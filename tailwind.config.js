@@ -13,6 +13,10 @@ module.exports = {
   theme: {
     extend: {
       // Add any customizations or extensions here
+      fontFamily: {
+        space: ["Space Grotesk", "sans-serif"],
+        amsterdam: ["New Amsterdam", "sans-serif"],
+      },
     },
     screens: {
       xs: "360px",
