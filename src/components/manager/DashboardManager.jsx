@@ -141,7 +141,7 @@ const DashBoardManager = ({ user, role, image, text }) => {
                     {openDropdown1 && (
                       <ul className="ml-[30px] px-4 text-current">
                         <li
-                          className="p-2 cursor-pointer dash-list"
+                          className="p-2 cursor-pointer dash-list "
                           onClick={() => setSelectedChild(<AddAdmin />)}
                         >
                           Customers

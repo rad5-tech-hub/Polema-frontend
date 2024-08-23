@@ -144,158 +144,207 @@ const AddAdmin = () => {
 
           <div className="flex w-full justify-between gap-8">
             <div className="left w-[50%]">
-              <TextField.Root
-                placeholder="Enter name"
-                className="mt-4"
-                type="text"
-                size={"3"}
-              >
-                <TextField.Slot>
-                  <PersonIcon height="16" width="16" />
-                </TextField.Slot>
-              </TextField.Root>
+              <div className="input-field mt-3">
+                <label
+                  className="text-[15px]  font-medium leading-[35px] text-white"
+                  htmlFor="fullname"
+                >
+                  Full Name
+                </label>
+                <TextField.Root
+                  placeholder="Enter fullname"
+                  className=""
+                  type="text"
+                  id="fullname"
+                  size={"3"}
+                >
+                  <TextField.Slot>
+                    <PersonIcon height="16" width="16" />
+                  </TextField.Slot>
+                </TextField.Root>
+              </div>
 
-              <TextField.Root
-                placeholder="Enter email"
-                className="mt-4"
-                id="email"
-                type="text"
-                size={"3"}
-              >
-                <TextField.Slot>
-                  <EnvelopeClosedIcon height="16" width="16" />
-                </TextField.Slot>
-              </TextField.Root>
+              <div className="input-field mt-3">
+                <label
+                  className="text-[15px]  font-medium leading-[35px] text-white"
+                  htmlFor="email"
+                >
+                  Email
+                </label>
+                <TextField.Root
+                  placeholder="Enter email"
+                  className=""
+                  id="email"
+                  type="text"
+                  size={"3"}
+                ></TextField.Root>
+              </div>
 
-              <TextField.Root
-                placeholder="Enter phone number"
-                className="mt-4"
-                type="number"
-                size={"3"}
-              >
-                <TextField.Slot>
-                  <Phone />
-                </TextField.Slot>
-              </TextField.Root>
+              <div className="input-field mt-3">
+                <label
+                  className="text-[15px]  font-medium leading-[35px] text-white"
+                  htmlFor="number"
+                >
+                  Phone Number
+                </label>
+                <TextField.Root
+                  placeholder="Enter phone number"
+                  className=""
+                  id="number"
+                  type="number"
+                  size={"3"}
+                ></TextField.Root>
+              </div>
             </div>
 
             <div className="right w-[50%]">
-              <Select.Root value={selectedItems.join(", ")} size={"3"}>
-                <Select.Trigger
-                  className="w-full mt-4"
-                  placeholder="Select Product(s)"
+              <div className="input-field mt-3">
+                <label
+                  className="text-[15px]  font-medium leading-[35px] text-white"
+                  htmlFor="products"
                 >
-                  <Flex as="span" align="center" gap="2">
-                    <PersonIcon />
-                    {selectedItems.length === 0
-                      ? "Select Product(s)"
-                      : selectedItems.join(", ")}
-                  </Flex>
-                </Select.Trigger>
-                <Select.Content position="popper">
-                  <CheckboxGroup.Root value={selectedItems}>
-                    <CheckboxGroup.Item
-                      value="pkc"
-                      onClick={() => handleCheckboxChange("pkc")}
-                    >
-                      PKC
-                    </CheckboxGroup.Item>
-                    <CheckboxGroup.Item
-                      value="engine-oil"
-                      onClick={() => handleCheckboxChange("engine-oil")}
-                    >
-                      Engine Oil
-                    </CheckboxGroup.Item>
-                    <CheckboxGroup.Item
-                      value="drugs"
-                      onClick={() => handleCheckboxChange("drugs")}
-                    >
-                      Drugs (pharmacy)
-                    </CheckboxGroup.Item>
-                    <CheckboxGroup.Item
-                      value="plastics"
-                      onClick={() => handleCheckboxChange("plastics")}
-                    >
-                      Plastics
-                    </CheckboxGroup.Item>
-                    <CheckboxGroup.Item
-                      value="sludge"
-                      onClick={() => handleCheckboxChange("sludge")}
-                    >
-                      Sludge
-                    </CheckboxGroup.Item>
-                    <CheckboxGroup.Item
-                      value="rvo"
-                      onClick={() => handleCheckboxChange("rvo")}
-                    >
-                      RVO (Refined Vegetable Oil)
-                    </CheckboxGroup.Item>
-                    <CheckboxGroup.Item
-                      value="ledger"
-                      onClick={() => handleCheckboxChange("ledger")}
-                    >
-                      Ledger
-                    </CheckboxGroup.Item>
-                    <CheckboxGroup.Item
-                      value="others"
-                      onClick={() => handleCheckboxChange("others")}
-                    >
-                      Others
-                    </CheckboxGroup.Item>
-                  </CheckboxGroup.Root>
-                </Select.Content>
-              </Select.Root>
+                  Assign Product(s)
+                </label>
+                <Select.Root value={selectedItems.join(", ")} size={"3"}>
+                  <Select.Trigger
+                    className="w-full"
+                    id="products"
+                    placeholder="Select Product(s)"
+                  >
+                    <Flex as="span" align="center" gap="2">
+                      <PersonIcon />
+                      {selectedItems.length === 0
+                        ? "Select Product(s)"
+                        : selectedItems.join(", ")}
+                    </Flex>
+                  </Select.Trigger>
+                  <Select.Content position="popper">
+                    <CheckboxGroup.Root value={selectedItems}>
+                      <CheckboxGroup.Item
+                        value="pkc"
+                        onClick={() => handleCheckboxChange("pkc")}
+                      >
+                        PKC
+                      </CheckboxGroup.Item>
+                      <CheckboxGroup.Item
+                        value="engine-oil"
+                        onClick={() => handleCheckboxChange("engine-oil")}
+                      >
+                        Engine Oil
+                      </CheckboxGroup.Item>
+                      <CheckboxGroup.Item
+                        value="drugs"
+                        onClick={() => handleCheckboxChange("drugs")}
+                      >
+                        Drugs (pharmacy)
+                      </CheckboxGroup.Item>
+                      <CheckboxGroup.Item
+                        value="plastics"
+                        onClick={() => handleCheckboxChange("plastics")}
+                      >
+                        Plastics
+                      </CheckboxGroup.Item>
+                      <CheckboxGroup.Item
+                        value="sludge"
+                        onClick={() => handleCheckboxChange("sludge")}
+                      >
+                        Sludge
+                      </CheckboxGroup.Item>
+                      <CheckboxGroup.Item
+                        value="rvo"
+                        onClick={() => handleCheckboxChange("rvo")}
+                      >
+                        RVO (Refined Vegetable Oil)
+                      </CheckboxGroup.Item>
+                      <CheckboxGroup.Item
+                        value="ledger"
+                        onClick={() => handleCheckboxChange("ledger")}
+                      >
+                        Ledger
+                      </CheckboxGroup.Item>
+                      <CheckboxGroup.Item
+                        value="others"
+                        onClick={() => handleCheckboxChange("others")}
+                      >
+                        Others
+                      </CheckboxGroup.Item>
+                    </CheckboxGroup.Root>
+                  </Select.Content>
+                </Select.Root>
+              </div>
 
               {showOtherInput && (
-                <TextField.Root
-                  placeholder="Add Product"
-                  className="mt-4"
-                  type="text"
-                  size={"3"}
-                  value={otherValue}
-                  onChange={(e) => setOtherValue(e.target.value)}
-                  onBlur={handleOtherBlur}
-                />
+                <div className="input-field mt-3">
+                  <label
+                    className="text-[15px]  font-medium leading-[35px] text-white"
+                    htmlFor="products"
+                  >
+                    Assign Product(s)
+                  </label>
+                  <TextField.Root
+                    placeholder="Add Product"
+                    className=""
+                    type="text"
+                    size={"3"}
+                    value={otherValue}
+                    onChange={(e) => setOtherValue(e.target.value)}
+                    onBlur={handleOtherBlur}
+                  />
+                </div>
               )}
 
-              <Select.Root
-                value={value}
-                onValueChange={handleValueChange}
-                size={"3"}
-              >
-                <Select.Trigger
-                  className="w-full mt-4"
-                  placeholder="Select Product(s)"
+              <div className="mt-3 input-field">
+                <label
+                  className="text-[15px]  font-medium leading-[35px] text-white"
+                  htmlFor="role"
                 >
-                  <Flex as="span" align="center" gap="2">
-                    {data[value].icon}
-                    {data[value].label}
-                  </Flex>
-                </Select.Trigger>
-                <Select.Content position="popper">
-                  <Select.Item value="admin1">Admin 1</Select.Item>
-                  <Select.Item value="admin2">Admin 2</Select.Item>
-                  <Select.Item value="admin3">Admin 3</Select.Item>
-                  <Select.Item value="accountant">Accountant</Select.Item>
-                  <Select.Item value="keeperPharmacy">
-                    Store Keeper (Pharmacy)
-                  </Select.Item>
-                  <Select.Item value="keeperGeneral">
-                    Store Keeper (General)
-                  </Select.Item>
-                </Select.Content>
-              </Select.Root>
+                  Assign Role
+                </label>
+                <Select.Root
+                  value={value}
+                  onValueChange={handleValueChange}
+                  size={"3"}
+                >
+                  <Select.Trigger
+                    className="w-full"
+                    id="role"
+                    placeholder="Select Product(s)"
+                  >
+                    <Flex as="span" align="center" gap="2">
+                      {data[value].icon}
+                      {data[value].label}
+                    </Flex>
+                  </Select.Trigger>
+                  <Select.Content position="popper">
+                    <Select.Item value="admin1">Admin 1</Select.Item>
+                    <Select.Item value="admin2">Admin 2</Select.Item>
+                    <Select.Item value="admin3">Admin 3</Select.Item>
+                    <Select.Item value="accountant">Accountant</Select.Item>
+                    <Select.Item value="keeperPharmacy">
+                      Store Keeper (Pharmacy)
+                    </Select.Item>
+                    <Select.Item value="keeperGeneral">
+                      Store Keeper (General)
+                    </Select.Item>
+                  </Select.Content>
+                </Select.Root>
+              </div>
 
-              <TextField.Root
-                placeholder="Password"
-                className="mt-4"
-                type="password"
-                size={"3"}
-              >
-                <TextField.Slot>
-                  <LockClosedIcon height="16" width="16" />
-                </TextField.Slot>
-              </TextField.Root>
+              <div className="mt-3 input-field">
+                <label
+                  className="text-[15px]  font-medium leading-[35px] text-white"
+                  htmlFor="password"
+                >
+                  Enter Password
+                </label>
+                <TextField.Root
+                  placeholder="Password"
+                  className=""
+                  type="password"
+                  id="password"
+                  size={"3"}
+                ></TextField.Root>
+              </div>
               <Flex justify={"end"} align={"end"} width={"100%"}>
                 <Button className="mt-4 " size={3} type="submit">
                   Create
@@ -304,10 +353,6 @@ const AddAdmin = () => {
             </div>
           </div>
         </form>
-
-        <Separator className="w-full my-6" />
-        <Heading className="text-left p-4">All Admins</Heading>
-        <AllAdmins />
       </Card>
     </div>
   );
