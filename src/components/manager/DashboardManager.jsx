@@ -1,7 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Text } from "@radix-ui/themes";
 import { TokensIcon } from "@radix-ui/react-icons";
-import { AddAdmin, WelcomeComponent } from "./comps";
+import { useSearchParams } from "react-router-dom";
+import {
+  AddAdmin,
+  WelcomeComponent,
+  AllAdmins,
+  AddProduct,
+  AddCustomer,
+} from "./comps";
 
 import {
   ClipboardCopyIcon,
@@ -12,8 +19,13 @@ import { NavLink } from "react-router-dom";
 import Header from "./Header";
 import { Theme } from "@radix-ui/themes";
 import { Notifications, Settings } from "../icons";
+import Charts from "../Charts";
+import AllProducts from "./comps/AllProducts";
 
 const DashBoardManager = ({ user, role, image, text }) => {
+  const [params] = useSearchParams();
+  const query = params.get("action");
+
   const [selectedChild, setSelectedChild] = useState(<WelcomeComponent />);
 
   // States for each dropdown
@@ -90,7 +102,9 @@ const DashBoardManager = ({ user, role, image, text }) => {
           >
             <div className="flex items-center justify-between gap-2 px-6 py-[1.375rem] lg:py-[1.625rem]">
               <NavLink to="/">
-                <Text size={"6"}>POLEMA</Text>
+                <Text size={"6"} className="font-extrabold">
+                  POLEMA
+                </Text>
               </NavLink>
 
               <button
@@ -142,7 +156,7 @@ const DashBoardManager = ({ user, role, image, text }) => {
                       <ul className="ml-[30px] px-4 text-current">
                         <li
                           className="p-2 cursor-pointer dash-list "
-                          onClick={() => setSelectedChild(<AddAdmin />)}
+                          onClick={() => setSelectedChild(<AddCustomer />)}
                         >
                           Customers
                         </li>
@@ -177,17 +191,11 @@ const DashBoardManager = ({ user, role, image, text }) => {
                     </p>
                     {openDropdown2 && (
                       <ul className="ml-[25px] px-4 text-current">
-                        <li
-                          className="p-2 cursor-pointer dash-list"
-                          onClick={() => setSelectedChild(<AddAdmin />)}
-                        >
+                        <li className="p-2 cursor-pointer dash-list">
                           Staff Account
                         </li>
-                        <li
-                          className="p-2 cursor-pointer dash-list"
-                          onClick={() => setSelectedChild(<AddAdmin />)}
-                        >
-                          Products
+                        <li className="p-2 cursor-pointer dash-list">
+                          Product
                         </li>
                         <li
                           className="p-2 cursor-pointer dash-list"
