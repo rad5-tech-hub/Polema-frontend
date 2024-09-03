@@ -156,7 +156,15 @@ const DashBoardManager = ({ user, role, image, text }) => {
                       <ul className="ml-[30px] px-4 text-current">
                         <li
                           className="p-2 cursor-pointer dash-list "
-                          onClick={() => setSelectedChild(<AddCustomer />)}
+                          onClick={() =>
+                            setSelectedChild(
+                              <AddCustomer
+                                setChild={setSelectedChild}
+                                child={selectedChild}
+                                buttonValue={true}
+                              />
+                            )
+                          }
                         >
                           Customers
                         </li>
@@ -191,16 +199,26 @@ const DashBoardManager = ({ user, role, image, text }) => {
                     </p>
                     {openDropdown2 && (
                       <ul className="ml-[25px] px-4 text-current">
-                        <li className="p-2 cursor-pointer dash-list">
+                        <li
+                          className="p-2 cursor-pointer dash-list"
+                          onClick={() =>
+                            setSelectedChild(
+                              <AddAdmin
+                                setChild={setSelectedChild}
+                                child={selectedChild}
+                              />
+                            )
+                          }
+                        >
                           Staff Account
-                        </li>
-                        <li className="p-2 cursor-pointer dash-list">
-                          Product
                         </li>
                         <li
                           className="p-2 cursor-pointer dash-list"
-                          onClick={() => setSelectedChild(<AddAdmin />)}
+                          onClick={() => setSelectedChild(<AddProduct />)}
                         >
+                          Product
+                        </li>
+                        <li className="p-2 cursor-pointer dash-list">
                           Account book
                         </li>
                       </ul>

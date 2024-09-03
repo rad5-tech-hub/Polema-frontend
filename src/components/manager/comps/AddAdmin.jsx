@@ -1,6 +1,7 @@
 import React, { useState } from "react";
+
 import axios from "axios";
-import AllAdmins from "./AllAdmins";
+
 import {
   Card,
   Select,
@@ -12,6 +13,7 @@ import {
   TextField,
   Text,
   Flex,
+  Spinner,
 } from "@radix-ui/themes";
 import { Phone } from "../../icons";
 import {
@@ -19,14 +21,17 @@ import {
   LockClosedIcon,
   PersonIcon,
 } from "@radix-ui/react-icons";
+import AllAdmins from "./AllAdmins";
+import { Camera } from "../../icons";
 
-const AddAdmin = () => {
+const AddAdmin = ({ child, setChild }) => {
   const [value, setValue] = useState("admin");
   const [selectedItems, setSelectedItems] = useState([]);
   const [otherValue, setOtherValue] = useState("");
   const [showOtherInput, setShowOtherInput] = useState(false);
   const [uploadedImage, setUploadedImage] = useState(null);
   const [imageURL, setImageURL] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const data = {
     admin: { label: "Admin", icon: <PersonIcon /> },
@@ -94,7 +99,7 @@ const AddAdmin = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(e);
+
     console.log(selectedItems);
     const submitobject = {
       fullname: e.target[1].value,
@@ -114,10 +119,14 @@ const AddAdmin = () => {
   };
 
   return (
-    <div>
+    <div className="!font-space">
       <div className="flex justify-end my-4">
-        <Button>
-          <a href="/dashboard/md?action=view-admins">View Admins</a>
+        <Button
+          onClick={() => {
+            setChild(<AllAdmins />);
+          }}
+        >
+          View Admins
         </Button>
       </div>
       <Card className="w-full">
@@ -135,7 +144,7 @@ const AddAdmin = () => {
                 className="w-full h-full object-cover rounded-full"
               />
             ) : (
-              <PersonIcon width={40} height={40} />
+              <Camera />
             )}
           </div>
           <input
@@ -347,13 +356,15 @@ const AddAdmin = () => {
               </div>
             </div>
           </div>
+
+          {/* Permissions Div */}
           <Separator className="w-full mt-8" />
           <div className="permission-box mt-5">
             <Heading className="mb-5">Permissions</Heading>
 
-            {/* -------------- */}
+            {/* Users & Role */}
             <Flex className="w-full" gap={"7"}>
-              <Card className="w-full">
+              <Card className="w-full" id="users">
                 <Flex justify={"between"} align={"center"}>
                   <Text className="font-medium">USERS</Text>
                   <Flex gap={"2"} align={"center"}>
@@ -395,6 +406,7 @@ const AddAdmin = () => {
                   </div>
                 </Flex>
               </Card>
+
               <Card className="w-full">
                 <Flex justify={"between"} align={"center"}>
                   <Text className="font-medium">ROLE</Text>
@@ -429,11 +441,80 @@ const AddAdmin = () => {
               </Card>
             </Flex>
 
-            {/* --------------------- */}
-            <Flex className="w-full mt-6" gap={"7"}>
-              <Card className="w-full">
+            {/* Customers and Pharmacy Products */}
+            <Flex className="w-full mt-4" gap={"7"}>
+              <Card className="w-full" id="customers">
                 <Flex justify={"between"} align={"center"}>
-                  <Text className="font-medium">USERS</Text>
+                  <Text className="font-medium">CUSTOMERS</Text>
+                  <Flex gap={"2"} align={"center"}>
+                    <Checkbox id="customersAll" />
+                    <label htmlFor="customersAll">Select All</label>
+                  </Flex>
+                </Flex>
+                <Separator className="w-full mt-3" />
+                <Flex className="mt-4 w-full justify-between">
+                  <div className="left-perimssion">
+                    <Flex gap={"2"} align={"center"} className="mt-3">
+                      <Checkbox id="viewCustomer" />
+                      <label htmlFor="viewCustomer">View Customer</label>
+                    </Flex>
+                    <Flex gap={"2"} align={"center"} className="mt-3">
+                      <Checkbox id="editCustomer" />
+                      <label htmlFor="editCustomer">Edit Customer</label>
+                    </Flex>
+                  </div>
+                  <div className="right-permission">
+                    <Flex gap={"3"} align={"center"} className="mt-3">
+                      <Checkbox id="createCustomer" />
+                      <label htmlFor="createCustomer">Create Customer</label>
+                    </Flex>
+                    <Flex gap={"3"} align={"center"} className="mt-3">
+                      <Checkbox id="deleteCustomer" />
+                      <label htmlFor="deleteCustomer">Delete Customer</label>
+                    </Flex>
+                  </div>
+                </Flex>
+              </Card>
+
+              <Card className="w-full" id="pharm">
+                <Flex justify={"between"} align={"center"}>
+                  <Text className="font-medium">PHARMACY PRODUCT</Text>
+                  <Flex gap={"3"} align={"center"}>
+                    <Checkbox id="pharmProductAll" />
+                    <label htmlFor="pharmProductAll">Select All</label>
+                  </Flex>
+                </Flex>
+                <Separator className="w-full mt-2" />
+                <Flex className="mt-4 w-full justify-between">
+                  <div className="left-perimssion">
+                    <Flex gap={"2"} align={"center"} className="mt-3">
+                      <Checkbox id="viewProduct" />
+                      <label htmlFor="viewProduct">View Product</label>
+                    </Flex>
+                    <Flex gap={"2"} align={"center"} className="mt-3">
+                      <Checkbox id="editPharmProduct" />
+                      <label htmlFor="editPharmProduct">Edit Product</label>
+                    </Flex>
+                  </div>
+                  <div className="right-permission">
+                    <Flex gap={"3"} align={"center"} className="mt-3">
+                      <Checkbox id="createPharmProduct" />
+                      <label htmlFor="createPharmProduct">Create Product</label>
+                    </Flex>
+                    <Flex gap={"3"} align={"center"} className="mt-3">
+                      <Checkbox id="deletePharmProduct" />
+                      <label htmlFor="deletePharmProduct">Delete Product</label>
+                    </Flex>
+                  </div>
+                </Flex>
+              </Card>
+            </Flex>
+
+            {/* Ticket and Products */}
+            <Flex className="w-full mt-4" gap={"7"}>
+              <Card className="w-full" id="tickets">
+                <Flex justify={"between"} align={"center"}>
+                  <Text className="font-medium">TICKETS</Text>
                   <Flex gap={"2"} align={"center"}>
                     <Checkbox id="usersAll" />
                     <label htmlFor="usersAll">Select All</label>
@@ -443,64 +524,196 @@ const AddAdmin = () => {
                 <Flex className="mt-4 w-full justify-between">
                   <div className="left-perimssion">
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="viewUser" />
-                      <label htmlFor="viewUser">View User</label>
+                      <Checkbox id="viewTicket" />
+                      <label htmlFor="viewTicket">View Ticket</label>
                     </Flex>
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="editUser" />
-                      <label htmlFor="editUser">Edit User</label>
+                      <Checkbox id="editTicket" />
+                      <label htmlFor="editTicket">Edit Ticket</label>
                     </Flex>
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="resetUserPassword" />
-                      <label htmlFor="resetUserPassword">
-                        Reset User password
-                      </label>
+                      <Checkbox id="approveTicket" />
+                      <label htmlFor="approveTicket">Approve Ticket</label>
                     </Flex>
                   </div>
                   <div className="right-permission">
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="createUser" />
-                      <label htmlFor="createUser">Create User</label>
+                      <Checkbox id="createTicket" />
+                      <label htmlFor="createTicket">Create Ticket</label>
                     </Flex>
+
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="suspendUser" />
-                      <label htmlFor="suspendUser">Suspend User</label>
-                    </Flex>
-                    <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="deleteUser" />
-                      <label htmlFor="deleteUser">Delete User</label>
+                      <Checkbox id="deleteTicket" />
+                      <label htmlFor="deleteTicket">Delete Ticket</label>
                     </Flex>
                   </div>
                 </Flex>
               </Card>
-              <Card className="w-full">
+
+              <Card className="w-full" id="products">
                 <Flex justify={"between"} align={"center"}>
-                  <Text className="font-medium">ROLE</Text>
+                  <Text className="font-medium">PRODUCTS</Text>
                   <Flex gap={"3"} align={"center"}>
-                    <Checkbox id="usersAll" />
-                    <label htmlFor="usersAll">Select All</label>
+                    <Checkbox id="productAll" />
+                    <label htmlFor="productAll">Select All</label>
                   </Flex>
                 </Flex>
                 <Separator className="w-full mt-2" />
                 <Flex className="mt-4 w-full justify-between">
                   <div className="left-perimssion">
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="viewRole" />
-                      <label htmlFor="viewRole">View Role</label>
+                      <Checkbox id="viewProducts" />
+                      <label htmlFor="viewProducts">View Products</label>
                     </Flex>
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="editRole" />
-                      <label htmlFor="editRole">Edit Role</label>
+                      <Checkbox id="editProduct" />
+                      <label htmlFor="editProduct">Edit Product</label>
                     </Flex>
                   </div>
                   <div className="right-permission">
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="createRole" />
-                      <label htmlFor="createRole">Create Role</label>
+                      <Checkbox id="createProduct" />
+                      <label htmlFor="createProduct">Create Product</label>
                     </Flex>
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="suspendUser" />
-                      <label htmlFor="suspendUser">Delete Role</label>
+                      <Checkbox id="editProductPrice" />
+                      <label htmlFor="editProductPrice">
+                        Edit Product Price
+                      </label>
+                    </Flex>
+                  </div>
+                </Flex>
+              </Card>
+            </Flex>
+
+            {/* Supplier and Order */}
+            <Flex className="w-full mt-4" gap={"7"}>
+              <Card className="w-full">
+                <Flex justify={"between"} align={"center"}>
+                  <Text className="font-medium">SUPPLIER</Text>
+                  <Flex gap={"2"} align={"center"}>
+                    <Checkbox id="supplierAll" />
+                    <label htmlFor="supplierAll">Select All</label>
+                  </Flex>
+                </Flex>
+                <Separator className="w-full mt-3" />
+                <Flex className="mt-4 w-full justify-between">
+                  <div className="left-perimssion">
+                    <Flex gap={"2"} align={"center"} className="mt-3">
+                      <Checkbox id="viewSupplier" />
+                      <label htmlFor="viewSupplier">View Supplier</label>
+                    </Flex>
+                    <Flex gap={"2"} align={"center"} className="mt-3">
+                      <Checkbox id="editSupplier" />
+                      <label htmlFor="editSupplier">Edit Supplier</label>
+                    </Flex>
+                  </div>
+                  <div className="right-permission">
+                    <Flex gap={"3"} align={"center"} className="mt-3">
+                      <Checkbox id="createSupplier" />
+                      <label htmlFor="createSupplier">Create Supplier</label>
+                    </Flex>
+                    <Flex gap={"3"} align={"center"} className="mt-3">
+                      <Checkbox id="deleteSupplier" />
+                      <label htmlFor="deleteSupplier">Delete Supplier</label>
+                    </Flex>
+                  </div>
+                </Flex>
+              </Card>
+
+              <Card className="w-full">
+                <Flex justify={"between"} align={"center"}>
+                  <Text className="font-medium">ORDER</Text>
+                  <Flex gap={"3"} align={"center"}>
+                    <Checkbox id="orderAll" />
+                    <label htmlFor="orderAll">Select All</label>
+                  </Flex>
+                </Flex>
+                <Separator className="w-full mt-2" />
+                <Flex className="mt-4 w-full justify-between">
+                  <div className="left-perimssion">
+                    <Flex gap={"2"} align={"center"} className="mt-3">
+                      <Checkbox id="viewOrder" />
+                      <label htmlFor="viewOrder">View Order</label>
+                    </Flex>
+                    <Flex gap={"2"} align={"center"} className="mt-3">
+                      <Checkbox id="editOrder" />
+                      <label htmlFor="editOrder">Create Order</label>
+                    </Flex>
+                  </div>
+                  <div className="right-permission">
+                    <Flex gap={"3"} align={"center"} className="mt-3">
+                      <Checkbox id="deleteOrder" />
+                      <label htmlFor="deleteOrder">Delete Order</label>
+                    </Flex>
+                  </div>
+                </Flex>
+              </Card>
+            </Flex>
+
+            {/* Report and Store */}
+            <Flex className="w-full mt-4" gap={"7"}>
+              <Card className="w-full">
+                <Flex justify={"between"} align={"center"}>
+                  <Text className="font-medium">Report</Text>
+                  <Flex gap={"2"} align={"center"}>
+                    <Checkbox id="reportAll" />
+                    <label htmlFor="reportAll">Select All</label>
+                  </Flex>
+                </Flex>
+                <Separator className="w-full mt-3" />
+                <Flex className="mt-4 w-full justify-between">
+                  <div className="left-perimssion">
+                    <Flex gap={"2"} align={"center"} className="mt-3">
+                      <Checkbox id="viewReport" />
+                      <label htmlFor="viewUser">View Report</label>
+                    </Flex>
+                    <Flex gap={"2"} align={"center"} className="mt-3">
+                      <Checkbox id="downloadReport" />
+                      <label htmlFor="downloadReport">Download Report</label>
+                    </Flex>
+                  </div>
+                  <div className="right-permission">
+                    <Flex gap={"3"} align={"center"} className="mt-3">
+                      <Checkbox id="createReport" />
+                      <label htmlFor="createReport">Create Report</label>
+                    </Flex>
+                    <Flex gap={"3"} align={"center"} className="mt-3">
+                      <Checkbox id="shareReport" />
+                      <label htmlFor="shareReport">Share Report</label>
+                    </Flex>
+                  </div>
+                </Flex>
+              </Card>
+
+              <Card className="w-full">
+                <Flex justify={"between"} align={"center"}>
+                  <Text className="font-medium">STORE</Text>
+                  <Flex gap={"3"} align={"center"}>
+                    <Checkbox id="storeAll" />
+                    <label htmlFor="storeAll">Select All</label>
+                  </Flex>
+                </Flex>
+                <Separator className="w-full mt-2" />
+                <Flex className="mt-4 w-full justify-between">
+                  <div className="left-perimssion">
+                    <Flex gap={"2"} align={"center"} className="mt-3">
+                      <Checkbox id="viewInventory" />
+                      <label htmlFor="viewInventory">View Inventory</label>
+                    </Flex>
+                    <Flex gap={"2"} align={"center"} className="mt-3">
+                      <Checkbox id="editInventory" />
+                      <label htmlFor="editInventory">Edit Inventory</label>
+                    </Flex>
+                  </div>
+                  <div className="right-permission">
+                    <Flex gap={"3"} align={"center"} className="mt-3">
+                      <Checkbox id="createInventory" />
+                      <label htmlFor="createInventory">Create Inventory</label>
+                    </Flex>
+                    <Flex gap={"3"} align={"center"} className="mt-3">
+                      <Checkbox id="updateInventory" />
+                      <label htmlFor="updateInventory">Update Inventory</label>
                     </Flex>
                   </div>
                 </Flex>
@@ -510,7 +723,7 @@ const AddAdmin = () => {
 
           <Flex justify={"end"} align={"end"} width={"100%"}>
             <Button className="mt-4 " size={3} type="submit">
-              Create
+              {isLoading ? <Spinner size={"2"} /> : "Create Admin"}
             </Button>
           </Flex>
         </form>

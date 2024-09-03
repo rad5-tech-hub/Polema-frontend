@@ -1,7 +1,6 @@
 import React from "react";
 import { Card, Theme } from "@radix-ui/themes";
-import Cloudinary from "./cloudinary";
-// import DropDown from "./DropDown";
+
 import {
   BarChart,
   Bar,
@@ -81,8 +80,6 @@ const Charts = () => {
           />
         </BarChart>
       </Card>
-
-      <Cloudinary />
     </Theme>
   );
 };

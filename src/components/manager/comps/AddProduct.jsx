@@ -114,9 +114,7 @@ const AddProduct = () => {
   return (
     <div>
       <div className="flex justify-end my-4">
-        <Button>
-          <a href="/dashboard/md?action=view-products">View Products</a>
-        </Button>
+        <Button>View Products</Button>
       </div>
       <Card className="w-full">
         <Heading className="text-left p-4">Add Product</Heading>

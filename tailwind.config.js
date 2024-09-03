@@ -14,8 +14,8 @@ module.exports = {
     extend: {
       // Add any customizations or extensions here
       fontFamily: {
-        space: ["Space Grotesk", "sans-serif"],
-        amsterdam: ["New Amsterdam", "sans-serif"],
+        space: ["Inter", "sans-serif"],
+        amsterdam: ["Roboto", "sans-serif"],
       },
     },
     screens: {

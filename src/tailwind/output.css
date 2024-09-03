@@ -621,6 +621,10 @@ video {
   margin-bottom: 1rem;
 }
 
+.mb-5 {
+  margin-bottom: 1.25rem;
+}
+
 .mb-6 {
   margin-bottom: 1.5rem;
 }
@@ -659,10 +663,6 @@ video {
 
 .mt-8 {
   margin-top: 2rem;
-}
-
-.mb-5 {
-  margin-bottom: 1.25rem;
 }
 
 .block {
@@ -820,6 +820,10 @@ video {
   gap: 2rem;
 }
 
+.gap-5 {
+  gap: 1.25rem;
+}
+
 .overflow-hidden {
   overflow: hidden;
 }
@@ -932,11 +936,11 @@ video {
 }
 
 .font-amsterdam {
-  font-family: New Amsterdam, sans-serif;
+  font-family: Roboto, sans-serif;
 }
 
 .font-space {
-  font-family: Space Grotesk, sans-serif;
+  font-family: Inter, sans-serif;
 }
 
 .text-\[\.7rem\] {
@@ -951,16 +955,22 @@ video {
   font-size: 2.0rem;
 }
 
+.text-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
 .font-extrabold {
   font-weight: 800;
 }
 
 .font-medium {
   font-weight: 500;
-}
-
-.font-bold {
-  font-weight: 700;
 }
 
 .leading-\[35px\] {

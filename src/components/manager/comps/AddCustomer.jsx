@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import AllAdmins from "./AllAdmins";
 import {
@@ -20,17 +21,18 @@ import {
   LockClosedIcon,
   PersonIcon,
 } from "@radix-ui/react-icons";
+import AllCustomers from "./AllCustomers";
 
 const root = import.meta.env.VITE_ROOT;
 
-const AddCustomer = () => {
+const AddCustomer = ({ child, setChild, buttonValue }) => {
   const [value, setValue] = useState("admin");
   const [selectedItems, setSelectedItems] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [otherValue, setOtherValue] = useState("");
   const [showOtherInput, setShowOtherInput] = useState(false);
   const [uploadedImage, setUploadedImage] = useState(null);
-  const [imageURL, setImageURL] = useState("");
+  const [imageURL, setImageURL] = useState(" ");
 
   const data = {
     admin: { label: "Admin", icon: <PersonIcon /> },
@@ -102,32 +104,43 @@ const AddCustomer = () => {
     const submitobject = {
       name: e.target[1].value + " " + e.target[4].value,
       category: "A",
-      phonenumber: e.target[3]?.value,
+      phonenumber: e.target[3].value,
       profilePic: imageURL,
-      address: e.target[5]?.value,
+      address: e.target[5].value,
     };
     setIsLoading(true);
-    // console.log(submitobject);
+
     axios
       .post(`http://${root}/customer/register`, submitobject)
-      .then((response) => {})
+      .then((response) => {
+        // Handle the successful response here
+        console.log("Response:", response.data);
+        toast.success("Customer successfully created");
+      })
       .catch((error) => {
+        // Handle any errors that occur during the request
+        console.error(
+          "Error:",
+          error.response ? error.response.data : error.message
+        );
         console.log(error);
+        toast.error("An Error occurred. Try again");
       })
       .finally(() => {
-        setIsLoading(false);
+        // Always executed, regardless of success or failure
+        setIsLoading(false); // Reset loading state
       });
-
-    // Handle form submission, including the imageURL which is the Cloudinary URL
-
-    // Add your form submission logic here
   };
 
   return (
     <div>
       <div className="flex justify-end my-4">
-        <Button>
-          <a href="/dashboard/md?action=view-admins">View Customers</a>
+        <Button
+          onClick={() => {
+            setChild(<AllCustomers child={child} setChild={setChild} />);
+          }}
+        >
+          View Customers
         </Button>
       </div>
       <Card className="w-full">
@@ -166,7 +179,7 @@ const AddCustomer = () => {
                   First Name
                 </label>
                 <TextField.Root
-                  placeholder="Enter fullname"
+                  placeholder="Enter First Name"
                   className=""
                   type="text"
                   id="firstname"
@@ -253,6 +266,7 @@ const AddCustomer = () => {
             </Button>
           </Flex>
         </form>
+        <Toaster position="bottom-center" />
       </Card>
     </div>
   );
