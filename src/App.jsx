@@ -1,25 +1,26 @@
-import { useEffect, useState } from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Login from "./pages/Login";
 import Charts from "./components/Charts";
-import Layout from "./components/DashboardLayout";
 import Manager from "./components/manager";
-
+import AdminDashboard from "./components/admin/AdminDashboard";
+import PrivateRoute from "./components/PrivateRoute"; // Assume this is adjusted for React Router v6
 import "@radix-ui/themes/styles.css";
-import { BrowserRouter, Router, Route, Routes } from "react-router-dom";
 import "./index.css";
+
 function App() {
   return (
-    <>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/dashboard" element={<Layout />} />
-          <Route path="/dashboard/md" element={<Manager />} />
+    <Router>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
 
-          <Route path="/charts" element={<Charts />} />
-        </Routes>
-      </BrowserRouter>
-    </>
+        {/* Protected Routes */}
+        <Route path="/dashboard" element={<AdminDashboard />} />
+        <Route path="/md" element={<PrivateRoute component={Manager} />} />
+        <Route path="/charts" element={<PrivateRoute component={Charts} />} />
+      </Routes>
+    </Router>
   );
 }
 

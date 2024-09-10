@@ -111,7 +111,7 @@ const AddCustomer = ({ child, setChild, buttonValue }) => {
     setIsLoading(true);
 
     axios
-      .post(`http://${root}/customer/register`, submitobject)
+      .post(`${root}/customer/register`, submitobject)
       .then((response) => {
         // Handle the successful response here
         console.log("Response:", response.data);

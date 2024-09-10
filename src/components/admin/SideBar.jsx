@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { Text } from "@radix-ui/themes";
 import { NavLink, useLocation } from "react-router-dom";
 import { TokensIcon, ClipboardCopyIcon } from "@radix-ui/react-icons";
-import DropDown from "./DropDown";
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const location = useLocation();
@@ -260,8 +259,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                   Report
                 </NavLink>
               </li>
-
-              <DropDown />
             </ul>
           </div>
         </nav>

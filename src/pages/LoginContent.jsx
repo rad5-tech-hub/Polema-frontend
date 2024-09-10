@@ -6,41 +6,46 @@ import {
   Heading,
   Card,
   TextField,
-  Select,
   Container,
   Button,
+  Spinner,
 } from "@radix-ui/themes";
-import {
-  LockClosedIcon,
-  PersonIcon,
-  EnvelopeClosedIcon,
-} from "@radix-ui/react-icons";
+import { LockClosedIcon, EnvelopeClosedIcon } from "@radix-ui/react-icons";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 const root = import.meta.env.VITE_ROOT;
 
 const LoginContent = () => {
-  const [value, setValue] = useState("admin");
+  const [loading, setLoading] = useState(false); // Spinner state
+  const navigate = useNavigate();
 
   const handleLoginForm = async (e) => {
     e.preventDefault();
+    setLoading(true); // Show spinner
 
     try {
-      const response = await axios.post(`http://${root}/admin/login`, {
+      const response = await axios.post(`${root}/admin/login`, {
         email: e.target[0].value,
         password: e.target[1].value,
       });
+
+      localStorage.setItem("token", response.data.token);
+
       toast.success("Login Successful");
+      navigate("/dashboard");
     } catch (error) {
       // Handle error
       if (error.response) {
         toast.error(error.response.data.error);
+        console.log(error);
       } else if (error.request) {
         console.log("Error Request:", error.request);
-        toast.error(error.request);
+        toast.error("Network Error");
       } else {
-        // Something happened in setting up the request that triggered an Error
         console.log("Error Message:", error.message);
       }
+    } finally {
+      setLoading(false); // Hide spinner after request completes
     }
   };
 
@@ -49,7 +54,7 @@ const LoginContent = () => {
       <div className="h-screen grid place-content-center">
         <div className="xs:w-[100%] sm:w-[450px]">
           <Card className=" p-4 ">
-            <form action="" onSubmit={handleLoginForm}>
+            <form onSubmit={handleLoginForm}>
               <div style={{ textAlign: "center" }}>
                 <Heading mb="6">LOGIN</Heading>
               </div>
@@ -62,8 +67,6 @@ const LoginContent = () => {
                   <EnvelopeClosedIcon height="16" width="16" />
                 </TextField.Slot>
               </TextField.Root>
-
-              {/* {-------------} */}
 
               <TextField.Root
                 placeholder="Password"
@@ -79,9 +82,13 @@ const LoginContent = () => {
               <p className="text-right mt-2 text-[.7rem] cursor-pointer underline">
                 Forgot Password?
               </p>
-              {/* ------------------- */}
-              <Button type="submit" className="w-[100%] mt-4">
-                Submit
+
+              <Button
+                type="submit"
+                className="w-[100%] mt-4"
+                disabled={loading}
+              >
+                {loading ? <Spinner /> : "Submit"} {/* Spinner text */}
               </Button>
             </form>
           </Card>

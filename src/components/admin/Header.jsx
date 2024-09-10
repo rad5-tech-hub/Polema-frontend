@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 
-// import DropdownUser from "./DropdownUser";
-import ThemeSwitcher from "./ThemeSwitcher";
+import ThemeSwitcher from "../ThemeSwitcher";
 const LogoIcon = "";
 
 const Header = ({ sidebarOpen, setSidebarOpen, user, role, image, text }) => {
@@ -54,7 +53,7 @@ const Header = ({ sidebarOpen, setSidebarOpen, user, role, image, text }) => {
         </div>
 
         <div className="hidden sm:block">
-          <h1 className="text-[2.0rem]">Hello,Ada.</h1>
+          <h1 className="text-[2.0rem]">Hello,Admin.</h1>
         </div>
 
         <div className="flex items-center gap-3 2xsm:gap-7">
