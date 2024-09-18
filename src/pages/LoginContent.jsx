@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
+import { adminState } from "../components/store/adminSlice/adminSlice";
+import { useSelector, useDispatch } from "react-redux";
+
+import { jwtDecode } from "jwt-decode";
 import {
   Text,
   Flex,
@@ -16,8 +20,15 @@ import { useNavigate } from "react-router-dom";
 const root = import.meta.env.VITE_ROOT;
 
 const LoginContent = () => {
+  const [adminBoolean, setAdminBoolean] = useState();
   const [loading, setLoading] = useState(false); // Spinner state
   const navigate = useNavigate();
+
+  // Fuction used to update value at store after successful login
+  const dispatch = useDispatch();
+
+  // Retrieving data from store
+  const dataAtStore = useSelector((state) => state.admin.isAdmin);
 
   const handleLoginForm = async (e) => {
     e.preventDefault();
@@ -31,8 +42,15 @@ const LoginContent = () => {
 
       localStorage.setItem("token", response.data.token);
 
+      console.log(response);
+
+      // Change the value of state on store
+      dispatch(adminState(true));
+
       toast.success("Login Successful");
-      navigate("/dashboard");
+      {
+        response.data.admin.isAdmin ? navigate("/md") : navigate("/admin");
+      }
     } catch (error) {
       // Handle error
       if (error.response) {
@@ -45,7 +63,7 @@ const LoginContent = () => {
         console.log("Error Message:", error.message);
       }
     } finally {
-      setLoading(false); // Hide spinner after request completes
+      setLoading(false); // Remove spinner after request completes
     }
   };
 

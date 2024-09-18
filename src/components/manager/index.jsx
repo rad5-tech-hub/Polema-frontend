@@ -1,10 +1,13 @@
 import React from "react";
 import DashBoardManager from "./DashboardManager";
+import { useParams } from "react-router-dom";
 
 const Manager = () => {
+  const { id } = useParams();
+
   return (
     <>
-      <DashBoardManager></DashBoardManager>
+      <DashBoardManager route={id}></DashBoardManager>
     </>
   );
 };

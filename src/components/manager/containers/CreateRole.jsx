@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-
+import React, { useEffect, useState } from "react";
+import toast, { Toaster } from "react-hot-toast";
+import { jwtDecode } from "jwt-decode";
 import axios from "axios";
-
 import {
   Card,
   Select,
@@ -15,103 +15,90 @@ import {
   Flex,
   Spinner,
 } from "@radix-ui/themes";
-import { Phone } from "../../icons";
-import {
-  EnvelopeClosedIcon,
-  LockClosedIcon,
-  PersonIcon,
-} from "@radix-ui/react-icons";
-
-import { Camera } from "../../icons";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import UpdateURL from "./ChangeRoute";
 
 const CreateRole = ({ child, setChild }) => {
-  const [selectedItems, setSelectedItems] = useState([]);
+  // Root URL for making requests
+  const root = import.meta.env.VITE_ROOT;
+
   const [isLoading, setIsLoading] = useState(false);
+  const [token, setToken] = useState("");
 
-  const [permissions, setPermissions] = useState({
-    users: {
-      selectAll: false,
-      viewUser: false,
-      editUser: false,
-      resetUserPassword: false,
-      createUser: false,
-      suspendUser: false,
-      deleteUser: false,
-    },
-    roles: {
-      selectAll: false,
-      viewRole: false,
-      editRole: false,
-      createRole: false,
-      deleteRole: false,
-    },
-    customers: {
-      selectAll: false,
-      viewCustomer: false,
-      editCustomer: false,
-      createCustomer: false,
-      deleteCustomer: false,
-    },
-    // Add other permission categories in a similar way
-  });
+  // Array for all selected permissions/roles
+  const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
 
-  const handleSelectAll = (category) => {
-    const updatedCategory = Object.keys(permissions[category]).reduce(
-      (acc, key) => {
-        acc[key] = !permissions[category].selectAll;
-        return acc;
-      },
-      {}
-    );
-    setPermissions((prev) => ({
-      ...prev,
-      [category]: updatedCategory,
-    }));
+  const handleCheckboxChange = (event) => {
+    const { id, checked } = event.target;
+    if (checked) {
+      setSelectedCheckboxes((prevSelected) => [...prevSelected, id]);
+    } else {
+      setSelectedCheckboxes((prevSelected) =>
+        prevSelected.filter((checkboxId) => checkboxId !== id)
+      );
+    }
   };
 
-  const handlePermissionChange = (category, permission) => {
-    setPermissions((prev) => {
-      const updatedPermissions = {
-        ...prev[category],
-        [permission]: !prev[category][permission],
-      };
+  const dataAtStore = useSelector((state) => state.admin.isAdmin);
 
-      // Automatically update selectAll status
-      const allSelected = Object.keys(updatedPermissions)
-        .filter((key) => key !== "selectAll")
-        .every((key) => updatedPermissions[key]);
-      updatedPermissions.selectAll = allSelected;
+  useEffect(() => {
+    const retrToken = localStorage.getItem("token");
 
-      return {
-        ...prev,
-        [category]: updatedPermissions,
-      };
-    });
+    setToken(retrToken);
+  }, []);
+
+  // Fetch token from local storage
+
+  const handleAll = (e) => {
+    const { id, checked } = e.target;
+    if (checked) {
+      console.log(id);
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    console.log(selectedItems);
     const submitobject = {
-      fullname: e.target[1].value,
-      email: e.target[2].value,
-      phoneNumber: e.target[3].value,
-      department: "",
-      profileURL: "",
-      products: selectedItems,
-      role: e.target[5].value,
-      password: e.target[8].value,
+      name: e.target[0].value,
+      permissions: selectedCheckboxes,
     };
-    console.log(submitobject);
 
-    // Handle form submission, including the imageURL which is the Cloudinary URL
-
-    // Add your form submission logic here
+    if (submitobject.role === "") {
+      toast.error("Assign a name to the role");
+    } else if (submitobject.permissions.length === 0) {
+      toast.error("Assign tasks to the role");
+    } else {
+      axios
+        .post(`${root}/admin/create-role`, submitobject, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          console.log(response);
+        })
+        .catch((error) => {
+          if (error.response) {
+            console.log(error.response.data);
+            toast.error(error.response.data.message || "Failed to create role");
+          } else if (error.request) {
+            console.log(error.request);
+            toast.error("No response received from the server");
+          } else {
+            console.log("Error", error.message);
+            toast.error("Request error occurred");
+          }
+        });
+    }
   };
+
+  // Change displayed route/url on loading the sites
 
   return (
     <div className="!font-space">
+      <UpdateURL url={"/create-role"} />
       <Card className="w-full">
         <Heading className=" py-4">Create Role</Heading>
 
@@ -145,27 +132,36 @@ const CreateRole = ({ child, setChild }) => {
                 <Flex justify={"between"} align={"center"}>
                   <Text className="font-medium">USERS</Text>
                   <Flex gap={"2"} align={"center"}>
-                    <Checkbox
-                      id="usersAll"
-                      checked={permissions.users.selectAll}
-                      onChange={() => handleSelectAll("users")}
-                    />
-                    <label htmlFor="usersAll">Select All</label>
+                    {/* <input type="checkbox" id="usersAll" onChange={handleAll} /> */}
+                    {/* <label htmlFor="usersAll">Select All</label> */}
                   </Flex>
                 </Flex>
                 <Separator className="w-full mt-3" />
                 <Flex className="mt-4 w-full justify-between">
-                  <div className="left-perimssion">
+                  <div className="left-permission">
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="viewUser" />
+                      <input
+                        type="checkbox"
+                        name=""
+                        id="viewUser"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="viewUser">View User</label>
                     </Flex>
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="editUser" />
+                      <input
+                        type="checkbox"
+                        id="editUser"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="editUser">Edit User</label>
                     </Flex>
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="resetUserPassword" />
+                      <input
+                        type="checkbox"
+                        id="resetUserPassword"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="resetUserPassword">
                         Reset User password
                       </label>
@@ -173,15 +169,27 @@ const CreateRole = ({ child, setChild }) => {
                   </div>
                   <div className="right-permission">
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="createUser" />
+                      <input
+                        type="checkbox"
+                        id="createUser"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="createUser">Create User</label>
                     </Flex>
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="suspendUser" />
+                      <input
+                        type="checkbox"
+                        id="suspendUser"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="suspendUser">Suspend User</label>
                     </Flex>
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="deleteUser" />
+                      <input
+                        type="checkbox"
+                        id="deleteUser"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="deleteUser">Delete User</label>
                     </Flex>
                   </div>
@@ -192,30 +200,46 @@ const CreateRole = ({ child, setChild }) => {
                 <Flex justify={"between"} align={"center"}>
                   <Text className="font-medium">ROLE</Text>
                   <Flex gap={"3"} align={"center"}>
-                    <Checkbox id="usersAll" />
-                    <label htmlFor="usersAll">Select All</label>
+                    {/* <input type="checkbox" id="rolesAll" /> */}
+                    {/* <label htmlFor="usersAll">Select All</label> */}
                   </Flex>
                 </Flex>
                 <Separator className="w-full mt-2" />
                 <Flex className="mt-4 w-full justify-between">
                   <div className="left-perimssion">
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="viewRole" />
+                      <input
+                        type="checkbox"
+                        id="viewRole"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="viewRole">View Role</label>
                     </Flex>
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="editRole" />
+                      <input
+                        type="checkbox"
+                        id="editRole"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="editRole">Edit Role</label>
                     </Flex>
                   </div>
                   <div className="right-permission">
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="createRole" />
+                      <input
+                        type="checkbox"
+                        id="createRole"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="createRole">Create Role</label>
                     </Flex>
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="suspendUser" />
-                      <label htmlFor="suspendUser">Delete Role</label>
+                      <input
+                        type="checkbox"
+                        id="deleteRole"
+                        onChange={handleCheckboxChange}
+                      />
+                      <label htmlFor="deleteRole">Delete Role</label>
                     </Flex>
                   </div>
                 </Flex>
@@ -228,29 +252,45 @@ const CreateRole = ({ child, setChild }) => {
                 <Flex justify={"between"} align={"center"}>
                   <Text className="font-medium">CUSTOMERS</Text>
                   <Flex gap={"2"} align={"center"}>
-                    <Checkbox id="customersAll" />
-                    <label htmlFor="customersAll">Select All</label>
+                    {/* <input type="checkbox" id="customersAll" /> */}
+                    {/* <label htmlFor="customersAll">Select All</label> */}
                   </Flex>
                 </Flex>
                 <Separator className="w-full mt-3" />
                 <Flex className="mt-4 w-full justify-between">
                   <div className="left-perimssion">
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="viewCustomer" />
+                      <input
+                        type="checkbox"
+                        id="viewCustomer"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="viewCustomer">View Customer</label>
                     </Flex>
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="editCustomer" />
+                      <input
+                        type="checkbox"
+                        id="editCustomer"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="editCustomer">Edit Customer</label>
                     </Flex>
                   </div>
                   <div className="right-permission">
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="createCustomer" />
+                      <input
+                        type="checkbox"
+                        id="createCustomer"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="createCustomer">Create Customer</label>
                     </Flex>
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="deleteCustomer" />
+                      <input
+                        type="checkbox"
+                        id="deleteCustomer"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="deleteCustomer">Delete Customer</label>
                     </Flex>
                   </div>
@@ -261,29 +301,45 @@ const CreateRole = ({ child, setChild }) => {
                 <Flex justify={"between"} align={"center"}>
                   <Text className="font-medium">PHARMACY PRODUCT</Text>
                   <Flex gap={"3"} align={"center"}>
-                    <Checkbox id="pharmProductAll" />
-                    <label htmlFor="pharmProductAll">Select All</label>
+                    {/* <input type="checkbox" id="pharmProductAll" /> */}
+                    {/* <label htmlFor="pharmProductAll">Select All</label> */}
                   </Flex>
                 </Flex>
                 <Separator className="w-full mt-2" />
                 <Flex className="mt-4 w-full justify-between">
                   <div className="left-perimssion">
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="viewProduct" />
-                      <label htmlFor="viewProduct">View Product</label>
+                      <input
+                        type="checkbox"
+                        id="viewPharmProduct"
+                        onChange={handleCheckboxChange}
+                      />
+                      <label htmlFor="viewPharmProduct">View Product</label>
                     </Flex>
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="editPharmProduct" />
+                      <input
+                        type="checkbox"
+                        id="editPharmProduct"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="editPharmProduct">Edit Product</label>
                     </Flex>
                   </div>
                   <div className="right-permission">
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="createPharmProduct" />
+                      <input
+                        type="checkbox"
+                        id="createPharmProduct"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="createPharmProduct">Create Product</label>
                     </Flex>
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="deletePharmProduct" />
+                      <input
+                        type="checkbox"
+                        id="deletePharmProduct"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="deletePharmProduct">Delete Product</label>
                     </Flex>
                   </div>
@@ -297,34 +353,54 @@ const CreateRole = ({ child, setChild }) => {
                 <Flex justify={"between"} align={"center"}>
                   <Text className="font-medium">TICKETS</Text>
                   <Flex gap={"2"} align={"center"}>
-                    <Checkbox id="usersAll" />
-                    <label htmlFor="usersAll">Select All</label>
+                    {/* <input type="checkbox" id="ticketsAll" /> */}
+                    {/* <label htmlFor="usersAll">Select All</label> */}
                   </Flex>
                 </Flex>
                 <Separator className="w-full mt-3" />
                 <Flex className="mt-4 w-full justify-between">
                   <div className="left-perimssion">
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="viewTicket" />
+                      <input
+                        type="checkbox"
+                        id="viewTicket"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="viewTicket">View Ticket</label>
                     </Flex>
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="editTicket" />
+                      <input
+                        type="checkbox"
+                        id="editTicket"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="editTicket">Edit Ticket</label>
                     </Flex>
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="approveTicket" />
+                      <input
+                        type="checkbox"
+                        id="approveTicket"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="approveTicket">Approve Ticket</label>
                     </Flex>
                   </div>
                   <div className="right-permission">
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="createTicket" />
+                      <input
+                        type="checkbox"
+                        id="createTicket"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="createTicket">Create Ticket</label>
                     </Flex>
 
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="deleteTicket" />
+                      <input
+                        type="checkbox"
+                        id="deleteTicket"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="deleteTicket">Delete Ticket</label>
                     </Flex>
                   </div>
@@ -335,29 +411,45 @@ const CreateRole = ({ child, setChild }) => {
                 <Flex justify={"between"} align={"center"}>
                   <Text className="font-medium">PRODUCTS</Text>
                   <Flex gap={"3"} align={"center"}>
-                    <Checkbox id="productAll" />
-                    <label htmlFor="productAll">Select All</label>
+                    {/* <input type="checkbox" id="productAll" /> */}
+                    {/* <label htmlFor="productAll">Select All</label> */}
                   </Flex>
                 </Flex>
                 <Separator className="w-full mt-2" />
                 <Flex className="mt-4 w-full justify-between">
                   <div className="left-perimssion">
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="viewProducts" />
+                      <input
+                        type="checkbox"
+                        id="viewProducts"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="viewProducts">View Products</label>
                     </Flex>
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="editProduct" />
+                      <input
+                        type="checkbox"
+                        id="editProduct"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="editProduct">Edit Product</label>
                     </Flex>
                   </div>
                   <div className="right-permission">
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="createProduct" />
+                      <input
+                        type="checkbox"
+                        id="createProduct"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="createProduct">Create Product</label>
                     </Flex>
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="editProductPrice" />
+                      <input
+                        type="checkbox"
+                        id="editProductPrice"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="editProductPrice">
                         Edit Product Price
                       </label>
@@ -373,29 +465,45 @@ const CreateRole = ({ child, setChild }) => {
                 <Flex justify={"between"} align={"center"}>
                   <Text className="font-medium">SUPPLIER</Text>
                   <Flex gap={"2"} align={"center"}>
-                    <Checkbox id="supplierAll" />
-                    <label htmlFor="supplierAll">Select All</label>
+                    {/* <input type="checkbox" id="supplierAll" /> */}
+                    {/* <label htmlFor="supplierAll">Select All</label> */}
                   </Flex>
                 </Flex>
                 <Separator className="w-full mt-3" />
                 <Flex className="mt-4 w-full justify-between">
                   <div className="left-perimssion">
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="viewSupplier" />
+                      <input
+                        type="checkbox"
+                        id="viewSupplier"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="viewSupplier">View Supplier</label>
                     </Flex>
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="editSupplier" />
+                      <input
+                        type="checkbox"
+                        id="editSupplier"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="editSupplier">Edit Supplier</label>
                     </Flex>
                   </div>
                   <div className="right-permission">
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="createSupplier" />
+                      <input
+                        type="checkbox"
+                        id="createSupplier"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="createSupplier">Create Supplier</label>
                     </Flex>
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="deleteSupplier" />
+                      <input
+                        type="checkbox"
+                        id="deleteSupplier"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="deleteSupplier">Delete Supplier</label>
                     </Flex>
                   </div>
@@ -406,25 +514,37 @@ const CreateRole = ({ child, setChild }) => {
                 <Flex justify={"between"} align={"center"}>
                   <Text className="font-medium">ORDER</Text>
                   <Flex gap={"3"} align={"center"}>
-                    <Checkbox id="orderAll" />
-                    <label htmlFor="orderAll">Select All</label>
+                    {/* <input type="checkbox" id="orderAll" /> */}
+                    {/* <label htmlFor="orderAll">Select All</label> */}
                   </Flex>
                 </Flex>
                 <Separator className="w-full mt-2" />
                 <Flex className="mt-4 w-full justify-between">
                   <div className="left-perimssion">
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="viewOrder" />
+                      <input
+                        type="checkbox"
+                        id="viewOrder"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="viewOrder">View Order</label>
                     </Flex>
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="editOrder" />
-                      <label htmlFor="editOrder">Create Order</label>
+                      <input
+                        type="checkbox"
+                        id="editOrder"
+                        onChange={handleCheckboxChange}
+                      />
+                      <label htmlFor="createOrder">Create Order</label>
                     </Flex>
                   </div>
                   <div className="right-permission">
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="deleteOrder" />
+                      <input
+                        type="checkbox"
+                        id="deleteOrder"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="deleteOrder">Delete Order</label>
                     </Flex>
                   </div>
@@ -438,29 +558,45 @@ const CreateRole = ({ child, setChild }) => {
                 <Flex justify={"between"} align={"center"}>
                   <Text className="font-medium">Report</Text>
                   <Flex gap={"2"} align={"center"}>
-                    <Checkbox id="reportAll" />
-                    <label htmlFor="reportAll">Select All</label>
+                    {/* <input type="checkbox" id="reportAll" /> */}
+                    {/* <label htmlFor="reportAll">Select All</label> */}
                   </Flex>
                 </Flex>
                 <Separator className="w-full mt-3" />
                 <Flex className="mt-4 w-full justify-between">
                   <div className="left-perimssion">
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="viewReport" />
-                      <label htmlFor="viewUser">View Report</label>
+                      <input
+                        type="checkbox"
+                        id="viewReport"
+                        onChange={handleCheckboxChange}
+                      />
+                      <label htmlFor="viewReport">View Report</label>
                     </Flex>
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="downloadReport" />
+                      <input
+                        type="checkbox"
+                        id="downloadReport"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="downloadReport">Download Report</label>
                     </Flex>
                   </div>
                   <div className="right-permission">
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="createReport" />
+                      <input
+                        type="checkbox"
+                        id="createReport"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="createReport">Create Report</label>
                     </Flex>
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="shareReport" />
+                      <input
+                        type="checkbox"
+                        id="shareReport"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="shareReport">Share Report</label>
                     </Flex>
                   </div>
@@ -471,29 +607,45 @@ const CreateRole = ({ child, setChild }) => {
                 <Flex justify={"between"} align={"center"}>
                   <Text className="font-medium">STORE</Text>
                   <Flex gap={"3"} align={"center"}>
-                    <Checkbox id="storeAll" />
-                    <label htmlFor="storeAll">Select All</label>
+                    {/* <input type="checkbox" id="storeAll" /> */}
+                    {/* <label htmlFor="storeAll">Select All</label> */}
                   </Flex>
                 </Flex>
                 <Separator className="w-full mt-2" />
                 <Flex className="mt-4 w-full justify-between">
                   <div className="left-perimssion">
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="viewInventory" />
+                      <input
+                        type="checkbox"
+                        id="viewInventory"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="viewInventory">View Inventory</label>
                     </Flex>
                     <Flex gap={"2"} align={"center"} className="mt-3">
-                      <Checkbox id="editInventory" />
+                      <input
+                        type="checkbox"
+                        id="editInventory"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="editInventory">Edit Inventory</label>
                     </Flex>
                   </div>
                   <div className="right-permission">
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="createInventory" />
+                      <input
+                        type="checkbox"
+                        id="createInventory"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="createInventory">Create Inventory</label>
                     </Flex>
                     <Flex gap={"3"} align={"center"} className="mt-3">
-                      <Checkbox id="updateInventory" />
+                      <input
+                        type="checkbox"
+                        id="updateInventory"
+                        onChange={handleCheckboxChange}
+                      />
                       <label htmlFor="updateInventory">Update Inventory</label>
                     </Flex>
                   </div>
@@ -509,8 +661,61 @@ const CreateRole = ({ child, setChild }) => {
           </Flex>
         </form>
       </Card>
+      <Toaster position="bottom-center" />
     </div>
   );
 };
 
 export default CreateRole;
+
+// "viewUser",
+// "editUser",
+// "resetUserPassword",
+// "createUser",
+// "suspendUser",
+// "deleteUser",
+
+// "viewRole",
+// "editRole",
+// "createRole",
+// "deleteRole",
+
+// "viewCustomer",
+// "editCustomer",
+// "createCustomer",
+// "deleteCustomer",
+
+// "viewPharmProduct",
+// "editPharmProduct",
+// "createPharmProduct",
+// "deletePharmProduct",
+
+// "viewTicket",
+// "editTicket",
+// "approveTicket",
+// "createTicket",
+// "deleteTicket",
+
+// "viewProducts",
+// "editProduct",
+// "createProduct",
+// "editProductPrice",
+
+// "viewSupplier",
+// "editSupplier",
+// "createSupplier",
+// "deleteSupplier",
+
+// "viewOrder",
+// "createOrder",
+// "deleteOrder",
+
+// "viewReport",
+// "downloadReport",
+// "createReport",
+// "shareReport",
+
+// "viewInventory",
+// "editInventory",
+// "createInventory",
+// "updateInventory",

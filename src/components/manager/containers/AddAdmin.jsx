@@ -106,7 +106,6 @@ const AddAdmin = ({ child, setChild }) => {
       email: e.target[2].value,
       phoneNumber: e.target[3].value,
       department: "",
-      profileURL: "",
       products: selectedItems,
       role: e.target[5].value,
       password: e.target[8].value,

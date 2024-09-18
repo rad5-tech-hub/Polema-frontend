@@ -16,8 +16,9 @@ function App() {
         <Route path="/login" element={<Login />} />
 
         {/* Protected Routes */}
-        <Route path="/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/md" element={<PrivateRoute component={Manager} />} />
+        <Route path="/md/:id" element={<PrivateRoute component={Manager} />} />
         <Route path="/charts" element={<PrivateRoute component={Charts} />} />
       </Routes>
     </Router>

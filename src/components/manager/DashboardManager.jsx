@@ -25,10 +25,7 @@ import { Theme } from "@radix-ui/themes";
 import { Notifications, Settings } from "../icons";
 import Charts from "../Charts";
 
-const DashBoardManager = ({ user, role, image, text }) => {
-  const [params] = useSearchParams();
-  const query = params.get("action");
-
+const DashBoardManager = ({ route }) => {
   const [selectedChild, setSelectedChild] = useState(<WelcomeComponent />);
 
   // States for each dropdown
@@ -140,6 +137,31 @@ const DashBoardManager = ({ user, role, image, text }) => {
       document.querySelector("body")?.classList.remove("sidebar-expanded");
     }
   }, [sidebarExpanded]);
+
+  // Setting the value of selectedChild by routing
+  useEffect(() => {
+    const handleRoute = (param) => {
+      switch (param) {
+        case "create-role":
+          setSelectedChild(<CreateRole />);
+          break;
+        case 2:
+          setOpenDropdown2(!openDropdown2);
+          break;
+        case 3:
+          setOpenDropdown3(!openDropdown3);
+          break;
+        case 4:
+          setOpenDropdown4(!openDropdown4);
+          break;
+        case 5:
+          setOpenDropdown5(!openDropdown5);
+          break;
+      }
+    };
+
+    handleRoute(route);
+  }, []);
 
   return (
     <Theme>
@@ -618,7 +640,7 @@ const DashBoardManager = ({ user, role, image, text }) => {
                           </li>
                           <li
                             className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddProduct />)}
+                            onClick={() => setSelectedChild(<AddProducts />)}
                           >
                             View Admin
                           </li>

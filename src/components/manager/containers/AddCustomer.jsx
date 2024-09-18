@@ -137,7 +137,7 @@ const AddCustomer = ({ child, setChild, buttonValue }) => {
         <Heading className="text-left p-4">Customers</Heading>
         <Separator className="w-full" />
         <form onSubmit={handleSubmit}>
-          <div
+          {/* <div
             className="add-image flex justify-center items-center w-[70px] mt-6 h-[70px] border border-current rounded-full cursor-pointer"
             onClick={() => document.getElementById("imageUpload").click()}
           >
@@ -157,7 +157,7 @@ const AddCustomer = ({ child, setChild, buttonValue }) => {
             accept="image/*"
             style={{ display: "none" }}
             onChange={handleImageChange}
-          />
+          /> */}
 
           <div className="flex w-full justify-between gap-8">
             <div className="left w-[50%]">

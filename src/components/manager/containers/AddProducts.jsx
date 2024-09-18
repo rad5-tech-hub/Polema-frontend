@@ -10,6 +10,7 @@ import {
   Flex,
 } from "@radix-ui/themes";
 import { PlusIcon } from "@radix-ui/react-icons";
+import UpdateURL from "./ChangeRoute";
 
 const AddProducts = () => {
   const [pricePlan, setPricePlan] = useState(false);
@@ -65,6 +66,7 @@ const AddProducts = () => {
 
   return (
     <div>
+      <UpdateURL url={"/add-products"} />
       <Card className="w-full">
         <Heading className="text-left py-4">Add Product</Heading>
         <Separator className="w-full" />
