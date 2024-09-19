@@ -1,7 +1,4 @@
-// Manager's View
-
 import React, { useState, useEffect } from "react";
-
 import AddCustomer from "./AddCustomer";
 import { Button, Table } from "@radix-ui/themes";
 import axios from "axios";
@@ -17,11 +14,11 @@ const AllCustomers = ({ child, setChild }) => {
       const result = Object.values(data);
       const resultInfo = result[1];
 
-      // if (resultInfo === undefined) {
-      //   setCustomerData([]);
-      // } else {
-      //   setCustomerData(resultInfo);
-      // }
+      if (resultInfo === undefined) {
+        setCustomerData([]);
+      } else {
+        setCustomerData(resultInfo);
+      }
     });
   }, []);
 

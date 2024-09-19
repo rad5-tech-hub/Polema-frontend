@@ -20,10 +20,9 @@ import {
   LockClosedIcon,
   PersonIcon,
 } from "@radix-ui/react-icons";
-
 const root = import.meta.env.VITE_ROOT;
 
-const AddCustomer = ({ child, setChild, buttonValue }) => {
+const AddSuppliers = ({ child, setChild, buttonValue }) => {
   const [value, setValue] = useState("admin");
   const [selectedItems, setSelectedItems] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -134,10 +133,10 @@ const AddCustomer = ({ child, setChild, buttonValue }) => {
   return (
     <div>
       <Card className="w-full">
-        <Heading className="text-left p-4">Customers</Heading>
+        <Heading className="text-left py-4">Add Suppliers</Heading>
         <Separator className="w-full" />
         <form onSubmit={handleSubmit}>
-          {/* <div
+          <div
             className="add-image flex justify-center items-center w-[70px] mt-6 h-[70px] border border-current rounded-full cursor-pointer"
             onClick={() => document.getElementById("imageUpload").click()}
           >
@@ -157,7 +156,7 @@ const AddCustomer = ({ child, setChild, buttonValue }) => {
             accept="image/*"
             style={{ display: "none" }}
             onChange={handleImageChange}
-          /> */}
+          />
 
           <div className="flex w-full justify-between gap-8">
             <div className="left w-[50%]">
@@ -232,22 +231,6 @@ const AddCustomer = ({ child, setChild, buttonValue }) => {
                   className="text-[15px]  font-medium leading-[35px]   "
                   htmlFor="address"
                 >
-                  Category
-                </label>
-                <TextField.Root
-                  placeholder="Select Category"
-                  className=""
-                  type="text"
-                  id="address"
-                  size={"3"}
-                ></TextField.Root>
-              </div>
-
-              <div className="mt-3 input-field">
-                <label
-                  className="text-[15px]  font-medium leading-[35px]   "
-                  htmlFor="address"
-                >
                   Enter Address
                 </label>
                 <TextField.Root
@@ -278,4 +261,4 @@ const AddCustomer = ({ child, setChild, buttonValue }) => {
   );
 };
 
-export default AddCustomer;
+export default AddSuppliers;

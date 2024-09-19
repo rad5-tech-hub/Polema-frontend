@@ -1,6 +1,5 @@
 import React from "react";
 import { Card, Container, Text } from "@radix-ui/themes";
-import Charts from "../../Charts.jsx";
 
 const WelcomeComponent = () => {
   return (
@@ -12,7 +11,6 @@ const WelcomeComponent = () => {
           Manage Sales and expenses for Sludge and other raws.
         </li>
       </Card>
-      {/* <Charts /> */}
     </Container>
   );
 };

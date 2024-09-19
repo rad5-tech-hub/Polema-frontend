@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
+import toast, { Toaster } from "react-hot-toast";
 import { Text } from "@radix-ui/themes";
 import { TokensIcon } from "@radix-ui/react-icons";
 import { useSearchParams } from "react-router-dom";
+import DynamicIcon from "./DynamicIcon";
 import {
   AddAdmin,
   WelcomeComponent,
-  AllAdmins,
-  AddProduct,
+  AddProducts,
   AddCustomer,
 } from "./containers";
 
@@ -19,41 +20,58 @@ import { NavLink } from "react-router-dom";
 import Header from "./Header";
 import { Theme } from "@radix-ui/themes";
 import { Notifications, Settings } from "../icons";
+import axios from "axios";
 
 const AdminDashboard = ({ user, role, image, text }) => {
   const [params] = useSearchParams();
   const query = params.get("action");
 
   const [selectedChild, setSelectedChild] = useState(<WelcomeComponent />);
+  const [navContent, setNavContent] = useState([]);
+
+  // State to track which dropdown is open
+  const [openDropdownIndex, setOpenDropdownIndex] = useState(null);
+  // const [selectedChild, setSelectedChild] = useState(null);
+
+  const handleToggle = (index) => {
+    // Toggle the dropdown index
+    setOpenDropdownIndex(openDropdownIndex === index ? null : index);
+    // Set selected child
+    setSelectedChild(<WelcomeComponent />);
+  };
 
   // States for each dropdown
+  const [openDropdown0, setOpenDropdown0] = useState(false);
   const [openDropdown1, setOpenDropdown1] = useState(false);
   const [openDropdown2, setOpenDropdown2] = useState(false);
   const [openDropdown3, setOpenDropdown3] = useState(false);
   const [openDropdown4, setOpenDropdown4] = useState(false);
   const [openDropdown5, setOpenDropdown5] = useState(false);
 
-  const handleToggle = (dropdownNumber) => {
-    switch (dropdownNumber) {
-      case 1:
-        setOpenDropdown1(!openDropdown1);
-        break;
-      case 2:
-        setOpenDropdown2(!openDropdown2);
-        break;
-      case 3:
-        setOpenDropdown3(!openDropdown3);
-        break;
-      case 4:
-        setOpenDropdown4(!openDropdown4);
-        break;
-      case 5:
-        setOpenDropdown5(!openDropdown5);
-        break;
-      default:
-        break;
-    }
-  };
+  // const handleToggle = (dropdownNumber) => {
+  //   switch (dropdownNumber) {
+  //     case 0:
+  //       setOpenDropdown0(!openDropdown0);
+  //       break;
+  //     case 1:
+  //       setOpenDropdown1(!openDropdown1);
+  //       break;
+  //     case 2:
+  //       setOpenDropdown2(!openDropdown2);
+  //       break;
+  //     case 3:
+  //       setOpenDropdown3(!openDropdown3);
+  //       break;
+  //     case 4:
+  //       setOpenDropdown4(!openDropdown4);
+  //       break;
+  //     case 5:
+  //       setOpenDropdown5(!openDropdown5);
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // };
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -89,11 +107,31 @@ const AdminDashboard = ({ user, role, image, text }) => {
     }
   }, [sidebarExpanded]);
 
+  // Fetch links from database
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    const response = axios
+      .get("https://polema.bookbank.com.ng/admin/get-nav", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((result) => {
+        console.log(result);
+        setNavContent(result.data.navParentsWithPermissions);
+      })
+      .catch((err) => {
+        console.log(err);
+        toast.error(err.response.data.message);
+      });
+  }, []);
   return (
     <Theme>
       <div className="dark:bg-boxdark-2 dark:text-bodydark xl:mx-[12%]">
         {/* <!-- ===== Page Wrapper Start ===== --> */}
         <div className="flex h-screen overflow-hidden">
+          {/* --------- Commented out entire sidebar---------------- */}
           <aside
             ref={sidebar}
             className={`absolute left-0 font-space top-0 z-[9999] flex border-r-[1px] border-white shadow-2xl h-screen max-w-[17.125rem] flex-col overflow-y-hidden duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 ${
@@ -133,7 +171,42 @@ const AdminDashboard = ({ user, role, image, text }) => {
             <div className="no-scrollbar h-screen flex flex-col overflow-y-auto duration-300 ease-linear">
               <nav className="py-1 px-2 lg:px-4">
                 <div>
+                  {/* ------Delete from here------ */}
                   <ul className="mb-6 flex flex-col gap-1.5">
+                    {navContent.map((item, index) => (
+                      <>
+                        <p
+                          className="flex gap-3 items-center px-4 cursor-pointer"
+                          onClick={() => handleToggle(index)}
+                        >
+                          <DynamicIcon iconName={"fa-heart"} />
+                          <p className="p-2">{item.navParentName}</p>
+                          {openDropdownIndex === index ? (
+                            <CaretUpIcon />
+                          ) : (
+                            <CaretDownIcon />
+                          )}
+                        </p>
+                        {openDropdownIndex === index && (
+                          <ul className="ml-[30px] px-4 text-current">
+                            {item.permissions.map((navChild) => {
+                              return (
+                                <li
+                                  className="p-2 cursor-pointer dash-list "
+                                  onClick={() => console.log(Clicked)}
+                                >
+                                  {navChild.name}
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        )}
+                      </>
+                    ))}
+                  </ul>
+                  {/* ------------Delete Above---------- */}
+
+                  {/* <ul className="mb-6 flex flex-col gap-1.5">
                     <p
                       className="flex gap-3 items-center px-4 cursor-pointer"
                       onClick={() => {
@@ -214,7 +287,7 @@ const AdminDashboard = ({ user, role, image, text }) => {
                         </li>
                         <li
                           className="p-2 cursor-pointer dash-list"
-                          onClick={() => setSelectedChild(<AddProduct />)}
+                          onClick={() => setSelectedChild(<AddProducts />)}
                         >
                           Product
                         </li>
@@ -371,11 +444,13 @@ const AdminDashboard = ({ user, role, image, text }) => {
                       <Settings width={20} height={20} />
                       <p className="p-2">Settings</p>
                     </p>
-                  </ul>
+                  </ul> */}
                 </div>
               </nav>
             </div>
           </aside>
+          {/* --------- Commented out entire sidebar---------------- */}
+
           {/* <!-- ===== Content Area Start ===== --> */}
           <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
             {/* <!-- ===== Header Start ===== --> */}
@@ -401,6 +476,7 @@ const AdminDashboard = ({ user, role, image, text }) => {
         </div>
         {/* <!-- ===== Page Wrapper End ===== --> */}
       </div>
+      <Toaster position="bottom-center" />
     </Theme>
   );
 };

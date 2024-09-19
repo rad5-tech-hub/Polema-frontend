@@ -1,10 +1,19 @@
 import { configureStore } from "@reduxjs/toolkit";
-import adminReducer from "./adminSlice/adminSlice";
+import adminName from "./AdminName/adminSlice";
+import { persistStore, persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage";
 
+const persitConfig = {
+  key: "adminName",
+  storage,
+};
+
+const persistedAdminNameReducer = persistReducer(persitConfig, adminName);
 const store = configureStore({
   reducer: {
-    admin: adminReducer,
+    admin: persistedAdminNameReducer,
   },
 });
 
-export default store;
+const persistor = persistStore(store);
+export { store, persistor };

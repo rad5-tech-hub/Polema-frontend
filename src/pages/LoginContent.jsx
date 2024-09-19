@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { adminState } from "../components/store/adminSlice/adminSlice";
 import { useSelector, useDispatch } from "react-redux";
 
 import { jwtDecode } from "jwt-decode";
@@ -24,12 +23,6 @@ const LoginContent = () => {
   const [loading, setLoading] = useState(false); // Spinner state
   const navigate = useNavigate();
 
-  // Fuction used to update value at store after successful login
-  const dispatch = useDispatch();
-
-  // Retrieving data from store
-  const dataAtStore = useSelector((state) => state.admin.isAdmin);
-
   const handleLoginForm = async (e) => {
     e.preventDefault();
     setLoading(true); // Show spinner
@@ -43,9 +36,6 @@ const LoginContent = () => {
       localStorage.setItem("token", response.data.token);
 
       console.log(response);
-
-      // Change the value of state on store
-      dispatch(adminState(true));
 
       toast.success("Login Successful");
       {

@@ -3,7 +3,8 @@ import { createRoot } from "react-dom/client";
 import App from "./App.jsx";
 import "./tailwind/output.css";
 import { Provider } from "react-redux";
-import store from "./components/store/store.js";
+import { PersistGate } from "redux-persist/integration/react";
+import { persistor, store } from "./components/store/store.js";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

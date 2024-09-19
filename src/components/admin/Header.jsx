@@ -53,7 +53,7 @@ const Header = ({ sidebarOpen, setSidebarOpen, user, role, image, text }) => {
         </div>
 
         <div className="hidden sm:block">
-          <h1 className="text-[2.0rem]">Hello,Admin.</h1>
+          <h1 className="text-[2.0rem]">Hello, Admin.</h1>
         </div>
 
         <div className="flex items-center gap-3 2xsm:gap-7">
