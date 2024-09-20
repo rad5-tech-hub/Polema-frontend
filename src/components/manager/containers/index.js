@@ -7,11 +7,13 @@ import UsersList from "./UsersList";
 import AllCustomers from "./AllCustomers";
 import AddSuppliers from "./AddSuppliers";
 import CreateRole from "./CreateRole";
+import AllProducts from "./AllProducts";
 
 export {
   AddAdmin,
   AddSuppliers,
   CreateRole,
+  AllProducts,
   WelcomeComponent,
   AddCustomer,
   AddDepartment,

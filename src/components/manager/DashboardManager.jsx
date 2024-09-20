@@ -7,7 +7,7 @@ import {
   WelcomeComponent,
   AddProducts,
   AddCustomer,
-  AllCustomers,
+  AllProducts,
   UsersList,
   CreateRole,
   AddSuppliers,
@@ -145,17 +145,19 @@ const DashBoardManager = ({ route }) => {
         case "create-role":
           setSelectedChild(<CreateRole />);
           break;
-        case 2:
-          setOpenDropdown2(!openDropdown2);
+        case "add-products":
+          setSelectedChild(<AddProducts />);
           break;
-        case 3:
-          setOpenDropdown3(!openDropdown3);
+        case "create-admin":
+          setSelectedChild(<AddAdmin />);
           break;
-        case 4:
-          setOpenDropdown4(!openDropdown4);
+        case "add-department":
+          setSelectedChild(<AddDepartment />);
+
           break;
-        case 5:
-          setOpenDropdown5(!openDropdown5);
+        case "all-products":
+          setSelectedChild(<AllProducts />);
+
           break;
       }
     };
@@ -308,9 +310,7 @@ const DashBoardManager = ({ route }) => {
                           </li>
                           <li
                             className="p-2 cursor-pointer dash-list"
-                            onClick={() =>
-                              setSelectedChild(<UsersList page={"products"} />)
-                            }
+                            onClick={() => setSelectedChild(<AllProducts />)}
                           >
                             View All
                           </li>

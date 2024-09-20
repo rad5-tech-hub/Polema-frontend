@@ -8,11 +8,16 @@ import {
   Separator,
   TextField,
   Flex,
+  Spinner,
 } from "@radix-ui/themes";
 import { PlusIcon } from "@radix-ui/react-icons";
 import UpdateURL from "./ChangeRoute";
+import toast, { Toaster } from "react-hot-toast";
+
+const root = import.meta.env.VITE_ROOT;
 
 const AddProducts = () => {
+  const [isloading, setIsLoading] = useState(false);
   const [pricePlan, setPricePlan] = useState(false);
   const [basePrice, setBasePrice] = useState("");
   const [plans, setPlans] = useState([{ name: "", discount: "" }]);
@@ -36,13 +41,32 @@ const AddProducts = () => {
     }
   };
 
+  const handlePlanChange = (index, field, value) => {
+    const updatedPlans = [...plans];
+    updatedPlans[index] = {
+      ...updatedPlans[index],
+      [field]: value,
+    };
+    setPlans(updatedPlans);
+  };
   // Add new plan fields
   const handleAddPlan = () => {
     setPlans([...plans, { name: "", discount: "" }]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    setIsLoading(true);
+
+    const retrToken = localStorage.getItem("token");
+
+    // Check if the token is available
+    if (!retrToken) {
+      toast.error("An error occurred. Try logging in again");
+
+      return;
+    }
 
     // Create the Plans object from the plans array
     const plansObject = plans.reduce((acc, plan) => {
@@ -53,13 +77,36 @@ const AddProducts = () => {
     }, {});
 
     const submitObject = {
-      productName: e.target[1].value,
-      basePrice: basePrice, // Submit raw base price without commas
-      productUnit: e.target[3].value,
-      plans: plansObject, // Plans as an object
+      name: e.target[0].value,
+      price: {
+        [e.target[2].value]: Number(basePrice),
+      }, // Submit raw base price without commas
+
+      pricePlan: plansObject, // Plans as an object
     };
 
-    console.log(submitObject);
+    try {
+      const response = await axios.post(
+        `${root}/admin/add-product`,
+        submitObject,
+        {
+          headers: {
+            Authorization: `Bearer ${retrToken}`,
+          },
+        }
+      );
+      toast.success(response.data.message);
+      console.log(response);
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+      {
+        error.response.data.error
+          ? toast.error(error.response.data.error)
+          : toast.error(error.response.data.message);
+      }
+    }
 
     // Add your form submission logic here
   };
@@ -200,11 +247,12 @@ const AddProducts = () => {
 
           <Flex justify={"end"} align={"end"} width={"100%"}>
             <Button className="mt-4" size={3} type="submit">
-              Create
+              {isloading ? <Spinner /> : "Create"}
             </Button>
           </Flex>
         </form>
       </Card>
+      <Toaster position="bottom-center" />
     </div>
   );
 };

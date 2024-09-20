@@ -1,9 +1,36 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Heading, Table } from "@radix-ui/themes";
+import axios from "axios";
+import UpdateURL from "./ChangeRoute";
+
+const root = import.meta.env.VITE_ROOT;
+
+const fetchProducts = async () => {
+  const retrToken = localStorage.getItem("token");
+
+  // Check if the token is available
+  if (!retrToken) {
+    toast.error("An error occurred. Try logging in again");
+
+    return;
+  }
+
+  try {
+    const response = await axios.get(`${root}/admin/get-products`, {
+      headers: {
+        Authorization: `Bearer ${retrToken}`,
+      },
+    });
+    console.log(response);
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 const AllProducts = () => {
   return (
     <>
+      <UpdateURL url={"/all-products"} />
       <Heading size={"6"} className="p-4">
         All Products
       </Heading>
