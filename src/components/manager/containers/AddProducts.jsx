@@ -78,9 +78,12 @@ const AddProducts = () => {
 
     const submitObject = {
       name: e.target[0].value,
-      price: {
-        [e.target[2].value]: Number(basePrice),
-      }, // Submit raw base price without commas
+      price: [
+        {
+          unit: e.target[2].value,
+          amount: Number(basePrice),
+        },
+      ], // Submit raw base price without commas
 
       pricePlan: plansObject, // Plans as an object
     };

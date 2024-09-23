@@ -68,13 +68,13 @@ const CreateRole = ({ child, setChild }) => {
 
     const submitobject = {
       name: e.target[0].value,
-      permissions: selectedCheckboxes,
+      permissionsId: selectedCheckboxes,
     };
 
     console.log(submitobject);
     if (submitobject.name === "") {
       toast.error("Assign a name to the role");
-    } else if (submitobject.permissions.length === 0) {
+    } else if (submitobject.permissionsId.length === 0) {
       toast.error("Assign tasks to the role");
     } else {
       setIsLoading(true);
@@ -247,7 +247,7 @@ const CreateRole = ({ child, setChild }) => {
           )}
         </form>
       </Card>
-      <Toaster position="bottom-center" />
+      <Toaster position="top-center" />
     </div>
   );
 };

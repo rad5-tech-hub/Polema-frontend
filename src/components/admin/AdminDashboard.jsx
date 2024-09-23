@@ -193,7 +193,9 @@ const AdminDashboard = ({ user, role, image, text }) => {
                               return (
                                 <li
                                   className="p-2 cursor-pointer dash-list "
-                                  onClick={() => console.log(Clicked)}
+                                  onClick={() =>
+                                    setSelectedChild(<AddCustomer />)
+                                  }
                                 >
                                   {navChild.name}
                                 </li>

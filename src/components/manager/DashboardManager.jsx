@@ -11,7 +11,11 @@ import {
   UsersList,
   CreateRole,
   AddSuppliers,
+  AllDepartments,
   AddDepartment,
+  AllAdmins,
+  AllRoles,
+  AllSuspended,
 } from "./containers";
 
 import {
@@ -155,9 +159,22 @@ const DashBoardManager = ({ route }) => {
           setSelectedChild(<AddDepartment />);
 
           break;
+        case "all-departments":
+          setSelectedChild(<AllDepartments />);
+
+          break;
         case "all-products":
           setSelectedChild(<AllProducts />);
 
+          break;
+        case "view-admins":
+          setSelectedChild(<AllAdmins />);
+          break;
+        case "view-roles":
+          setSelectedChild(<AllRoles />);
+          break;
+        case "suspended-admins":
+          setSelectedChild(<AllSuspended />);
           break;
       }
     };
@@ -236,15 +253,7 @@ const DashBoardManager = ({ route }) => {
                         <ul className="ml-[30px] px-4 text-current">
                           <li
                             className="p-2 cursor-pointer dash-list "
-                            onClick={() =>
-                              setSelectedChild(
-                                <AddCustomer
-                                  setChild={setSelectedChild}
-                                  child={selectedChild}
-                                  buttonValue={true}
-                                />
-                              )
-                            }
+                            onClick={() => setSelectedChild(<AddCustomer />)}
                           >
                             Add
                           </li>
@@ -410,15 +419,7 @@ const DashBoardManager = ({ route }) => {
                         <ul className="ml-[30px] px-4 text-current">
                           <li
                             className="p-2 cursor-pointer dash-list "
-                            onClick={() =>
-                              setSelectedChild(
-                                <AddCustomer
-                                  setChild={setSelectedChild}
-                                  child={selectedChild}
-                                  buttonValue={true}
-                                />
-                              )
-                            }
+                            onClick={() => setSelectedChild(<AddCustomer />)}
                           >
                             Raw Materials
                           </li>
@@ -628,7 +629,7 @@ const DashBoardManager = ({ route }) => {
                           </li>
                           <li
                             className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<CreateRole />)}
+                            onClick={() => setSelectedChild(<AllRoles />)}
                           >
                             View Role
                           </li>
@@ -640,11 +641,14 @@ const DashBoardManager = ({ route }) => {
                           </li>
                           <li
                             className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddProducts />)}
+                            onClick={() => setSelectedChild(<AllAdmins />)}
                           >
                             View Admin
                           </li>
-                          <li className="p-2 cursor-pointer dash-list">
+                          <li
+                            className="p-2 cursor-pointer dash-list"
+                            onClick={() => setSelectedChild(<AllSuspended />)}
+                          >
                             Suspended Admins
                           </li>
                         </ul>
@@ -671,7 +675,7 @@ const DashBoardManager = ({ route }) => {
                           </li>
                           <li
                             className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
+                            onClick={() => setSelectedChild(<AllDepartments />)}
                           >
                             View All
                           </li>
