@@ -1,4 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import {
+  faBriefcase,
+  faSitemap,
+  faBuilding,
+  faStore,
+  faTags,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import * as Switch from "@radix-ui/react-switch";
 import {
@@ -7,6 +15,7 @@ import {
   Heading,
   Separator,
   TextField,
+  Select,
   Flex,
   Spinner,
 } from "@radix-ui/themes";
@@ -21,7 +30,16 @@ const AddProducts = () => {
   const [pricePlan, setPricePlan] = useState(false);
   const [basePrice, setBasePrice] = useState("");
   const [plans, setPlans] = useState([{ name: "", discount: "" }]);
-  const [uploadedImage, setUploadedImage] = useState(null);
+
+  // State management for selected category
+  const [selectedCategory, setSelectedCategory] = useState("");
+
+  // State management for selected department
+  const [selectedDept, setSelectedDept] = useState("");
+
+  // State management for fetched departments
+  const [department, setDepartment] = useState([]);
+
   const [imageURL, setImageURL] = useState("");
 
   const handleSwitchChange = (checked) => {
@@ -54,6 +72,27 @@ const AddProducts = () => {
     setPlans([...plans, { name: "", discount: "" }]);
   };
 
+  // Fetch departments from db
+  const fetchDepartments = async () => {
+    let retrToken = localStorage.getItem("token");
+
+    // Check if the token is available
+    if (!retrToken) {
+      toast.error("An error occurred. Try logging in again");
+
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${root}/dept/get-department`);
+      console.log(response);
+      setDepartment(response.data.departments);
+    } catch (error) {
+      console.log(error);
+      toast.error();
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -76,22 +115,45 @@ const AddProducts = () => {
       return acc;
     }, {});
 
+    const plansArray = plans
+      .filter((plan) => plan.name && plan.discount) // Filter out empty plans
+      .map((plan) => ({
+        category: plan.name,
+        amount: plan.discount,
+      }));
+
     const submitObject = {
       name: e.target[0].value,
+      category: selectedCategory,
+      departmentId: selectedDept,
       price: [
         {
-          unit: e.target[2].value,
+          unit: e.target[4].value,
           amount: Number(basePrice),
         },
       ], // Submit raw base price without commas
 
-      pricePlan: plansObject, // Plans as an object
+      pricePlan: plansArray, // Plans as an object
     };
+
+    const submitWithoutPlans = {
+      name: e.target[0].value,
+      category: selectedCategory,
+      departmentId: selectedDept,
+      price: [
+        {
+          unit: e.target[4].value,
+          amount: Number(basePrice),
+        },
+      ],
+    };
+
+    console.log(pricePlan ? submitObject : submitWithoutPlans);
 
     try {
       const response = await axios.post(
         `${root}/admin/add-product`,
-        submitObject,
+        pricePlan ? submitObject : submitWithoutPlans,
         {
           headers: {
             Authorization: `Bearer ${retrToken}`,
@@ -113,6 +175,10 @@ const AddProducts = () => {
 
     // Add your form submission logic here
   };
+
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
 
   return (
     <div>
@@ -153,6 +219,34 @@ const AddProducts = () => {
                   onChange={handleBasePriceChange} // Update raw value without commas
                 />
               </div>
+
+              {/* Category Dropdown */}
+              <div className="w-full mt-3">
+                <label className="text-[15px]  font-medium leading-[35px]">
+                  Category
+                </label>
+                <Select.Root
+                  value={selectedCategory}
+                  onValueChange={(value) => setSelectedCategory(value)} // Initial value
+                >
+                  <Select.Trigger
+                    className="w-full"
+                    placeholder="Select Catgory"
+                  >
+                    <Flex as="span" align="center" gap="2">
+                      <FontAwesomeIcon icon={faTags} />
+                      {selectedCategory || "Select Category"}
+                    </Flex>
+                  </Select.Trigger>
+                  <Select.Content position="popper">
+                    {/* {products.map((product) => ( */}
+
+                    <Select.Item value="For Sale">For Sale</Select.Item>
+                    <Select.Item value="For Purchase">For Purchase</Select.Item>
+                    {/* ))} */}
+                  </Select.Content>
+                </Select.Root>
+              </div>
             </div>
 
             <div className="right w-[50%]">
@@ -169,6 +263,35 @@ const AddProducts = () => {
                   type="text"
                   size={"3"}
                 />
+              </div>
+
+              {/* Departments Dropdown */}
+              <div className="w-full mt-3">
+                <label className="text-[15px]  font-medium leading-[35px]">
+                  Department
+                </label>
+                <Select.Root
+                  value={selectedDept}
+                  onValueChange={(value) => setSelectedDept(value)} // Initial value
+                >
+                  <Select.Trigger
+                    className="w-full"
+                    placeholder="Select Department"
+                  >
+                    <Flex as="span" align="center" gap="2">
+                      <FontAwesomeIcon icon={faBriefcase} />
+                      {department.find((dept) => dept.id === selectedDept)
+                        ?.name || "Select Department"}
+                    </Flex>
+                  </Select.Trigger>
+                  <Select.Content position="popper">
+                    {department.map((dept) => {
+                      return (
+                        <Select.Item value={dept.id}>{dept.name}</Select.Item>
+                      );
+                    })}
+                  </Select.Content>
+                </Select.Root>
               </div>
             </div>
           </div>
@@ -249,7 +372,12 @@ const AddProducts = () => {
           )}
 
           <Flex justify={"end"} align={"end"} width={"100%"}>
-            <Button className="mt-4" size={3} type="submit">
+            <Button
+              className="mt-4"
+              size={3}
+              type="submit"
+              disabled={isloading}
+            >
               {isloading ? <Spinner /> : "Create"}
             </Button>
           </Flex>

@@ -16,6 +16,7 @@ import {
   AllAdmins,
   AllRoles,
   AllSuspended,
+  AllCustomers,
 } from "./containers";
 
 import {
@@ -24,6 +25,7 @@ import {
   CaretDownIcon,
 } from "@radix-ui/react-icons";
 import { NavLink } from "react-router-dom";
+
 import Header from "./Header";
 import { Theme } from "@radix-ui/themes";
 import { Notifications, Settings } from "../icons";
@@ -31,6 +33,9 @@ import Charts from "../Charts";
 
 const DashBoardManager = ({ route }) => {
   const [selectedChild, setSelectedChild] = useState(<WelcomeComponent />);
+
+  // State to check for light or dark mode
+  const [isDark, setIsDark] = useState(true);
 
   // States for each dropdown
   const [openDropdown1, setOpenDropdown1] = useState(false);
@@ -118,6 +123,15 @@ const DashBoardManager = ({ route }) => {
     storedSidebarExpanded === null ? false : storedSidebarExpanded === "true"
   );
 
+  // To check for theme of the page
+  useEffect(() => {
+    const theme = localStorage.getItem("polemaTheme");
+
+    {
+      theme === "dark" ? setIsDark(true) : setIsDark(false);
+    }
+  }, []);
+
   useEffect(() => {
     const clickHandler = ({ target }) => {
       if (!sidebar.current || !trigger.current) return;
@@ -176,6 +190,13 @@ const DashBoardManager = ({ route }) => {
         case "suspended-admins":
           setSelectedChild(<AllSuspended />);
           break;
+        case "add-customer":
+          setSelectedChild(<AddCustomer />);
+          break;
+
+        case "all-customers":
+          setSelectedChild(<AllCustomers />);
+          break;
       }
     };
 
@@ -188,9 +209,11 @@ const DashBoardManager = ({ route }) => {
         <div className="flex h-screen overflow-hidden ">
           <aside
             ref={sidebar}
-            className={`absolute left-0 font-space top-0 z-[9999] sidebar-container flex border-r-[1px] border-white shadow-2xl h-screen max-w-[18.0rem] flex-col overflow-y-hidden duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 ${
-              sidebarOpen ? "translate-x-0" : "-translate-x-full"
-            }`}
+            className={`absolute left-0 font-space top-0 z-[9999] 
+              
+              sidebar-container flex border-r-[1px] border-white shadow-2xl h-screen max-w-[18.0rem] flex-col overflow-y-hidden duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 ${
+                sidebarOpen ? "translate-x-0" : "-translate-x-full"
+              }`}
           >
             <div className="flex items-center justify-between gap-2 px-6 py-[1.375rem] lg:py-[1.625rem]">
               <NavLink to="/">
@@ -259,11 +282,17 @@ const DashBoardManager = ({ route }) => {
                           </li>
                           <li
                             className="p-2 cursor-pointer dash-list"
+                            onClick={() => setSelectedChild(<AllCustomers />)}
+                          >
+                            View All
+                          </li>
+                          <li
+                            className="p-2 cursor-pointer dash-list"
                             onClick={() =>
                               setSelectedChild(<UsersList page={"customers"} />)
                             }
                           >
-                            View All
+                            Ledger
                           </li>
                         </ul>
                       )}
@@ -294,6 +323,9 @@ const DashBoardManager = ({ route }) => {
                             }
                           >
                             View All
+                          </li>
+                          <li className="p-2 cursor-pointer dash-list">
+                            Ledger
                           </li>
                         </ul>
                       )}

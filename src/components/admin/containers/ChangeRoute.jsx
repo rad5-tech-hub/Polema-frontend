@@ -5,12 +5,10 @@ const UpdateURL = ({ url }) => {
   const cleanedUrl = url.replace(/^\/|\/$/g, "");
 
   // Set the base path to reset to (e.g., '/md')
-  const basePath = "/admin";
+  const basePath = "/md";
 
   // Construct the new URL using the base path and the cleaned URL
   const newUrl = `${basePath}/${cleanedUrl}`;
-
-  console.log(newUrl);
 
   // Update the URL without reloading the page
   window.history.replaceState(null, "", newUrl);

@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import axios from "axios";
-
+import UpdateURL from "./ChangeRoute";
 import {
   Card,
   Select,
@@ -23,28 +23,27 @@ import {
 } from "@radix-ui/react-icons";
 
 import { Camera } from "../../icons";
+import toast, { Toaster } from "react-hot-toast";
+const root = import.meta.env.VITE_ROOT;
 
 const AddAdmin = ({ child, setChild }) => {
-  const [value, setValue] = useState("admin");
+  const [value, setValue] = useState("");
+  const [id, setID] = useState("");
   const [selectedItems, setSelectedItems] = useState([]);
-  const [otherValue, setOtherValue] = useState("");
-  const [showOtherInput, setShowOtherInput] = useState(false);
-  const [uploadedImage, setUploadedImage] = useState(null);
-  const [imageURL, setImageURL] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [rolesArray, setRolesArray] = useState([]);
 
-  const data = {
-    admin: { label: "Admin", icon: <PersonIcon /> },
-    admin1: { label: "Admin 1", icon: <PersonIcon /> },
-    admin2: { label: "Admin 2", icon: <PersonIcon /> },
-    admin3: { label: "Admin 3", icon: <PersonIcon /> },
-    accountant: { label: "Accountant", icon: <PersonIcon /> },
-    keeperGeneral: { label: "Storekeeper (General)", icon: <PersonIcon /> },
-    keeperPharmacy: { label: "Storekeeper (Pharmacy)", icon: <PersonIcon /> },
-  };
+  const data = rolesArray.reduce((acc, role) => {
+    acc[role.name] = {
+      label: role.name,
+      icon: <PersonIcon />,
+    };
+    return acc;
+  }, {});
 
   const handleValueChange = (value) => {
     setValue(value);
+    setID(value);
   };
 
   const handleCheckboxChange = (selectedValue) => {
@@ -62,89 +61,90 @@ const AddAdmin = ({ child, setChild }) => {
     }
   };
 
-  const handleOtherBlur = () => {
-    if (otherValue.trim() !== "") {
-      setSelectedItems((prevItems) => [...prevItems, otherValue]);
-    }
-    setOtherValue("");
-    setShowOtherInput(false);
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUploadedImage(reader.result);
-        uploadImageToCloudinary(file);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const uploadImageToCloudinary = async (file) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", "ml_default");
-
-    await axios
-      .post("https://api.cloudinary.com/v1_1/da4yjuf39/image/upload", formData)
-      .then((result) => {
-        setImageURL(result.data.secure_url);
-      })
-      .catch((error) => {
-        console.error("Error uploading image:", error);
-      });
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
-    console.log(selectedItems);
+    const retrToken = localStorage.getItem("token");
+
+    // Check if the token is available
+    if (!retrToken) {
+      toast.error("An error occurred. Try logging in again");
+
+      return;
+    }
+
+    const nameToFind = e.target[6].value;
+    const result = rolesArray.find((item) => item.name === nameToFind);
+
     const submitobject = {
-      fullname: e.target[1].value,
-      email: e.target[2].value,
-      phoneNumber: e.target[3].value,
-      department: "",
-      products: selectedItems,
-      role: e.target[5].value,
-      password: e.target[8].value,
+      firstname: e.target[0].value,
+      lastname: e.target[4].value,
+      email: e.target[1].value,
+      phoneNumber: e.target[2].value,
+      department: ["marketer"],
+      roleId: result.id,
+      password: e.target[3].value,
+      confirmPassword: e.target[8].value,
     };
-    console.log(submitobject);
 
-    // Handle form submission, including the imageURL which is the Cloudinary URL
+    try {
+      const response = await axios.post(
+        `${root}/admin/reg-staff`,
+        submitobject,
+        {
+          headers: {
+            Authorization: `Bearer ${retrToken}`,
+          },
+        }
+      );
+      console.log(response);
+      toast.success(response.data.message);
 
-    // Add your form submission logic here
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+
+      setIsLoading(false);
+      toast.error(error.response.data.error);
+    }
   };
 
+  // Fetch departments and roles
+  const fetchDepartments = async () => {
+    const retrToken = localStorage.getItem("token");
+
+    // Check if the token is available
+    if (!retrToken) {
+      toast.error("An error occurred. Try logging in again");
+
+      return;
+    }
+    try {
+      const response = await axios.get(`${root}/admin/get-rolePerm`, {
+        headers: {
+          Authorization: `Beaer ${retrToken}`,
+        },
+      });
+
+      setRolesArray(response.data);
+    } catch (err) {
+      console.log(err);
+      toast.error(err.message);
+    }
+  };
+
+  // Fetch departments and roles on page load
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
   return (
     <div className="!font-space">
+      <UpdateURL url={"/create-admin"} />
       <Card className="w-full">
         <Heading className="text-left py-4">Create Admin</Heading>
         <Separator className="w-full" />
         <form onSubmit={handleSubmit}>
-          {/* <div
-            className="add-image flex justify-center items-center w-[70px] mt-6 h-[70px] border border-white rounded-full cursor-pointer"
-            onClick={() => document.getElementById("imageUpload").click()}
-          >
-            {uploadedImage ? (
-              <img
-                src={uploadedImage}
-                alt="Uploaded"
-                className="w-full h-full object-cover rounded-full"
-              />
-            ) : (
-              <Camera />
-            )}
-          </div>
-          <input
-            type="file"
-            id="imageUpload"
-            accept="image/*"
-            style={{ display: "none" }}
-            onChange={handleImageChange}
-          /> */}
-
           <div className="flex w-full justify-between gap-8">
             <div className="left w-[50%]">
               <div className="input-field mt-3">
@@ -158,7 +158,7 @@ const AddAdmin = ({ child, setChild }) => {
                   placeholder="Enter First Name"
                   className=""
                   type="text"
-                  id="fullname"
+                  id="firstname"
                   size={"3"}
                 ></TextField.Root>
               </div>
@@ -194,104 +194,25 @@ const AddAdmin = ({ child, setChild }) => {
                   size={"3"}
                 ></TextField.Root>
               </div>
+
+              <div className="mt-3 input-field">
+                <label
+                  className="text-[15px]  font-medium leading-[35px]   "
+                  htmlFor="password"
+                >
+                  Password
+                </label>
+                <TextField.Root
+                  placeholder="Enter Password"
+                  className=""
+                  type="password"
+                  id="password"
+                  size={"3"}
+                ></TextField.Root>
+              </div>
             </div>
 
             <div className="right w-[50%]">
-              {/* <div className="input-field mt-3">
-                <label
-                  className="text-[15px]  font-medium leading-[35px]   "
-                  htmlFor="products"
-                >
-                  Assign Product(s)
-                </label>
-                <Select.Root value={selectedItems.join(", ")} size={"3"}>
-                  <Select.Trigger
-                    className="w-full"
-                    id="products"
-                    placeholder="Select Product(s)"
-                  >
-                    <Flex as="span" align="center" gap="2">
-                      <PersonIcon />
-                      {selectedItems.length === 0
-                        ? "Select Product(s)"
-                        : selectedItems.join(", ")}
-                    </Flex>
-                  </Select.Trigger>
-                  <Select.Content position="popper">
-                    <CheckboxGroup.Root value={selectedItems}>
-                      <CheckboxGroup.Item
-                        value="pkc"
-                        onClick={() => handleCheckboxChange("pkc")}
-                      >
-                        PKC
-                      </CheckboxGroup.Item>
-                      <CheckboxGroup.Item
-                        value="engine-oil"
-                        onClick={() => handleCheckboxChange("engine-oil")}
-                      >
-                        Engine Oil
-                      </CheckboxGroup.Item>
-                      <CheckboxGroup.Item
-                        value="drugs"
-                        onClick={() => handleCheckboxChange("drugs")}
-                      >
-                        Drugs (pharmacy)
-                      </CheckboxGroup.Item>
-                      <CheckboxGroup.Item
-                        value="plastics"
-                        onClick={() => handleCheckboxChange("plastics")}
-                      >
-                        Plastics
-                      </CheckboxGroup.Item>
-                      <CheckboxGroup.Item
-                        value="sludge"
-                        onClick={() => handleCheckboxChange("sludge")}
-                      >
-                        Sludge
-                      </CheckboxGroup.Item>
-                      <CheckboxGroup.Item
-                        value="rvo"
-                        onClick={() => handleCheckboxChange("rvo")}
-                      >
-                        RVO (Refined Vegetable Oil)
-                      </CheckboxGroup.Item>
-                      <CheckboxGroup.Item
-                        value="ledger"
-                        onClick={() => handleCheckboxChange("ledger")}
-                      >
-                        Ledger
-                      </CheckboxGroup.Item>
-                      <CheckboxGroup.Item
-                        value="others"
-                        onClick={() => handleCheckboxChange("others")}
-                      >
-                        Others
-                      </CheckboxGroup.Item>
-                    </CheckboxGroup.Root>
-                  </Select.Content>
-                </Select.Root>
-              </div> */}
-
-              {/* {showOtherInput && (
-                <div className="input-field mt-3">
-                  <label
-                    className="text-[15px]  font-medium leading-[35px]   "
-                    htmlFor="products"
-                  >
-                    Assign Product(s)
-                  </label>
-                  <TextField.Root
-                    placeholder="Add Product"
-                    className=""
-                    type="text"
-                    size={"3"}
-                    value={otherValue}
-                    onChange={(e) => setOtherValue(e.target.value)}
-                    onBlur={handleOtherBlur}
-                  />
-                </div>
-              )} */}
-
               <div className="mt-3 input-field">
                 <label
                   className="text-[15px]  font-medium leading-[35px]   "
@@ -302,8 +223,8 @@ const AddAdmin = ({ child, setChild }) => {
                 <TextField.Root
                   placeholder="Enter Last Name"
                   className=""
-                  type="password"
-                  id="password"
+                  type="text"
+                  id="lastname"
                   size={"3"}
                 ></TextField.Root>
               </div>
@@ -317,28 +238,28 @@ const AddAdmin = ({ child, setChild }) => {
                 </label>
                 <Select.Root
                   value={value}
+                  id={id}
                   onValueChange={handleValueChange}
                   size={"3"}
                 >
                   <Select.Trigger
                     className="w-full"
                     id="role"
-                    placeholder="Select Product(s)"
+                    placeholder="Select role"
                   >
                     <Flex as="span" align="center" gap="2">
-                      {data[value].icon}
-                      {data[value].label}
+                      <PersonIcon />
+                      {value}
                     </Flex>
                   </Select.Trigger>
                   <Select.Content position="popper">
-                    <Select.Item value="admin1">Admin 1</Select.Item>
-
-                    <Select.Item value="keeperPharmacy">
-                      Store Keeper (Pharmacy)
-                    </Select.Item>
-                    <Select.Item value="keeperGeneral">
-                      Store Keeper (General)
-                    </Select.Item>
+                    {rolesArray.map((role) => {
+                      return (
+                        <Select.Item value={role.name} id={role.id}>
+                          {role.name}
+                        </Select.Item>
+                      );
+                    })}
                   </Select.Content>
                 </Select.Root>
               </div>
@@ -348,13 +269,29 @@ const AddAdmin = ({ child, setChild }) => {
                   className="text-[15px]  font-medium leading-[35px]   "
                   htmlFor="password"
                 >
-                  Enter Password
+                  Department
                 </label>
                 <TextField.Root
-                  placeholder="Password"
+                  placeholder="Department"
+                  className=""
+                  type="text"
+                  id="department"
+                  size={"3"}
+                ></TextField.Root>
+              </div>
+
+              <div className="mt-3 input-field">
+                <label
+                  className="text-[15px]  font-medium leading-[35px]   "
+                  htmlFor="passwordConfirm"
+                >
+                  Confirm Password
+                </label>
+                <TextField.Root
+                  placeholder="Confirm Password"
                   className=""
                   type="password"
-                  id="password"
+                  id="passwordConfirm"
                   size={"3"}
                 ></TextField.Root>
               </div>
@@ -370,8 +307,108 @@ const AddAdmin = ({ child, setChild }) => {
           </Flex>
         </form>
       </Card>
+      <Toaster position="bottom-center" />
     </div>
   );
 };
 
 export default AddAdmin;
+
+{
+  /* <div className="input-field mt-3">
+  <label
+    className="text-[15px]  font-medium leading-[35px]   "
+    htmlFor="products"
+  >
+    Assign Product(s)
+  </label>
+  <Select.Root value={selectedItems.join(", ")} size={"3"}>
+    <Select.Trigger
+      className="w-full"
+      id="products"
+      placeholder="Select Product(s)"
+    >
+      <Flex as="span" align="center" gap="2">
+        <PersonIcon />
+        {selectedItems.length === 0
+          ? "Select Product(s)"
+          : selectedItems.join(", ")}
+      </Flex>
+    </Select.Trigger>
+    <Select.Content position="popper">
+      <CheckboxGroup.Root value={selectedItems}>
+        <CheckboxGroup.Item
+          value="pkc"
+          onClick={() => handleCheckboxChange("pkc")}
+        >
+          PKC
+        </CheckboxGroup.Item>
+        <CheckboxGroup.Item
+          value="engine-oil"
+          onClick={() => handleCheckboxChange("engine-oil")}
+        >
+          Engine Oil
+        </CheckboxGroup.Item>
+        <CheckboxGroup.Item
+          value="drugs"
+          onClick={() => handleCheckboxChange("drugs")}
+        >
+          Drugs (pharmacy)
+        </CheckboxGroup.Item>
+        <CheckboxGroup.Item
+          value="plastics"
+          onClick={() => handleCheckboxChange("plastics")}
+        >
+          Plastics
+        </CheckboxGroup.Item>
+        <CheckboxGroup.Item
+          value="sludge"
+          onClick={() => handleCheckboxChange("sludge")}
+        >
+          Sludge
+        </CheckboxGroup.Item>
+        <CheckboxGroup.Item
+          value="rvo"
+          onClick={() => handleCheckboxChange("rvo")}
+        >
+          RVO (Refined Vegetable Oil)
+        </CheckboxGroup.Item>
+        <CheckboxGroup.Item
+          value="ledger"
+          onClick={() => handleCheckboxChange("ledger")}
+        >
+          Ledger
+        </CheckboxGroup.Item>
+        <CheckboxGroup.Item
+          value="others"
+          onClick={() => handleCheckboxChange("others")}
+        >
+          Others
+        </CheckboxGroup.Item>
+      </CheckboxGroup.Root>
+    </Select.Content>
+  </Select.Root>
+</div> */
+}
+
+{
+  /* {showOtherInput && (
+  <div className="input-field mt-3">
+    <label
+      className="text-[15px]  font-medium leading-[35px]   "
+      htmlFor="products"
+    >
+      Assign Product(s)
+    </label>
+    <TextField.Root
+      placeholder="Add Product"
+      className=""
+      type="text"
+      size={"3"}
+      value={otherValue}
+      onChange={(e) => setOtherValue(e.target.value)}
+      onBlur={handleOtherBlur}
+    />
+  </div>
+)} */
+}

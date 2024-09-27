@@ -17,6 +17,7 @@ function App() {
 
         {/* Protected Routes */}
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/:id" element={<AdminDashboard />} />
         <Route path="/md" element={<PrivateRoute component={Manager} />} />
         <Route path="/md/:id" element={<PrivateRoute component={Manager} />} />
         <Route path="/charts" element={<PrivateRoute component={Charts} />} />

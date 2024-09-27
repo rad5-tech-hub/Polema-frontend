@@ -101,7 +101,7 @@ const LoginContent = () => {
             </form>
           </Card>
         </div>
-        <Toaster position="bottom-center" />
+        <Toaster position="top-right" />
       </div>
     </>
   );

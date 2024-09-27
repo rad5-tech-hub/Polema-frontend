@@ -14,12 +14,13 @@ import {
   Spinner,
   Flex,
 } from "@radix-ui/themes";
-import { Camera } from "../../icons";
+
 import {
   EnvelopeClosedIcon,
   LockClosedIcon,
   PersonIcon,
 } from "@radix-ui/react-icons";
+import UpdateURL from "./ChangeRoute";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -32,15 +33,15 @@ const AddCustomer = ({ child, setChild, buttonValue }) => {
   const [uploadedImage, setUploadedImage] = useState(null);
   const [imageURL, setImageURL] = useState(" ");
 
-  const data = {
-    admin: { label: "Admin", icon: <PersonIcon /> },
-    admin1: { label: "Admin 1", icon: <PersonIcon /> },
-    admin2: { label: "Admin 2", icon: <PersonIcon /> },
-    admin3: { label: "Admin 3", icon: <PersonIcon /> },
-    accountant: { label: "Accountant", icon: <PersonIcon /> },
-    keeperGeneral: { label: "Storekeeper (General)", icon: <PersonIcon /> },
-    keeperPharmacy: { label: "Storekeeper (Pharmacy)", icon: <PersonIcon /> },
-  };
+  // const data = {
+  //   admin: { label: "Admin", icon: <PersonIcon /> },
+  //   admin1: { label: "Admin 1", icon: <PersonIcon /> },
+  //   admin2: { label: "Admin 2", icon: <PersonIcon /> },
+  //   admin3: { label: "Admin 3", icon: <PersonIcon /> },
+  //   accountant: { label: "Accountant", icon: <PersonIcon /> },
+  //   keeperGeneral: { label: "Storekeeper (General)", icon: <PersonIcon /> },
+  //   keeperPharmacy: { label: "Storekeeper (Pharmacy)", icon: <PersonIcon /> },
+  // };
 
   const handleValueChange = (value) => {
     setValue(value);
@@ -81,84 +82,61 @@ const AddCustomer = ({ child, setChild, buttonValue }) => {
     }
   };
 
-  const uploadImageToCloudinary = async (file) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", "ml_default");
-
-    await axios
-      .post("https://api.cloudinary.com/v1_1/da4yjuf39/image/upload", formData)
-      .then((result) => {
-        console.log(result);
-        setImageURL(result.data.secure_url);
-      })
-      .catch((error) => {
-        console.error("Error uploading image:", error);
-      });
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const retrToken = localStorage.getItem("token");
+
+    // Check if the token is available
+    if (!retrToken) {
+      toast.error("An error occurred. Try logging in again");
+
+      return;
+    }
+
     const submitobject = {
-      name: e.target[1].value + " " + e.target[4].value,
-      category: "A",
-      phonenumber: e.target[3].value,
+      firstname: e.target[0].value,
+      lastname: e.target[3].value,
+      email: e.target[1].value,
+      phoneNumber: e.target[2].value,
       profilePic: imageURL,
-      address: e.target[5].value,
+      address: e.target[4].value,
     };
     setIsLoading(true);
+    console.log(e);
 
-    axios
-      .post(`${root}/customer/register`, submitobject)
-      .then((response) => {
-        // Handle the successful response here
-        console.log("Response:", response.data);
-        toast.success("Customer successfully created");
-      })
-      .catch((error) => {
-        // Handle any errors that occur during the request
-        console.error(
-          "Error:",
-          error.response ? error.response.data : error.message
-        );
-        console.log(error);
-        toast.error("An Error occurred. Try again");
-      })
-      .finally(() => {
-        // Always executed, regardless of success or failure
-        setIsLoading(false); // Reset loading state
-      });
+    try {
+      const response = await axios.post(
+        `${root}/customer/reg-customer`,
+        submitobject,
+        {
+          headers: {
+            Authorization: `Bearer ${retrToken}`,
+          },
+        }
+      );
+
+      setIsLoading(false);
+      console.log(response.data);
+      toast.success(response.data.message);
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+      {
+        error.response.data.error
+          ? toast.error(error.response.data.error)
+          : toast.error(error.message);
+      }
+    }
   };
 
   return (
     <div>
+      <UpdateURL url={"/add-customer"} />
       <Card className="w-full">
         <Heading className="text-left p-4">Customers</Heading>
         <Separator className="w-full" />
         <form onSubmit={handleSubmit}>
-          {/* <div
-            className="add-image flex justify-center items-center w-[70px] mt-6 h-[70px] border border-current rounded-full cursor-pointer"
-            onClick={() => document.getElementById("imageUpload").click()}
-          >
-            {uploadedImage ? (
-              <img
-                src={uploadedImage}
-                alt="Uploaded"
-                className="w-full h-full object-cover rounded-full"
-              />
-            ) : (
-              <Camera width={50} height={50} />
-            )}
-          </div>
-          <input
-            type="file"
-            id="imageUpload"
-            accept="image/*"
-            style={{ display: "none" }}
-            onChange={handleImageChange}
-          /> */}
-
           <div className="flex w-full justify-between gap-8">
             <div className="left w-[50%]">
               <div className="input-field mt-3">
@@ -232,22 +210,6 @@ const AddCustomer = ({ child, setChild, buttonValue }) => {
                   className="text-[15px]  font-medium leading-[35px]   "
                   htmlFor="address"
                 >
-                  Category
-                </label>
-                <TextField.Root
-                  placeholder="Select Category"
-                  className=""
-                  type="text"
-                  id="address"
-                  size={"3"}
-                ></TextField.Root>
-              </div>
-
-              <div className="mt-3 input-field">
-                <label
-                  className="text-[15px]  font-medium leading-[35px]   "
-                  htmlFor="address"
-                >
                   Enter Address
                 </label>
                 <TextField.Root
@@ -272,8 +234,8 @@ const AddCustomer = ({ child, setChild, buttonValue }) => {
             </Button>
           </Flex>
         </form>
-        <Toaster position="bottom-center" />
       </Card>
+      <Toaster position="top-right" />
     </div>
   );
 };
