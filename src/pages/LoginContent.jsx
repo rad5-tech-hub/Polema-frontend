@@ -37,18 +37,33 @@ const LoginContent = () => {
 
       console.log(response);
 
-      toast.success("Login Successful");
+      toast.success("Login Successful", {
+        style: {
+          padding: "30px",
+        },
+        duration: 6500,
+      });
       {
         response.data.admin.isAdmin ? navigate("/md") : navigate("/admin");
       }
     } catch (error) {
       // Handle error
       if (error.response) {
-        toast.error(error.response.data.error);
+        toast.error(error.response.data.error, {
+          style: {
+            padding: "30px",
+          },
+          duration: 6500,
+        });
         console.log(error);
       } else if (error.request) {
         console.log("Error Request:", error.request);
-        toast.error("Network Error");
+        toast.error("Network Error", {
+          style: {
+            padding: "30px",
+          },
+          duration: 6500,
+        });
       } else {
         console.log("Error Message:", error.message);
       }

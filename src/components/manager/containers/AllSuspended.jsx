@@ -8,13 +8,14 @@ import { faRedoAlt, faClose } from "@fortawesome/free-solid-svg-icons";
 import { DropDownIcon, DeleteIcon } from "../../icons";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { refractor } from "../../date";
 import UpdateURL from "./ChangeRoute";
 import toast, { Toaster } from "react-hot-toast";
 
 const root = import.meta.env.VITE_ROOT;
 
 // Restore Dialog
-const RestoreDialog = ({ isOpen, onClose, user, id }) => {
+const RestoreDialog = ({ isOpen, onClose, runfetch, id }) => {
   const [suspendLoading, setSuspendLoading] = useState(false);
 
   const restoreAdmin = async (id) => {
@@ -37,13 +38,24 @@ const RestoreDialog = ({ isOpen, onClose, user, id }) => {
       );
       setSuspendLoading(false);
       console.log(response);
-      toast.success("Admin Restored successfully");
+      toast.success("Admin Restored successfully", {
+        duration: 6500,
+        style: {
+          padding: "30px",
+        },
+      });
       onClose();
+      runfetch();
     } catch (error) {
       setSuspendLoading(false);
       onClose();
       console.log(error);
-      toast.error("Error in restoring staff");
+      toast.error("Error in restoring staff", {
+        duration: 6500,
+        style: {
+          padding: "30px",
+        },
+      });
     }
   };
 
@@ -82,7 +94,7 @@ const RestoreDialog = ({ isOpen, onClose, user, id }) => {
 };
 
 //Delete Dialog
-const DeleteDialog = ({ isOpen, onClose, user, id }) => {
+const DeleteDialog = ({ isOpen, onClose, runfetch, id }) => {
   const [suspendLoading, setSuspendLoading] = useState(false);
 
   const deleteAdmin = async (id) => {
@@ -94,7 +106,7 @@ const DeleteDialog = ({ isOpen, onClose, user, id }) => {
       return;
     }
     try {
-      const response = await axios.patch(`${root}/admin/delete-staff/${id}`, {
+      const response = await axios.delete(`${root}/admin/delete-staff/${id}`, {
         headers: {
           Authorization: `Bearer ${retrToken}`,
         },
@@ -103,6 +115,7 @@ const DeleteDialog = ({ isOpen, onClose, user, id }) => {
       console.log(response);
       onClose();
       toast.success("Admin Deleted successfully");
+      runfetch();
     } catch (error) {
       setSuspendLoading(false);
       onClose();
@@ -167,11 +180,23 @@ const AllSuspended = () => {
         },
       });
       setLoading(false);
+      console.log(response.data);
+
       setSuspended(response.data.suspendedStaffList);
-      toast.success(response.data.message);
+      toast.success(response.data.message, {
+        duration: 6500,
+        style: {
+          padding: "30px",
+        },
+      });
     } catch (error) {
       setLoading(false);
-      toast.error(error.response?.data?.message || error.message);
+      toast.error(error.response?.data?.message || error.message, {
+        duration: 6500,
+        style: {
+          padding: "30px",
+        },
+      });
     }
   };
 
@@ -189,6 +214,7 @@ const AllSuspended = () => {
           <Table.Row>
             <Table.ColumnHeaderCell>NAME</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>EMAIL</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>SUSPEND DATE</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
         {loading ? (
@@ -208,6 +234,10 @@ const AllSuspended = () => {
                     {upperFirst(staff.firstname)} {upperFirst(staff.lastname)}
                   </Table.RowHeaderCell>
                   <Table.RowHeaderCell>{staff.email}</Table.RowHeaderCell>
+                  <Table.RowHeaderCell>
+                    {refractor(staff.updatedAt)}
+                  </Table.RowHeaderCell>
+
                   <div className="absolute right-4 top-2">
                     <DropdownMenu.Root>
                       <DropdownMenu.Trigger>
@@ -251,6 +281,7 @@ const AllSuspended = () => {
         <RestoreDialog
           isOpen={!!selectedStaffId}
           onClose={() => setDialogType(null)}
+          runfetch={fetchSuspended}
           id={selectedStaffId}
         />
       )}
@@ -258,6 +289,7 @@ const AllSuspended = () => {
         <DeleteDialog
           isOpen={!!selectedStaffId}
           onClose={() => setDialogType(null)}
+          runfetch={fetchSuspended}
           id={selectedStaffId}
         />
       )}

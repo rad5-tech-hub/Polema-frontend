@@ -99,14 +99,27 @@ const AddAdmin = ({ child, setChild }) => {
         }
       );
       console.log(response);
-      toast.success(response.data.message);
+      toast.success(response.data.message, {
+        duration: 6500,
+        style: {
+          padding: "25px",
+        },
+      });
 
       setIsLoading(false);
+      setTimeout(() => {
+        window.location.href = "/md/view-admins";
+      }, 1500);
     } catch (error) {
       console.log(error);
 
       setIsLoading(false);
-      toast.error(error.response.data.error);
+      toast.error(error.response.data.error, {
+        duration: 6500,
+        style: {
+          padding: "25px",
+        },
+      });
     }
   };
 
@@ -269,10 +282,10 @@ const AddAdmin = ({ child, setChild }) => {
                   className="text-[15px]  font-medium leading-[35px]   "
                   htmlFor="password"
                 >
-                  Department
+                  Address
                 </label>
                 <TextField.Root
-                  placeholder="Department"
+                  placeholder="Enter Address"
                   className=""
                   type="text"
                   id="department"
@@ -307,7 +320,7 @@ const AddAdmin = ({ child, setChild }) => {
           </Flex>
         </form>
       </Card>
-      <Toaster position="bottom-center" />
+      <Toaster position="top-right" />
     </div>
   );
 };

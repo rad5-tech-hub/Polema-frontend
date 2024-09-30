@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-
+import Logout from "../Logout";
 import ThemeSwitcher from "../ThemeSwitcher";
 const LogoIcon = "";
 
@@ -59,8 +59,8 @@ const Header = ({ sidebarOpen, setSidebarOpen, user, role, image, text }) => {
         <div className="flex items-center gap-3 2xsm:gap-7">
           <ul className="flex items-center gap-2 2xsm:gap-4"></ul>
 
-          {/* <!-- User Area --> */}
           <ThemeSwitcher />
+          <Logout />
           {/* <!-- User Area --> */}
         </div>
       </div>

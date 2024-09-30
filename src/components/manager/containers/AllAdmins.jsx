@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
+import { refractor } from "../../date";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import { DeleteIcon, DropDownIcon, Suspend } from "../../icons";
 
@@ -14,6 +15,7 @@ import {
   Card,
 } from "@radix-ui/themes";
 import { upperFirst } from "lodash";
+import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 
 import UpdateURL from "./ChangeRoute";
 import toast, { LoaderIcon, Toaster } from "react-hot-toast";
@@ -24,7 +26,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 const root = import.meta.env.VITE_ROOT;
 
 // Suspend Dialog
-const SuspendDialog = ({ isOpen, onClose, user, id }) => {
+const SuspendDialog = ({ isOpen, onClose, runFetch, id }) => {
   const [suspendLoading, setSuspendLoading] = useState(false);
 
   const suspendAdmin = async (id) => {
@@ -50,15 +52,31 @@ const SuspendDialog = ({ isOpen, onClose, user, id }) => {
       setSuspendLoading(false);
       console.log(response);
       onClose();
-      toast.success("Admin Suspended successfully");
+      toast.success("Admin Suspended successfully", {
+        duration: 6500,
+        style: {
+          padding: "30px",
+        },
+      });
+      runFetch();
     } catch (error) {
       setSuspendLoading(false);
       onClose();
       console.log(error);
       {
         error.response.data.error
-          ? toast.error(error.response.data.error)
-          : toast.error(error.message);
+          ? toast.error(error.response.data.error, {
+              duration: 6500,
+              style: {
+                padding: "30px",
+              },
+            })
+          : toast.error(error.message, {
+              duration: 6500,
+              style: {
+                padding: "30px",
+              },
+            });
       }
     }
   };
@@ -323,9 +341,7 @@ const AllAdmins = () => {
       });
       console.log(response);
 
-      response.data.products
-        ? setStaffList([])
-        : setStaffList(response.data.staffList);
+      setStaffList(response.data.staffList);
     } catch (error) {
       console.error(error);
       {
@@ -362,6 +378,13 @@ const AllAdmins = () => {
   return (
     <>
       <UpdateURL url={"/view-admins"} />
+
+      <TextField.Root placeholder="Search admins.." className="w-[55%] mb-5">
+        <TextField.Slot>
+          <MagnifyingGlassIcon height={"16"} width={"16"} />
+        </TextField.Slot>
+      </TextField.Root>
+
       <Heading>Admins</Heading>
       <Table.Root variant="surface" size={"3"} className="mt-4">
         <Table.Header>
@@ -369,6 +392,7 @@ const AllAdmins = () => {
             <Table.ColumnHeaderCell>NAME</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>EMAIL</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>ROLE</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
         {loading ? (
@@ -397,6 +421,11 @@ const AllAdmins = () => {
                       className={`${staff.active ? "" : "text-red-400"}`}
                     >
                       {getRoleNameById(staff.roleId)}
+                    </Table.Cell>
+                    <Table.Cell
+                      className={`${staff.active ? "" : "text-red-400"}`}
+                    >
+                      {refractor(staff.createdAt)}
                     </Table.Cell>
                     <div className="absolute right-4 top-2">
                       <DropdownMenu.Root>
@@ -438,6 +467,7 @@ const AllAdmins = () => {
           isOpen={!!selectedStaff}
           onClose={() => setSelectedStaff(null)}
           user={selectedStaff.firstname}
+          runFetch={fetchStaffData}
           id={selectedStaff.id}
         />
       )}

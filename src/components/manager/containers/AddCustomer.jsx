@@ -118,14 +118,32 @@ const AddCustomer = ({ child, setChild, buttonValue }) => {
 
       setIsLoading(false);
       console.log(response.data);
-      toast.success(response.data.message);
+      toast.success(response.data.message, {
+        duration: 6500,
+        style: {
+          padding: "30px",
+        },
+      });
+
+      // Redirect to all customers page
+      window.location.href = "/md/all-customers";
     } catch (error) {
       console.log(error);
       setIsLoading(false);
       {
         error.response.data.error
-          ? toast.error(error.response.data.error)
-          : toast.error(error.message);
+          ? toast.error(error.response.data.error, {
+              duration: 6500,
+              style: {
+                padding: "30px",
+              },
+            })
+          : toast.error(error.message, {
+              duration: 6500,
+              style: {
+                padding: "30px",
+              },
+            });
       }
     }
   };

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { DropdownMenu } from "@radix-ui/themes";
+import { refractor } from "../../date";
 import { DeleteIcon, DropDownIcon, Suspend } from "../../icons";
 import { faClose, faPen } from "@fortawesome/free-solid-svg-icons";
 import { LoaderIcon } from "react-hot-toast";
@@ -327,7 +328,12 @@ const AllRoles = () => {
 
     // Check if the token is available
     if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
+      toast.error("An error occurred. Try logging in again", {
+        duration: 6500,
+        style: {
+          padding: "20px",
+        },
+      });
 
       return;
     }
@@ -337,7 +343,11 @@ const AllRoles = () => {
       });
 
       setLoading(false);
-      setRolesList(response.data.roles);
+
+      response.data.roles = undefined
+        ? setRolesList([])
+        : setRolesList(response.data.roles);
+
       toast.success("Retrieved Successfully");
     } catch (error) {
       console.log(error);
@@ -382,6 +392,7 @@ const AllRoles = () => {
                           </span>
                         ))}
                       </Table.RowHeaderCell>
+
                       <div className="absolute right-4 top-2">
                         <DropdownMenu.Root>
                           <DropdownMenu.Trigger>

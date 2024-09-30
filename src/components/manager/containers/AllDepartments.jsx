@@ -1,7 +1,9 @@
 import React, { useEffect } from "react";
+import { refractor } from "../../date";
 import axios from "axios";
 import UpdateURL from "./ChangeRoute";
 import { Heading, Table, Spinner } from "@radix-ui/themes";
+import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
 
 // All imports for the dropdown menu
@@ -25,7 +27,7 @@ import toast, { LoaderIcon, Toaster } from "react-hot-toast";
 const root = import.meta.env.VITE_ROOT;
 
 //Delete Dialog Box $//
-const DeleteDialog = ({ isOpen, onClose, user, id }) => {
+const DeleteDialog = ({ isOpen, onClose, runfetch, id }) => {
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const deleteDept = async (id) => {
@@ -52,6 +54,7 @@ const DeleteDialog = ({ isOpen, onClose, user, id }) => {
       setDeleteLoading(false);
       toast.success(response.data.message);
       onClose();
+      runfetch();
     } catch (error) {
       console.log(error);
       setDeleteLoading(false);
@@ -156,6 +159,16 @@ const AllDepartments = () => {
   return (
     <>
       <UpdateURL url={"/all-departments"} />
+
+      <TextField.Root
+        placeholder="Search department.."
+        className="w-[55%] mb-5 "
+      >
+        <TextField.Slot>
+          <MagnifyingGlassIcon height={"16"} width={"16"} />
+        </TextField.Slot>
+      </TextField.Root>
+
       <Heading>All Departments</Heading>
       <Table.Root variant="surface" className="mt-4">
         <Table.Header>
@@ -163,6 +176,7 @@ const AllDepartments = () => {
             <Table.ColumnHeaderCell>DEPARTMENT NAME</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>PRODUCTS</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>CATEGORY</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
 
@@ -201,6 +215,9 @@ const AllDepartments = () => {
                             <br />
                           </span>
                         ))}
+                  </Table.RowHeaderCell>
+                  <Table.RowHeaderCell>
+                    {refractor(dept.createdAt)}
                   </Table.RowHeaderCell>
                   <div className="absolute right-4 top-2">
                     <DropdownMenu.Root>
@@ -241,6 +258,7 @@ const AllDepartments = () => {
           isOpen={!!selectedDepartment}
           onClose={() => setSelectedDepartment(null)}
           id={selectedDepartment.id}
+          runfetch={fetchDept}
         />
       )}
       <Toaster position="top-right" />

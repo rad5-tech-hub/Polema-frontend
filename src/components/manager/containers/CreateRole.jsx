@@ -47,8 +47,6 @@ const CreateRole = ({ child, setChild }) => {
     }
   };
 
-  const dataAtStore = useSelector((state) => state.admin.isAdmin);
-
   // Fetch token from local storage
   const fetchToken = async () => {
     const retrToken = await localStorage.getItem("token");
@@ -104,17 +102,39 @@ const CreateRole = ({ child, setChild }) => {
         );
 
         console.log(response);
-        toast.success("Role created successfully");
+        toast.success("Role created successfully", {
+          duration: 6500,
+          style: {
+            padding: "25px",
+          },
+        });
+
+        window.location.href = "/md/view-roles";
       } catch (error) {
         if (error.response) {
           console.log(error.response.data);
-          toast.error(error.response.data.message || "Failed to create role");
+          toast.error(error.response.data.message || "Failed to create role", {
+            duration: 6500,
+            style: {
+              padding: "25px",
+            },
+          });
         } else if (error.request) {
           console.log(error.request);
-          toast.error("No response received from the server");
+          toast.error("No response received from the server", {
+            duration: 6500,
+            style: {
+              padding: "25px",
+            },
+          });
         } else {
           console.log("Error", error.message);
-          toast.error("Request error occurred");
+          toast.error("Request error occurred", {
+            duration: 6500,
+            style: {
+              padding: "25px",
+            },
+          });
         }
       } finally {
         // Reset loading state
@@ -146,7 +166,12 @@ const CreateRole = ({ child, setChild }) => {
       }
       setPermissionsLoading(false);
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err.message, {
+        duration: 6500,
+        style: {
+          padding: "25px",
+        },
+      });
       setPermissionsLoading(false);
     }
   };
@@ -247,7 +272,7 @@ const CreateRole = ({ child, setChild }) => {
           )}
         </form>
       </Card>
-      <Toaster position="top-center" />
+      <Toaster position="top-right" />
     </div>
   );
 };

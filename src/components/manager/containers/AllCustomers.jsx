@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { upperFirst } from "lodash";
-import AddCustomer from "./AddCustomer";
+import { refractor } from "../../date";
 import { Table, Spinner, TextField, Flex, Text } from "@radix-ui/themes";
 import axios from "axios";
 import UpdateURL from "./ChangeRoute";
@@ -16,11 +15,12 @@ import { Suspend } from "../../icons";
 import * as Dialog from "@radix-ui/react-dialog";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import toast, { LoaderIcon, Toaster } from "react-hot-toast";
+import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 
 const root = import.meta.env.VITE_ROOT;
 
 //Edit Dialog Box $//
-const EditDialog = ({ isOpen, onClose, user, id }) => {
+const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [changedFirstName, setChangedFirstName] = useState(id.firstname);
   const [changedLastName, setChangesLastName] = useState(id.lastname);
@@ -60,12 +60,23 @@ const EditDialog = ({ isOpen, onClose, user, id }) => {
       setDeleteLoading(false);
       console.log(response);
       onClose();
-      toast.success(response.data.message);
+      toast.success(response.data.message, {
+        duration: 6500,
+        style: {
+          padding: "30px",
+        },
+      });
+      fetchCustomers();
     } catch (error) {
       console.log(error);
       setDeleteLoading(false);
       onClose();
-      toast.error(error.message);
+      toast.error(error.message, {
+        duration: 6500,
+        style: {
+          padding: "30px",
+        },
+      });
     }
   };
   return (
@@ -295,7 +306,12 @@ const AllCustomers = () => {
 
     // Check if the token is available
     if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
+      toast.error("An error occurred. Try logging in again", {
+        duration: 6500,
+        style: {
+          padding: "30px",
+        },
+      });
 
       return;
     }
@@ -306,7 +322,12 @@ const AllCustomers = () => {
         },
       });
 
-      toast.success(response.data.message);
+      toast.success(response.data.message, {
+        duration: 6500,
+        style: {
+          padding: "25px",
+        },
+      });
       {
         response.data.customers.length === 0
           ? setCustomerData([])
@@ -318,8 +339,18 @@ const AllCustomers = () => {
       setLoading(false);
       {
         error.message
-          ? toast.error(error.message)
-          : toast.error("An Error Occured");
+          ? toast.error(error.message, {
+              duration: 6500,
+              style: {
+                padding: "30px",
+              },
+            })
+          : toast.error("An Error Occured", {
+              duration: 6500,
+              style: {
+                padding: "30px",
+              },
+            });
       }
     }
   };
@@ -331,15 +362,20 @@ const AllCustomers = () => {
   return (
     <>
       <UpdateURL url={"/all-customers"} />
+      <TextField.Root placeholder="Search Customers.." className="w-[55%] mb-5">
+        <TextField.Slot>
+          <MagnifyingGlassIcon height={"16"} width={"16"} />
+        </TextField.Slot>
+      </TextField.Root>
       <Heading className="mb-4">Customers</Heading>
       <Table.Root size={"3"} variant="surface">
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeaderCell>First Name</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Last Name</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Email</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Address</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Phone</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>NAME</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>EMAIL</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>ADDRESS</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>PHONE</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
 
@@ -356,22 +392,26 @@ const AllCustomers = () => {
             ) : (
               customerData.map((customer) => (
                 <>
-                  <Table.Row key={customer.id} className="relative">
+                  <Table.Row
+                    key={customer.id}
+                    onClick={() => handleEditClcik(customer)}
+                    className="relative hover:bg-[rgb(225,225,225)]/30 cursor-pointer"
+                  >
                     {" "}
                     {/* Ensure unique key */}
                     <Table.RowHeaderCell>
-                      {customer.firstname}
+                      {customer.firstname} {customer.lastname}
                     </Table.RowHeaderCell>
-                    <Table.Cell>{customer.lastname}</Table.Cell>
                     <Table.Cell>{customer.email}</Table.Cell>
                     <Table.Cell>{customer.address}</Table.Cell>
                     <Table.Cell>{customer.phoneNumber}</Table.Cell>
-                    <div className="absolute right-4 top-2">
+                    <Table.Cell>{refractor(customer.createdAt)}</Table.Cell>
+                    {/* <div className="absolute right-4 top-2">
                       <DropdownMenu.Root>
                         <DropdownMenu.Trigger>
                           <Button variant="surface" className="cursor-pointer">
                             <DropDownIcon />
-                            {/* <DropdownMenu.TriggerIcon /> */}
+                            
                           </Button>
                         </DropdownMenu.Trigger>
                         <DropdownMenu.Content>
@@ -391,7 +431,7 @@ const AllCustomers = () => {
                           </DropdownMenu.Item>
                         </DropdownMenu.Content>
                       </DropdownMenu.Root>
-                    </div>
+                    </div> */}
                   </Table.Row>
                 </>
               ))
@@ -411,6 +451,7 @@ const AllCustomers = () => {
           isOpen={!!selectEditCustomer}
           onClose={() => setSelectEditCustomer(null)}
           id={selectEditCustomer}
+          fetchCustomers={fetchCustomers}
         />
       )}
       <Toaster position="top-right" />

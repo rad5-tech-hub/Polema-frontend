@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { refractor } from "../../date";
 
 // All imports for the dropdown menu
 import { DeleteIcon, DropDownIcon } from "../../icons";
@@ -22,6 +23,7 @@ import { Heading, Table, Spinner } from "@radix-ui/themes";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import UpdateURL from "./ChangeRoute";
+import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -367,6 +369,17 @@ const AllProducts = () => {
   return (
     <>
       <UpdateURL url={"/all-products"} />
+
+      {/* Search Box */}
+      <TextField.Root
+        placeholder="Search by product name"
+        className="w-[55%] mb-5"
+      >
+        <TextField.Slot>
+          <MagnifyingGlassIcon height={"16"} width={"16"} />
+        </TextField.Slot>
+      </TextField.Root>
+
       <Heading size={"6"} className="p-4">
         All Products
       </Heading>
@@ -377,6 +390,7 @@ const AllProducts = () => {
             <Table.ColumnHeaderCell>Category</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Unit</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Price</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Date</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
 
@@ -411,6 +425,11 @@ const AllProducts = () => {
                           ₦ {price.amount} <br />
                         </div>
                       ))}
+                    </Table.Cell>
+                    <Table.Cell>
+                      <div>
+                        {refractor(product.createdAt)} <br />
+                      </div>
                     </Table.Cell>
                     <div className="absolute right-4 top-2">
                       <DropdownMenu.Root>

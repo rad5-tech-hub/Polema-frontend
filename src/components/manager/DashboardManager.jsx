@@ -17,6 +17,7 @@ import {
   AllRoles,
   AllSuspended,
   AllCustomers,
+  AllSuppliers,
 } from "./containers";
 
 import {
@@ -197,6 +198,12 @@ const DashBoardManager = ({ route }) => {
         case "all-customers":
           setSelectedChild(<AllCustomers />);
           break;
+        case "add-supplier":
+          setSelectedChild(<AddSuppliers />);
+          break;
+        case "all-suppliers":
+          setSelectedChild(<AllSuppliers />);
+          break;
       }
     };
 
@@ -318,9 +325,7 @@ const DashBoardManager = ({ route }) => {
                           </li>
                           <li
                             className="p-2 cursor-pointer dash-list"
-                            onClick={() =>
-                              setSelectedChild(<UsersList page={"suppliers"} />)
-                            }
+                            onClick={() => setSelectedChild(<AllSuppliers />)}
                           >
                             View All
                           </li>

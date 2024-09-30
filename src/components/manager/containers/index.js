@@ -6,6 +6,7 @@ import AddCustomer from "./AddCustomer";
 import AddProducts from "./AddProducts";
 import AllRoles from "./AllRoles";
 import UsersList from "./UsersList";
+import AllSuppliers from "./AllSuppliers";
 import AllCustomers from "./AllCustomers";
 import AllDepartments from "./AllDepartments";
 import AddSuppliers from "./AddSuppliers";
@@ -17,6 +18,7 @@ export {
   AddAdmin,
   AddSuppliers,
   CreateRole,
+  AllSuppliers,
   AllRoles,
   AllDepartments,
   AllSuspended,
