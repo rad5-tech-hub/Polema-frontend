@@ -2,17 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { Text } from "@radix-ui/themes";
 import components from "./containers/components";
-import {
-  AddAdmin,
-  AddSuppliers,
-  CreateRole,
-  WelcomeComponent,
-  AddCustomer,
-  AddDepartment,
-  UsersList,
-  AddProducts,
-  AllCustomers,
-} from "./containers";
+import WelcomeComponent from "./containers/WelcomeComponent";
 import { useSearchParams } from "react-router-dom";
 import DynamicIcon from "./DynamicIcon";
 

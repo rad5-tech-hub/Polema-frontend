@@ -16,8 +16,7 @@ import {
   Spinner,
 } from "@radix-ui/themes";
 import { useSelector } from "react-redux";
-
-import UpdateURL from "./ChangeRoute";
+import UpdateURL from "../ChangeRoute";
 
 const CreateRole = ({ child, setChild }) => {
   // Root URL for making requests

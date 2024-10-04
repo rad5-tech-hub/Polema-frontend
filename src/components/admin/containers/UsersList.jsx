@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import AddCustomer from "./AddCustomer";
+
 import { Button, Heading, Table, Spinner } from "@radix-ui/themes";
 import axios from "axios";
 import { upperFirst } from "lodash";

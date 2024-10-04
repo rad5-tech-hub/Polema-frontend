@@ -8,7 +8,6 @@ const Login = () => {
     <>
       <Theme accentColor="blue" appearance={""} panelBackground="translucent">
         <LoginContent />
-        <ThemeSwitcher styling={"absolute right-[10px] top-[10px]"} />
       </Theme>
     </>
   );

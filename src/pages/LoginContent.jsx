@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Image from "../static/image/login-bg.png";
 import toast, { Toaster } from "react-hot-toast";
 import { useSelector, useDispatch } from "react-redux";
 
@@ -43,9 +44,7 @@ const LoginContent = () => {
         },
         duration: 6500,
       });
-      {
-        response.data.admin.isAdmin ? navigate("/md") : navigate("/admin");
-      }
+      navigate("/admin");
     } catch (error) {
       // Handle error
       if (error.response) {
@@ -74,12 +73,18 @@ const LoginContent = () => {
 
   return (
     <>
-      <div className="h-screen grid place-content-center">
+      <div
+        className="h-screen grid place-content-center"
+        style={{
+          backgroundImage: `linear-gradient(180deg, rgba(41, 41, 41, 0.91) 10.42%, rgba(255, 255, 255, 0.03) 100%,rgba(41, 41, 41, 0.91)),url(${Image})`,
+        }}
+      >
         <div className="xs:w-[100%] sm:w-[450px]">
+          {/* <Heading className="text-center">POLEMA</Heading>  */}
           <Card className=" p-4 ">
             <form onSubmit={handleLoginForm}>
               <div style={{ textAlign: "center" }}>
-                <Heading mb="6">LOGIN</Heading>
+                <Heading mb="6">USER LOGIN</Heading>
               </div>
               <TextField.Root
                 placeholder="Enter Email"
@@ -108,10 +113,15 @@ const LoginContent = () => {
 
               <Button
                 type="submit"
-                className="w-[100%] mt-4"
+                className="w-[100%] mt-4 bg-[#444242]"
                 disabled={loading}
               >
-                {loading ? <Spinner /> : "Submit"} {/* Spinner text */}
+                {loading ? (
+                  <p className="text-white">Please Wait...</p>
+                ) : (
+                  "Submit"
+                )}{" "}
+                {/* Spinner text */}
               </Button>
             </form>
           </Card>

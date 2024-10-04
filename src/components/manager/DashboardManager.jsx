@@ -7,9 +7,11 @@ import {
   WelcomeComponent,
   AddProducts,
   AddCustomer,
+  CustomerLedger,
+  AuthorityToGiveCash,
   AllProducts,
-  UsersList,
   CreateRole,
+  AccountBook,
   AddSuppliers,
   AllDepartments,
   AddDepartment,
@@ -204,6 +206,15 @@ const DashBoardManager = ({ route }) => {
         case "all-suppliers":
           setSelectedChild(<AllSuppliers />);
           break;
+        case "customer-ledger":
+          setSelectedChild(<CustomerLedger />);
+          break;
+        case "account-book":
+          setSelectedChild(<AccountBook />);
+          break;
+        case "authority-to-give-cash":
+          setSelectedChild(<AuthorityToGiveCash />);
+          break;
       }
     };
 
@@ -217,8 +228,8 @@ const DashBoardManager = ({ route }) => {
           <aside
             ref={sidebar}
             className={`absolute left-0 font-space top-0 z-[9999] 
-              
-              sidebar-container flex border-r-[1px] border-white shadow-2xl h-screen max-w-[18.0rem] flex-col overflow-y-hidden duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 ${
+              bg-[#434343]
+              sidebar-container flex border-r-[1px] border-white !text-white shadow-2xl h-screen max-w-[18.0rem] flex-col overflow-y-hidden duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 ${
                 sidebarOpen ? "translate-x-0" : "-translate-x-full"
               }`}
           >
@@ -269,6 +280,34 @@ const DashBoardManager = ({ route }) => {
                       </p>
                     </div>
 
+                    {/* Account Book */}
+                    <div>
+                      <p
+                        className="flex gap-3 items-center px-4 cursor-pointer"
+                        onClick={() => handleToggle(2)}
+                      >
+                        <ClipboardCopyIcon width={18} height={18} />
+                        <p className="p-2">Account Book</p>
+                        {openDropdown2 ? <CaretUpIcon /> : <CaretDownIcon />}
+                      </p>
+                      {openDropdown2 && (
+                        <ul className="ml-[30px] px-4 text-current">
+                          <li
+                            className="p-2 cursor-pointer dash-list "
+                            onClick={() => setSelectedChild(<AccountBook />)}
+                          >
+                            Add
+                          </li>
+                          <li
+                            className="p-2 cursor-pointer dash-list"
+                            onClick={() => setSelectedChild(<AllSuppliers />)}
+                          >
+                            View All
+                          </li>
+                        </ul>
+                      )}
+                    </div>
+
                     {/* Customers */}
                     <div>
                       <p
@@ -295,11 +334,15 @@ const DashBoardManager = ({ route }) => {
                           </li>
                           <li
                             className="p-2 cursor-pointer dash-list"
-                            onClick={() =>
-                              setSelectedChild(<UsersList page={"customers"} />)
-                            }
+                            onClick={() => setSelectedChild(<CustomerLedger />)}
                           >
                             Ledger
+                          </li>
+                          <li
+                            className="p-2 cursor-pointer dash-list"
+                            onClick={() => setSelectedChild(<CustomerLedger />)}
+                          >
+                            Place Orders
                           </li>
                         </ul>
                       )}
@@ -331,6 +374,12 @@ const DashBoardManager = ({ route }) => {
                           </li>
                           <li className="p-2 cursor-pointer dash-list">
                             Ledger
+                          </li>
+                          <li
+                            className="p-2 cursor-pointer dash-list"
+                            onClick={() => setSelectedChild(<CustomerLedger />)}
+                          >
+                            Place Orders
                           </li>
                         </ul>
                       )}
@@ -371,30 +420,46 @@ const DashBoardManager = ({ route }) => {
                         onClick={() => handleToggle(4)}
                       >
                         <ClipboardCopyIcon width={18} height={18} />
-                        <p className="p-2">Pharmacy </p>
+                        <p className="p-2">Pharmacy Store </p>
                         {openDropdown4 ? <CaretUpIcon /> : <CaretDownIcon />}
                       </p>
                       {openDropdown4 && (
                         <ul className="ml-[30px] px-4 text-current">
                           <li
-                            className="p-2 cursor-pointer dash-list "
-                            onClick={() =>
-                              setSelectedChild(
-                                <AddCustomer
-                                  setChild={setSelectedChild}
-                                  child={selectedChild}
-                                  buttonValue={true}
-                                />
-                              )
-                            }
+                            className="p-2 cursor-pointer dash-list"
+                            onClick={() => setSelectedChild(<AddAdmin />)}
                           >
-                            Raw Materials
+                            Add Raw Materials Inventory
                           </li>
                           <li
                             className="p-2 cursor-pointer dash-list"
                             onClick={() => setSelectedChild(<AddAdmin />)}
                           >
-                            Production
+                            Remove Raw Materials Inventory
+                          </li>
+                          <li
+                            className="p-2 cursor-pointer dash-list"
+                            onClick={() => setSelectedChild(<AddAdmin />)}
+                          >
+                            View Raw Materials Inventory
+                          </li>
+                          <li
+                            className="p-2 cursor-pointer dash-list"
+                            onClick={() => setSelectedChild(<AddAdmin />)}
+                          >
+                            Add Production Inventory
+                          </li>
+                          <li
+                            className="p-2 cursor-pointer dash-list"
+                            onClick={() => setSelectedChild(<AddAdmin />)}
+                          >
+                            Remove Production Inventory
+                          </li>
+                          <li
+                            className="p-2 cursor-pointer dash-list"
+                            onClick={() => setSelectedChild(<AddAdmin />)}
+                          >
+                            View Production Inventory
                           </li>
                           <li
                             className="p-2 cursor-pointer dash-list"
@@ -420,17 +485,21 @@ const DashBoardManager = ({ route }) => {
                         <ul className="ml-[30px] px-4 text-current">
                           <li
                             className="p-2 cursor-pointer dash-list "
-                            onClick={() =>
-                              setSelectedChild(
-                                <AddCustomer
-                                  setChild={setSelectedChild}
-                                  child={selectedChild}
-                                  buttonValue={true}
-                                />
-                              )
-                            }
+                            onClick={() => setSelectedChild(<AddCustomer />)}
                           >
-                            Materials
+                            Add Materials Inventory
+                          </li>
+                          <li
+                            className="p-2 cursor-pointer dash-list"
+                            onClick={() => setSelectedChild(<AddAdmin />)}
+                          >
+                            Remove Raw Materials Inventory
+                          </li>
+                          <li
+                            className="p-2 cursor-pointer dash-list"
+                            onClick={() => setSelectedChild(<AddAdmin />)}
+                          >
+                            View Raw Materials Inventory
                           </li>
                           <li
                             className="p-2 cursor-pointer dash-list"
@@ -455,16 +524,40 @@ const DashBoardManager = ({ route }) => {
                       {openDropdown6 && (
                         <ul className="ml-[30px] px-4 text-current">
                           <li
-                            className="p-2 cursor-pointer dash-list "
-                            onClick={() => setSelectedChild(<AddCustomer />)}
+                            className="p-2 cursor-pointer dash-list"
+                            onClick={() => setSelectedChild(<AddAdmin />)}
                           >
-                            Raw Materials
+                            Add Raw Materials Inventory
                           </li>
                           <li
                             className="p-2 cursor-pointer dash-list"
                             onClick={() => setSelectedChild(<AddAdmin />)}
                           >
-                            Production
+                            Remove Raw Materials Inventory
+                          </li>
+                          <li
+                            className="p-2 cursor-pointer dash-list"
+                            onClick={() => setSelectedChild(<AddAdmin />)}
+                          >
+                            View Raw Materials Inventory
+                          </li>
+                          <li
+                            className="p-2 cursor-pointer dash-list"
+                            onClick={() => setSelectedChild(<AddAdmin />)}
+                          >
+                            Add Production Inventory
+                          </li>
+                          <li
+                            className="p-2 cursor-pointer dash-list"
+                            onClick={() => setSelectedChild(<AddAdmin />)}
+                          >
+                            Remove Production Inventory
+                          </li>
+                          <li
+                            className="p-2 cursor-pointer dash-list"
+                            onClick={() => setSelectedChild(<AddAdmin />)}
+                          >
+                            View Production Inventory
                           </li>
                           <li
                             className="p-2 cursor-pointer dash-list"
@@ -483,72 +576,36 @@ const DashBoardManager = ({ route }) => {
                         onClick={() => handleToggle(7)}
                       >
                         <ClipboardCopyIcon width={18} height={18} />
-                        <p className="p-2">Ledger</p>
+                        <p className="p-2" title="Department Ledger">
+                          Dept. Ledger
+                        </p>
                         {openDropdown7 ? <CaretUpIcon /> : <CaretDownIcon />}
                       </p>
                       {openDropdown7 && (
                         <ul className="ml-[30px] px-4 text-current">
                           <li
                             className="p-2 cursor-pointer dash-list "
-                            onClick={() =>
-                              setSelectedChild(
-                                <AddCustomer
-                                  setChild={setSelectedChild}
-                                  child={selectedChild}
-                                  buttonValue={true}
-                                />
-                              )
-                            }
+                            onClick={() => setSelectedChild(<AddCustomer />)}
                           >
-                            Raw Materials
+                            Refinery
                           </li>
                           <li
                             className="p-2 cursor-pointer dash-list"
                             onClick={() => setSelectedChild(<AddAdmin />)}
                           >
-                            Production
+                            Plastics
                           </li>
                           <li
                             className="p-2 cursor-pointer dash-list"
                             onClick={() => setSelectedChild(<AddAdmin />)}
                           >
-                            Place Order
-                          </li>
-                        </ul>
-                      )}
-                    </div>
-
-                    {/* Orders */}
-                    <div>
-                      <p
-                        className="flex gap-3 items-center px-4 cursor-pointer"
-                        onClick={() => handleToggle(8)}
-                      >
-                        <ClipboardCopyIcon width={18} height={18} />
-                        <p className="p-2">Orders</p>
-                        {openDropdown8 ? <CaretUpIcon /> : <CaretDownIcon />}
-                      </p>
-                      {openDropdown8 && (
-                        <ul className="ml-[30px] px-4 text-current">
-                          <li
-                            className="p-2 cursor-pointer dash-list "
-                            onClick={() =>
-                              setSelectedChild(
-                                <AddCustomer
-                                  setChild={setSelectedChild}
-                                  child={selectedChild}
-                                  buttonValue={true}
-                                />
-                              )
-                            }
-                          >
-                            Customer
+                            Lubricants
                           </li>
                           <li
                             className="p-2 cursor-pointer dash-list"
                             onClick={() => setSelectedChild(<AddAdmin />)}
                           >
-                            Department
+                            Pharmacy
                           </li>
                         </ul>
                       )}
@@ -576,25 +633,64 @@ const DashBoardManager = ({ route }) => {
                             className="p-2 cursor-pointer dash-list"
                             onClick={() => setSelectedChild(<AddAdmin />)}
                           >
-                            Auth. to weigh
+                            View Approved L.P.O
+                          </li>
+                          <li
+                            className="p-2 cursor-pointer dash-list"
+                            onClick={() =>
+                              setSelectedChild(<AuthorityToGiveCash />)
+                            }
+                          >
+                            Authority to give cash
                           </li>
                           <li
                             className="p-2 cursor-pointer dash-list"
                             onClick={() => setSelectedChild(<AddAdmin />)}
                           >
-                            Auth. to weigh
+                            View approved authority to give cash
                           </li>
                           <li
                             className="p-2 cursor-pointer dash-list"
                             onClick={() => setSelectedChild(<AddAdmin />)}
                           >
-                            Auth. to weigh
+                            Authority to collect from General Store
                           </li>
                           <li
                             className="p-2 cursor-pointer dash-list"
                             onClick={() => setSelectedChild(<AddAdmin />)}
                           >
-                            Auth. to weigh
+                            View Approved Authority to collect from General
+                            Store
+                          </li>
+                          <li
+                            className="p-2 cursor-pointer dash-list"
+                            onClick={() => setSelectedChild(<AddAdmin />)}
+                          >
+                            Authority to weigh
+                          </li>
+                          <li
+                            className="p-2 cursor-pointer dash-list"
+                            onClick={() => setSelectedChild(<AddAdmin />)}
+                          >
+                            View Approved Authority to weigh
+                          </li>
+                          <li
+                            className="p-2 cursor-pointer dash-list"
+                            onClick={() => setSelectedChild(<AddAdmin />)}
+                          >
+                            Authority to collect from General Store
+                          </li>
+                          <li
+                            className="p-2 cursor-pointer dash-list"
+                            onClick={() => setSelectedChild(<AddAdmin />)}
+                          >
+                            Authority to load
+                          </li>
+                          <li
+                            className="p-2 cursor-pointer dash-list"
+                            onClick={() => setSelectedChild(<AddAdmin />)}
+                          >
+                            View Approved Authority to load
                           </li>
                         </ul>
                       )}
@@ -734,6 +830,12 @@ const DashBoardManager = ({ route }) => {
                         <ul className="ml-[25px] px-4 text-current">
                           <li
                             className="p-2 cursor-pointer dash-list"
+                            onClick={() => setSelectedChild(<AccountBook />)}
+                          >
+                            Account Book
+                          </li>
+                          <li
+                            className="p-2 cursor-pointer dash-list"
                             onClick={() => setSelectedChild(<AddAdmin />)}
                           >
                             Cash Collection
@@ -772,18 +874,6 @@ const DashBoardManager = ({ route }) => {
                       </p>
                       {openDropdown14 && (
                         <ul className="ml-[25px] px-4 text-current">
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Add Sales
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Add Expenses
-                          </li>
                           <li
                             className="p-2 cursor-pointer dash-list"
                             onClick={() => setSelectedChild(<AddAdmin />)}
@@ -841,18 +931,6 @@ const DashBoardManager = ({ route }) => {
                             onClick={() => setSelectedChild(<AddAdmin />)}
                           >
                             Weigh Hstory
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Finance
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Weigh
                           </li>
                         </ul>
                       )}
