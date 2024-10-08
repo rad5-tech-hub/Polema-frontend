@@ -328,6 +328,8 @@ const AllCustomers = () => {
           padding: "25px",
         },
       });
+      console.log(response);
+
       {
         response.data.customers.length === 0
           ? setCustomerData([])
@@ -361,7 +363,6 @@ const AllCustomers = () => {
 
   return (
     <>
-      <UpdateURL url={"/all-customers"} />
       <TextField.Root placeholder="Search Customers.." className="w-[55%] mb-5">
         <TextField.Slot>
           <MagnifyingGlassIcon height={"16"} width={"16"} />
@@ -371,6 +372,7 @@ const AllCustomers = () => {
       <Table.Root size={"3"} variant="surface">
         <Table.Header>
           <Table.Row>
+            <Table.ColumnHeaderCell>ID</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>NAME</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>EMAIL</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>ADDRESS</Table.ColumnHeaderCell>
@@ -399,6 +401,7 @@ const AllCustomers = () => {
                   >
                     {" "}
                     {/* Ensure unique key */}
+                    <Table.Cell>{customer.customerTag}</Table.Cell>
                     <Table.RowHeaderCell>
                       {customer.firstname} {customer.lastname}
                     </Table.RowHeaderCell>

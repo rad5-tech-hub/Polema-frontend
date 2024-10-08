@@ -1,26 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Text } from "@radix-ui/themes";
+import axios from "axios";
+import { Flex, Spinner, Text } from "@radix-ui/themes";
 import { TokensIcon } from "@radix-ui/react-icons";
-import { useSearchParams } from "react-router-dom";
-import {
-  AddAdmin,
-  WelcomeComponent,
-  AddProducts,
-  AddCustomer,
-  CustomerLedger,
-  AuthorityToGiveCash,
-  AllProducts,
-  CreateRole,
-  AccountBook,
-  AddSuppliers,
-  AllDepartments,
-  AddDepartment,
-  AllAdmins,
-  AllRoles,
-  AllSuspended,
-  AllCustomers,
-  AllSuppliers,
-} from "./containers";
+import { CircleIcon } from "@radix-ui/react-icons";
+import { useNavigate } from "react-router-dom";
 
 import {
   ClipboardCopyIcon,
@@ -33,88 +16,48 @@ import Header from "./Header";
 import { Theme } from "@radix-ui/themes";
 import { Notifications, Settings } from "../icons";
 import Charts from "../Charts";
+import DynamicIcon from "../DynamicIcon";
+import toast from "react-hot-toast";
+import _ from "lodash";
+const root = import.meta.env.VITE_ROOT;
 
-const DashBoardManager = ({ route }) => {
-  const [selectedChild, setSelectedChild] = useState(<WelcomeComponent />);
+const DashBoardManager = ({ children }) => {
+  // State management for spinner at the navbar
+  const [loading, setLoading] = useState(true);
+
+  const route = "/admin";
+
+  const navigate = useNavigate();
+
+  const [navigation, setNavigation] = useState([]);
+
+  // Function to trim string length
+  function trimString(str, length) {
+    if (str.length > 10) {
+      return str.slice(0, length  ) + "...";
+    }
+    return str;
+  }
 
   // State to check for light or dark mode
   const [isDark, setIsDark] = useState(true);
 
   // States for each dropdown
-  const [openDropdown1, setOpenDropdown1] = useState(false);
-  const [openDropdown2, setOpenDropdown2] = useState(false);
-  const [openDropdown3, setOpenDropdown3] = useState(false);
-  const [openDropdown4, setOpenDropdown4] = useState(false);
-  const [openDropdown5, setOpenDropdown5] = useState(false);
-  const [openDropdown6, setOpenDropdown6] = useState(false);
-  const [openDropdown7, setOpenDropdown7] = useState(false);
-  const [openDropdown8, setOpenDropdown8] = useState(false);
-  const [openDropdown9, setOpenDropdown9] = useState(false);
-  const [openDropdown10, setOpenDropdown10] = useState(false);
-  const [openDropdown11, setOpenDropdown11] = useState(false);
-  const [openDropdown12, setOpenDropdown12] = useState(false);
-  const [openDropdown13, setOpenDropdown13] = useState(false);
-  const [openDropdown14, setOpenDropdown14] = useState(false);
-  const [openDropdown15, setOpenDropdown15] = useState(false);
-  const [openDropdown16, setOpenDropdown16] = useState(false);
-  const [openDropdown17, setOpenDropdown17] = useState(false);
+  const [openDropdowns, setOpenDropdowns] = useState(() => {
+    const savedState = localStorage.getItem("dropdownStates");
+    return savedState ? JSON.parse(savedState) : {};
+  });
 
+  // Toggle dropdown state and persist it to localStorage
   const handleToggle = (dropdownNumber) => {
-    switch (dropdownNumber) {
-      case 1:
-        setOpenDropdown1(!openDropdown1);
-        break;
-      case 2:
-        setOpenDropdown2(!openDropdown2);
-        break;
-      case 3:
-        setOpenDropdown3(!openDropdown3);
-        break;
-      case 4:
-        setOpenDropdown4(!openDropdown4);
-        break;
-      case 5:
-        setOpenDropdown5(!openDropdown5);
-        break;
-      case 6:
-        setOpenDropdown6(!openDropdown6);
-        break;
-      case 7:
-        setOpenDropdown7(!openDropdown7);
-        break;
-      case 8:
-        setOpenDropdown8(!openDropdown8);
-        break;
-      case 9:
-        setOpenDropdown9(!openDropdown9);
-        break;
-      case 10:
-        setOpenDropdown10(!openDropdown10);
-        break;
-      case 11:
-        setOpenDropdown11(!openDropdown11);
-        break;
-      case 12:
-        setOpenDropdown12(!openDropdown12);
-        break;
-      case 13:
-        setOpenDropdown13(!openDropdown13);
-        break;
-      case 14:
-        setOpenDropdown14(!openDropdown14);
-        break;
-      case 15:
-        setOpenDropdown15(!openDropdown15);
-        break;
-      case 16:
-        setOpenDropdown16(!openDropdown16);
-        break;
-      case 17:
-        setOpenDropdown17(!openDropdown17);
-        break;
-      default:
-        break;
-    }
+    setOpenDropdowns((prev) => {
+      const newDropdownState = {
+        ...prev,
+        [dropdownNumber]: !prev[dropdownNumber],
+      };
+      localStorage.setItem("dropdownStates", JSON.stringify(newDropdownState));
+      return newDropdownState;
+    });
   };
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -125,15 +68,6 @@ const DashBoardManager = ({ route }) => {
   const [sidebarExpanded, setSidebarExpanded] = useState(
     storedSidebarExpanded === null ? false : storedSidebarExpanded === "true"
   );
-
-  // To check for theme of the page
-  useEffect(() => {
-    const theme = localStorage.getItem("polemaTheme");
-
-    {
-      theme === "dark" ? setIsDark(true) : setIsDark(false);
-    }
-  }, []);
 
   useEffect(() => {
     const clickHandler = ({ target }) => {
@@ -159,66 +93,34 @@ const DashBoardManager = ({ route }) => {
     }
   }, [sidebarExpanded]);
 
-  // Setting the value of selectedChild by routing
+  const fetchNav = async () => {
+    const retrToken = localStorage.getItem("token");
+
+    // Check if the token is available
+    if (!retrToken) {
+      toast.error("An error occurred. Try logging in again");
+
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${root}/admin/get-nav`, {
+        headers: {
+          Authorization: `Bearer ${retrToken}`,
+        },
+      });
+      console.log(response);
+      setNavigation(response.data.navParentsWithPermissions);
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+      toast.error(error?.response?.message?.data || "An error occured.");
+    }
+  };
+
   useEffect(() => {
-    const handleRoute = (param) => {
-      switch (param) {
-        case "create-role":
-          setSelectedChild(<CreateRole />);
-          break;
-        case "add-products":
-          setSelectedChild(<AddProducts />);
-          break;
-        case "create-admin":
-          setSelectedChild(<AddAdmin />);
-          break;
-        case "add-department":
-          setSelectedChild(<AddDepartment />);
-
-          break;
-        case "all-departments":
-          setSelectedChild(<AllDepartments />);
-
-          break;
-        case "all-products":
-          setSelectedChild(<AllProducts />);
-
-          break;
-        case "view-admins":
-          setSelectedChild(<AllAdmins />);
-          break;
-        case "view-roles":
-          setSelectedChild(<AllRoles />);
-          break;
-        case "suspended-admins":
-          setSelectedChild(<AllSuspended />);
-          break;
-        case "add-customer":
-          setSelectedChild(<AddCustomer />);
-          break;
-
-        case "all-customers":
-          setSelectedChild(<AllCustomers />);
-          break;
-        case "add-supplier":
-          setSelectedChild(<AddSuppliers />);
-          break;
-        case "all-suppliers":
-          setSelectedChild(<AllSuppliers />);
-          break;
-        case "customer-ledger":
-          setSelectedChild(<CustomerLedger />);
-          break;
-        case "account-book":
-          setSelectedChild(<AccountBook />);
-          break;
-        case "authority-to-give-cash":
-          setSelectedChild(<AuthorityToGiveCash />);
-          break;
-      }
-    };
-
-    handleRoute(route);
+    fetchNav();
   }, []);
 
   return (
@@ -266,798 +168,65 @@ const DashBoardManager = ({ route }) => {
             <div className="no-scrollbar h-screen flex flex-col overflow-y-auto duration-300 ease-linear">
               <nav className="py-1 px-2 lg:px-4">
                 <div>
-                  <ul className="mb-6 flex flex-col gap-1.5">
-                    {/* Dashboard Link */}
-                    <div className=" text-current rounded-sm">
-                      <p
-                        className="flex gap-3 items-center px-4 cursor-pointer"
-                        onClick={() => {
-                          setSelectedChild(<WelcomeComponent />);
-                        }}
-                      >
-                        <TokensIcon width={20} height={20} />
-                        <p className="p-2">Dashboard</p>
-                      </p>
+                  {loading ? (
+                    <div className="h-screen flex justify-center items-center">
+                      <Spinner />
                     </div>
-
-                    {/* Account Book */}
-                    <div>
-                      <p
-                        className="flex gap-3 items-center px-4 cursor-pointer"
-                        onClick={() => handleToggle(2)}
-                      >
-                        <ClipboardCopyIcon width={18} height={18} />
-                        <p className="p-2">Account Book</p>
-                        {openDropdown2 ? <CaretUpIcon /> : <CaretDownIcon />}
-                      </p>
-                      {openDropdown2 && (
-                        <ul className="ml-[30px] px-4 text-current">
-                          <li
-                            className="p-2 cursor-pointer dash-list "
-                            onClick={() => setSelectedChild(<AccountBook />)}
-                          >
-                            Add
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AllSuppliers />)}
-                          >
-                            View All
-                          </li>
-                        </ul>
-                      )}
-                    </div>
-
-                    {/* Customers */}
-                    <div>
-                      <p
-                        className="flex gap-3 items-center px-4 cursor-pointer"
-                        onClick={() => handleToggle(1)}
-                      >
-                        <ClipboardCopyIcon width={18} height={18} />
-                        <p className="p-2">Customers</p>
-                        {openDropdown1 ? <CaretUpIcon /> : <CaretDownIcon />}
-                      </p>
-                      {openDropdown1 && (
-                        <ul className="ml-[30px] px-4 text-current">
-                          <li
-                            className="p-2 cursor-pointer dash-list "
-                            onClick={() => setSelectedChild(<AddCustomer />)}
-                          >
-                            Add
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AllCustomers />)}
-                          >
-                            View All
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<CustomerLedger />)}
-                          >
-                            Ledger
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<CustomerLedger />)}
-                          >
-                            Place Orders
-                          </li>
-                        </ul>
-                      )}
-                    </div>
-
-                    {/* Suppliers */}
-                    <div>
-                      <p
-                        className="flex gap-3 items-center px-4 cursor-pointer"
-                        onClick={() => handleToggle(2)}
-                      >
-                        <ClipboardCopyIcon width={18} height={18} />
-                        <p className="p-2">Suppliers</p>
-                        {openDropdown2 ? <CaretUpIcon /> : <CaretDownIcon />}
-                      </p>
-                      {openDropdown2 && (
-                        <ul className="ml-[30px] px-4 text-current">
-                          <li
-                            className="p-2 cursor-pointer dash-list "
-                            onClick={() => setSelectedChild(<AddSuppliers />)}
-                          >
-                            Add
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AllSuppliers />)}
-                          >
-                            View All
-                          </li>
-                          <li className="p-2 cursor-pointer dash-list">
-                            Ledger
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<CustomerLedger />)}
-                          >
-                            Place Orders
-                          </li>
-                        </ul>
-                      )}
-                    </div>
-
-                    {/* Products */}
-                    <div>
-                      <p
-                        className="flex gap-3 items-center px-4 cursor-pointer"
-                        onClick={() => handleToggle(3)}
-                      >
-                        <ClipboardCopyIcon width={18} height={18} />
-                        <p className="p-2">Products</p>
-                        {openDropdown3 ? <CaretUpIcon /> : <CaretDownIcon />}
-                      </p>
-                      {openDropdown3 && (
-                        <ul className="ml-[30px] px-4 text-current">
-                          <li
-                            className="p-2 cursor-pointer dash-list "
-                            onClick={() => setSelectedChild(<AddProducts />)}
-                          >
-                            Add
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AllProducts />)}
-                          >
-                            View All
-                          </li>
-                        </ul>
-                      )}
-                    </div>
-
-                    {/* Pharmacy Store */}
-                    <div>
-                      <p
-                        className="flex gap-3 items-center px-4 cursor-pointer"
-                        onClick={() => handleToggle(4)}
-                      >
-                        <ClipboardCopyIcon width={18} height={18} />
-                        <p className="p-2">Pharmacy Store </p>
-                        {openDropdown4 ? <CaretUpIcon /> : <CaretDownIcon />}
-                      </p>
-                      {openDropdown4 && (
-                        <ul className="ml-[30px] px-4 text-current">
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Add Raw Materials Inventory
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Remove Raw Materials Inventory
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            View Raw Materials Inventory
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Add Production Inventory
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Remove Production Inventory
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            View Production Inventory
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Place Order
-                          </li>
-                        </ul>
-                      )}
-                    </div>
-
-                    {/* General Store */}
-                    <div>
-                      <p
-                        className="flex gap-3 items-center px-4 cursor-pointer"
-                        onClick={() => handleToggle(5)}
-                      >
-                        <ClipboardCopyIcon width={18} height={18} />
-                        <p className="p-2">General Store </p>
-                        {openDropdown5 ? <CaretUpIcon /> : <CaretDownIcon />}
-                      </p>
-                      {openDropdown5 && (
-                        <ul className="ml-[30px] px-4 text-current">
-                          <li
-                            className="p-2 cursor-pointer dash-list "
-                            onClick={() => setSelectedChild(<AddCustomer />)}
-                          >
-                            Add Materials Inventory
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Remove Raw Materials Inventory
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            View Raw Materials Inventory
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Place Order
-                          </li>
-                        </ul>
-                      )}
-                    </div>
-
-                    {/* Department Store */}
-                    <div>
-                      <p
-                        className="flex gap-3 items-center px-4 cursor-pointer"
-                        onClick={() => handleToggle(6)}
-                      >
-                        <ClipboardCopyIcon width={18} height={18} />
-                        <p className="p-2">Department Store</p>
-                        {openDropdown6 ? <CaretUpIcon /> : <CaretDownIcon />}
-                      </p>
-                      {openDropdown6 && (
-                        <ul className="ml-[30px] px-4 text-current">
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Add Raw Materials Inventory
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Remove Raw Materials Inventory
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            View Raw Materials Inventory
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Add Production Inventory
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Remove Production Inventory
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            View Production Inventory
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Place Order
-                          </li>
-                        </ul>
-                      )}
-                    </div>
-
-                    {/* Department Ledger */}
-                    <div>
-                      <p
-                        className="flex gap-3 items-center px-4 cursor-pointer"
-                        onClick={() => handleToggle(7)}
-                      >
-                        <ClipboardCopyIcon width={18} height={18} />
-                        <p className="p-2" title="Department Ledger">
-                          Dept. Ledger
-                        </p>
-                        {openDropdown7 ? <CaretUpIcon /> : <CaretDownIcon />}
-                      </p>
-                      {openDropdown7 && (
-                        <ul className="ml-[30px] px-4 text-current">
-                          <li
-                            className="p-2 cursor-pointer dash-list "
-                            onClick={() => setSelectedChild(<AddCustomer />)}
-                          >
-                            Refinery
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Plastics
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Lubricants
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Pharmacy
-                          </li>
-                        </ul>
-                      )}
-                    </div>
-
-                    {/* Raise Tickets */}
-                    <div>
-                      <p
-                        className="flex gap-3 items-center px-4 cursor-pointer"
-                        onClick={() => handleToggle(9)}
-                      >
-                        <ClipboardCopyIcon width={18} height={18} />
-                        <p className="p-2">Raise Tickets</p>
-                        {openDropdown9 ? <CaretUpIcon /> : <CaretDownIcon />}
-                      </p>
-                      {openDropdown9 && (
-                        <ul className="ml-[30px] px-4 text-current">
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            L.P.O
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            View Approved L.P.O
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() =>
-                              setSelectedChild(<AuthorityToGiveCash />)
-                            }
-                          >
-                            Authority to give cash
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            View approved authority to give cash
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Authority to collect from General Store
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            View Approved Authority to collect from General
-                            Store
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Authority to weigh
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            View Approved Authority to weigh
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Authority to collect from General Store
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Authority to load
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            View Approved Authority to load
-                          </li>
-                        </ul>
-                      )}
-                    </div>
-
-                    {/* Tickets */}
-                    <div>
-                      <p
-                        className="flex gap-3 items-center px-4 cursor-pointer"
-                        onClick={() => handleToggle(10)}
-                      >
-                        <ClipboardCopyIcon width={18} height={18} />
-                        <p className="p-2">Tickets</p>
-                        {openDropdown10 ? <CaretUpIcon /> : <CaretDownIcon />}
-                      </p>
-                      {openDropdown10 && (
-                        <ul className="ml-[30px] px-4 text-current">
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            L.P.O
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Auth. to weigh
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Auth. to weigh
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Auth. to weigh
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Auth. to weigh
-                          </li>
-                        </ul>
-                      )}
-                    </div>
-
-                    {/* Admins */}
-                    <div>
-                      <p
-                        className="flex gap-3 items-center px-4 cursor-pointer"
-                        onClick={() => handleToggle(11)}
-                      >
-                        <ClipboardCopyIcon width={18} height={18} />
-                        <p className="p-2">Admins</p>
-                        {openDropdown11 ? <CaretUpIcon /> : <CaretDownIcon />}
-                      </p>
-                      {openDropdown11 && (
-                        <ul className="ml-[25px] px-4 text-current">
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<CreateRole />)}
-                          >
-                            Create Role
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AllRoles />)}
-                          >
-                            View Role
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Create Admin
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AllAdmins />)}
-                          >
-                            View Admin
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AllSuspended />)}
-                          >
-                            Suspended Admins
-                          </li>
-                        </ul>
-                      )}
-                    </div>
-
-                    {/* Department */}
-                    <div>
-                      <p
-                        className="flex gap-3 items-center px-4 cursor-pointer"
-                        onClick={() => handleToggle(12)}
-                      >
-                        <ClipboardCopyIcon width={18} height={18} />
-                        <p className="p-2"> Departments</p>
-                        {openDropdown12 ? <CaretUpIcon /> : <CaretDownIcon />}
-                      </p>
-                      {openDropdown12 && (
-                        <ul className="ml-[25px] px-4 text-current">
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddDepartment />)}
-                          >
-                            Add
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AllDepartments />)}
-                          >
-                            View All
-                          </li>
-                        </ul>
-                      )}
-                    </div>
-
-                    {/* Cash Management */}
-                    <div>
-                      <p
-                        className="flex gap-3 items-center px-4 cursor-pointer"
-                        onClick={() => handleToggle(13)}
-                      >
-                        <ClipboardCopyIcon width={18} height={18} />
-                        <p className="p-2">Cash</p>
-                        {openDropdown13 ? <CaretUpIcon /> : <CaretDownIcon />}
-                      </p>
-                      {openDropdown13 && (
-                        <ul className="ml-[25px] px-4 text-current">
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AccountBook />)}
-                          >
-                            Account Book
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Cash Collection
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Cash Disbursement
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Impress
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Receipt
-                          </li>
-                        </ul>
-                      )}
-                    </div>
-
-                    {/* Accounting */}
-                    <div>
-                      <p
-                        className="flex gap-3 items-center px-4 cursor-pointer"
-                        onClick={() => handleToggle(14)}
-                      >
-                        <ClipboardCopyIcon width={18} height={18} />
-                        <p className="p-2">Accounting</p>
-                        {openDropdown14 ? <CaretUpIcon /> : <CaretDownIcon />}
-                      </p>
-                      {openDropdown14 && (
-                        <ul className="ml-[25px] px-4 text-current">
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            View Sales
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            View Expenses
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Reconcile Acccount
-                          </li>
-                        </ul>
-                      )}
-                    </div>
-
-                    {/* Weighing Operations */}
-                    <div>
-                      <p
-                        className="flex gap-3 items-center px-4 cursor-pointer"
-                        onClick={() => handleToggle(15)}
-                      >
-                        <ClipboardCopyIcon width={18} height={18} />
-                        <p className="p-2">Weighing</p>
-                        {openDropdown15 ? <CaretUpIcon /> : <CaretDownIcon />}
-                      </p>
-                      {openDropdown15 && (
-                        <ul className="ml-[25px] px-4 text-current">
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            New Weighing
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Products Weights
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Update Weights
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Weigh Hstory
-                          </li>
-                        </ul>
-                      )}
-                    </div>
-
-                    {/* Report */}
-                    <div>
-                      <p
-                        className="flex gap-3 items-center px-4 cursor-pointer"
-                        onClick={() => handleToggle(16)}
-                      >
-                        <ClipboardCopyIcon width={18} height={18} />
-                        <p className="p-2">Report</p>
-                        {openDropdown16 ? <CaretUpIcon /> : <CaretDownIcon />}
-                      </p>
-                      {openDropdown16 && (
-                        <ul className="ml-[25px] px-4 text-current">
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Inventory
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Production
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Department
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Cash
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Finance
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Weigh Bridge
-                          </li>
-                        </ul>
-                      )}
-                    </div>
-
-                    {/* Notification */}
-                    <div>
-                      <p
-                        className="flex gap-3 items-center px-4 cursor-pointer"
-                        onClick={() => handleToggle(17)}
-                      >
-                        <ClipboardCopyIcon width={18} height={18} />
-                        <p className="p-2">Notifications</p>
-                        {openDropdown17 ? <CaretUpIcon /> : <CaretDownIcon />}
-                      </p>
-                      {openDropdown17 && (
-                        <ul className="ml-[25px] px-4 text-current">
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Low Stock Alert
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            New Inventory
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Pending Orders
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Inventory
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            New Weigh Request
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Pending Weights
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Purchase Order
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            Low Cash Balance
-                          </li>
-                          <li
-                            className="p-2 cursor-pointer dash-list"
-                            onClick={() => setSelectedChild(<AddAdmin />)}
-                          >
-                            New Role/Permissions
-                          </li>
-                        </ul>
-                      )}
-                    </div>
-                  </ul>
+                  ) : (
+                    <ul className="mb-6 flex flex-col gap-1.5">
+                      {navigation.map((nav, index) => {
+                        return (
+                          <div>
+                            <p
+                              className="flex gap-3 items-center px-4 cursor-pointer"
+                              onClick={() => handleToggle(index)}
+                            >
+                              <DynamicIcon
+                                iconName={_.camelCase(nav.navParentIcon)}
+                              />
+                              <p className="p-2" title={nav.navParentName}>
+                                {trimString(nav.navParentName, 12)}
+                              </p>
+                              {openDropdowns[index] ? (
+                                <CaretUpIcon />
+                              ) : (
+                                <CaretDownIcon />
+                              )}
+                            </p>
+                            {openDropdowns[index] && (
+                              <ul className="ml-[20px] px-4 text-current">
+                                {nav.permissions.map((item) => {
+                                  return (
+                                    <li
+                                      className={`p-2 cursor-pointer mb-1 ${
+                                        window.location.pathname ===
+                                        `${route}/${nav.navParentSlug}/${item.slug}`
+                                          ? "bg-[#f4f4f4] rounded-lg shadow-2xl !text-black min-w-[50px]"
+                                          : ""
+                                      }`}
+                                      onClick={() =>
+                                        navigate(
+                                          `${route}/${nav.navParentSlug}/${item.slug}`
+                                        )
+                                      }
+                                    >
+                                      <Flex gap={"2"} align={"center"}>
+                                        <CircleIcon />
+                                        <span title={item.name}>
+                                          {" "}
+                                          {trimString(item.name, 14)}
+                                        </span>
+                                      </Flex>
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </ul>
+                  )}
                 </div>
               </nav>
             </div>
@@ -1074,7 +243,7 @@ const DashBoardManager = ({ route }) => {
             />
             <main>
               <div className="mx-auto max-w-screen-xl z-[1] p-4 md:p-6 xl:p-10">
-                {selectedChild}
+                {children}
               </div>
             </main>
           </div>
@@ -1085,3 +254,1000 @@ const DashBoardManager = ({ route }) => {
 };
 
 export default DashBoardManager;
+
+// <div>
+// <ul className="mb-6 flex flex-col gap-1.5">
+//   {/* Dashboard Link */}
+//   <div className=" text-current rounded-sm">
+//     <p
+//       className="flex gap-3 items-center px-4 cursor-pointer"
+//       onClick={() => {
+//         setSelectedChild(<WelcomeComponent />);
+//       }}
+//     >
+//       <TokensIcon width={20} height={20} />
+//       <p className="p-2">Dashboard</p>
+//     </p>
+//   </div>
+
+//   {/* Account Book */}
+//   <div>
+//     <p
+//       className="flex gap-3 items-center px-4 cursor-pointer"
+//       onClick={() => handleToggle(18)}
+//     >
+//       <ClipboardCopyIcon width={18} height={18} />
+//       <p className="p-2">Account Book</p>
+//       {openDropdowns[18] ? (
+//         <CaretUpIcon />
+//       ) : (
+//         <CaretDownIcon />
+//       )}
+//     </p>
+//     {openDropdowns[18] && (
+//       <ul className="ml-[30px] px-4 text-current">
+//         <li
+//           className="p-2 cursor-pointer dash-list "
+//           onClick={() => setSelectedChild(<AccountBook />)}
+//         >
+//           Add
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AllSuppliers />)}
+//         >
+//           View All
+//         </li>
+//       </ul>
+//     )}
+//   </div>
+
+//   {/* Customers */}
+//   <div>
+//     <p
+//       className="flex gap-3 items-center px-4 cursor-pointer"
+//       onClick={() => handleToggle(1)}
+//     >
+//       <ClipboardCopyIcon width={18} height={18} />
+//       <p className="p-2">Customers</p>
+//       {openDropdowns[1] ? <CaretUpIcon /> : <CaretDownIcon />}
+//     </p>
+//     {openDropdowns[1] && (
+//       <ul className="ml-[25px] px-4 text-current">
+//         <li
+//           className={`p-2 cursor-pointer mb-1 ${
+//             window.location.pathname ===
+//             `${route}/customers/add-customer`
+//               ? "bg-[#f4f4f4] rounded-lg shadow-2xl !text-black min-w-[50px]"
+//               : ""
+//           }`}
+//           onClick={() =>
+//             navigate(`${route}/customers/add-customer`)
+//           }
+//         >
+//           <Flex gap={"3"} align={"center"}>
+//             <CircleIcon />
+//             {"Add"}
+//           </Flex>
+//         </li>
+
+//         <li
+//           className={`p-2 cursor-pointer mb-1  ${
+//             window.location.pathname ===
+//             `${route}/customers/view-customers`
+//               ? "bg-[#f4f4f4] rounded-lg shadow-2xl !text-black min-w-[30px]"
+//               : ""
+//           }`}
+//           onClick={() =>
+//             navigate(`${route}/customers/view-customers`)
+//           }
+//         >
+//           <Flex gap={"3"} align={"center"}>
+//             <CircleIcon />
+//             {"View"}
+//           </Flex>
+//         </li>
+//         <li
+//           className={`p-2 cursor-pointer mb-1  ${
+//             window.location.pathname ===
+//             `${route}/customers/customer-ledger`
+//               ? "bg-[#f4f4f4] rounded-lg shadow-2xl !text-black min-w-[50px]"
+//               : ""
+//           }`}
+//           onClick={() =>
+//             navigate(`${route}/customers/customer-ledger`)
+//           }
+//         >
+//           <Flex gap={"3"} align={"center"}>
+//             <CircleIcon />
+//             {"Ledger"}
+//           </Flex>
+//         </li>
+//         <li className={`p-2 cursor-pointer mb-1`}>
+//           <Flex gap={"3"} align={"center"}>
+//             <CircleIcon />
+//             Place Order
+//           </Flex>
+//         </li>
+//       </ul>
+//     )}
+//   </div>
+
+//   {/* Suppliers */}
+//   <div>
+//     <p
+//       className="flex gap-3 items-center px-4 cursor-pointer"
+//       onClick={() => handleToggle(2)}
+//     >
+//       <ClipboardCopyIcon width={18} height={18} />
+//       <p className="p-2">Suppliers</p>
+//       {openDropdowns[2] ? <CaretUpIcon /> : <CaretDownIcon />}
+//     </p>
+//     {openDropdowns[2] && (
+//       <ul className="ml-[25px] px-4 text-current">
+//         <li
+//           className={`p-2 cursor-pointer mb-1 ${
+//             window.location.pathname ===
+//             `${route}/suppliers/add-supplier`
+//               ? "bg-[#f4f4f4] rounded-lg shadow-2xl !text-black min-w-[50px]"
+//               : ""
+//           }`}
+//           onClick={() =>
+//             navigate(`${route}/suppliers/add-supplier`)
+//           }
+//         >
+//           <Flex gap={"3"} align={"center"}>
+//             <CircleIcon />
+//             {"Add"}
+//           </Flex>
+//         </li>
+//         <li
+//           className={`p-2 cursor-pointer mb-1 ${
+//             window.location.pathname ===
+//             `${route}/suppliers/view-suppliers`
+//               ? "bg-[#f4f4f4] rounded-lg shadow-2xl !text-black min-w-[50px]"
+//               : ""
+//           }`}
+//           onClick={() =>
+//             navigate(`${route}/suppliers/view-suppliers`)
+//           }
+//         >
+//           <Flex gap={"3"} align={"center"}>
+//             <CircleIcon />
+//             {"View All"}
+//           </Flex>
+//         </li>
+//         <li
+//           className={`p-2 cursor-pointer mb-`}
+//           onClick={() =>
+//             navigate(`${route}/suppliers/view-suppliers`)
+//           }
+//         >
+//           <Flex gap={"3"} align={"center"}>
+//             <CircleIcon />
+//             Ledger
+//           </Flex>
+//         </li>
+//         <li
+//           className={`p-2 cursor-pointer mb-`}
+//           onClick={() => setSelectedChild(<CustomerLedger />)}
+//         >
+//           <Flex gap={"3"} align={"center"}>
+//             <CircleIcon />
+//             Place Orders
+//           </Flex>
+//         </li>
+//       </ul>
+//     )}
+//   </div>
+
+//   {/* Products */}
+//   <div>
+//     <p
+//       className="flex gap-3 items-center px-4 cursor-pointer"
+//       onClick={() => handleToggle(3)}
+//     >
+//       <ClipboardCopyIcon width={18} height={18} />
+//       <p className="p-2">Products</p>
+//       {openDropdowns[3] ? <CaretUpIcon /> : <CaretDownIcon />}
+//     </p>
+//     {openDropdowns[3] && (
+//       <ul className="ml-[30px] px-4 text-current">
+//         <li
+//           className={`p-2 cursor-pointer mb-1 ${
+//             window.location.pathname ===
+//             `${route}/products/add-product`
+//               ? "bg-[#f4f4f4] rounded-lg shadow-2xl !text-black min-w-[50px]"
+//               : ""
+//           }`}
+//           onClick={() =>
+//             navigate(`${route}/products/add-product`)
+//           }
+//         >
+//           <Flex gap={"3"} align={"center"}>
+//             <CircleIcon />
+//             Add
+//           </Flex>
+//         </li>
+//         <li
+//           className={`p-2 cursor-pointer mb-1 ${
+//             window.location.pathname ===
+//             `${route}/products/view-products`
+//               ? "bg-[#f4f4f4] rounded-lg shadow-2xl !text-black min-w-[50px]"
+//               : ""
+//           }`}
+//           onClick={() =>
+//             navigate(`${route}/products/view-products`)
+//           }
+//         >
+//           <Flex gap={"3"} align={"center"}>
+//             <CircleIcon />
+//             View All
+//           </Flex>
+//         </li>
+//       </ul>
+//     )}
+//   </div>
+
+//   {/* Pharmacy Store */}
+//   <div>
+//     <p
+//       className="flex gap-3 items-center px-4 cursor-pointer"
+//       onClick={() => handleToggle(4)}
+//     >
+//       <ClipboardCopyIcon width={18} height={18} />
+//       <p className="p-2">Pharmacy Store </p>
+//       {openDropdowns[4] ? <CaretUpIcon /> : <CaretDownIcon />}
+//     </p>
+//     {openDropdowns[4] && (
+//       <ul className="ml-[30px] px-4 text-current">
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Add Raw Materials Inventory
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Remove Raw Materials Inventory
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           View Raw Materials Inventory
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Add Production Inventory
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Remove Production Inventory
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           View Production Inventory
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Place Order
+//         </li>
+//       </ul>
+//     )}
+//   </div>
+
+//   {/* General Store */}
+//   <div>
+//     <p
+//       className="flex gap-3 items-center px-4 cursor-pointer"
+//       onClick={() => handleToggle(5)}
+//     >
+//       <ClipboardCopyIcon width={18} height={18} />
+//       <p className="p-2">General Store </p>
+//       {openDropdowns[5] ? <CaretUpIcon /> : <CaretDownIcon />}
+//     </p>
+//     {openDropdowns[5] && (
+//       <ul className="ml-[30px] px-4 text-current">
+//         <li
+//           className="p-2 cursor-pointer dash-list "
+//           onClick={() => setSelectedChild(<AddCustomer />)}
+//         >
+//           Add Materials Inventory
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Remove Raw Materials Inventory
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           View Raw Materials Inventory
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Place Order
+//         </li>
+//       </ul>
+//     )}
+//   </div>
+
+//   {/* Department Store */}
+//   <div>
+//     <p
+//       className="flex gap-3 items-center px-4 cursor-pointer"
+//       onClick={() => handleToggle(6)}
+//     >
+//       <ClipboardCopyIcon width={18} height={18} />
+//       <p className="p-2">Department Store</p>
+//       {openDropdowns[6] ? <CaretUpIcon /> : <CaretDownIcon />}
+//     </p>
+//     {openDropdowns[6] && (
+//       <ul className="ml-[30px] px-4 text-current">
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Add Raw Materials Inventory
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Remove Raw Materials Inventory
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           View Raw Materials Inventory
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Add Production Inventory
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Remove Production Inventory
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           View Production Inventory
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Place Order
+//         </li>
+//       </ul>
+//     )}
+//   </div>
+
+//   {/* Department Ledger */}
+//   <div>
+//     <p
+//       className="flex gap-3 items-center px-4 cursor-pointer"
+//       onClick={() => handleToggle(7)}
+//     >
+//       <ClipboardCopyIcon width={18} height={18} />
+//       <p className="p-2" title="Department Ledger">
+//         Dept. Ledger
+//       </p>
+//       {openDropdowns[7] ? <CaretUpIcon /> : <CaretDownIcon />}
+//     </p>
+//     {openDropdowns[7] && (
+//       <ul className="ml-[30px] px-4 text-current">
+//         <li
+//           className="p-2 cursor-pointer dash-list "
+//           onClick={() => setSelectedChild(<AddCustomer />)}
+//         >
+//           Refinery
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Plastics
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Lubricants
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Pharmacy
+//         </li>
+//       </ul>
+//     )}
+//   </div>
+
+//   {/* Raise Tickets */}
+//   <div>
+//     <p
+//       className="flex gap-3 items-center px-4 cursor-pointer"
+//       onClick={() => handleToggle(9)}
+//     >
+//       <ClipboardCopyIcon width={18} height={18} />
+//       <p className="p-2">Raise Tickets</p>
+//       {openDropdowns[9] ? <CaretUpIcon /> : <CaretDownIcon />}
+//     </p>
+//     {openDropdowns[9] && (
+//       <ul className="ml-[30px] px-4 text-current">
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           L.P.O
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           View Approved L.P.O
+//         </li>
+//         <li
+//           className={`p-2 cursor-pointer mb-1 ${
+//             window.location.pathname ===
+//             `${route}/raise-tickets/authority-to-give-casht`
+//               ? "bg-[#f4f4f4] rounded-lg shadow-2xl !text-black min-w-[50px]"
+//               : ""
+//           }`}
+//           onClick={() =>
+//             navigate(
+//               `${route}/raise-tickets/authority-to-give-cash`
+//             )
+//           }
+//           title="Authority to give cash"
+//         >
+//           <Flex align={"center"} gap={"2"}>
+//             <CircleIcon />
+//             {trimString("Authority to give cash")}
+//           </Flex>
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           View approved authority to give cash
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Authority to collect from General Store
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           View Approved Authority to collect from General
+//           Store
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Authority to weigh
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           View Approved Authority to weigh
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Authority to collect from General Store
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Authority to load
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           View Approved Authority to load
+//         </li>
+//       </ul>
+//     )}
+//   </div>
+
+//   {/* Tickets */}
+//   <div>
+//     <p
+//       className="flex gap-3 items-center px-4 cursor-pointer"
+//       onClick={() => handleToggle(10)}
+//     >
+//       <ClipboardCopyIcon width={18} height={18} />
+//       <p className="p-2">Tickets</p>
+//       {openDropdowns[10] ? (
+//         <CaretUpIcon />
+//       ) : (
+//         <CaretDownIcon />
+//       )}
+//     </p>
+//     {openDropdowns[10] && (
+//       <ul className="ml-[30px] px-4 text-current">
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           L.P.O
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Auth. to weigh
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Auth. to weigh
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Auth. to weigh
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Auth. to weigh
+//         </li>
+//       </ul>
+//     )}
+//   </div>
+
+//   {/* Admins */}
+//   <div>
+//     <p
+//       className="flex gap-3 items-center px-4 cursor-pointer"
+//       onClick={() => handleToggle(11)}
+//     >
+//       <ClipboardCopyIcon width={18} height={18} />
+//       <p className="p-2">Admins</p>
+//       {openDropdowns[11] ? (
+//         <CaretUpIcon />
+//       ) : (
+//         <CaretDownIcon />
+//       )}
+//     </p>
+//     {openDropdowns[11] && (
+//       <ul className="ml-[25px] px-4 text-current">
+//         <li
+//           className={`p-2 cursor-pointer mb-1 ${
+//             window.location.pathname ===
+//             `${route}/admins/create-role`
+//               ? "bg-[#f4f4f4] rounded-lg shadow-2xl !text-black min-w-[50px]"
+//               : ""
+//           }`}
+//           onClick={() =>
+//             navigate(`${route}/admins/create-role`)
+//           }
+//           title="Create Role"
+//         >
+//           <Flex gap={"3"} align={"center"}>
+//             <CircleIcon />
+//             Create Role
+//           </Flex>
+//         </li>
+//         <li
+//           className={`p-2 cursor-pointer mb-1 ${
+//             window.location.pathname ===
+//             `${route}/admins/view-roles`
+//               ? "bg-[#f4f4f4] rounded-lg shadow-2xl !text-black min-w-[50px]"
+//               : ""
+//           }`}
+//           onClick={() =>
+//             navigate(`${route}/admins/view-roles`)
+//           }
+//           title="View Roles"
+//         >
+//           <Flex gap={"3"} align={"center"}>
+//             <CircleIcon />
+//             View Roles
+//           </Flex>
+//         </li>
+//         <li
+//           className={`p-2 cursor-pointer mb-1 ${
+//             window.location.pathname ===
+//             `${route}/admins/create-admin`
+//               ? "bg-[#f4f4f4] rounded-lg shadow-2xl !text-black min-w-[50px]"
+//               : ""
+//           }`}
+//           onClick={() =>
+//             navigate(`${route}/admins/create-admin`)
+//           }
+//         >
+//           <Flex gap={"3"} align={"center"}>
+//             <CircleIcon />
+//             Create Admin
+//           </Flex>
+//         </li>
+//         <li
+//           className={`p-2 cursor-pointer mb-1 ${
+//             window.location.pathname ===
+//             `${route}/admins/view-admins`
+//               ? "bg-[#f4f4f4] rounded-lg shadow-2xl !text-black min-w-[50px]"
+//               : ""
+//           }`}
+//           onClick={() =>
+//             navigate(`${route}/admins/view-admins`)
+//           }
+//         >
+//           <Flex gap={"3"} align={"center"}>
+//             <CircleIcon />
+//             View Admins
+//           </Flex>
+//         </li>
+//         <li
+//           className={`p-2 cursor-pointer mb-1 ${
+//             window.location.pathname ===
+//             `${route}/admins/suspended-admins`
+//               ? "bg-[#f4f4f4] rounded-lg shadow-2xl !text-black min-w-[50px]"
+//               : ""
+//           }`}
+//           onClick={() =>
+//             navigate(`${route}/admins/suspended-admins`)
+//           }
+//           title="Suspended Admins"
+//         >
+//           <Flex gap={"3"} align={"center"}>
+//             <CircleIcon />
+//             {trimString("Suspended Admins")}
+//           </Flex>
+//         </li>
+//       </ul>
+//     )}
+//   </div>
+
+//   {/* Department */}
+//   <div>
+//     <p
+//       className="flex gap-3 items-center px-4 cursor-pointer"
+//       onClick={() => handleToggle(12)}
+//     >
+//       <ClipboardCopyIcon width={18} height={18} />
+//       <p className="p-2"> Departments</p>
+//       {openDropdowns[12] ? (
+//         <CaretUpIcon />
+//       ) : (
+//         <CaretDownIcon />
+//       )}
+//     </p>
+//     {openDropdowns[12] && (
+//       <ul className="ml-[25px] px-4 text-current">
+//         <li
+//           className={`p-2 cursor-pointer mb-1 ${
+//             window.location.pathname ===
+//             `${route}/departments/add-department`
+//               ? "bg-[#f4f4f4] rounded-lg shadow-2xl !text-black min-w-[50px]"
+//               : ""
+//           }`}
+//           onClick={() =>
+//             navigate(`${route}/departments/add-department`)
+//           }
+//         >
+//           <Flex gap={"3"} align={"center"}>
+//             <CircleIcon />
+//             Add
+//           </Flex>
+//         </li>
+//         <li
+//           className={`p-2 cursor-pointer mb-1 ${
+//             window.location.pathname ===
+//             `${route}/departments/view-departments`
+//               ? "bg-[#f4f4f4] rounded-lg shadow-2xl !text-black min-w-[50px]"
+//               : ""
+//           }`}
+//           onClick={() =>
+//             navigate(`${route}/departments/view-departments`)
+//           }
+//         >
+//           <Flex gap={"3"} align={"center"}>
+//             <CircleIcon />
+//             View All
+//           </Flex>
+//         </li>
+//       </ul>
+//     )}
+//   </div>
+
+//   {/* Cash Management */}
+//   <div>
+//     <p
+//       className="flex gap-3 items-center px-4 cursor-pointer"
+//       onClick={() => handleToggle(13)}
+//     >
+//       <ClipboardCopyIcon width={18} height={18} />
+//       <p className="p-2">Cash</p>
+//       {openDropdowns[13] ? (
+//         <CaretUpIcon />
+//       ) : (
+//         <CaretDownIcon />
+//       )}
+//     </p>
+//     {openDropdowns[13] && (
+//       <ul className="ml-[25px] px-4 text-current">
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AccountBook />)}
+//         >
+//           Account Book
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Cash Collection
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Cash Disbursement
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Impress
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Receipt
+//         </li>
+//       </ul>
+//     )}
+//   </div>
+
+//   {/* Accounting */}
+//   <div>
+//     <p
+//       className="flex gap-3 items-center px-4 cursor-pointer"
+//       onClick={() => handleToggle(14)}
+//     >
+//       <ClipboardCopyIcon width={18} height={18} />
+//       <p className="p-2">Accounting</p>
+//       {openDropdowns[14] ? (
+//         <CaretUpIcon />
+//       ) : (
+//         <CaretDownIcon />
+//       )}
+//     </p>
+//     {openDropdowns[14] && (
+//       <ul className="ml-[25px] px-4 text-current">
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           View Sales
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           View Expenses
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Reconcile Acccount
+//         </li>
+//       </ul>
+//     )}
+//   </div>
+
+//   {/* Weighing Operations */}
+//   <div>
+//     <p
+//       className="flex gap-3 items-center px-4 cursor-pointer"
+//       onClick={() => handleToggle(15)}
+//     >
+//       <ClipboardCopyIcon width={18} height={18} />
+//       <p className="p-2">Weighing</p>
+//       {openDropdowns[15] ? (
+//         <CaretUpIcon />
+//       ) : (
+//         <CaretDownIcon />
+//       )}
+//     </p>
+//     {openDropdowns[15] && (
+//       <ul className="ml-[25px] px-4 text-current">
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           New Weighing
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Products Weights
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Update Weights
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Weigh Hstory
+//         </li>
+//       </ul>
+//     )}
+//   </div>
+
+//   {/* Report */}
+//   <div>
+//     <p
+//       className="flex gap-3 items-center px-4 cursor-pointer"
+//       onClick={() => handleToggle(16)}
+//     >
+//       <ClipboardCopyIcon width={18} height={18} />
+//       <p className="p-2">Report</p>
+//       {openDropdowns[16] ? (
+//         <CaretUpIcon />
+//       ) : (
+//         <CaretDownIcon />
+//       )}
+//     </p>
+//     {openDropdowns[16] && (
+//       <ul className="ml-[25px] px-4 text-current">
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Inventory
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Production
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Department
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Cash
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Finance
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Weigh Bridge
+//         </li>
+//       </ul>
+//     )}
+//   </div>
+
+//   {/* Notification */}
+//   <div>
+//     <p
+//       className="flex gap-3 items-center px-4 cursor-pointer"
+//       onClick={() => handleToggle(17)}
+//     >
+//       <ClipboardCopyIcon width={18} height={18} />
+//       <p className="p-2">Notifications</p>
+//       {openDropdowns[17] ? (
+//         <CaretUpIcon />
+//       ) : (
+//         <CaretDownIcon />
+//       )}
+//     </p>
+//     {openDropdowns[17] && (
+//       <ul className="ml-[25px] px-4 text-current">
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Low Stock Alert
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           New Inventory
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Pending Orders
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Inventory
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           New Weigh Request
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Pending Weights
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Purchase Order
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           Low Cash Balance
+//         </li>
+//         <li
+//           className="p-2 cursor-pointer dash-list"
+//           onClick={() => setSelectedChild(<AddAdmin />)}
+//         >
+//           New Role/Permissions
+//         </li>
+//       </ul>
+//     )}
+//   </div>
+// </ul>
+// </div>

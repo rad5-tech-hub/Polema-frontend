@@ -176,7 +176,7 @@ const EditDialog = ({ isOpen, onClose, fetchSuppliers, id }) => {
             <Dialog.Close asChild>
               <button
                 onClick={() => onClose()}
-                className="bg-blue-700 focus:shadow-red7 text-white inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
+                className="bg-red-700 focus:shadow-red  hover:bg-red-600 text-white inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
               >
                 No
               </button>
@@ -185,7 +185,7 @@ const EditDialog = ({ isOpen, onClose, fetchSuppliers, id }) => {
               onClick={() => {
                 EditSupplier(id);
               }}
-              className=" ml-4 bg-red-500 text-white hover:bg-red-600 focus:shadow-red7 inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
+              className=" ml-4 bg-blue-500 text-white hover:bg-blue-600 focus:shadow-red7 inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
             >
               {suspendLoading ? <LoaderIcon /> : "Yes"}
             </button>
@@ -235,6 +235,8 @@ const AllSuppliers = () => {
       setSuppliers(repsonse.data.customers);
     } catch (error) {
       console.log(error);
+      setPageLoading(false);
+      setSuppliers([]);
     }
   };
 
@@ -245,7 +247,6 @@ const AllSuppliers = () => {
 
   return (
     <>
-      <UpdateURL url={"/all-suppliers"} />
       <TextField.Root placeholder="Search Suppliers.." className="w-[55%] mb-5">
         <TextField.Slot>
           <MagnifyingGlassIcon height={"16"} width={"16"} />
@@ -257,6 +258,8 @@ const AllSuppliers = () => {
         <Table.Root size={"3"}>
           <Table.Header>
             <Table.Row>
+              <Table.ColumnHeaderCell>ID</Table.ColumnHeaderCell>
+
               <Table.ColumnHeaderCell>NAME</Table.ColumnHeaderCell>
 
               <Table.ColumnHeaderCell>EMAIL</Table.ColumnHeaderCell>
@@ -280,6 +283,8 @@ const AllSuppliers = () => {
                       className="cursor-pointer hover:bg-[rgb(225,225,225)]/30"
                       onClick={() => setViewStaff(supplier)}
                     >
+                      <Table.Cell>{supplier.supplierTag}</Table.Cell>
+
                       <Table.Cell>{`${supplier.firstname} ${supplier.lastname}`}</Table.Cell>
                       <Table.Cell>{supplier.email}</Table.Cell>
                       <Table.Cell>{supplier.address}</Table.Cell>

@@ -62,7 +62,13 @@ const AddDepartment = () => {
         }
       );
       setLoading(false);
-      toast.success(response.data.message);
+      setDepartmentName("");
+      toast.success(response.data.message, {
+        duration: 6000,
+        style: {
+          padding: "30px",
+        },
+      });
     } catch (error) {
       setLoading(false);
       console.log(error);
@@ -75,8 +81,6 @@ const AddDepartment = () => {
   };
   return (
     <div>
-      <UpdateURL url={"/add-department"} />
-
       <Card>
         <Heading className="py-4">Create Department</Heading>
         <Separator className="w-full" />
@@ -92,6 +96,7 @@ const AddDepartment = () => {
             <TextField.Root
               placeholder="Enter Department Name"
               className="mt-1 w-[50%] p-1"
+              value={departmentName}
               onChange={(e) => setDepartmentName(e.target.value)}
             ></TextField.Root>
           </div>
@@ -103,7 +108,7 @@ const AddDepartment = () => {
           </Flex>
         </form>
       </Card>
-      <Toaster position="bottom-center" />
+      <Toaster position="top-right" />
     </div>
   );
 };

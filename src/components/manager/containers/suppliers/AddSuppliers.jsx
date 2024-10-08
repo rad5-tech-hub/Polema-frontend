@@ -70,8 +70,7 @@ const AddSuppliers = ({ child, setChild, buttonValue }) => {
         },
       });
 
-      // Redirect to all suppliers page
-      window.location.href = "/md/all-suppliers";
+      navigate("/admin/suppliers/view-suppliers");
     } catch (error) {
       setIsLoading(false);
       toast.error(error.response.data.error);
@@ -82,7 +81,6 @@ const AddSuppliers = ({ child, setChild, buttonValue }) => {
   return (
     <div>
       <Card className="w-full">
-        <UpdateURL url={"/add-supplier"} />
         <Heading className="text-left py-4">Add Supplier</Heading>
         <Separator className="w-full" />
         <form onSubmit={handleSubmit}>

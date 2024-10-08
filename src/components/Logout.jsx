@@ -32,7 +32,7 @@ const LogoutDialog = ({ isOpen, onClose, handleLogout }) => {
             <Dialog.Close asChild>
               <button
                 onClick={onClose}
-                className="bg-blue-500 hover:bg-blue-800 focus:shadow-red7 text-white inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
+                className="bg-red-500 hover:bg-red-800 focus:shadow-red7 text-white inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
               >
                 No
               </button>
@@ -40,7 +40,7 @@ const LogoutDialog = ({ isOpen, onClose, handleLogout }) => {
             <button
               disabled={confirmLoading}
               onClick={handleConfirmLogout}
-              className="ml-4 bg-red-500 text-white hover:bg-red-600 focus:shadow-red7 inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
+              className="ml-4 bg-blue-500 text-white hover:bg-blue-600 focus:shadow-red7 inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
             >
               {confirmLoading ? <LoaderIcon /> : "Yes"}
             </button>
@@ -68,6 +68,7 @@ const Logout = () => {
   // Function to handle logout
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("dropdownStates");
     navigate("/");
     toast.success("Logged out successfully!", {
       duration: 5000,

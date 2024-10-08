@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   faBriefcase,
   faSitemap,
@@ -13,6 +14,7 @@ import {
   Card,
   Button,
   Heading,
+  DropdownMenu,
   Separator,
   TextField,
   Select,
@@ -26,9 +28,11 @@ import toast, { Toaster } from "react-hot-toast";
 const root = import.meta.env.VITE_ROOT;
 
 const AddProducts = () => {
+  const navigate = useNavigate();
   const [isloading, setIsLoading] = useState(false);
   const [pricePlan, setPricePlan] = useState(false);
   const [basePrice, setBasePrice] = useState("");
+  const [unit, setUnit] = useState("");
   const [plans, setPlans] = useState([{ name: "", discount: "" }]);
 
   // State management for selected category
@@ -39,8 +43,6 @@ const AddProducts = () => {
 
   // State management for fetched departments
   const [department, setDepartment] = useState([]);
-
-  const [imageURL, setImageURL] = useState("");
 
   const handleSwitchChange = (checked) => {
     setPricePlan(checked);
@@ -67,6 +69,7 @@ const AddProducts = () => {
     };
     setPlans(updatedPlans);
   };
+
   // Add new plan fields
   const handleAddPlan = () => {
     setPlans([...plans, { name: "", discount: "" }]);
@@ -79,7 +82,6 @@ const AddProducts = () => {
     // Check if the token is available
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
-
       return;
     }
 
@@ -93,6 +95,17 @@ const AddProducts = () => {
     }
   };
 
+  const productsCategory = [
+    {
+      name: "Product For Sale",
+      type: "For Sale",
+    },
+    {
+      name: "Product For Purchase",
+      type: "For Purchase",
+    },
+  ];
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -103,18 +116,10 @@ const AddProducts = () => {
     // Check if the token is available
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
-
       return;
     }
 
     // Create the Plans object from the plans array
-    const plansObject = plans.reduce((acc, plan) => {
-      if (plan.name && plan.discount) {
-        acc[plan.name] = plan.discount;
-      }
-      return acc;
-    }, {});
-
     const plansArray = plans
       .filter((plan) => plan.name && plan.discount) // Filter out empty plans
       .map((plan) => ({
@@ -124,31 +129,34 @@ const AddProducts = () => {
 
     const submitObject = {
       name: e.target[0].value,
-      category: selectedCategory,
+      category: productsCategory.find(
+        (product) => product.name === selectedCategory
+      ).type,
       departmentId: selectedDept,
       price: [
         {
-          unit: e.target[4].value,
+          unit: unit,
           amount: Number(basePrice),
         },
       ], // Submit raw base price without commas
-
       pricePlan: plansArray, // Plans as an object
     };
 
     const submitWithoutPlans = {
       name: e.target[0].value,
-      category: selectedCategory,
+      category: productsCategory.find(
+        (product) => product.name === selectedCategory
+      ).type,
       departmentId: selectedDept,
       price: [
         {
-          unit: e.target[4].value,
+          unit: unit,
           amount: Number(basePrice),
         },
       ],
     };
 
-    console.log(pricePlan ? submitObject : submitWithoutPlans);
+    console.log(pricePlan ? submitWithoutPlans : submitObject);
 
     try {
       const response = await axios.post(
@@ -169,7 +177,7 @@ const AddProducts = () => {
       });
       console.log(response);
       setTimeout(() => {
-        window.location.href = "/md/all-products";
+        navigate("/admin/products/view-products");
       }, 1500);
     } catch (error) {
       console.log(error);
@@ -180,8 +188,6 @@ const AddProducts = () => {
           : toast.error(error.response.data.message);
       }
     }
-
-    // Add your form submission logic here
   };
 
   useEffect(() => {
@@ -190,120 +196,121 @@ const AddProducts = () => {
 
   return (
     <div>
-      <UpdateURL url={"/add-products"} />
-      <Card className="w-full">
-        <Heading className="text-left py-4">Add Product</Heading>
-        <Separator className="w-full" />
-        <form onSubmit={handleSubmit}>
-          <div className="flex w-full justify-between gap-8">
-            <div className="left w-[50%]">
-              <div className="input-field mt-3">
-                <label
-                  className="text-[15px] font-medium leading-[35px]"
-                  htmlFor="product-name"
-                >
-                  Product Name
-                </label>
-                <TextField.Root
-                  placeholder="Enter Product name"
-                  type="text"
-                  id="product-name"
-                  size={"3"}
-                />
-              </div>
+      <Flex justify={"between"} align={"center"}>
+        <Heading className="text-left py-4">Create Product</Heading>
 
-              <div className="input-field mt-3">
-                <label
-                  className="text-[15px] font-medium leading-[35px]"
-                  htmlFor="price"
-                >
-                  Base Price
-                </label>
-                <TextField.Root
-                  placeholder="Enter Base Price"
-                  id="price"
-                  type="text" // Use text type to enable formatting
-                  value={formatNumber(basePrice)} // Display formatted number
-                  onChange={handleBasePriceChange} // Update raw value without commas
-                />
-              </div>
-
-              {/* Category Dropdown */}
-              <div className="w-full mt-3">
-                <label className="text-[15px]  font-medium leading-[35px]">
-                  Category
-                </label>
-                <Select.Root
-                  value={selectedCategory}
-                  onValueChange={(value) => setSelectedCategory(value)} // Initial value
-                >
-                  <Select.Trigger
-                    className="w-full"
-                    placeholder="Select Catgory"
-                  >
-                    <Flex as="span" align="center" gap="2">
-                      <FontAwesomeIcon icon={faTags} />
-                      {selectedCategory || "Select Category"}
-                    </Flex>
-                  </Select.Trigger>
-                  <Select.Content position="popper">
-                    {/* {products.map((product) => ( */}
-
-                    <Select.Item value="For Sale">For Sale</Select.Item>
-                    <Select.Item value="For Purchase">For Purchase</Select.Item>
-                    {/* ))} */}
-                  </Select.Content>
-                </Select.Root>
-              </div>
+        <Select.Root
+          value={selectedCategory}
+          onValueChange={(value) => {
+            setSelectedCategory(value); // Update selected category
+            if (value === "Product For Sale") {
+              setSelectedDept(""); // Reset department when category is "Product For Sale"
+            }
+          }}
+        >
+          <Select.Trigger className="" placeholder="Type">
+            <Flex align="center">{selectedCategory || "Select Category"}</Flex>
+          </Select.Trigger>
+          <Select.Content position="popper">
+            {productsCategory.map((customer) => (
+              <Select.Item key={customer.type} value={customer.name}>
+                {customer.name}
+              </Select.Item>
+            ))}
+          </Select.Content>
+        </Select.Root>
+      </Flex>
+      <Separator className="w-full" />
+      <form onSubmit={handleSubmit}>
+        <div className="flex w-full justify-between gap-8">
+          <div className="left w-[50%]">
+            <div className="input-field mt-3">
+              <label
+                className="text-[15px] font-medium leading-[35px]"
+                htmlFor="product-name"
+              >
+                Product Name
+              </label>
+              <TextField.Root
+                placeholder="Enter Product name"
+                type="text"
+                id="product-name"
+                size={"3"}
+              />
             </div>
 
-            <div className="right w-[50%]">
-              <div className="input-field mt-3">
-                <label
-                  className="text-[15px] font-medium leading-[35px]"
-                  htmlFor="unit"
-                >
-                  Product Unit
-                </label>
-                <TextField.Root
-                  placeholder="Specify Unit (kg, litres, bags, others)"
-                  id="unit"
-                  type="text"
-                  size={"3"}
-                />
-              </div>
-
-              {/* Departments Dropdown */}
-              <div className="w-full mt-3">
-                <label className="text-[15px]  font-medium leading-[35px]">
-                  Department
-                </label>
-                <Select.Root
-                  value={selectedDept}
-                  onValueChange={(value) => setSelectedDept(value)} // Initial value
-                >
-                  <Select.Trigger
-                    className="w-full"
-                    placeholder="Select Department"
-                  >
-                    <Flex as="span" align="center" gap="2">
-                      <FontAwesomeIcon icon={faBriefcase} />
-                      {department.find((dept) => dept.id === selectedDept)
-                        ?.name || "Select Department"}
-                    </Flex>
-                  </Select.Trigger>
-                  <Select.Content position="popper">
-                    {department.map((dept) => {
-                      return (
-                        <Select.Item value={dept.id}>{dept.name}</Select.Item>
-                      );
-                    })}
-                  </Select.Content>
-                </Select.Root>
-              </div>
+            <div className="input-field mt-3">
+              <label
+                className="text-[15px] font-medium leading-[35px]"
+                htmlFor="price"
+              >
+                Base Price
+              </label>
+              <TextField.Root
+                placeholder="Enter Base Price"
+                id="price"
+                type="text" // Use text type to enable formatting
+                value={formatNumber(basePrice)} // Display formatted number
+                onChange={handleBasePriceChange} // Update raw value without commas
+              />
             </div>
           </div>
 
+          <div className="right w-[50%]">
+            <div className="input-field mt-3">
+              <label
+                className="text-[15px] font-medium leading-[35px]"
+                htmlFor="unit"
+              >
+                Product Unit
+              </label>
+              <TextField.Root
+                placeholder="Specify Unit (kg, litres, bags, others)"
+                id="unit"
+                type="text"
+                value={unit}
+                onChange={(e) => {
+                  setUnit(e.target.value);
+                }}
+                size={"3"}
+              />
+            </div>
+
+            {/* Conditionally render Departments Dropdown */}
+
+            <div className="w-full mt-3">
+              <label className="text-[15px]  font-medium leading-[35px]">
+                Department
+              </label>
+              <Select.Root
+                value={selectedDept}
+                onValueChange={(value) => setSelectedDept(value)} // Initial value
+              >
+                <Select.Trigger
+                  className="w-full"
+                  placeholder="Select Department"
+                >
+                  <Flex as="span" align="center" gap="2">
+                    <FontAwesomeIcon icon={faBriefcase} />
+                    {department.find((dept) => dept.id === selectedDept)
+                      ?.name || "Select Department"}
+                  </Flex>
+                </Select.Trigger>
+                <Select.Content position="popper">
+                  {department.map((dept) => {
+                    return (
+                      <Select.Item key={dept.id} value={dept.id}>
+                        {dept.name}
+                      </Select.Item>
+                    );
+                  })}
+                </Select.Content>
+              </Select.Root>
+            </div>
+          </div>
+        </div>
+
+        {selectedCategory !== "Product For Sale" && (
           <div className="input-field mt-3 flex justify-end">
             <div>
               <label
@@ -312,10 +319,11 @@ const AddProducts = () => {
               >
                 Price Plan
               </label>
+
               <Switch.Root
-                className={`
-                ${pricePlan ? "bg-green-500" : "bg-gray-500"}
-                w-[32px] h-[15px] bg-black-600 rounded-full relative shadow-[0_2px_10px] border-2 border-black shadow-black/25  data-[state=checked]:bg-green outline-none cursor-default`}
+                className={`${
+                  pricePlan ? "bg-green-500" : "bg-gray-500"
+                } w-[32px] h-[15px] bg-black-600 rounded-full relative shadow-[0_2px_10px] border-2 border-black shadow-black/25  data-[state=checked]:bg-green outline-none cursor-default`}
                 id="pricePlan"
                 checked={pricePlan}
                 onCheckedChange={handleSwitchChange}
@@ -324,73 +332,68 @@ const AddProducts = () => {
               </Switch.Root>
             </div>
           </div>
+        )}
 
-          {pricePlan && (
-            <Card className="mt-4">
-              <Heading className="py-4">Pricing Plan</Heading>
-              <Separator className="w-full mb-4" />
+        {pricePlan && (
+          <>
+            <Heading className="py-4">Pricing Plan</Heading>
+            <Separator className="w-full mb-4" />
 
-              {plans.map((plan, index) => (
-                <Flex key={index} gap={"4"} className="mb-2">
-                  <div className="w-full">
-                    <label htmlFor={`plan-name-${index}`}>
-                      Pricing Plan Name
-                    </label>
-                    <TextField.Root
-                      type="text"
-                      placeholder="Enter Plan Name"
-                      className="mt-1"
-                      value={plan.name}
-                      onChange={(e) =>
-                        handlePlanChange(index, "name", e.target.value)
-                      }
-                    />
-                  </div>
-                  <div className="w-full">
-                    <label htmlFor={`plan-discount-${index}`}>
-                      Plan Discount
-                    </label>
-                    <TextField.Root
-                      type="text" // Use text type to enable formatting
-                      placeholder="Enter Price Discount (in Naira)"
-                      className="mt-1"
-                      value={formatNumber(plan.discount)}
-                      onChange={(e) =>
-                        handlePlanChange(
-                          index,
-                          "discount",
-                          e.target.value.replace(/,/g, "")
-                        )
-                      }
-                    />
-                  </div>
-                </Flex>
-              ))}
+            {plans.map((plan, index) => (
+              <Flex key={index} gap={"4"} className="mb-2">
+                <div className="w-full">
+                  <label htmlFor={`plan-name-${index}`}>
+                    Pricing Plan Name
+                  </label>
+                  <TextField.Root
+                    type="text"
+                    placeholder="Enter Plan Name"
+                    className="mt-1"
+                    value={plan.name}
+                    onChange={(e) =>
+                      handlePlanChange(index, "name", e.target.value)
+                    }
+                  />
+                </div>
+                <div className="w-full">
+                  <label htmlFor={`plan-discount-${index}`}>
+                    Plan Discount
+                  </label>
+                  <TextField.Root
+                    type="text" // Use text type to enable formatting
+                    placeholder="Enter Price Discount (in Naira)"
+                    className="mt-1"
+                    value={formatNumber(plan.discount)}
+                    onChange={(e) =>
+                      handlePlanChange(
+                        index,
+                        "discount",
+                        e.target.value.replace(/,/g, "")
+                      )
+                    }
+                  />
+                </div>
+              </Flex>
+            ))}
 
-              <Button
-                className="mt-3"
-                color="brown"
-                radius="medium"
-                onClick={handleAddPlan}
-              >
-                <PlusIcon width={"20px"} height={"20px"} />
-                Add Plan
-              </Button>
-            </Card>
-          )}
-
-          <Flex justify={"end"} align={"end"} width={"100%"}>
             <Button
-              className="mt-4"
-              size={3}
-              type="submit"
-              disabled={isloading}
+              className="mt-3"
+              color="brown"
+              radius="medium"
+              onClick={handleAddPlan}
             >
-              {isloading ? <Spinner /> : "Create"}
+              <PlusIcon width={"20px"} height={"20px"} />
+              Add Plan
             </Button>
-          </Flex>
-        </form>
-      </Card>
+          </>
+        )}
+
+        <Flex justify={"end"} align={"end"} width={"100%"}>
+          <Button className="mt-4" size={3} type="submit" disabled={isloading}>
+            {isloading ? <Spinner /> : "Create"}
+          </Button>
+        </Flex>
+      </form>
       <Toaster position="top-right" containerStyle={{ padding: "30px" }} />
     </div>
   );

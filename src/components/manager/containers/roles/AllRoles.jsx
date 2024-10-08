@@ -351,6 +351,7 @@ const AllRoles = () => {
       toast.success("Retrieved Successfully");
     } catch (error) {
       console.log(error);
+      setLoading(false);
       toast.error("An error occurred .Try again ");
     }
   };
@@ -361,7 +362,6 @@ const AllRoles = () => {
 
   return (
     <>
-      <UpdateURL url={"/view-roles"} />
       <Heading className="mb-4">Roles</Heading>
       <Table.Root variant="surface">
         <Table.Header>

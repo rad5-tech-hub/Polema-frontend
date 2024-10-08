@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+
 import {
   Tabs,
   Select,
@@ -16,7 +17,9 @@ const root = import.meta.env.VITE_ROOT;
 
 const AuthorityToGiveCash = () => {
   const [customers, setCustomers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState(""); // New state to handle search input
   const [products, setProducts] = useState([]);
+  const [searchProductQuery, setSearchProductQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState("");
   const [basePrice, setBasePrice] = useState("");
@@ -82,7 +85,7 @@ const AuthorityToGiveCash = () => {
       });
 
       console.log(response.data.products);
-      response.data.length === 0
+      response.data.products.length === 0
         ? setProducts([])
         : setProducts(response.data.products);
     } catch (error) {
@@ -189,7 +192,6 @@ const AuthorityToGiveCash = () => {
 
   return (
     <>
-      <UpdateURL url={"/authority-to-give-cash"} />
       <Tabs.Root defaultValue="Customers">
         <Tabs.List className="justify-center flex w-full items-center">
           <Tabs.Trigger value="Customers">Customers</Tabs.Trigger>
@@ -208,17 +210,42 @@ const AuthorityToGiveCash = () => {
                     className="w-full mt-2"
                     placeholder="Select Customer Name"
                   />
+
+                  {/* Dropdown Content */}
                   <Select.Content position="popper">
-                    {customers.map((customer) => {
-                      return (
-                        <Select.Item key={customer.id} value={customer.id}>
-                          {customer.firstname} {customer.lastname}
-                        </Select.Item>
-                      );
-                    })}
+                    {/* Search input inside the dropdown */}
+                    <div className="p-2">
+                      <input
+                        type="text"
+                        placeholder="Search customers..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded"
+                      />
+                    </div>
+
+                    {/* Filter customers based on the search query */}
+                    {customers
+                      .filter(
+                        (customer) =>
+                          customer.firstname
+                            .toLowerCase()
+                            .includes(searchQuery.toLowerCase()) ||
+                          customer.lastname
+                            .toLowerCase()
+                            .includes(searchQuery.toLowerCase())
+                      )
+                      .map((customer) => {
+                        return (
+                          <Select.Item key={customer.id} value={customer.id}>
+                            {customer.firstname} {customer.lastname}
+                          </Select.Item>
+                        );
+                      })}
                   </Select.Content>
                 </Select.Root>
               </div>
+
               <div className="w-full">
                 <Text size={"4"}>Select Product</Text>
                 <Select.Root
@@ -229,14 +256,34 @@ const AuthorityToGiveCash = () => {
                     className="w-full mt-2"
                     placeholder="Select Product"
                   />
+
+                  {/* Dropdown Content */}
                   <Select.Content position="popper">
-                    {products.map((product) => {
-                      return (
-                        <Select.Item key={product.id} value={product.id}>
-                          {product.name}
-                        </Select.Item>
-                      );
-                    })}
+                    {/* Search input inside the dropdown */}
+                    <div className="p-2">
+                      <input
+                        type="text"
+                        placeholder="Search products..."
+                        value={searchProductQuery}
+                        onChange={(e) => setSearchProductQuery(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded"
+                      />
+                    </div>
+
+                    {/* Filter products based on the search query */}
+                    {products
+                      .filter((product) =>
+                        product.name
+                          .toLowerCase()
+                          .includes(searchProductQuery.toLowerCase())
+                      )
+                      .map((product) => {
+                        return (
+                          <Select.Item key={product.id} value={product.id}>
+                            {product.name}
+                          </Select.Item>
+                        );
+                      })}
                   </Select.Content>
                 </Select.Root>
               </div>

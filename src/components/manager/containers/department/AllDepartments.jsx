@@ -262,7 +262,6 @@ const AllDepartments = () => {
 
   return (
     <>
-      <UpdateURL url={"/all-departments"} />
       {isEditOpen ? (
         <EditDialog />
       ) : (

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   Card,
@@ -25,6 +26,8 @@ const CreateRole = ({ child, setChild }) => {
   const root = import.meta.env.VITE_ROOT;
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const navigate = useNavigate();
   const [token, setToken] = useState("");
 
   // Default loader until permissions fetch
@@ -109,7 +112,9 @@ const CreateRole = ({ child, setChild }) => {
           },
         });
 
-        window.location.href = "/md/view-roles";
+        setTimeout(() => {
+          navigate("/admin/admins/view-roles");
+        }, 1500);
       } catch (error) {
         if (error.response) {
           console.log(error.response.data);
@@ -183,7 +188,6 @@ const CreateRole = ({ child, setChild }) => {
   }, []);
   return (
     <div className="!font-space">
-      <UpdateURL url={"/create-role"} />
       <Card className="w-full">
         <Heading className=" py-4">Create Role</Heading>
 
@@ -264,7 +268,12 @@ const CreateRole = ({ child, setChild }) => {
               </div>
 
               <Flex justify={"end"} align={"end"} width={"100%"}>
-                <Button className="mt-4 " size={3} type="submit">
+                <Button
+                  className="mt-4 "
+                  size={3}
+                  type="submit"
+                  disabled={isLoading}
+                >
                   {isLoading ? <Spinner size={"2"} /> : "Create Role"}
                 </Button>
               </Flex>

@@ -3,7 +3,8 @@ import toast, { Toaster } from "react-hot-toast";
 import UpdateURL from "../ChangeRoute";
 import {
   Select,
-  Card,
+  Separator,
+  DropdownMenu,
   Text,
   Flex,
   TextField,
@@ -125,69 +126,71 @@ const AccountBook = () => {
 
   return (
     <>
-      <UpdateURL url={"/account-book"} />
-      <Card>
-        <Heading className="mb-4">Customer Account Book</Heading>
-        <form onSubmit={handleSubmit}>
-          <Flex className="w-full mb-4" gap={"5"}>
-            <div className="w-full">
-              <Text className="mb-4">Customer Name</Text>
-              <Select.Root
-                value={selectedCustomerId}
-                onValueChange={setSelectedCustomerId} // Update selected customer ID
-              >
-                <Select.Trigger
-                  className="w-full mt-2"
-                  placeholder="Select Customer"
-                />
-                <Select.Content position="popper">
-                  {customers.map((customer) => (
-                    <Select.Item key={customer.id} value={customer.id}>
-                      {customer.firstname} {customer.lastname}
-                    </Select.Item>
-                  ))}
-                </Select.Content>
-              </Select.Root>
-            </div>
+      <Flex>
+        <Heading className="mb-4">Add</Heading>
+      </Flex>
 
-            <div className="w-full">
-              <Text className="mb-4">Product</Text>
-              <Select.Root
-                value={selectedProductId}
-                onValueChange={setSelectedProductId} // Update selected product ID
-              >
-                <Select.Trigger
-                  className="w-full mt-2"
-                  placeholder="Select Product"
-                />
-                <Select.Content position="popper">
-                  {products.map((product) => (
-                    <Select.Item key={product.id} value={product.id}>
-                      {product.name}
-                    </Select.Item>
-                  ))}
-                </Select.Content>
-              </Select.Root>
-            </div>
-          </Flex>
-
-          <div>
-            <Text>Enter Amount</Text>
-            <TextField.Root
-              className="mt-2 w-[50%]"
-              placeholder="Enter Amount in Naira (₦)"
-              value={formatNumber(basePrice)} // Display formatted number
-              onChange={handleBasePriceChange}
-            />
+      <Separator className="my-3 w-full" />
+      <form onSubmit={handleSubmit}>
+        <Flex className="w-full mb-4" gap={"5"}>
+          <div className="w-full">
+            <Text className="mb-4">Customer Name</Text>
+            <Select.Root
+              value={selectedCustomerId}
+              onValueChange={setSelectedCustomerId} // Update selected customer ID
+            >
+              <Select.Trigger
+                className="w-full mt-2"
+                placeholder="Select Customer"
+              />
+              <Select.Content position="popper">
+                {customers.map((customer) => (
+                  <Select.Item key={customer.id} value={customer.id}>
+                    {customer.firstname} {customer.lastname}
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select.Root>
           </div>
 
-          <Flex justify={"end"} className="mt-4 cursor-pointer">
-            <Button className="cursor-pointer" type="submit" disabled={loading}>
-              {loading ? <Spinner /> : "Submit"}
-            </Button>
-          </Flex>
-        </form>
-      </Card>
+          <div className="w-full">
+            <Text className="mb-4">Product</Text>
+            <Select.Root
+              value={selectedProductId}
+              onValueChange={setSelectedProductId} // Update selected product ID
+            >
+              <Select.Trigger
+                className="w-full mt-2"
+                placeholder="Select Product"
+              />
+              <Select.Content position="popper">
+                {products.map((product) => (
+                  <Select.Item key={product.id} value={product.id}>
+                    {product.name}
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select.Root>
+          </div>
+        </Flex>
+
+        <div>
+          <Text>Enter Amount</Text>
+          <TextField.Root
+            className="mt-2 w-[50%]"
+            placeholder="Enter Amount in Naira (₦)"
+            value={formatNumber(basePrice)} // Display formatted number
+            onChange={handleBasePriceChange}
+          />
+        </div>
+
+        <Flex justify={"end"} className="mt-4 cursor-pointer">
+          <Button className="cursor-pointer" type="submit" disabled={loading}>
+            {loading ? <Spinner /> : "Submit"}
+          </Button>
+        </Flex>
+      </form>
+
       <Toaster position="top-right" />
     </>
   );

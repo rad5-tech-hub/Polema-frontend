@@ -12,8 +12,6 @@ const CustomerLedger = () => {
   };
   return (
     <>
-      <UpdateURL url={"/customer-ledger"} />
-
       <Table.Root variant="surface">
         <Table.Header>
           <Table.Row>

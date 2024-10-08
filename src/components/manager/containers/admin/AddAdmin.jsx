@@ -153,7 +153,6 @@ const AddAdmin = ({ child, setChild }) => {
   }, []);
   return (
     <div className="!font-space">
-      <UpdateURL url={"/create-admin"} />
       <Card className="w-full">
         <Heading className="text-left py-4">Create Admin</Heading>
         <Separator className="w-full" />
@@ -314,7 +313,12 @@ const AddAdmin = ({ child, setChild }) => {
           {/* Permissions Div */}
 
           <Flex justify={"end"} align={"end"} width={"100%"}>
-            <Button className="mt-4 " size={3} type="submit">
+            <Button
+              className="mt-4 "
+              size={3}
+              type="submit"
+              disabled={isLoading}
+            >
               {isLoading ? <Spinner size={"2"} /> : "Create Admin"}
             </Button>
           </Flex>

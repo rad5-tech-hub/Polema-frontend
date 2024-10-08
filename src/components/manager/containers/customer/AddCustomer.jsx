@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import {
@@ -25,6 +26,7 @@ import UpdateURL from "../ChangeRoute";
 const root = import.meta.env.VITE_ROOT;
 
 const AddCustomer = ({ child, setChild, buttonValue }) => {
+  const navigate = useNavigate();
   const [value, setValue] = useState("admin");
   const [selectedItems, setSelectedItems] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -126,7 +128,7 @@ const AddCustomer = ({ child, setChild, buttonValue }) => {
       });
 
       // Redirect to all customers page
-      window.location.href = "/md/all-customers";
+      navigate("/admin/customer/view-customers");
     } catch (error) {
       console.log(error);
       setIsLoading(false);
@@ -150,7 +152,6 @@ const AddCustomer = ({ child, setChild, buttonValue }) => {
 
   return (
     <div>
-      <UpdateURL url={"/add-customer"} />
       <Card className="w-full">
         <Heading className="text-left p-4">Customers</Heading>
         <Separator className="w-full" />

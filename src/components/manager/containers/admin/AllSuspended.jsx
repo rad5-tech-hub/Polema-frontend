@@ -207,7 +207,6 @@ const AllSuspended = () => {
 
   return (
     <>
-      <UpdateURL url={"/suspended-admins"} />
       <Heading className="mb-4">Suspended Admins</Heading>
 
       <Table.Root variant="surface">

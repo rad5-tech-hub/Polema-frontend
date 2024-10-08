@@ -199,7 +199,7 @@ const AllAdmins = () => {
           : toast.error("An Error Occured");
       }
     } finally {
-      setLoading(false); // Set loading to false after fetching
+      setLoading(false);
     }
   };
 
@@ -512,8 +512,6 @@ const AllAdmins = () => {
 
   return (
     <>
-      <UpdateURL url={"/view-admins"} />
-
       {editDialogOpen ? (
         <EditDialog />
       ) : (
