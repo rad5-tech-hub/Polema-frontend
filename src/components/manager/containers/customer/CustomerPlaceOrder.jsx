@@ -1,29 +1,22 @@
-import React, { useEffect, useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
-import UpdateURL from "../ChangeRoute";
+import React, { useState, useEffect } from "react";
 import {
-  Select,
+  Heading,
   Separator,
-  DropdownMenu,
-  Text,
   Flex,
+  Select,
+  Text,
   TextField,
   Button,
-  Spinner,
-  Heading,
 } from "@radix-ui/themes";
 import axios from "axios";
 const root = import.meta.env.VITE_ROOT;
 
-const AccountBook = () => {
-  const navigate = useNavigate();
+const CustomerPlaceOrder = () => {
+  const [basePrice, setBasePrice] = useState("");
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
   const [selectedProductId, setSelectedProductId] = useState("");
-  const [basePrice, setBasePrice] = useState("");
-  const [loading, setLoading] = useState(false);
 
   // Function to format number with commas
   const formatNumber = (num) => {
@@ -47,12 +40,13 @@ const AccountBook = () => {
     }
 
     try {
-      const response = await axios.get(`${root}/customer/get-customers`, {
+      const response = await axios.get(`${root}/customer/get-suppliers`, {
         headers: {
           Authorization: `Bearer ${retrToken}`,
         },
       });
       setCustomers(response.data.customers);
+      console.log(response);
     } catch (error) {
       console.log(error);
     }
@@ -77,66 +71,15 @@ const AccountBook = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    const retrToken = localStorage.getItem("token");
-
-    if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
-      return;
-    }
-
-    const submissionData = {
-      customerId: selectedCustomerId,
-      productId: selectedProductId,
-      amount: basePrice,
-    };
-
-    try {
-      const response = await axios.post(
-        `${root}/customer/create-account`,
-        submissionData,
-        { headers: { Authorization: `Bearer ${retrToken}` } }
-      );
-      console.log(response);
-      toast.success(response.data.message, {
-        duration: 6500,
-        style: {
-          padding: "30px",
-        },
-      });
-      setTimeout(() => {
-        navigate("/admin/account-book/view-all");
-      }, 1500);
-    } catch (error) {
-      console.log(error);
-      toast.error(error.message, {
-        duration: 6500,
-        style: {
-          padding: "30px",
-        },
-      });
-    }
-
-    // Reset loading after submitting
-    setLoading(false);
-  };
-
   useEffect(() => {
     fetchCustomers();
     fetchProducts();
   }, []);
-
   return (
     <>
-      <Flex>
-        <Heading className="mb-4">Add</Heading>
-      </Flex>
-
+      <Heading>Place Order</Heading>
       <Separator className="my-3 w-full" />
-      <form onSubmit={handleSubmit}>
+      <form action="">
         <Flex className="w-full mb-4" gap={"5"}>
           <div className="w-full">
             <Text className="mb-4">Customer Name</Text>
@@ -179,26 +122,33 @@ const AccountBook = () => {
           </div>
         </Flex>
 
-        <div>
-          <Text>Enter Amount</Text>
-          <TextField.Root
-            className="mt-2 w-[50%]"
-            placeholder="Enter Amount in Naira (₦)"
-            value={formatNumber(basePrice)} // Display formatted number
-            onChange={handleBasePriceChange}
-          />
-        </div>
-
-        <Flex justify={"end"} className="mt-4 cursor-pointer">
-          <Button className="cursor-pointer" type="submit" disabled={loading}>
-            {loading ? <Spinner /> : "Submit"}
-          </Button>
+        <Flex className="w-full mb-4" gap={"5"}>
+          <div className="w-full">
+            <Text className="mb-4"> Quantity</Text>
+            <TextField.Root className="mt-2 " placeholder="Input Quantity" />
+          </div>
+          <div className="w-full">
+            <Text className="mb-4">Product Unit </Text>
+            <TextField.Root className="mt-2 " placeholder="Enter Unit" />
+          </div>
+        </Flex>
+        <Flex className="w-full mb-4" gap={"5"}>
+          <div className="w-full">
+            <Text className="mb-4"> Enter Price</Text>
+            <TextField.Root
+              className="mt-2 w-[50%] "
+              placeholder="Enter Price in Naira(₦)"
+              value={formatNumber(basePrice)} // Display formatted number
+              onChange={handleBasePriceChange}
+            />
+          </div>
+        </Flex>
+        <Flex className="w-full mb-4" gap={"5"} justify={"end"}>
+          <Button size={"3"}>Add</Button>
         </Flex>
       </form>
-
-      <Toaster position="top-right" />
     </>
   );
 };
 
-export default AccountBook;
+export default CustomerPlaceOrder;

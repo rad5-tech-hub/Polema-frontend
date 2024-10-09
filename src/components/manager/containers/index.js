@@ -17,6 +17,7 @@ import AllProducts from "./products/AllProducts";
 import AuthorityToGiveCash from "./raise-tickets/AuthorityToGiveCash";
 import AllSuspended from "./admin/AllSuspended";
 import CustomerLedger from "./customer/CustomerLedger";
+import CustomerPlaceOrder from "./customer/CustomerPlaceOrder";
 import AccountBook from "./account-book/AccountBook";
 
 export {
@@ -25,6 +26,7 @@ export {
   SupplierPlaceOrder,
   AddSuppliers,
   AccountBook,
+  CustomerPlaceOrder,
   CustomerLedger,
   ViewAccoountBook,
   CreateRole,

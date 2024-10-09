@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { refractor } from "../../../date";
 import toast, { Toaster } from "react-hot-toast";
-import { Spinner, Table } from "@radix-ui/themes";
+import { Spinner, Table, Heading } from "@radix-ui/themes";
 import axios from "axios";
 
 const root = import.meta.env.VITE_ROOT;
@@ -99,9 +100,11 @@ const ViewAccoountBook = () => {
 
   return (
     <>
+      <Heading className="mb-4">Customer Account Book</Heading>
       <Table.Root variant="surface">
         <Table.Header>
           <Table.Row>
+            <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>CUSTOMER NAME</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>PRODUCT</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>AMOUNT(₦)</Table.ColumnHeaderCell>
@@ -121,6 +124,7 @@ const ViewAccoountBook = () => {
             ) : (
               accountBook.map((details) => (
                 <Table.Row key={details.id}>
+                  <Table.Cell>{refractor(details.createdAt)}</Table.Cell>
                   <Table.Cell>
                     {getCustomerNameById(details.customerId)}
                   </Table.Cell>

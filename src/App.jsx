@@ -10,6 +10,7 @@ import {
   WelcomeComponent,
   AddProducts,
   AddCustomer,
+  CustomerPlaceOrder,
   CustomerLedger,
   AuthorityToGiveCash,
   AllProducts,
@@ -63,6 +64,10 @@ const App = () => {
                   <Route
                     path="customers/customer-ledger"
                     element={<CustomerLedger />}
+                  />
+                  <Route
+                    path="customers/place-order"
+                    element={<CustomerPlaceOrder />}
                   />
 
                   {/* Account Book Routes */}
