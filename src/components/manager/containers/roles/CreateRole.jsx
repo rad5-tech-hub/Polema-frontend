@@ -90,8 +90,6 @@ const CreateRole = ({ child, setChild }) => {
         return;
       }
 
-      console.log(submitobject);
-
       try {
         // Make the API request with await
         const response = await axios.post(
@@ -287,55 +285,3 @@ const CreateRole = ({ child, setChild }) => {
 };
 
 export default CreateRole;
-
-// "viewUser",
-// "editUser",
-// "resetUserPassword",
-// "createUser",
-// "suspendUser",
-// "deleteUser",
-
-// "viewRole",
-// "editRole",
-// "createRole",
-// "deleteRole",
-
-// "viewCustomer",
-// "editCustomer",
-// "createCustomer",
-// "deleteCustomer",
-
-// "viewPharmProduct",
-// "editPharmProduct",
-// "createPharmProduct",
-// "deletePharmProduct",
-
-// "viewTicket",
-// "editTicket",
-// "approveTicket",
-// "createTicket",
-// "deleteTicket",
-
-// "viewProducts",
-// "editProduct",
-// "createProduct",
-// "editProductPrice",
-
-// "viewSupplier",
-// "editSupplier",
-// "createSupplier",
-// "deleteSupplier",
-
-// "viewOrder",
-// "createOrder",
-// "deleteOrder",
-
-// "viewReport",
-// "downloadReport",
-// "createReport",
-// "shareReport",
-
-// "viewInventory",
-// "editInventory",
-// "createInventory",
-// "updateInventory",

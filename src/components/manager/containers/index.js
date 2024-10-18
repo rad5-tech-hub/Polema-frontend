@@ -1,4 +1,6 @@
 import WelcomeComponent from "./WelcomeComponent";
+import ViewPharmacy from "./pharmacy-store/ViewPharmacy";
+import CreatePharmacyStore from "./pharmacy-store/CreatePharmacyStore";
 import AllAdmins from "./admin/AllAdmins";
 import AddAdmin from "./admin/AddAdmin";
 import AddDepartment from "./department/AddDepartment";
@@ -32,6 +34,7 @@ export {
   CreateRole,
   AllSuppliers,
   AllRoles,
+  CreatePharmacyStore,
   AllDepartments,
   AllSuspended,
   AllAdmins,
@@ -42,4 +45,5 @@ export {
   UsersList,
   AddProducts,
   AllCustomers,
+  ViewPharmacy,
 };

@@ -140,12 +140,18 @@ import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { TextField, Heading, Card, Button } from "@radix-ui/themes";
-import { LockClosedIcon, EnvelopeClosedIcon } from "@radix-ui/react-icons";
+import {
+  LockClosedIcon,
+  EnvelopeClosedIcon,
+  EyeOpenIcon,
+  EyeClosedIcon,
+} from "@radix-ui/react-icons"; // Add icons for eye open and closed
 
 const root = import.meta.env.VITE_ROOT;
 
 const LoginContent = () => {
   const [loading, setLoading] = useState(false); // Spinner state
+  const [passwordVisible, setPasswordVisible] = useState(false); // Password visibility state
   const navigate = useNavigate();
 
   const handleLoginForm = async (e) => {
@@ -189,6 +195,10 @@ const LoginContent = () => {
     }
   };
 
+  const togglePasswordVisibility = () => {
+    setPasswordVisible(!passwordVisible);
+  };
+
   return (
     <>
       <div
@@ -197,16 +207,16 @@ const LoginContent = () => {
           backgroundImage: `
           linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(41, 41, 41, 0.85) 50%, rgba(0, 0, 0, 0.95) 100%),
           url(${Image})`,
-          backgroundSize: "cover", // Ensures the image covers the entire background
-          backgroundPosition: "center", // Centers the background image
-          backgroundBlendMode: "overlay", // Blends the gradient with the image
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundBlendMode: "overlay",
         }}
       >
         <div className="xs:w-[100%] sm:w-[450px]">
           <div style={{ textAlign: "center", color: "#f1f1f1" }}>
             <Heading mb="6">POLEMA</Heading>
           </div>
-          <Card className=" p-4 ">
+          <Card className="p-4">
             <form onSubmit={handleLoginForm}>
               <div style={{ textAlign: "center" }}>
                 <Heading mb="6">USER LOGIN</Heading>
@@ -224,11 +234,21 @@ const LoginContent = () => {
               <TextField.Root
                 placeholder="Password"
                 className="mt-4"
-                type="password"
+                type={passwordVisible ? "text" : "password"} // Toggle between text and password
                 size={"3"}
               >
                 <TextField.Slot>
                   <LockClosedIcon height="16" width="16" />
+                </TextField.Slot>
+                <TextField.Slot
+                  onClick={togglePasswordVisibility}
+                  className="cursor-pointer"
+                >
+                  {passwordVisible ? (
+                    <EyeOpenIcon height="16" width="16" /> // Eye closed icon when visible
+                  ) : (
+                    <EyeClosedIcon height="16" width="16" /> // Eye open icon when hidden
+                  )}
                 </TextField.Slot>
               </TextField.Root>
 
@@ -245,8 +265,7 @@ const LoginContent = () => {
                   <p className="text-white">Please Wait...</p>
                 ) : (
                   "Submit"
-                )}{" "}
-                {/* Spinner text */}
+                )}
               </Button>
             </form>
           </Card>

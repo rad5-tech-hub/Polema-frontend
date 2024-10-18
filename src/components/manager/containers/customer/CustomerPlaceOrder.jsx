@@ -40,13 +40,12 @@ const CustomerPlaceOrder = () => {
     }
 
     try {
-      const response = await axios.get(`${root}/customer/get-suppliers`, {
+      const response = await axios.get(`${root}/customer/get-customers`, {
         headers: {
           Authorization: `Bearer ${retrToken}`,
         },
       });
       setCustomers(response.data.customers);
-      console.log(response);
     } catch (error) {
       console.log(error);
     }
@@ -65,10 +64,16 @@ const CustomerPlaceOrder = () => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      setProducts(response.data.products);
+      console.log(response.data.products);
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    alert("form Submitted");
   };
 
   useEffect(() => {
@@ -79,7 +84,7 @@ const CustomerPlaceOrder = () => {
     <>
       <Heading>Place Order</Heading>
       <Separator className="my-3 w-full" />
-      <form action="">
+      <form action="" onSubmit={handleSubmit}>
         <Flex className="w-full mb-4" gap={"5"}>
           <div className="w-full">
             <Text className="mb-4">Customer Name</Text>
@@ -134,9 +139,28 @@ const CustomerPlaceOrder = () => {
         </Flex>
         <Flex className="w-full mb-4" gap={"5"}>
           <div className="w-full">
+            <Text className="mb-4">Price Discount (Optional)</Text>
+            <Select.Root
+              value={selectedProductId}
+              onValueChange={setSelectedProductId} // Update selected product ID
+            >
+              <Select.Trigger
+                className="w-full mt-2"
+                placeholder="Select Plan"
+              />
+              <Select.Content position="popper">
+                {products.map((product) => (
+                  <Select.Item key={product.id} value={product.id}>
+                    {product.name}
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select.Root>
+          </div>
+          <div className="w-full">
             <Text className="mb-4"> Enter Price</Text>
             <TextField.Root
-              className="mt-2 w-[50%] "
+              className="mt-2  "
               placeholder="Enter Price in Naira(₦)"
               value={formatNumber(basePrice)} // Display formatted number
               onChange={handleBasePriceChange}
@@ -144,7 +168,9 @@ const CustomerPlaceOrder = () => {
           </div>
         </Flex>
         <Flex className="w-full mb-4" gap={"5"} justify={"end"}>
-          <Button size={"3"}>Add</Button>
+          <Button size={"3"} type="submit">
+            Add
+          </Button>
         </Flex>
       </form>
     </>

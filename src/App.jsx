@@ -8,12 +8,14 @@ import DashBoardManager from "./components/manager/DashboardManager";
 import {
   AddAdmin,
   WelcomeComponent,
+  ViewPharmacy,
   AddProducts,
   AddCustomer,
   CustomerPlaceOrder,
   CustomerLedger,
   AuthorityToGiveCash,
   AllProducts,
+  CreatePharmacyStore,
   CreateRole,
   ViewAccoountBook,
   AccountBook,
@@ -126,6 +128,16 @@ const App = () => {
                   <Route
                     path="raise-tickets/authority-to-give-cash"
                     element={<AuthorityToGiveCash />}
+                  />
+
+                  {/* Test Routes for phamrcy store */}
+                  <Route
+                    path="/pharmacy-store"
+                    element={<CreatePharmacyStore />}
+                  />
+                  <Route
+                    path="/pharmacy-store/view-store"
+                    element={<ViewPharmacy />}
                   />
                 </Routes>
               </DashBoardManager>

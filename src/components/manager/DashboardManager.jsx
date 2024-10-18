@@ -34,7 +34,7 @@ const DashBoardManager = ({ children }) => {
   // Function to trim string length
   function trimString(str, length) {
     if (str.length > 10) {
-      return str.slice(0, length  ) + "...";
+      return str.slice(0, length) + "...";
     }
     return str;
   }

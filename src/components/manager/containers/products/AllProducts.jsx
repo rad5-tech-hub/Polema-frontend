@@ -51,7 +51,7 @@ const DeleteDialog = ({ isOpen, onClose, runFetch, id }) => {
       console.log(response);
       setDeleteLoading(false);
       onClose();
-      toast.success(response.data.message);
+      // toast.success(response.data.message);
       runFetch();
     } catch (error) {
       console.log(error);
@@ -219,7 +219,7 @@ const AllProducts = () => {
         setDepartment([]);
       } catch (error) {
         console.log(error);
-        toast.error();
+        // toast.error();
       }
     };
     return (

@@ -17,6 +17,9 @@ module.exports = {
         space: ["Inter", "sans-serif"],
         amsterdam: ["Roboto", "sans-serif"],
       },
+      colors: {
+        theme: "#434343",
+      },
     },
     screens: {
       xs: "360px",

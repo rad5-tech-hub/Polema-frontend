@@ -322,14 +322,6 @@ const AllCustomers = () => {
         },
       });
 
-      toast.success(response.data.message, {
-        duration: 6500,
-        style: {
-          padding: "25px",
-        },
-      });
-      console.log(response);
-
       {
         response.data.customers.length === 0
           ? setCustomerData([])
@@ -378,6 +370,7 @@ const AllCustomers = () => {
             <Table.ColumnHeaderCell>ADDRESS</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>PHONE</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
 
@@ -396,8 +389,7 @@ const AllCustomers = () => {
                 <>
                   <Table.Row
                     key={customer.id}
-                    onClick={() => handleEditClcik(customer)}
-                    className="relative hover:bg-[rgb(225,225,225)]/30 cursor-pointer"
+                    className="relative cursor-pointer"
                   >
                     {" "}
                     {/* Ensure unique key */}
@@ -409,32 +401,29 @@ const AllCustomers = () => {
                     <Table.Cell>{customer.address}</Table.Cell>
                     <Table.Cell>{customer.phoneNumber}</Table.Cell>
                     <Table.Cell>{refractor(customer.createdAt)}</Table.Cell>
-                    {/* <div className="absolute right-4 top-2">
-                      <DropdownMenu.Root>
-                        <DropdownMenu.Trigger>
-                          <Button variant="surface" className="cursor-pointer">
-                            <DropDownIcon />
-                            
-                          </Button>
-                        </DropdownMenu.Trigger>
-                        <DropdownMenu.Content>
-                          <DropdownMenu.Item
-                            shortcut={<FontAwesomeIcon icon={faPen} />}
-                            onClick={() => handleEditClcik(customer)}
-                          >
-                            Edit
-                          </DropdownMenu.Item>
-                          {}
-                          <DropdownMenu.Item
-                            color="red"
-                            shortcut={<DeleteIcon />}
-                            onClick={() => handleDeleteClick(customer)}
-                          >
-                            Delete
-                          </DropdownMenu.Item>
-                        </DropdownMenu.Content>
-                      </DropdownMenu.Root>
-                    </div> */}
+                    <Table.Cell>
+                      <div className="absolute right-4 top-2">
+                        <DropdownMenu.Root>
+                          <DropdownMenu.Trigger>
+                            <Button
+                              variant="surface"
+                              className="cursor-pointer"
+                            >
+                              <DropDownIcon />
+                            </Button>
+                          </DropdownMenu.Trigger>
+                          <DropdownMenu.Content variant="solid">
+                            <DropdownMenu.Item
+                              shortcut={<FontAwesomeIcon icon={faPen} />}
+                              onClick={() => handleEditClcik(customer)}
+                            >
+                              Edit
+                            </DropdownMenu.Item>
+                            {}
+                          </DropdownMenu.Content>
+                        </DropdownMenu.Root>
+                      </div>
+                    </Table.Cell>
                   </Table.Row>
                 </>
               ))

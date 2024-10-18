@@ -1,14 +1,22 @@
 import { UpdateIcon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { refractor } from "../../../date";
 import React, { useEffect, useState } from "react";
-import UpdateURL from "../ChangeRoute";
-import { Heading, Table, TextField, Spinner, Flex } from "@radix-ui/themes";
+import { DeleteIcon, DropDownIcon } from "../../../icons";
+import {
+  Heading,
+  Table,
+  TextField,
+  Spinner,
+  Flex,
+  Button,
+  DropdownMenu,
+} from "@radix-ui/themes";
 import axios from "axios";
 
 //All imports for the Dialog Box
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as Dialog from "@radix-ui/react-dialog";
-import { faClose } from "@fortawesome/free-solid-svg-icons";
+import { faClose, faPen } from "@fortawesome/free-solid-svg-icons";
 import toast, { LoaderIcon, Toaster } from "react-hot-toast";
 
 const root = import.meta.env.VITE_ROOT;
@@ -266,6 +274,7 @@ const AllSuppliers = () => {
               <Table.ColumnHeaderCell>ADDRESS</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell>PHONE</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
             </Table.Row>
           </Table.Header>
           {pageLoading ? (
@@ -280,7 +289,7 @@ const AllSuppliers = () => {
                 suppliers.map((supplier) => {
                   return (
                     <Table.Row
-                      className="cursor-pointer hover:bg-[rgb(225,225,225)]/30"
+                      className="cursor-pointer  relative"
                       onClick={() => setViewStaff(supplier)}
                     >
                       <Table.Cell>{supplier.supplierTag}</Table.Cell>
@@ -290,6 +299,28 @@ const AllSuppliers = () => {
                       <Table.Cell>{supplier.address}</Table.Cell>
                       <Table.Cell>{supplier.phoneNumber}</Table.Cell>
                       <Table.Cell>{refractor(supplier.createdAt)}</Table.Cell>
+                      <Table.Cell>
+                        <div className="absolute right-4 top-2">
+                          <DropdownMenu.Root>
+                            <DropdownMenu.Trigger>
+                              <Button
+                                variant="surface"
+                                className="cursor-pointer"
+                              >
+                                <DropDownIcon />
+                              </Button>
+                            </DropdownMenu.Trigger>
+                            <DropdownMenu.Content variant="solid">
+                              <DropdownMenu.Item
+                                shortcut={<FontAwesomeIcon icon={faPen} />}
+                                onClick={() => setViewStaff(supplier)}
+                              >
+                                Edit
+                              </DropdownMenu.Item>
+                            </DropdownMenu.Content>
+                          </DropdownMenu.Root>
+                        </div>
+                      </Table.Cell>
                     </Table.Row>
                   );
                 })
