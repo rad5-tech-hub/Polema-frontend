@@ -1,5 +1,4 @@
 import { refractor } from "../../../date";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
   Heading,
   Select,
@@ -18,6 +17,7 @@ import { LoaderIcon } from "react-hot-toast";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 const root = import.meta.env.VITE_ROOT;
+import { DropdownMenu } from "@radix-ui/themes";
 
 const ViewPharmacyStore = () => {
   const [isRawMaterials, setIsRawMaterials] = useState(false);
@@ -185,40 +185,6 @@ const ViewPharmacyStore = () => {
                     />
                     {item.status}
                   </Table.Cell>
-                  <DropdownMenu.Root>
-                    <DropdownMenu.Trigger />
-
-                    <DropdownMenu.Portal>
-                      <DropdownMenu.Content>
-                        <DropdownMenu.Label />
-                        <DropdownMenu.Item />
-
-                        <DropdownMenu.Group>
-                          <DropdownMenu.Item />
-                        </DropdownMenu.Group>
-
-                        <DropdownMenu.CheckboxItem>
-                          <DropdownMenu.ItemIndicator />
-                        </DropdownMenu.CheckboxItem>
-
-                        <DropdownMenu.RadioGroup>
-                          <DropdownMenu.RadioItem>
-                            <DropdownMenu.ItemIndicator />
-                          </DropdownMenu.RadioItem>
-                        </DropdownMenu.RadioGroup>
-
-                        <DropdownMenu.Sub>
-                          <DropdownMenu.SubTrigger />
-                          <DropdownMenu.Portal>
-                            <DropdownMenu.SubContent />
-                          </DropdownMenu.Portal>
-                        </DropdownMenu.Sub>
-
-                        <DropdownMenu.Separator />
-                        <DropdownMenu.Arrow />
-                      </DropdownMenu.Content>
-                    </DropdownMenu.Portal>
-                  </DropdownMenu.Root>
                 </Table.Row>
               );
             })
