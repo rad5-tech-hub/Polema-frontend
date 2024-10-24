@@ -1,4 +1,10 @@
 import WelcomeComponent from "./WelcomeComponent";
+import CreateDepartmentStore from "./department-store/CreateDepartmentStore";
+import GeneralStorePlaceOrder from "./general-store/GeneralStorePlaceOrder";
+import ViewShelf from "./general-store/ViewShelf";
+import CreateShelf from "./general-store/CreateShelf";
+import ViewPharmacyOrder from "./pharmacy-store/ViewPharmacyOrder";
+import PharmacyPlaceOrder from "./pharmacy-store/PharmacyPlaceOrder";
 import ViewPharmacy from "./pharmacy-store/ViewPharmacy";
 import CreatePharmacyStore from "./pharmacy-store/CreatePharmacyStore";
 import AllAdmins from "./admin/AllAdmins";
@@ -21,9 +27,15 @@ import AllSuspended from "./admin/AllSuspended";
 import CustomerLedger from "./customer/CustomerLedger";
 import CustomerPlaceOrder from "./customer/CustomerPlaceOrder";
 import AccountBook from "./account-book/AccountBook";
+import DepartementStorePlaceOrder from "./department-store/DepartementStorePlaceOrder";
+import DepartmentStoreViewOrders from "./department-store/DepartmentStoreViewOrders";
+import ViewDepartmentStore from "./department-store/ViewDepartmentStore";
 
 export {
   AddAdmin,
+  DepartementStorePlaceOrder,
+  DepartmentStoreViewOrders,
+  ViewDepartmentStore,
   AuthorityToGiveCash,
   SupplierPlaceOrder,
   AddSuppliers,
@@ -45,5 +57,11 @@ export {
   UsersList,
   AddProducts,
   AllCustomers,
+  CreateShelf,
+  PharmacyPlaceOrder,
   ViewPharmacy,
+  ViewPharmacyOrder,
+  CreateDepartmentStore,
+  ViewShelf,
+  GeneralStorePlaceOrder,
 };

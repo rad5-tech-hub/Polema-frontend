@@ -1,28 +1,35 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { refractor } from "../../../date";
 import { DropdownMenu, TextField } from "@radix-ui/themes";
 import {
   Blockquote,
   Separator,
   Flex,
   Grid,
+  Spinner,
   Table,
   Button,
   Heading,
   Select,
 } from "@radix-ui/themes";
-import { Cross2Icon } from "@radix-ui/react-icons";
+
 import { DropDownIcon, DeleteIcon } from "../../../icons";
 import { faPen } from "@fortawesome/free-solid-svg-icons";
 import {
   faPills,
   faPlus,
+  faArrowLeft,
+  faArrowRight,
   faArrowUp,
   faArrowDown,
   faClose,
   faSquare,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import toast, { Toaster } from "react-hot-toast";
 import * as Dialog from "@radix-ui/react-dialog";
+import axios from "axios";
+const root = import.meta.env.VITE_ROOT;
 
 // Add dialog box
 const AddDialog = ({ isOpen, onClose }) => {
@@ -192,136 +199,63 @@ const EditDialog = ({ isOpen, onClose }) => {
   );
 };
 
+// Remove Dialog Box
+const RemoveDialog = ({ isOpen, onClose }) => {
+  return (
+    <Dialog.Root open={isOpen} onOpenChange={onClose}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="bg-black/50 data-[state=open]:animate-overlayShow backdrop-blur-sm fixed inset-0" />
+
+        <Dialog.Content className=" fixed top-[50%] left-[50%] min-h-[75vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none">
+          <Dialog.Title className=" mb-4 text-[17px] font-medium text-black">
+            Remove
+          </Dialog.Title>
+          <div className="w-[90px] h-[90px] rounded-lg cursor-pointer bg-[#f4f4f4] border-dashed border-[2px]"></div>
+          <form action="" className="mt-8">
+            <Flex justify={"between"}>
+              <p className="p-1 font-bold">Product Name</p>
+              <TextField.Root className="p-1" disabled></TextField.Root>
+            </Flex>
+            <Flex justify={"between"} className="mt-3">
+              <p className="p-1 font-bold">Quantity</p>
+              <TextField.Root className="p-1"></TextField.Root>
+            </Flex>
+            <Flex justify={"between"} className="mt-3">
+              <p className="p-1 font-bold">Unit</p>
+              <TextField.Root className="p-1" disabled></TextField.Root>
+            </Flex>
+          </form>
+          <div className="mt-[25px] flex absolute bottom-[20px] right-[20px] justify-end">
+            <Dialog.Close asChild>
+              <button
+                onClick={() => onClose()}
+                className="bg-transparent focus:shadow-red7 border-theme border-[1px] inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
+              >
+                Discard
+              </button>
+            </Dialog.Close>
+            <button className=" ml-4 bg-theme text-white hover:bg-red-600 focus:shadow-red7 inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none">
+              Yes
+            </button>
+          </div>
+          <Dialog.Close asChild>
+            <button
+              className="text-violet11 hover:bg-violet4 focus:shadow-violet7 absolute top-[10px] right-[10px] inline-flex h-[25px] w-[25px] appearance-none items-center justify-center rounded-full focus:shadow-[0_0_0_2px] focus:outline-none"
+              aria-label="Close"
+            >
+              <FontAwesomeIcon icon={faClose} color="black" />
+            </button>
+          </Dialog.Close>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+};
+
 const ViewPharmacy = () => {
-  const [selectedAddItem, setSelectedAddItem] = useState(true);
+  const [selectedAddItem, setSelectedAddItem] = useState(null);
   const [selectedEditItem, setSelectedEditItem] = useState(null);
   const [selectedRemoveItem, setSelectedRemoveItem] = useState(null);
-
-  const detailsArray = [
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Paracetamol",
-      stockNumber: 350,
-      stockAvailable: false,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 40,
-      stockAvailable: false,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-  ];
-
-  const listArray = [
-    {
-      date: "10/15/25",
-      productName: "Paracetamol",
-      id: "23HJZyo0",
-      category: "Antibiotics",
-      unit: "TONS",
-      thresholdValue: 50,
-      stockStatus: false,
-    },
-    {
-      date: "10/15/25",
-      productName: "Paracetamol",
-      id: "23HJZyo0",
-      category: "Antibiotics",
-      unit: "TONS",
-      thresholdValue: 50,
-      stockStatus: false,
-    },
-    {
-      date: "10/15/25",
-      productName: "Panadol",
-      id: "23HJZyo0",
-      category: "Anagestics",
-      unit: "Kilos",
-      thresholdValue: 1000,
-      stockStatus: true,
-    },
-    {
-      date: "10/15/25",
-      productName: "Panadol",
-      id: "23HJZyo0",
-      category: "Repelaant",
-      unit: "Kilos",
-      thresholdValue: 1000,
-      stockStatus: false,
-    },
-    {
-      date: "10/15/25",
-      productName: "Septodont",
-      id: "23HJZyo0",
-      unit: "Kilogram",
-      category: "Antibiotics",
-      thresholdValue: 580,
-      stockStatus: true,
-    },
-  ];
 
   // Function to handle the add dialog visibility
   const handleAddClick = () => {
@@ -332,10 +266,16 @@ const ViewPharmacy = () => {
   const handleEditClick = () => {
     setSelectedEditItem(true);
   };
+
+  // Function to handle remove dialog visibility
+  const handleRemoveClick = () => {
+    setSelectedRemoveItem(true);
+  };
+
   return (
     <>
       <Flex justify={"between"}>
-        <Heading>Add New</Heading>
+        <Heading>View All</Heading>
         <Select.Root defaultValue="products">
           <Select.Trigger />
           <Select.Content>
@@ -351,7 +291,7 @@ const ViewPharmacy = () => {
 
       {/* Section showing availability status for various items */}
       <div>
-        <Grid columns={"5"} rows={"3"} gapX={"4"} gapY={"3"}>
+        {/* <Grid columns={"5"} rows={"3"} gapX={"4"} gapY={"3"}>
           {detailsArray.map((item, index) => {
             return (
               <div
@@ -386,7 +326,7 @@ const ViewPharmacy = () => {
               </div>
             );
           })}
-        </Grid>
+        </Grid> */}
       </div>
 
       {/* Table showing products  and their availability */}
@@ -417,14 +357,20 @@ const ViewPharmacy = () => {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {listArray.map((list) => {
-            return (
-              <Table.Row>
-                <Table.RowHeaderCell>{list.date}</Table.RowHeaderCell>
+          {currentProducts.length === 0 ? (
+            <div className="p-4">
+              <Spinner />
+            </div>
+          ) : (
+            currentProducts.map((list) => (
+              <Table.Row key={list.id}>
+                <Table.RowHeaderCell>
+                  {refractor(list.createdAt)}
+                </Table.RowHeaderCell>
                 <Table.RowHeaderCell>
                   <Flex gap={"2"} align={"center"}>
                     <FontAwesomeIcon icon={faPills} />
-                    {list.productName}
+                    {getProductNameById(list.id)}
                   </Flex>
                 </Table.RowHeaderCell>
                 <Table.RowHeaderCell>{list.id}</Table.RowHeaderCell>
@@ -435,18 +381,18 @@ const ViewPharmacy = () => {
                   <Flex align={"center"} gap={"2"}>
                     <FontAwesomeIcon
                       icon={faSquare}
-                      color={`${list.stockStatus ? "rgba(74,222,128)" : "red"}`}
+                      color={list.stockStatus ? "rgba(74,222,128)" : "red"}
                     />
-                    {list.stockStatus ? "IN STOCK" : "OUT OF STOCK  "}
+                    {list.status}
                   </Flex>
                 </Table.RowHeaderCell>
                 <DropdownMenu.Root>
-                  <DropdownMenu.Trigger className="mt-1 ">
-                    <Button variant="surface" className="cursor-pointer ">
+                  <DropdownMenu.Trigger className="mt-1">
+                    <Button variant="surface" className="cursor-pointer">
                       <DropDownIcon />
                     </Button>
                   </DropdownMenu.Trigger>
-                  <DropdownMenu.Content className="">
+                  <DropdownMenu.Content>
                     <DropdownMenu.Item
                       shortcut={<FontAwesomeIcon icon={faPlus} />}
                       onClick={() => handleAddClick(list)}
@@ -455,7 +401,7 @@ const ViewPharmacy = () => {
                     </DropdownMenu.Item>
                     <DropdownMenu.Item
                       shortcut={<DeleteIcon />}
-                      onClick={() => handleDeleteClick(dept)}
+                      onClick={() => handleRemoveClick(list)}
                     >
                       Remove
                     </DropdownMenu.Item>
@@ -468,10 +414,34 @@ const ViewPharmacy = () => {
                   </DropdownMenu.Content>
                 </DropdownMenu.Root>
               </Table.Row>
-            );
-          })}
+            ))
+          )}
         </Table.Body>
       </Table.Root>
+      {/* Pagination buttons */}
+
+      {/* <Flex justify={"center"} align={"center"} my={"3"}>
+        <div className="pagination-controls flex gap-2 items-center">
+          <Button
+            onClick={() => handlePageChange(currentPage - 1)}
+            className="cursor-pointer disabled:cursor-not-allowed"
+            disabled={currentPage === 1}
+          >
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </Button>
+
+          <span>{`Page ${currentPage} of ${totalPages}`}</span>
+
+          <Button
+            onClick={() => handlePageChange(currentPage + 1)}
+            className="cursor-pointer disabled:cursor-not-allowed"
+            disabled={currentPage === totalPages}
+          >
+            <FontAwesomeIcon icon={faArrowRight} />
+          </Button>
+        </div>
+      </Flex> */}
+
       {selectedAddItem && (
         <AddDialog
           isOpen={!!selectedAddItem}
@@ -484,8 +454,38 @@ const ViewPharmacy = () => {
           onClose={() => setSelectedEditItem(null)}
         />
       )}
+      {selectedRemoveItem && (
+        <RemoveDialog
+          isOpen={!!selectedRemoveItem}
+          onClose={() => setSelectedRemoveItem(null)}
+        />
+      )}
+      <Toaster position="top-right" />
     </>
   );
 };
 
 export default ViewPharmacy;
+
+// Functionality for accordion below here
+// const ITEMS_PER_PAGE = 10;
+
+// const [currentPage, setCurrentPage] = useState(1);
+
+// Calculate total pages
+// const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
+
+// Get the items for the current page
+// const currentProducts = products.slice(
+//   (currentPage - 1) * ITEMS_PER_PAGE,
+//   currentPage * ITEMS_PER_PAGE
+// );
+
+// Handle page change
+// const handlePageChange = (newPage) => {
+//   if (newPage > 0 && newPage <= totalPages) {
+//     setCurrentPage(newPage);
+//   }
+// };
+
+// Functionlaity for pagination above here

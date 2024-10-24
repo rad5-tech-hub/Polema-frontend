@@ -8,9 +8,15 @@ import DashBoardManager from "./components/manager/DashboardManager";
 import {
   AddAdmin,
   WelcomeComponent,
+  PharmacyPlaceOrder,
   ViewPharmacy,
+  ViewPharmacyOrder,
+  ViewShelf,
+  GeneralStorePlaceOrder,
   AddProducts,
+  CreateDepartmentStore,
   AddCustomer,
+  CreateShelf,
   CustomerPlaceOrder,
   CustomerLedger,
   AuthorityToGiveCash,
@@ -28,13 +34,14 @@ import {
   SupplierPlaceOrder,
   AllCustomers,
   AllSuppliers,
+  DepartementStorePlaceOrder,
+  DepartmentStoreViewOrders,
+  ViewDepartmentStore,
 } from "./components/manager/containers";
 
 import PrivateRoute from "./components/PrivateRoute"; // Assume this is adjusted for React Router v6
 import "@radix-ui/themes/styles.css";
 import "./index.css";
-
-const route = "/admin";
 
 const App = () => {
   return (
@@ -138,6 +145,46 @@ const App = () => {
                   <Route
                     path="/pharmacy-store/view-store"
                     element={<ViewPharmacy />}
+                  />
+                  <Route
+                    path="/pharmacy-store/place-order"
+                    element={<PharmacyPlaceOrder />}
+                  />
+                  <Route
+                    path="/pharmacy-store/view-orders"
+                    element={<ViewPharmacyOrder />}
+                  />
+
+                  {/* Test Routes for general store */}
+                  <Route
+                    path="/general-store/create-shelf"
+                    element={<CreateShelf />}
+                  />
+                  <Route
+                    path="/general-store/view-shelf"
+                    element={<ViewShelf />}
+                  />
+                  <Route
+                    path="/general-store/place-order"
+                    element={<GeneralStorePlaceOrder />}
+                  />
+
+                  {/* Test Routes for department store */}
+                  <Route
+                    path="/department-store/create-store"
+                    element={<CreateDepartmentStore />}
+                  />
+                  <Route
+                    path="/department-store/view-orders"
+                    element={<DepartmentStoreViewOrders />}
+                  />
+                  <Route
+                    path="/department-store/place-order"
+                    element={<DepartementStorePlaceOrder />}
+                  />
+                  <Route
+                    path="/department-store/view-store"
+                    element={<ViewDepartmentStore />}
                   />
                 </Routes>
               </DashBoardManager>
