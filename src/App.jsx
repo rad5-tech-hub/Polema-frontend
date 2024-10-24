@@ -9,7 +9,7 @@ import {
   AddAdmin,
   WelcomeComponent,
   PharmacyPlaceOrder,
-  ViewPharmacy,
+  ViewPharmacyStore,
   ViewPharmacyOrder,
   ViewShelf,
   GeneralStorePlaceOrder,
@@ -143,8 +143,8 @@ const App = () => {
                     element={<CreatePharmacyStore />}
                   />
                   <Route
-                    path="/pharmacy-store/view-store"
-                    element={<ViewPharmacy />}
+                    path="/pharmacy-store/store"
+                    element={<ViewPharmacyStore />}
                   />
                   <Route
                     path="/pharmacy-store/place-order"

@@ -30,9 +30,11 @@ import AccountBook from "./account-book/AccountBook";
 import DepartementStorePlaceOrder from "./department-store/DepartementStorePlaceOrder";
 import DepartmentStoreViewOrders from "./department-store/DepartmentStoreViewOrders";
 import ViewDepartmentStore from "./department-store/ViewDepartmentStore";
+import ViewPharmacyStore from "./pharmacy-store/ViewPharmacyStore";
 
 export {
   AddAdmin,
+  ViewPharmacyStore,
   DepartementStorePlaceOrder,
   DepartmentStoreViewOrders,
   ViewDepartmentStore,
