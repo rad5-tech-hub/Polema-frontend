@@ -1,9 +1,20 @@
 import React, { useEffect } from "react";
-import { Heading, Separator, Table, Spinner, Flex } from "@radix-ui/themes";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import {
+  Heading,
+  Separator,
+  Table,
+  Spinner,
+  Flex,
+  DropdownMenu,
+  TabNav,
+} from "@radix-ui/themes";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+
 import { refractor } from "../../../date";
-import { faSquare } from "@fortawesome/free-solid-svg-icons";
+import { faSquare, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 const root = import.meta.env.VITE_ROOT;
 
@@ -72,6 +83,9 @@ const ViewShelf = () => {
                     {item.status}
                   </Flex>
                 </Table.Cell>
+                <div className="p-3 rounded-full cursor-pointer absolute right-[10px] hover:bg-[rgba(225,225,225,1)]">
+                  <FontAwesomeIcon icon={faEllipsisV} />
+                </div>
               </Table.Row>
             ))
           )}

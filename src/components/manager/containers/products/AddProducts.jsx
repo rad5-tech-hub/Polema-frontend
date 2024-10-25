@@ -28,15 +28,17 @@ import toast, { Toaster } from "react-hot-toast";
 const root = import.meta.env.VITE_ROOT;
 
 const AddProducts = () => {
-  const navigate = useNavigate();
   const [isloading, setIsLoading] = useState(false);
   const [pricePlan, setPricePlan] = useState(false);
   const [basePrice, setBasePrice] = useState("");
   const [unit, setUnit] = useState("");
   const [plans, setPlans] = useState([{ name: "", discount: "" }]);
 
+  // State management for product name
+  const [productName, setProductName] = useState("");
+
   // State management for selected category
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("products");
 
   // State management for selected department
   const [selectedDept, setSelectedDept] = useState("");
@@ -95,22 +97,10 @@ const AddProducts = () => {
     }
   };
 
-  const productsCategory = [
-    {
-      name: "Product For Sale",
-      type: "For Sale",
-    },
-    {
-      name: "Product For Purchase",
-      type: "For Purchase",
-    },
-  ];
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     setIsLoading(true);
-
     const retrToken = localStorage.getItem("token");
 
     // Check if the token is available
@@ -129,9 +119,7 @@ const AddProducts = () => {
 
     const submitObject = {
       name: e.target[0].value,
-      category: productsCategory.find(
-        (product) => product.name === selectedCategory
-      ).type,
+      category: selectedCategory === "products" ? "For Sale" : "For Purchase",
       departmentId: selectedDept,
       price: [
         {
@@ -143,10 +131,8 @@ const AddProducts = () => {
     };
 
     const submitWithoutPlans = {
-      name: e.target[0].value,
-      category: productsCategory.find(
-        (product) => product.name === selectedCategory
-      ).type,
+      name: productName,
+      category: selectedCategory === "products" ? "For Sale" : "For Purchase",
       departmentId: selectedDept,
       price: [
         {
@@ -155,8 +141,6 @@ const AddProducts = () => {
         },
       ],
     };
-
-    console.log(pricePlan ? submitWithoutPlans : submitObject);
 
     try {
       const response = await axios.post(
@@ -175,10 +159,17 @@ const AddProducts = () => {
           padding: "30px",
         },
       });
+
+      // Reset form fields after successful submission
+      setProductName("");
+      setBasePrice("");
+      setUnit("");
+      setPlans([{ name: "", discount: "" }]);
+      setSelectedDept("");
+      setSelectedCategory("products");
+      setPricePlan(false);
+
       console.log(response);
-      setTimeout(() => {
-        navigate("/admin/products/view-products");
-      }, 1500);
     } catch (error) {
       console.log(error);
       setIsLoading(false);
@@ -200,6 +191,25 @@ const AddProducts = () => {
         <Heading className="text-left py-4">Create Product</Heading>
 
         <Select.Root
+          defaultValue="products"
+          value={selectedCategory}
+          onValueChange={(value) => {
+            setSelectedCategory(value);
+            if (value === "products") {
+              setSelectedCategory("products");
+            }
+          }}
+        >
+          <Select.Trigger placeholder="Select" />
+          <Select.Content>
+            <Select.Group>
+              <Select.Item value="raw-materials">Raw Materials</Select.Item>
+              <Select.Item value="products">Products</Select.Item>
+            </Select.Group>
+          </Select.Content>
+        </Select.Root>
+
+        {/* <Select.Root
           value={selectedCategory}
           onValueChange={(value) => {
             setSelectedCategory(value); // Update selected category
@@ -218,7 +228,7 @@ const AddProducts = () => {
               </Select.Item>
             ))}
           </Select.Content>
-        </Select.Root>
+        </Select.Root> */}
       </Flex>
       <Separator className="w-full" />
       <form onSubmit={handleSubmit}>
@@ -234,6 +244,9 @@ const AddProducts = () => {
               <TextField.Root
                 placeholder="Enter Product name"
                 type="text"
+                required={true}
+                onChange={(e) => setProductName(e.target.value)}
+                value={productName}
                 id="product-name"
                 size={"3"}
               />
@@ -249,6 +262,7 @@ const AddProducts = () => {
               <TextField.Root
                 placeholder="Enter Base Price"
                 id="price"
+                required={true}
                 type="text" // Use text type to enable formatting
                 value={formatNumber(basePrice)} // Display formatted number
                 onChange={handleBasePriceChange} // Update raw value without commas
@@ -268,6 +282,7 @@ const AddProducts = () => {
                 placeholder="Specify Unit (kg, litres, bags, others)"
                 id="unit"
                 type="text"
+                required={true}
                 value={unit}
                 onChange={(e) => {
                   setUnit(e.target.value);
@@ -310,7 +325,7 @@ const AddProducts = () => {
           </div>
         </div>
 
-        {selectedCategory !== "Product For Sale" && (
+        {selectedCategory !== "raw-materials" && (
           <div className="input-field mt-3 flex justify-end">
             <div>
               <label

@@ -8,6 +8,7 @@ import DashBoardManager from "./components/manager/DashboardManager";
 import {
   AddAdmin,
   WelcomeComponent,
+  ViewPharmacy,
   PharmacyPlaceOrder,
   ViewPharmacyStore,
   ViewPharmacyOrder,
@@ -137,21 +138,23 @@ const App = () => {
                     element={<AuthorityToGiveCash />}
                   />
 
-                  {/* Test Routes for phamrcy store */}
+                  {/*  Routes for phamrcy store */}
                   <Route
-                    path="/pharmacy-store"
+                    path="/pharmacy-store/create-pharmacy-store"
                     element={<CreatePharmacyStore />}
                   />
                   <Route
-                    path="/pharmacy-store/store"
+                    path="/pharmacy-store/view-pharmacy"
                     element={<ViewPharmacyStore />}
                   />
+
                   <Route
-                    path="/pharmacy-store/place-order"
+                    path="/pharmacy-store/place-pharmacy-order"
                     element={<PharmacyPlaceOrder />}
                   />
+
                   <Route
-                    path="/pharmacy-store/view-orders"
+                    path="/pharmacy-store/view-pharmacy-order"
                     element={<ViewPharmacyOrder />}
                   />
 
@@ -165,7 +168,7 @@ const App = () => {
                     element={<ViewShelf />}
                   />
                   <Route
-                    path="/general-store/place-order"
+                    path="/general-store/raise-general-order"
                     element={<GeneralStorePlaceOrder />}
                   />
 

@@ -17,11 +17,17 @@ const root = import.meta.env.VITE_ROOT;
 const CreatePharmacyStore = () => {
   const fileInputRef = useRef(null);
   const [image, setImage] = useState(null);
-  const [uploadedImage, setUploadedImage] = useState("");
+  const [uploadedImage, setUploadedImage] = useState(" ");
   const [isUploading, setIsUploading] = useState(false);
   const [products, setProducts] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState("");
   const [buttonLoading, setButtonLoading] = useState(false);
+
+  // State management for Pharmacy ID
+  const [pharmId, setPharmId] = React.useState("");
+
+  // State management to check if pharm Details request is complete
+  const [completeRequest, setCompleteRequest] = React.useState(false);
 
   // State management to toggle between raw materials and products;
   const [rawMaterialsActive, setRawMaterialsActive] = useState(false);
@@ -79,15 +85,21 @@ const CreatePharmacyStore = () => {
     }
 
     try {
-      const response = await axios.get(`${root}/admin/get-products`, {
-        headers: {
-          Authorization: `Bearer ${retrToken}`,
-        },
-      });
+      const response = await axios.get(
+        `${root}/dept/${
+          rawMaterialsActive
+            ? `get-dept-raw/${pharmId}`
+            : `get-dept-product/${pharmId}`
+        }`,
+        {
+          headers: {
+            Authorization: `Bearer ${retrToken}`,
+          },
+        }
+      );
+      console.log(response);
 
-      response.data.length === 0
-        ? setProducts([])
-        : setProducts(response.data.products);
+      setProducts(response.data.products);
     } catch (error) {
       toast.error(error.message);
     }
@@ -96,7 +108,6 @@ const CreatePharmacyStore = () => {
   // Function to add item to the pharm store
   const addItem = async (e) => {
     e.preventDefault();
-
     if (!selectedProductId) {
       toast.error("Please select a product");
       return;
@@ -105,23 +116,27 @@ const CreatePharmacyStore = () => {
     toast.loading("Adding item....", { duration: 1500 });
 
     const retrToken = localStorage.getItem("token");
-
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
       return;
     }
 
+    setButtonLoading(true);
+
+    // Build the body conditionally
+    const body = {
+      productId: selectedProductId,
+      unit,
+      thresholdValue,
+      ...(productID.trim() && { productTag: productID }),
+      ...(category.trim() && { category }),
+      ...(uploadedImage.trim() && { image: uploadedImage }),
+    };
+
     try {
       const response = await axios.post(
         `${root}/dept/create-pharmstore`,
-        {
-          productId: selectedProductId,
-          productTag: productID,
-          category: category,
-          unit: unit,
-          thresholdValue: thresholdValue,
-          image: uploadedImage,
-        },
+        body,
         {
           headers: {
             Authorization: `Bearer ${retrToken}`,
@@ -137,15 +152,45 @@ const CreatePharmacyStore = () => {
       setCategory("");
       setUnit("");
       setThresholdVal("");
+      setUploadedImage("");
+      setImage(null);
     } catch (error) {
       setButtonLoading(false);
       toast.error(error.message);
     }
   };
 
+  // Function to get pharmacy id used in makinga another request laterOn
+  const fetchPharmDetails = async () => {
+    const retrToken = localStorage.getItem("token");
+    if (!retrToken) {
+      toast.error("An error occurred. Try logging in again");
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${root}/dept/get-pharm-dept`, {
+        headers: {
+          Authorization: `Bearer ${retrToken}`,
+        },
+      });
+      console.log(response);
+      setPharmId(response.data.department[0].id);
+      setCompleteRequest(true);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    fetchPharmDetails();
+  }, [rawMaterialsActive]);
+
+  useEffect(() => {
+    if (pharmId) {
+      fetchProducts();
+    }
+  }, [pharmId, rawMaterialsActive]);
 
   return (
     <div className="p-2">
@@ -216,7 +261,12 @@ const CreatePharmacyStore = () => {
               required={true}
               onValueChange={setSelectedProductId}
             >
-              <Select.Trigger placeholder="Select Product" className="w-full" />
+              <Select.Trigger
+                placeholder={
+                  rawMaterialsActive ? "Select Raw Material" : "Select Product"
+                }
+                className="w-full"
+              />
               <Select.Content>
                 {products.map((product) => (
                   <Select.Item key={product.id} value={product.id}>

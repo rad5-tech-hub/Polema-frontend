@@ -1,4 +1,5 @@
 import { refractor } from "../../../date";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import {
   Heading,
   Select,
@@ -6,23 +7,29 @@ import {
   Grid,
   Separator,
   Table,
+  Button,
 } from "@radix-ui/themes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
   faPills,
+  faArrowLeft,
+  faArrowRight,
   faSquare,
   faEllipsisV,
 } from "@fortawesome/free-solid-svg-icons";
 import { LoaderIcon } from "react-hot-toast";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+
 const root = import.meta.env.VITE_ROOT;
-import { DropdownMenu } from "@radix-ui/themes";
 
 const ViewPharmacyStore = () => {
   const [isRawMaterials, setIsRawMaterials] = useState(false);
   const [gridLoading, setGridLoading] = useState(true);
   const [fetchedProducts, setFetchedProducts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // Set the number of items per page
 
   // Function to fetch store data
   const fetchStore = async () => {
@@ -64,6 +71,29 @@ const ViewPharmacyStore = () => {
     fetchStore();
   }, [isRawMaterials]);
 
+  // Calculate total pages
+  const totalPages = Math.ceil(fetchedProducts.length / itemsPerPage);
+
+  // Get the products to display on the current page
+  const currentItems = fetchedProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Handle next page
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  // Handle previous page
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
   return (
     <>
       <Flex justify={"between"} align={"center"}>
@@ -93,7 +123,7 @@ const ViewPharmacyStore = () => {
               <LoaderIcon />
             </div>
           ) : (
-            fetchedProducts.map((item) => {
+            currentItems.map((item) => {
               let statusColor;
 
               if (item.status === "Low Stock") {
@@ -159,7 +189,7 @@ const ViewPharmacyStore = () => {
               </Table.Cell>
             </Table.Row>
           ) : (
-            fetchedProducts.map((item) => {
+            currentItems.map((item) => {
               let statusColor;
 
               if (item.status === "Low Stock") {
@@ -191,6 +221,26 @@ const ViewPharmacyStore = () => {
           )}
         </Table.Body>
       </Table.Root>
+      {/* Pagination Buttons */}
+      <Flex justify={"center"} align={"center"} gap={"2"} className="mt-4">
+        <Button
+          disabled={currentPage === 1}
+          onClick={handlePrevPage}
+          className="mr-2"
+        >
+          <FontAwesomeIcon icon={faArrowLeft} />
+        </Button>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <Button
+          disabled={currentPage === totalPages}
+          onClick={handleNextPage}
+          className="ml-2"
+        >
+          <FontAwesomeIcon icon={faArrowRight} />
+        </Button>
+      </Flex>
     </>
   );
 };

@@ -1,4 +1,6 @@
 import React from "react";
+import toast, { Toaster } from "react-hot-toast";
+import { LoaderIcon } from "react-hot-toast";
 import {
   Heading,
   Card,
@@ -7,20 +9,23 @@ import {
   TextField,
   Text,
   Button,
+  Select,
 } from "@radix-ui/themes";
 import axios from "axios";
-import { toast } from "react-hot-toast"; // Assuming you're using this for notifications
 
 const root = import.meta.env.VITE_ROOT;
 
 const PharmacyPlaceOrder = () => {
+  // State management for button loader
+  const [isLoading, setIsLoading] = React.useState();
+
   const [rawMaterials, setRawMaterials] = React.useState([]);
   const [plans, setPlans] = React.useState([
     {
       rawMaterial: "",
       quantity: "",
       unit: "",
-      expectedDelivery: "",
+      expectedDeliveryDate: "",
     },
   ]);
 
@@ -39,6 +44,7 @@ const PharmacyPlaceOrder = () => {
         },
       });
       console.log(response);
+      setRawMaterials(response.data.parsedStores);
     } catch (error) {
       console.log(error);
     }
@@ -70,28 +76,50 @@ const PharmacyPlaceOrder = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setIsLoading(true);
+    toast.loading("Submitting Form", {
+      style: {
+        padding: "30px",
+      },
+      duration: 1000,
+    });
     const body = {
       orders: plans,
     };
-
+    console.log(body);
+    const retrToken = localStorage.getItem("token");
+    if (!retrToken) {
+      toast.error("An error occurred. Try logging in again");
+      return;
+    }
     try {
-      const retrToken = localStorage.getItem("token");
-      const response = await axios.post(`${root}/submit-order`, body, {
-        headers: {
-          Authorization: `Bearer ${retrToken}`,
-        },
-      });
+      const response = await axios.post(
+        `${root}/dept/raise-pharm-order`,
+        body,
+        {
+          headers: {
+            Authorization: `Bearer ${retrToken}`,
+          },
+        }
+      );
       console.log(response);
-      toast.success("Order placed successfully!");
-    } catch (error) {
-      console.log(error);
-      toast.error("Failed to place order.");
+      setIsLoading(false);
+      toast.success(response.data.message, {
+        style: {
+          padding: "30px",
+        },
+        duration: 3500,
+      });
+    } catch (err) {
+      console.log(err);
+      setIsLoading(false);
+      toast.error();
     }
   };
 
   React.useEffect(() => {
     fetchRawMaterials();
-  }, []); // Fetch raw materials once on component mount
+  }, []);
 
   return (
     <div>
@@ -114,14 +142,29 @@ const PharmacyPlaceOrder = () => {
               <Flex className="w-full" gap={"7"}>
                 <div className="w-full">
                   <Text className="mb-4">Raw Material Needed</Text>
-                  <TextField.Root
-                    className="mt-2"
-                    placeholder="Select Raw Material"
-                    value={plan.rawMaterial}
-                    onChange={(e) =>
-                      handleInputChange(index, "rawMaterial", e.target.value)
+
+                  <Select.Root
+                    onValueChange={(value) =>
+                      handleInputChange(index, "rawMaterial", value)
                     }
-                  />
+                  >
+                    <Select.Trigger
+                      className="mt-2 w-full"
+                      placeholder="Select Raw Material"
+                    />
+                    <Select.Content>
+                      <Select.Group>
+                        {rawMaterials.map((item) => (
+                          <Select.Item
+                            key={item.id}
+                            value={item.productId} // Set item.id as the value
+                          >
+                            {item.product.name}
+                          </Select.Item>
+                        ))}
+                      </Select.Group>
+                    </Select.Content>
+                  </Select.Root>
                 </div>
                 <div className="w-full">
                   <Text className="mb-4">Quantity </Text>
@@ -157,7 +200,7 @@ const PharmacyPlaceOrder = () => {
                     onChange={(e) =>
                       handleInputChange(
                         index,
-                        "expectedDelivery",
+                        "expectedDeliveryDate",
                         e.target.value
                       )
                     }
@@ -183,10 +226,11 @@ const PharmacyPlaceOrder = () => {
             size={"3"}
             className="!bg-theme border-2 cursor-pointer  !border-theme mt-3"
           >
-            Submit Order
+            {isLoading ? <LoaderIcon /> : "Submit Order"}
           </Button>
         </Flex>
       </form>
+      <Toaster position="top-right" />
     </div>
   );
 };

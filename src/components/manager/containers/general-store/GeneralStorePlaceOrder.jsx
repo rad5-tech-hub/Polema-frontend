@@ -19,7 +19,7 @@ const GeneralStorePlaceOrder = () => {
   // State to manage loader icon
   const [isLoading, setIsLoading] = useState(false);
 
-  // State to manage fetched shelf
+  // State to manage fetched shelves
   const [shelves, setShelves] = useState([]);
 
   // State to track all the plans (cards)
@@ -61,11 +61,9 @@ const GeneralStorePlaceOrder = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setIsLoading(true);
-    console.log({ orders: plans });
     const body = {
       orders: plans,
     };
-    console.log(body);
 
     const retrToken = localStorage.getItem("token");
 
