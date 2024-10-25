@@ -743,12 +743,20 @@ video {
   margin-bottom: 1.5rem;
 }
 
+.ml-2 {
+  margin-left: 0.5rem;
+}
+
 .ml-4 {
   margin-left: 1rem;
 }
 
 .ml-\[20px\] {
   margin-left: 20px;
+}
+
+.mr-2 {
+  margin-right: 0.5rem;
 }
 
 .mt-1 {
@@ -785,10 +793,6 @@ video {
 
 .mt-\[25px\] {
   margin-top: 25px;
-}
-
-.mr-2 {
-  margin-right: 0.5rem;
 }
 
 .block {
@@ -847,28 +851,20 @@ video {
   height: 100vh;
 }
 
+.h-\[20px\] {
+  height: 20px;
+}
+
 .max-h-\[101px\] {
   max-height: 101px;
 }
 
-.max-h-\[85vh\] {
-  max-height: 85vh;
-}
-
-.max-h-\[600px\] {
-  max-height: 600px;
-}
-
-.max-h-\[550px\] {
-  max-height: 550px;
-}
-
-.max-h-\[450px\] {
-  max-height: 450px;
-}
-
 .max-h-\[430px\] {
   max-height: 430px;
+}
+
+.max-h-\[85vh\] {
+  max-height: 85vh;
 }
 
 .min-h-\[75vh\] {
@@ -930,6 +926,10 @@ video {
 
 .w-full {
   width: 100%;
+}
+
+.w-\[20px\] {
+  width: 20px;
 }
 
 .min-w-\[50px\] {
@@ -1266,6 +1266,10 @@ video {
   padding: 0.5rem;
 }
 
+.p-3 {
+  padding: 0.75rem;
+}
+
 .p-4 {
   padding: 1rem;
 }
@@ -1276,10 +1280,6 @@ video {
 
 .p-\[25px\] {
   padding: 25px;
-}
-
-.p-3 {
-  padding: 0.75rem;
 }
 
 .px-2 {
@@ -1354,6 +1354,10 @@ video {
   font-size: .5rem;
 }
 
+.text-\[\.6rem\] {
+  font-size: .6rem;
+}
+
 .text-\[\.7rem\] {
   font-size: .7rem;
 }
@@ -1374,12 +1378,12 @@ video {
   font-size: 2.0rem;
 }
 
-.text-\[2\.5rem\] {
-  font-size: 2.5rem;
-}
-
 .text-\[25px\] {
   font-size: 25px;
+}
+
+.text-\[2em\] {
+  font-size: 2em;
 }
 
 .text-xl {
@@ -1390,22 +1394,6 @@ video {
 .text-xs {
   font-size: 0.75rem;
   line-height: 1rem;
-}
-
-.text-\[2\.3em\] {
-  font-size: 2.3em;
-}
-
-.text-\[\.6rem\] {
-  font-size: .6rem;
-}
-
-.text-\[2\.2em\] {
-  font-size: 2.2em;
-}
-
-.text-\[2em\] {
-  font-size: 2em;
 }
 
 .font-bold {
@@ -1661,6 +1649,10 @@ video {
 .hover\:bg-red-800:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(153 27 27 / var(--tw-bg-opacity));
+}
+
+.hover\:bg-\[rgba\(225\2c 225\2c 225\2c 1\)\]:hover {
+  background-color: rgba(225,225,225,1);
 }
 
 .focus\:shadow-\[0_0_0_2px\]:focus {
