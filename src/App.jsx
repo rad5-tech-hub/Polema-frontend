@@ -152,6 +152,7 @@ const App = () => {
                     path="/pharmacy-store/place-pharmacy-order"
                     element={<PharmacyPlaceOrder />}
                   />
+
                   <Route
                     path="/pharmacy-store/view-pharmacy-order"
                     element={<ViewPharmacyOrder />}
