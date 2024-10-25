@@ -216,7 +216,12 @@ const CreatePharmacyStore = () => {
               required={true}
               onValueChange={setSelectedProductId}
             >
-              <Select.Trigger placeholder="Select Product" className="w-full" />
+              <Select.Trigger
+                placeholder={
+                  rawMaterialsActive ? "Select Raw Material" : "Select Product"
+                }
+                className="w-full"
+              />
               <Select.Content>
                 {products.map((product) => (
                   <Select.Item key={product.id} value={product.id}>

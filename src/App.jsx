@@ -8,6 +8,7 @@ import DashBoardManager from "./components/manager/DashboardManager";
 import {
   AddAdmin,
   WelcomeComponent,
+  ViewPharmacy,
   PharmacyPlaceOrder,
   ViewPharmacyStore,
   ViewPharmacyOrder,
@@ -146,6 +147,7 @@ const App = () => {
                     path="/pharmacy-store/store"
                     element={<ViewPharmacyStore />}
                   />
+
                   <Route
                     path="/pharmacy-store/place-order"
                     element={<PharmacyPlaceOrder />}
