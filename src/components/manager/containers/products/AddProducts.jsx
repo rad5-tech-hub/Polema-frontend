@@ -6,6 +6,7 @@ import {
   faBuilding,
   faStore,
   faTags,
+  faCommentsDollar,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
@@ -142,6 +143,7 @@ const AddProducts = () => {
       ],
     };
 
+    console.log(pricePlan ? submitObject : submitWithoutPlans);
     try {
       const response = await axios.post(
         `${root}/admin/add-product`,

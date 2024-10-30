@@ -1,12 +1,13 @@
 import WelcomeComponent from "./WelcomeComponent";
-import CreateDepartmentStore from "./department-store/CreateDepartmentStore";
+
 import GeneralStorePlaceOrder from "./general-store/GeneralStorePlaceOrder";
 import ViewShelf from "./general-store/ViewShelf";
 import CreateShelf from "./general-store/CreateShelf";
 import ViewPharmacyOrder from "./pharmacy-store/ViewPharmacyOrder";
 import PharmacyPlaceOrder from "./pharmacy-store/PharmacyPlaceOrder";
-import ViewPharmacy from "./pharmacy-store/ViewPharmacy";
+import ViewGeneralOrder from "./general-store/ViewGeneralOrder";
 import CreatePharmacyStore from "./pharmacy-store/CreatePharmacyStore";
+import DepartmentStoreCreate from "./department-store/DepartmentStoreCreate";
 import AllAdmins from "./admin/AllAdmins";
 import AddAdmin from "./admin/AddAdmin";
 import AddDepartment from "./department/AddDepartment";
@@ -43,6 +44,7 @@ export {
   AddSuppliers,
   AccountBook,
   CustomerPlaceOrder,
+  DepartmentStoreCreate,
   CustomerLedger,
   ViewAccoountBook,
   CreateRole,
@@ -61,9 +63,8 @@ export {
   AllCustomers,
   CreateShelf,
   PharmacyPlaceOrder,
-  ViewPharmacy,
   ViewPharmacyOrder,
-  CreateDepartmentStore,
+  ViewGeneralOrder,
   ViewShelf,
   GeneralStorePlaceOrder,
 };

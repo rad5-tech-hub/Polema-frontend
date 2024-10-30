@@ -1,10 +1,11 @@
 import React, { useEffect } from "react";
-import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+
 import {
   Heading,
   Separator,
   Table,
   Spinner,
+  Button,
   Flex,
   DropdownMenu,
   TabNav,
@@ -13,7 +14,12 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 
 import { refractor } from "../../../date";
-import { faSquare, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
+import {
+  faSquare,
+  faEllipsisV,
+  faArrowLeft,
+  faArrowRight,
+} from "@fortawesome/free-solid-svg-icons";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 const root = import.meta.env.VITE_ROOT;
@@ -40,7 +46,7 @@ const ViewShelf = () => {
       setShelf(response.data.stores);
     } catch (error) {
       console.log(error);
-      toast.error("Failed to fetch shelf data."); // Optionally handle errors
+      setShelf([]);
     }
   };
 
@@ -48,11 +54,12 @@ const ViewShelf = () => {
     fetchShelf();
   }, []);
 
+  // Pagination Functionality
   return (
     <div>
       <Heading>View Shelf</Heading>
       <Separator className="w-full my-4" />
-      <Table.Root variant="surface">
+      <Table.Root className="relative !h-fit">
         <Table.Header>
           <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell>SHELF NAME</Table.ColumnHeaderCell>
@@ -67,7 +74,7 @@ const ViewShelf = () => {
             </div>
           ) : (
             shelf.map((item, index) => (
-              <Table.Row key={index} className="relative">
+              <Table.Row key={index} className="relative !overflow-visible">
                 <Table.RowHeaderCell>
                   {refractor(item.createdAt)}
                 </Table.RowHeaderCell>
@@ -83,8 +90,9 @@ const ViewShelf = () => {
                     {item.status}
                   </Flex>
                 </Table.Cell>
-                <div className="p-3 rounded-full cursor-pointer absolute right-[10px] hover:bg-[rgba(225,225,225,1)]">
+                <div className="p-3 rounded-full cursor-pointer  right-[0px] ">
                   <FontAwesomeIcon icon={faEllipsisV} />
+                  {/* {Add Dropdown code around here} */}
                 </div>
               </Table.Row>
             ))

@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import { BellIcon } from "@radix-ui/react-icons";
+import { Card } from "@radix-ui/themes";
 import Logout from "../Logout";
 import ThemeSwitcher from "../ThemeSwitcher";
 const LogoIcon = "";
@@ -60,7 +62,11 @@ const Header = ({ sidebarOpen, setSidebarOpen, user, role, image, text }) => {
           <ul className="flex items-center gap-2 2xsm:gap-4"></ul>
 
           {/* <ThemeSwitcher /> */}
+          <Card className="cursor-pointer">
+            <BellIcon />
+          </Card>
           <Logout />
+
           {/* <!-- User Area --> */}
         </div>
       </div>

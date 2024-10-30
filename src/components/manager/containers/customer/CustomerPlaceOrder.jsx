@@ -65,6 +65,7 @@ const CustomerPlaceOrder = () => {
         },
       });
       console.log(response.data.products);
+      setProducts(response.data.products);
     } catch (error) {
       console.log(error);
     }

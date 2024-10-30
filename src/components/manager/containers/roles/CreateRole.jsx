@@ -109,10 +109,6 @@ const CreateRole = ({ child, setChild }) => {
             padding: "25px",
           },
         });
-
-        setTimeout(() => {
-          navigate("/admin/admins/view-roles");
-        }, 1500);
       } catch (error) {
         if (error.response) {
           console.log(error.response.data);

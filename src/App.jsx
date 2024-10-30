@@ -8,14 +8,13 @@ import DashBoardManager from "./components/manager/DashboardManager";
 import {
   AddAdmin,
   WelcomeComponent,
-  ViewPharmacy,
   PharmacyPlaceOrder,
   ViewPharmacyStore,
   ViewPharmacyOrder,
   ViewShelf,
   GeneralStorePlaceOrder,
   AddProducts,
-  CreateDepartmentStore,
+  
   AddCustomer,
   CreateShelf,
   CustomerPlaceOrder,
@@ -26,8 +25,10 @@ import {
   CreateRole,
   ViewAccoountBook,
   AccountBook,
+  ViewGeneralOrder,
   AddSuppliers,
   AllDepartments,
+  DepartmentStoreCreate,
   AddDepartment,
   AllAdmins,
   AllRoles,
@@ -171,11 +172,15 @@ const App = () => {
                     path="/general-store/raise-general-order"
                     element={<GeneralStorePlaceOrder />}
                   />
+                  <Route
+                    path="/general-store/view-general-order"
+                    element={<ViewGeneralOrder />}
+                  />
 
                   {/* Test Routes for department store */}
                   <Route
                     path="/department-store/create-store"
-                    element={<CreateDepartmentStore />}
+                    element={<DepartmentStoreCreate />}
                   />
                   <Route
                     path="/department-store/view-orders"
