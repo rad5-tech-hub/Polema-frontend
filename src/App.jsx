@@ -10,6 +10,7 @@ import {
   WelcomeComponent,
   CashManagement,
   PharmacyPlaceOrder,
+  CashManagementLedger,
   ViewPharmacyStore,
   ViewPharmacyOrder,
   ViewShelf,
@@ -174,19 +175,19 @@ const App = () => {
 
                   {/* Test Routes for department store */}
                   <Route
-                    path="/department-store/create-store"
+                    path="/department-store/create-department-store"
                     element={<CreateDepartmentStore />}
                   />
                   <Route
-                    path="/department-store/view-orders"
+                    path="/department-store/view-dept-orders"
                     element={<DepartmentStoreViewOrders />}
                   />
                   <Route
-                    path="/department-store/place-order"
+                    path="/department-store/place-store-order"
                     element={<DepartementStorePlaceOrder />}
                   />
                   <Route
-                    path="/department-store/view-store"
+                    path="/department-store/department-store-products"
                     element={<ViewDepartmentStore />}
                   />
 
@@ -194,6 +195,10 @@ const App = () => {
                   <Route
                     path="/cash/cash-management"
                     element={<CashManagement />}
+                  />
+                  <Route
+                    path="/cash/cash-management-ledger"
+                    element={<CashManagementLedger />}
                   />
                 </Routes>
               </DashBoardManager>

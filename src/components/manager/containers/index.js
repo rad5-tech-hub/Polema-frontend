@@ -16,6 +16,7 @@ import AddProducts from "./products/AddProducts";
 import AllRoles from "./roles/AllRoles";
 import UsersList from "./UsersList";
 import ViewAccoountBook from "./account-book/ViewAccoountBook";
+import CashManagementLedger from "./cash/CashManagementLedger";
 import AllSuppliers from "./suppliers/AllSuppliers";
 import AllDepartments from "./department/AllDepartments";
 import AllCustomers from "./customer/AllCustomers";
@@ -60,6 +61,7 @@ export {
   UsersList,
   AddProducts,
   AllCustomers,
+  CashManagementLedger,
   CreateShelf,
   PharmacyPlaceOrder,
   ViewPharmacy,
