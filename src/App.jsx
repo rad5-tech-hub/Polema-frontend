@@ -8,7 +8,7 @@ import DashBoardManager from "./components/manager/DashboardManager";
 import {
   AddAdmin,
   WelcomeComponent,
-  ViewPharmacy,
+  CashManagement,
   PharmacyPlaceOrder,
   ViewPharmacyStore,
   ViewPharmacyOrder,
@@ -188,6 +188,12 @@ const App = () => {
                   <Route
                     path="/department-store/view-store"
                     element={<ViewDepartmentStore />}
+                  />
+
+                  {/* Test Routes for cash management */}
+                  <Route
+                    path="/cash/cash-management"
+                    element={<CashManagement />}
                   />
                 </Routes>
               </DashBoardManager>

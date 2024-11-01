@@ -10,6 +10,7 @@ import CreatePharmacyStore from "./pharmacy-store/CreatePharmacyStore";
 import AllAdmins from "./admin/AllAdmins";
 import AddAdmin from "./admin/AddAdmin";
 import AddDepartment from "./department/AddDepartment";
+import CashManagement from "./cash/CashManagement";
 import AddCustomer from "./customer/AddCustomer";
 import AddProducts from "./products/AddProducts";
 import AllRoles from "./roles/AllRoles";
@@ -66,4 +67,5 @@ export {
   CreateDepartmentStore,
   ViewShelf,
   GeneralStorePlaceOrder,
+  CashManagement,
 };
