@@ -96,6 +96,12 @@ const CashManagement = () => {
     }
   };
 
+  // Function to clean number input
+  function parseNumber(input) {
+    const cleanedInput = input.replace(/,/g, "");
+    return parseFloat(cleanedInput);
+  }
+
   useEffect(() => {
     fetchAdmins();
   }, []);
@@ -141,7 +147,7 @@ const CashManagement = () => {
               required
               value={amount}
               onChange={(e) => {
-                setCashAmount(e.target.value);
+                setCashAmount(parseNumber(e.target.value));
                 setAmount(formatAmount(e.target.value));
               }}
             >

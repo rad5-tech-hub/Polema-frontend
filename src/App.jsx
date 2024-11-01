@@ -12,6 +12,7 @@ import {
   PharmacyPlaceOrder,
   CashManagementLedger,
   ViewPharmacyStore,
+  LocalPurchaseOrder,
   ViewPharmacyOrder,
   ViewShelf,
   GeneralStorePlaceOrder,
@@ -135,8 +136,8 @@ const App = () => {
 
                   {/*Raise Tickets Routes*/}
                   <Route
-                    path="raise-tickets/authority-to-give-cash"
-                    element={<AuthorityToGiveCash />}
+                    path="raise-ticket/l.p.o"
+                    element={<LocalPurchaseOrder />}
                   />
 
                   {/*  Routes for phamrcy store */}

@@ -704,6 +704,11 @@ video {
   margin-bottom: 0.25rem;
 }
 
+.my-10 {
+  margin-top: 2.5rem;
+  margin-bottom: 2.5rem;
+}
+
 .my-2 {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
@@ -851,10 +856,6 @@ video {
   height: 100vh;
 }
 
-.h-\[20px\] {
-  height: 20px;
-}
-
 .max-h-\[101px\] {
   max-height: 101px;
 }
@@ -926,10 +927,6 @@ video {
 
 .w-full {
   width: 100%;
-}
-
-.w-\[20px\] {
-  width: 20px;
 }
 
 .min-w-\[50px\] {
@@ -1621,6 +1618,10 @@ video {
   will-change: transform;
 }
 
+.hover\:bg-\[rgba\(225\2c 225\2c 225\2c 1\)\]:hover {
+  background-color: rgba(225,225,225,1);
+}
+
 .hover\:bg-blue-600:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(37 99 235 / var(--tw-bg-opacity));
@@ -1649,10 +1650,6 @@ video {
 .hover\:bg-red-800:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(153 27 27 / var(--tw-bg-opacity));
-}
-
-.hover\:bg-\[rgba\(225\2c 225\2c 225\2c 1\)\]:hover {
-  background-color: rgba(225,225,225,1);
 }
 
 .focus\:shadow-\[0_0_0_2px\]:focus {

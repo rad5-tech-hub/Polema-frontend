@@ -1,4 +1,5 @@
 import WelcomeComponent from "./WelcomeComponent";
+import LocalPurchaseOrder from "./raise-tickets/LocalPurchaseOrder";
 import CreateDepartmentStore from "./department-store/CreateDepartmentStore";
 import GeneralStorePlaceOrder from "./general-store/GeneralStorePlaceOrder";
 import ViewShelf from "./general-store/ViewShelf";
@@ -51,6 +52,7 @@ export {
   AllSuppliers,
   AllRoles,
   CreatePharmacyStore,
+  LocalPurchaseOrder,
   AllDepartments,
   AllSuspended,
   AllAdmins,
