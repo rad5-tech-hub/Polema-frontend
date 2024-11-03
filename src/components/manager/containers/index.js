@@ -1,4 +1,5 @@
 import WelcomeComponent from "./WelcomeComponent";
+import AuthorityToWeigh from "./raise-tickets/AuthorityToWeigh";
 import LocalPurchaseOrder from "./raise-tickets/LocalPurchaseOrder";
 import CreateDepartmentStore from "./department-store/CreateDepartmentStore";
 import GeneralStorePlaceOrder from "./general-store/GeneralStorePlaceOrder";
@@ -72,4 +73,5 @@ export {
   ViewShelf,
   GeneralStorePlaceOrder,
   CashManagement,
+  AuthorityToWeigh,
 };

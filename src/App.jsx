@@ -22,7 +22,7 @@ import {
   CreateShelf,
   CustomerPlaceOrder,
   CustomerLedger,
-  AuthorityToGiveCash,
+  AuthorityToWeigh,
   AllProducts,
   CreatePharmacyStore,
   CreateRole,
@@ -139,6 +139,10 @@ const App = () => {
                     path="raise-ticket/l.p.o"
                     element={<LocalPurchaseOrder />}
                   />
+                  <Route
+                    path="raise-ticket/authority-to-weigh"
+                    element={<AuthorityToWeigh />}
+                  />
 
                   {/*  Routes for phamrcy store */}
                   <Route
@@ -194,11 +198,11 @@ const App = () => {
 
                   {/* Test Routes for cash management */}
                   <Route
-                    path="/cash/cash-management"
+                    path="/cash-management/cash-management"
                     element={<CashManagement />}
                   />
                   <Route
-                    path="/cash/cash-management-ledger"
+                    path="/cash-management/cash-ledger"
                     element={<CashManagementLedger />}
                   />
                 </Routes>
