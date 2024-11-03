@@ -1,5 +1,6 @@
 import WelcomeComponent from "./WelcomeComponent";
 import AuthorityToWeigh from "./raise-tickets/AuthorityToWeigh";
+import AuthorityToLoad from "./raise-tickets/AuthorityToLoad";
 import LocalPurchaseOrder from "./raise-tickets/LocalPurchaseOrder";
 import CreateDepartmentStore from "./department-store/CreateDepartmentStore";
 import GeneralStorePlaceOrder from "./general-store/GeneralStorePlaceOrder";
@@ -58,6 +59,7 @@ export {
   AllSuspended,
   AllAdmins,
   AllProducts,
+  AuthorityToLoad,
   WelcomeComponent,
   AddCustomer,
   AddDepartment,

@@ -11,6 +11,7 @@ import {
   CashManagement,
   PharmacyPlaceOrder,
   CashManagementLedger,
+  AuthorityToLoad,
   ViewPharmacyStore,
   LocalPurchaseOrder,
   ViewPharmacyOrder,
@@ -142,6 +143,10 @@ const App = () => {
                   <Route
                     path="raise-ticket/authority-to-weigh"
                     element={<AuthorityToWeigh />}
+                  />
+                  <Route
+                    path="raise-ticket/authority-to-load"
+                    element={<AuthorityToLoad />}
                   />
 
                   {/*  Routes for phamrcy store */}

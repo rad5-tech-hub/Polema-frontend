@@ -1,10 +1,13 @@
 import React from "react";
-import { Heading } from "@radix-ui/themes";
+import { Heading, Button, Flex } from "@radix-ui/themes";
 
 const AuthorityToLoad = () => {
   return (
     <>
-      <Heading>Authority to Load</Heading>
+      <Flex justify={"between"}>
+        <Heading>Authority to Load</Heading>
+        <Button>View All</Button>
+      </Flex>
     </>
   );
 };
