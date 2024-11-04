@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { refractor } from "../../../date";
 import axios from "axios";
-import UpdateURL from "../ChangeRoute";
 import { Heading, Table, Spinner } from "@radix-ui/themes";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
@@ -19,7 +18,6 @@ import {
 } from "@radix-ui/themes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen, faTags } from "@fortawesome/free-solid-svg-icons";
-import { Suspend } from "../../../icons";
 
 //All imports for the Dialog Box
 import * as Dialog from "@radix-ui/react-dialog";
@@ -266,14 +264,14 @@ const AllDepartments = () => {
         <EditDialog />
       ) : (
         <div>
-          <TextField.Root
+          {/* <TextField.Root
             placeholder="Search department.."
             className="w-[55%] mb-5"
           >
             <TextField.Slot>
               <MagnifyingGlassIcon height={"16"} width={"16"} />
             </TextField.Slot>
-          </TextField.Root>
+          </TextField.Root> */}
 
           <Heading>All Departments</Heading>
           <Table.Root className="mt-4">

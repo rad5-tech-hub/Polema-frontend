@@ -15,19 +15,10 @@ import {
   Spinner,
   Flex,
 } from "@radix-ui/themes";
-import { Camera } from "../../../icons";
-import {
-  EnvelopeClosedIcon,
-  LockClosedIcon,
-  PersonIcon,
-} from "@radix-ui/react-icons";
-import UpdateURL from "../ChangeRoute";
+
 const root = import.meta.env.VITE_ROOT;
-const redirectURL = import.meta.env.VITE_REDIRECT_URL;
 
-const AddSuppliers = ({ child, setChild, buttonValue }) => {
-  const navigate = useNavigate();
-
+const AddSuppliers = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [firstname, setFirstName] = useState("");
   const [lastname, setLastName] = useState("");
@@ -51,7 +42,7 @@ const AddSuppliers = ({ child, setChild, buttonValue }) => {
       firstname: firstname,
       lastname: lastname,
       address: address,
-      email: email,
+      ...(email && { email }),
       phoneNumber: number,
     };
 
@@ -61,7 +52,6 @@ const AddSuppliers = ({ child, setChild, buttonValue }) => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      console.log(response.data);
       setIsLoading(false);
       toast.success(response.data.message, {
         duration: 6000,
@@ -69,8 +59,6 @@ const AddSuppliers = ({ child, setChild, buttonValue }) => {
           padding: "30px",
         },
       });
-
-      navigate("/admin/suppliers/view-suppliers");
     } catch (error) {
       setIsLoading(false);
       toast.error(error.response.data.error);
@@ -184,8 +172,8 @@ const AddSuppliers = ({ child, setChild, buttonValue }) => {
 
           <Flex justify={"end"} align={"end"} width={"100%"}>
             <Button
-              className="mt-4 "
-              size={3}
+              className="mt-4 cursor-pointer"
+              size={"3"}
               type="submit"
               disabled={isLoading}
             >
