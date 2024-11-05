@@ -2,13 +2,12 @@ import React, { useState, useEffect } from "react";
 import { refractor } from "../../../date";
 import { Table, Spinner, TextField, Flex, Text } from "@radix-ui/themes";
 import axios from "axios";
-import UpdateURL from "../ChangeRoute";
 
 // All imports for the dropdown menu
 import { DeleteIcon, DropDownIcon } from "../../../icons";
 import { DropdownMenu, Button, Heading } from "@radix-ui/themes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPen, faUser } from "@fortawesome/free-solid-svg-icons";
+import { faPen, faUser, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
 import { Suspend } from "../../../icons";
 
 //All imports for the Dialog Box
@@ -43,7 +42,7 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
       firstname: changedFirstName,
       lastname: changedLastName,
       address: changedAddress,
-      email: changedEmail,
+      ...(changedEmail && { email: changedEmail }),
       phoneNumber: changedPhone,
     };
 
@@ -355,11 +354,11 @@ const AllCustomers = () => {
 
   return (
     <>
-      <TextField.Root placeholder="Search Customers.." className="w-[55%] mb-5">
+      {/* <TextField.Root placeholder="Search Customers.." className="w-[55%] mb-5">
         <TextField.Slot>
           <MagnifyingGlassIcon height={"16"} width={"16"} />
         </TextField.Slot>
-      </TextField.Root>
+      </TextField.Root> */}
       <Heading className="mb-4">Customers</Heading>
       <Table.Root size={"3"} variant="surface">
         <Table.Header>
@@ -409,7 +408,7 @@ const AllCustomers = () => {
                               variant="surface"
                               className="cursor-pointer"
                             >
-                              <DropDownIcon />
+                              <FontAwesomeIcon icon={faEllipsisV} />
                             </Button>
                           </DropdownMenu.Trigger>
                           <DropdownMenu.Content variant="solid">

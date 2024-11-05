@@ -25,6 +25,8 @@ const AccountBook = () => {
   const [basePrice, setBasePrice] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [isCustomer, setIsCustomer] = React.useState(true);
+
   // Function to format number with commas
   const formatNumber = (num) => {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -47,11 +49,14 @@ const AccountBook = () => {
     }
 
     try {
-      const response = await axios.get(`${root}/customer/get-customers`, {
-        headers: {
-          Authorization: `Bearer ${retrToken}`,
-        },
-      });
+      const response = await axios.get(
+        `${root}/customer/${isCustomer ? "get-customers" : "get-suppliers"}`,
+        {
+          headers: {
+            Authorization: `Bearer ${retrToken}`,
+          },
+        }
+      );
       setCustomers(response.data.customers);
     } catch (error) {
       console.log(error);
@@ -89,7 +94,7 @@ const AccountBook = () => {
     }
 
     const submissionData = {
-      customerId: selectedCustomerId,
+      [isCustomer ? "customerId" : "supplierId"]: selectedCustomerId,
       productId: selectedProductId,
       amount: basePrice,
     };
@@ -107,9 +112,6 @@ const AccountBook = () => {
           padding: "30px",
         },
       });
-      setTimeout(() => {
-        navigate("/admin/account-book/view-all");
-      }, 1500);
     } catch (error) {
       console.log(error);
       toast.error(error.message, {
@@ -127,19 +129,33 @@ const AccountBook = () => {
   useEffect(() => {
     fetchCustomers();
     fetchProducts();
-  }, []);
+  }, [isCustomer]);
 
   return (
     <>
-      <Flex>
+      <Flex justify={"between"}>
         <Heading className="mb-4">Add</Heading>
+        <Select.Root
+          defaultValue="customers"
+          onValueChange={(value) => {
+            value === "customers" ? setIsCustomer(true) : setIsCustomer(false);
+          }}
+        >
+          <Select.Trigger />
+          <Select.Content>
+            <Select.Item value="customers">Customers</Select.Item>
+            <Select.Item value="suppliers">Suppliers</Select.Item>
+          </Select.Content>
+        </Select.Root>
       </Flex>
 
       <Separator className="my-3 w-full" />
       <form onSubmit={handleSubmit}>
         <Flex className="w-full mb-4" gap={"5"}>
           <div className="w-full">
-            <Text className="mb-4">Customer Name</Text>
+            <Text className="mb-4">
+              {isCustomer ? "Customer" : "Supplier"} Name
+            </Text>
             <Select.Root
               value={selectedCustomerId}
               onValueChange={setSelectedCustomerId} // Update selected customer ID
@@ -159,7 +175,9 @@ const AccountBook = () => {
           </div>
 
           <div className="w-full">
-            <Text className="mb-4">Product</Text>
+            <Text className="mb-4">
+              {isCustomer ? "Product" : "Raw Material"}
+            </Text>
             <Select.Root
               value={selectedProductId}
               onValueChange={setSelectedProductId} // Update selected product ID

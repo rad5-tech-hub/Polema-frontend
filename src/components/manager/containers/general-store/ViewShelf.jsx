@@ -1,14 +1,6 @@
 import React, { useEffect } from "react";
 
-import {
-  Heading,
-  Separator,
-  Table,
-  Spinner,
-  Flex,
-  DropdownMenu,
-  TabNav,
-} from "@radix-ui/themes";
+import { Heading, Separator, Table, Spinner, Flex } from "@radix-ui/themes";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
@@ -83,9 +75,9 @@ const ViewShelf = () => {
                     {item.status}
                   </Flex>
                 </Table.Cell>
-                <div className="p-3 rounded-full cursor-pointer absolute right-[10px] hover:bg-[rgba(225,225,225,1)]">
+                {/* <div className="p-3 rounded-full cursor-pointer absolute right-[10px] hover:bg-[rgba(225,225,225,1)]">
                   <FontAwesomeIcon icon={faEllipsisV} />
-                </div>
+                </div> */}
               </Table.Row>
             ))
           )}

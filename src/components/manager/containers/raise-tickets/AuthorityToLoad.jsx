@@ -9,11 +9,16 @@ import {
   TextField,
   Text,
   Spinner,
+  DropdownMenu,
   Select,
   Grid,
 } from "@radix-ui/themes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowLeft,
+  faArrowRight,
+  faEllipsisV,
+} from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 const root = import.meta.env.VITE_ROOT;
@@ -142,7 +147,7 @@ const AuthorityToLoad = () => {
             Authorization: `Bearer ${retrToken}`,
           },
         });
-        console.log(response);
+
         setDetails(response.data.records);
       } catch (error) {
         console.log(error);
@@ -189,7 +194,7 @@ const AuthorityToLoad = () => {
             ) : (
               currentData().map((detail) => {
                 return (
-                  <Table.Row>
+                  <Table.Row className="relative">
                     <Table.RowHeaderCell>
                       {refractor(detail.createdAt)}
                     </Table.RowHeaderCell>
@@ -201,6 +206,20 @@ const AuthorityToLoad = () => {
                     </Table.RowHeaderCell>
                     <Table.RowHeaderCell>{detail.driver}</Table.RowHeaderCell>
                     <Table.RowHeaderCell>{detail.status}</Table.RowHeaderCell>
+                    <div className="absolute right-4 mt-2">
+                      <DropdownMenu.Root>
+                        <DropdownMenu.Trigger>
+                          <Button variant="soft">
+                            <FontAwesomeIcon icon={faEllipsisV} />
+                          </Button>
+                        </DropdownMenu.Trigger>
+                        <DropdownMenu.Content>
+                          <DropdownMenu.Item>
+                            Go to Approved LPO
+                          </DropdownMenu.Item>
+                        </DropdownMenu.Content>
+                      </DropdownMenu.Root>
+                    </div>
                   </Table.Row>
                 );
               })
