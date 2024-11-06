@@ -4,6 +4,11 @@ import ThemeSwitcher from "../ThemeSwitcher";
 const LogoIcon = "";
 
 const Header = ({ sidebarOpen, setSidebarOpen, user, role, image, text }) => {
+  const getAdminName = () => {
+    const name = localStorage.getItem("adminFirstName");
+    return name;
+  };
+
   return (
     <header className=" top-0 z-[999] font-amsterdam flex w-full  shadow-md dark:bg-boxdark dark:drop-shadow-none">
       <div className="flex flex-grow items-center justify-between px-4 py-4  md:px-6 2xl:px-11">
@@ -53,7 +58,7 @@ const Header = ({ sidebarOpen, setSidebarOpen, user, role, image, text }) => {
         </div>
 
         <div className="hidden sm:block">
-          <h1 className="text-[2.0rem]">Welcome Admin</h1>
+          <h1 className="text-[2.0rem]">Welcome {getAdminName()}</h1>
         </div>
 
         <div className="flex items-center gap-3 2xsm:gap-7">

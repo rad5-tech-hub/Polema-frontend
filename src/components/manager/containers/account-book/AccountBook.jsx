@@ -71,11 +71,14 @@ const AccountBook = () => {
       return;
     }
     try {
-      const response = await axios.get(`${root}/admin/get-products`, {
-        headers: {
-          Authorization: `Bearer ${retrToken}`,
-        },
-      });
+      const response = await axios.get(
+        `${root}/admin/${isCustomer ? "get-products" : "get-raw-materials"}`,
+        {
+          headers: {
+            Authorization: `Bearer ${retrToken}`,
+          },
+        }
+      );
       setProducts(response.data.products);
     } catch (error) {
       console.log(error);

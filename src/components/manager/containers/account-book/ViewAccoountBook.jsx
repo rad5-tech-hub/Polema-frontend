@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { refractor } from "../../../date";
 import toast, { Toaster } from "react-hot-toast";
-import { Spinner, Table, Heading } from "@radix-ui/themes";
+import { Spinner, Table, Heading, Select, Flex } from "@radix-ui/themes";
 import axios from "axios";
 
 const root = import.meta.env.VITE_ROOT;
@@ -11,6 +11,8 @@ const ViewAccoountBook = () => {
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [customerActive, setCustomerActive] = useState(true);
 
   // Fetch Details of account book
   const fetchAccountBookDetails = async () => {
@@ -100,12 +102,30 @@ const ViewAccoountBook = () => {
 
   return (
     <>
-      <Heading className="mb-4">Customer Account Book</Heading>
+      <Flex justify={"between"}>
+        <Heading className="mb-4">Account Book</Heading>
+        <Select.Root
+          defaultValue="customers"
+          onValueChange={(value) => {
+            value === "customers"
+              ? setCustomerActive(true)
+              : setCustomerActive(false);
+          }}
+        >
+          <Select.Trigger />
+          <Select.Content>
+            <Select.Item value="customers">Customers</Select.Item>
+            <Select.Item value="suppliers">Suppliers</Select.Item>
+          </Select.Content>
+        </Select.Root>
+      </Flex>
       <Table.Root variant="surface">
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>CUSTOMER NAME</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>
+              {customerActive ? "CUSTOMER" : "SUPPLIER"} NAME
+            </Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>PRODUCT</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>AMOUNT(₦)</Table.ColumnHeaderCell>
           </Table.Row>
