@@ -208,6 +208,7 @@ const App = () => {
                   />
 
                   {/* Test Routes for cash management */}
+                  {/* Routes for cashier */}
                   <Route
                     path="/cash-management/cash-management"
                     element={<CashManagement />}
