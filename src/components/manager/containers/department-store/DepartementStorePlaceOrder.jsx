@@ -1,53 +1,93 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Heading,
-  Separator,
-  Text,
   Card,
-  Flex,
-  Select,
-  Button,
   TextField,
+  Grid,
+  Text,
+  Button,
+  Flex,
+  Spinner,
+  Select,
 } from "@radix-ui/themes";
 import axios from "axios";
-import toast, { Toaster } from "react-hot-toast";
-
 const root = import.meta.env.VITE_ROOT;
+import toast, { Toaster } from "react-hot-toast";
 
 const DepartementStorePlaceOrder = () => {
   const [rawMaterials, setRawMaterials] = useState([]);
-  const [orderItems, setOrderItems] = useState([
+  const [btnLoading, setBtnLoading] = useState(false);
+  const [dept, setDept] = useState([]);
+  const [plans, setPlans] = useState([
     {
-      rawMaterial: "",
+      id: Date.now(),
+      departmentId: "",
+      productId: "",
       quantity: "",
       unit: "",
       expectedDeliveryDate: "",
     },
   ]);
 
-  const fetchDept = async () => {
+  // Fetch raw materials only when a department is selected
+  const fetchRawMaterials = async (departmentId) => {
     const retrToken = localStorage.getItem("token");
-    if (!retrToken) return;
+    if (!retrToken || !departmentId) return;
+
     try {
-      const response = await axios.get(`${root}/dept/view-deptstore-raw`, {
-        headers: { Authorization: `Bearer ${retrToken}` },
-      });
-      setRawMaterials(response.data.stores);
+      const response = await axios.get(
+        `${root}/dept/get-dept-raw/${departmentId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${retrToken}`,
+          },
+        }
+      );
+      setRawMaterials(response.data.products);
     } catch (error) {
+      console.log(error);
       setRawMaterials([]);
     }
   };
 
-  React.useEffect(() => {
+  // Fetch departments
+  const fetchDept = async () => {
+    const retrToken = localStorage.getItem("token");
+    if (!retrToken) return;
+
+    try {
+      const response = await axios.get(`${root}/dept/get-department`, {
+        headers: {
+          Authorization: `Bearer ${retrToken}`,
+        },
+      });
+      setDept(response.data.departments);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
     fetchDept();
   }, []);
 
-  const handleAddPlan = () => {
-    setOrderItems([
-      ...orderItems,
+  // Handle input change for each plan
+  const handleInputChange = (id, field, value) => {
+    setPlans((prevPlans) =>
+      prevPlans.map((plan) =>
+        plan.id === id ? { ...plan, [field]: value } : plan
+      )
+    );
+  };
+
+  // Add new plan card
+  const addPlan = () => {
+    setPlans([
+      ...plans,
       {
         id: Date.now(),
-        rawMaterial: "",
+        departmentId: "",
+        productId: "",
         quantity: "",
         unit: "",
         expectedDeliveryDate: "",
@@ -55,69 +95,113 @@ const DepartementStorePlaceOrder = () => {
     ]);
   };
 
-  const handleRemovePlan = (id) => {
-    setOrderItems(orderItems.filter((item) => item.id !== id));
+  // Remove plan card by id
+  const removePlan = (id) => {
+    setPlans(plans.filter((plan) => plan.id !== id));
   };
 
-  const handleInputChange = (id, field, value) => {
-    setOrderItems(
-      orderItems.map((item) =>
-        item.id === id ? { ...item, [field]: value } : item
-      )
-    );
-  };
-
-  const handleSubmit = async (e) => {
+  // Submit orders
+  const placeOrder = async (e) => {
     e.preventDefault();
-    const body = { orders: orderItems };
-    console.log(body);
+    setBtnLoading(true);
+    let retrToken = localStorage.getItem("token");
+
+    if (!retrToken) {
+      toast.error("An error occurred. Try logging in again");
+      return;
+    }
+
+    const orders = plans.map((plan) => ({
+      departmentId: plan.departmentId,
+      productId: plan.productId,
+      quantity: plan.quantity,
+      unit: plan.unit,
+      expectedDeliveryDate: plan.expectedDeliveryDate,
+    }));
+    console.log(orders);
 
     try {
-      const retrToken = localStorage.getItem("token");
-      await axios.post(`${root}/dept/create-dept-store`, body, {
-        headers: { Authorization: `Bearer ${retrToken}` },
-      });
+      const response = await axios.post(
+        `${root}/dept/create-deptstore-order`,
+        {
+          orders,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${retrToken}`,
+          },
+        }
+      );
+      setBtnLoading(false);
+      toast.success("Order placed successfully");
     } catch (error) {
-      console.error("Order submission failed:", error);
+      console.error("Failed to place order:", error);
+      setBtnLoading(false);
     }
   };
 
   return (
-    <>
-      <Flex justify={"between"}>
-        <Heading>Place Order</Heading>
-        <Button>View All</Button>
-      </Flex>
-      <Separator className="my-4 w-full" />
-
-      <form onSubmit={handleSubmit}>
-        {orderItems.map((item) => (
-          <Card key={item.id} className="mt-3">
+    <div>
+      <Heading>Place Order</Heading>
+      <form action="" onSubmit={placeOrder}>
+        {plans.map((plan) => (
+          <Card key={plan.id} className="mt-5">
             <Flex justify={"end"}>
-              <p
-                onClick={() => handleRemovePlan(item.id)}
+              <span
                 className="text-red-500 cursor-pointer"
+                onClick={() => removePlan(plan.id)}
               >
-                -Remove
-              </p>
+                - Remove
+              </span>
             </Flex>
-            <Flex justify={"between"} gap={"4"}>
+            <Grid columns={"2"} rows={"2"} gap={"4"}>
               <div className="w-full">
-                <Text>Select Raw Material Needed</Text>
+                <Text>Select Department</Text>
                 <Select.Root
-                  onValueChange={(value) =>
-                    handleInputChange(item.id, "rawMaterial", value)
-                  }
+                  required={true}
+                  onValueChange={(val) => {
+                    handleInputChange(plan.id, "departmentId", val);
+                    fetchRawMaterials(val); // Fetch raw materials when department is selected
+                  }}
                 >
                   <Select.Trigger
-                    placeholder="Select raw materials"
-                    disabled={rawMaterials.length === 0}
-                    className="w-full mt-2"
+                    className="mt-2 w-full"
+                    placeholder="Select Department"
                   />
                   <Select.Content>
-                    {rawMaterials.map((rm) => (
-                      <Select.Item value={rm.product.name} key={rm.id}>
-                        {rm.product.name}
+                    {dept.map((item) => (
+                      <Select.Item key={item.id} value={item.id}>
+                        {item.name}
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Root>
+              </div>
+              <div className="w-full">
+                <Text>Raw Material Needed</Text>
+                <Select.Root
+                  required={true}
+                  disabled={rawMaterials.length === 0}
+                  onValueChange={(val) => {
+                    handleInputChange(plan.id, "productId", val);
+                    const product = rawMaterials.find(
+                      (item) => item.id === val
+                    );
+                    handleInputChange(
+                      plan.id,
+                      "unit",
+                      product ? product.price[0].unit : ""
+                    );
+                  }}
+                >
+                  <Select.Trigger
+                    className="mt-2 w-full"
+                    placeholder="Select Raw Material"
+                  />
+                  <Select.Content>
+                    {rawMaterials.map((material) => (
+                      <Select.Item key={material.id} value={material.id}>
+                        {material.name}
                       </Select.Item>
                     ))}
                   </Select.Content>
@@ -126,65 +210,55 @@ const DepartementStorePlaceOrder = () => {
               <div className="w-full">
                 <Text>Quantity</Text>
                 <TextField.Root
-                  placeholder="Enter Quantity"
                   className="mt-2"
-                  value={item.quantity}
+                  placeholder="Enter quantity"
+                  value={plan.quantity}
+                  required={true}
                   onChange={(e) =>
-                    handleInputChange(item.id, "quantity", e.target.value)
+                    handleInputChange(plan.id, "quantity", e.target.value)
                   }
                 />
               </div>
-            </Flex>
-
-            <Flex className="mt-4" gap={"4"}>
               <div className="w-full">
                 <Text>Unit</Text>
                 <TextField.Root
-                  className="w-full mt-2"
-                  placeholder="Set Unit"
-                  value={item.unit}
-                  onChange={(e) =>
-                    handleInputChange(item.id, "unit", e.target.value)
-                  }
+                  className="mt-2"
+                  placeholder="Enter Unit"
+                  value={plan.unit}
+                  disabled
                 />
               </div>
               <div className="w-full">
                 <Text>Expected Delivery</Text>
                 <TextField.Root
+                  className="mt-2"
+                  placeholder="Enter Expected Delivery"
+                  required={true}
                   type="date"
-                  className="w-full mt-2"
-                  placeholder="Expected Delivery Date"
-                  value={item.expectedDeliveryDate}
+                  value={plan.expectedDeliveryDate}
                   onChange={(e) =>
                     handleInputChange(
-                      item.id,
+                      plan.id,
                       "expectedDeliveryDate",
                       e.target.value
                     )
                   }
                 />
               </div>
-            </Flex>
+            </Grid>
           </Card>
         ))}
-
-        <Button
-          type="button"
-          onClick={handleAddPlan}
-          className="mt-3"
-          size={"2"}
-        >
+        <Button className="mt-4" onClick={addPlan}>
           Add Plan
         </Button>
 
-        <Flex justify={"end"}>
-          <Button type="submit" className="mt-3 !bg-theme" size={"3"}>
-            Submit Order
+        <Flex className="mt-4" justify={"end"}>
+          <Button className="bg-theme" size={"3"} type="submit">
+            {btnLoading ? <Spinner /> : "Place Order"}
           </Button>
         </Flex>
       </form>
-      <Toaster position="top-right" />
-    </>
+    </div>
   );
 };
 

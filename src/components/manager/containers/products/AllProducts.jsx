@@ -433,19 +433,19 @@ const AllProducts = () => {
         <EditDialog />
       ) : (
         <div>
-          {/* Search Box */}
-          <TextField.Root
-            placeholder="Search by product name"
-            className="w-[55%] mb-5"
-          >
-            <TextField.Slot>
-              <MagnifyingGlassIcon height={"16"} width={"16"} />
-            </TextField.Slot>
-          </TextField.Root>
+          <Flex justify={"between"} align={"center"}>
+            <Heading size={"6"} className="p-4">
+              All Products
+            </Heading>
+            <Select.Root defaultValue="products">
+              <Select.Trigger />
+              <Select.Content>
+                <Select.Item value="products">Products</Select.Item>
+                <Select.Item value="raw materials">Raw Materials</Select.Item>
+              </Select.Content>
+            </Select.Root>
+          </Flex>
 
-          <Heading size={"6"} className="p-4">
-            All Products
-          </Heading>
           <Table.Root size={"3"} variant="surface">
             <Table.Header>
               <Table.Row>
@@ -508,12 +508,12 @@ const AllProducts = () => {
                               </Button>
                             </DropdownMenu.Trigger>
                             <DropdownMenu.Content>
-                              <DropdownMenu.Item
+                              {/* <DropdownMenu.Item
                                 shortcut={<FontAwesomeIcon icon={faPen} />}
                                 onClick={() => console.log("Hello World")}
                               >
                                 Edit
-                              </DropdownMenu.Item>
+                              </DropdownMenu.Item> */}
                               {}
                               <DropdownMenu.Item
                                 color="red"

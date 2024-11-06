@@ -1,5 +1,8 @@
 import WelcomeComponent from "./WelcomeComponent";
-
+import AuthorityToWeigh from "./raise-tickets/AuthorityToWeigh";
+import AuthorityToLoad from "./raise-tickets/AuthorityToLoad";
+import LocalPurchaseOrder from "./raise-tickets/LocalPurchaseOrder";
+import CreateDepartmentStore from "./department-store/CreateDepartmentStore";
 import GeneralStorePlaceOrder from "./general-store/GeneralStorePlaceOrder";
 import ViewShelf from "./general-store/ViewShelf";
 import CreateShelf from "./general-store/CreateShelf";
@@ -11,11 +14,13 @@ import DepartmentStoreCreate from "./department-store/DepartmentStoreCreate";
 import AllAdmins from "./admin/AllAdmins";
 import AddAdmin from "./admin/AddAdmin";
 import AddDepartment from "./department/AddDepartment";
+import CashManagement from "./cash/CashManagement";
 import AddCustomer from "./customer/AddCustomer";
 import AddProducts from "./products/AddProducts";
 import AllRoles from "./roles/AllRoles";
 import UsersList from "./UsersList";
 import ViewAccoountBook from "./account-book/ViewAccoountBook";
+import CashManagementLedger from "./cash/CashManagementLedger";
 import AllSuppliers from "./suppliers/AllSuppliers";
 import AllDepartments from "./department/AllDepartments";
 import AllCustomers from "./customer/AllCustomers";
@@ -51,20 +56,25 @@ export {
   AllSuppliers,
   AllRoles,
   CreatePharmacyStore,
+  LocalPurchaseOrder,
   AllDepartments,
   AllSuspended,
   AllAdmins,
   AllProducts,
+  AuthorityToLoad,
   WelcomeComponent,
   AddCustomer,
   AddDepartment,
   UsersList,
   AddProducts,
   AllCustomers,
+  CashManagementLedger,
   CreateShelf,
   PharmacyPlaceOrder,
   ViewPharmacyOrder,
   ViewGeneralOrder,
   ViewShelf,
   GeneralStorePlaceOrder,
+  CashManagement,
+  AuthorityToWeigh,
 };

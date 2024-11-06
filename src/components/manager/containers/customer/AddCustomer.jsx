@@ -25,64 +25,15 @@ import UpdateURL from "../ChangeRoute";
 
 const root = import.meta.env.VITE_ROOT;
 
-const AddCustomer = ({ child, setChild, buttonValue }) => {
-  const navigate = useNavigate();
-  const [value, setValue] = useState("admin");
-  const [selectedItems, setSelectedItems] = useState([]);
+const AddCustomer = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [otherValue, setOtherValue] = useState("");
-  const [showOtherInput, setShowOtherInput] = useState(false);
-  const [uploadedImage, setUploadedImage] = useState(null);
   const [imageURL, setImageURL] = useState(" ");
-
-  // const data = {
-  //   admin: { label: "Admin", icon: <PersonIcon /> },
-  //   admin1: { label: "Admin 1", icon: <PersonIcon /> },
-  //   admin2: { label: "Admin 2", icon: <PersonIcon /> },
-  //   admin3: { label: "Admin 3", icon: <PersonIcon /> },
-  //   accountant: { label: "Accountant", icon: <PersonIcon /> },
-  //   keeperGeneral: { label: "Storekeeper (General)", icon: <PersonIcon /> },
-  //   keeperPharmacy: { label: "Storekeeper (Pharmacy)", icon: <PersonIcon /> },
-  // };
-
-  const handleValueChange = (value) => {
-    setValue(value);
-  };
-
-  const handleCheckboxChange = (selectedValue) => {
-    if (selectedValue === "others") {
-      setShowOtherInput(true);
-    } else {
-      setShowOtherInput(false);
-      setSelectedItems((prevItems) => {
-        if (prevItems.includes(selectedValue)) {
-          return prevItems.filter((item) => item !== selectedValue);
-        } else {
-          return [...prevItems, selectedValue];
-        }
-      });
-    }
-  };
-
-  const handleOtherBlur = () => {
-    if (otherValue.trim() !== "") {
-      setSelectedItems((prevItems) => [...prevItems, otherValue]);
-    }
-    setOtherValue("");
-    setShowOtherInput(false);
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUploadedImage(reader.result);
-        uploadImageToCloudinary(file);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  // State management for the form content
+  const [firstname, setFirstName] = useState("");
+  const [lastname, setLastname] = useState("");
+  const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
+  const [number, setNumber] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -92,20 +43,28 @@ const AddCustomer = ({ child, setChild, buttonValue }) => {
     // Check if the token is available
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
-
       return;
     }
 
-    const submitobject = {
-      firstname: e.target[0].value,
-      lastname: e.target[3].value,
-      email: e.target[1].value,
-      phoneNumber: e.target[2].value,
-      profilePic: imageURL,
-      address: e.target[4].value,
+    const resetForm = () => {
+      setFirstName("");
+      setLastname("");
+      setEmail("");
+      setAddress("");
+      setNumber("");
     };
+
+    // Dynamically build submitobject to exclude email if it's empty
+    const submitobject = {
+      firstname: firstname,
+      lastname: lastname,
+      ...(email && { email }),
+      phoneNumber: number,
+      profilePic: imageURL,
+      address: address,
+    };
+
     setIsLoading(true);
-    console.log(e);
 
     try {
       const response = await axios.post(
@@ -119,34 +78,23 @@ const AddCustomer = ({ child, setChild, buttonValue }) => {
       );
 
       setIsLoading(false);
-      console.log(response.data);
+
       toast.success(response.data.message, {
         duration: 6500,
         style: {
           padding: "30px",
         },
       });
-
-      // Redirect to all customers page
-      navigate("/admin/customer/view-customers");
+      resetForm();
     } catch (error) {
       console.log(error);
       setIsLoading(false);
-      {
-        error.response.data.error
-          ? toast.error(error.response.data.error, {
-              duration: 6500,
-              style: {
-                padding: "30px",
-              },
-            })
-          : toast.error(error.message, {
-              duration: 6500,
-              style: {
-                padding: "30px",
-              },
-            });
-      }
+      toast.error(error.response?.data?.error || error.message, {
+        duration: 6500,
+        style: {
+          padding: "30px",
+        },
+      });
     }
   };
 
@@ -171,6 +119,10 @@ const AddCustomer = ({ child, setChild, buttonValue }) => {
                   type="text"
                   id="firstname"
                   size={"3"}
+                  value={firstname}
+                  onChange={(e) => {
+                    setFirstName(e.target.value);
+                  }}
                 ></TextField.Root>
               </div>
 
@@ -187,6 +139,10 @@ const AddCustomer = ({ child, setChild, buttonValue }) => {
                   id="email"
                   type="text"
                   size={"3"}
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                  }}
                 ></TextField.Root>
               </div>
 
@@ -200,6 +156,10 @@ const AddCustomer = ({ child, setChild, buttonValue }) => {
                 <TextField.Root
                   placeholder="Enter phone number"
                   className=""
+                  value={number}
+                  onChange={(e) => {
+                    setNumber(e.target.value);
+                  }}
                   id="number"
                   type="number"
                   size={"3"}
@@ -218,6 +178,10 @@ const AddCustomer = ({ child, setChild, buttonValue }) => {
                 <TextField.Root
                   placeholder="Enter Last Name"
                   className=""
+                  value={lastname}
+                  onChange={(e) => {
+                    setLastname(e.target.value);
+                  }}
                   type="text"
                   id="lastname"
                   size={"3"}
@@ -232,6 +196,10 @@ const AddCustomer = ({ child, setChild, buttonValue }) => {
                   Enter Address
                 </label>
                 <TextField.Root
+                  value={address}
+                  onChange={(e) => {
+                    setAddress(e.target.value);
+                  }}
                   placeholder="Enter Address"
                   className=""
                   type="text"

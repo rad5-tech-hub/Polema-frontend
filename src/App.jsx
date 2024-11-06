@@ -8,18 +8,22 @@ import DashBoardManager from "./components/manager/DashboardManager";
 import {
   AddAdmin,
   WelcomeComponent,
+  CashManagement,
   PharmacyPlaceOrder,
+  CashManagementLedger,
+  AuthorityToLoad,
   ViewPharmacyStore,
+  LocalPurchaseOrder,
   ViewPharmacyOrder,
   ViewShelf,
   GeneralStorePlaceOrder,
   AddProducts,
-  
+  CreateDepartmentStore,
   AddCustomer,
   CreateShelf,
   CustomerPlaceOrder,
   CustomerLedger,
-  AuthorityToGiveCash,
+  AuthorityToWeigh,
   AllProducts,
   CreatePharmacyStore,
   CreateRole,
@@ -135,8 +139,16 @@ const App = () => {
 
                   {/*Raise Tickets Routes*/}
                   <Route
-                    path="raise-tickets/authority-to-give-cash"
-                    element={<AuthorityToGiveCash />}
+                    path="raise-ticket/l.p.o"
+                    element={<LocalPurchaseOrder />}
+                  />
+                  <Route
+                    path="raise-ticket/authority-to-weigh"
+                    element={<AuthorityToWeigh />}
+                  />
+                  <Route
+                    path="raise-ticket/authority-to-load"
+                    element={<AuthorityToLoad />}
                   />
 
                   {/*  Routes for phamrcy store */}
@@ -179,20 +191,30 @@ const App = () => {
 
                   {/* Test Routes for department store */}
                   <Route
-                    path="/department-store/create-store"
-                    element={<DepartmentStoreCreate />}
+                    path="/department-store/create-department-store"
+                    element={<CreateDepartmentStore />}
                   />
                   <Route
-                    path="/department-store/view-orders"
+                    path="/department-store/view-dept-orders"
                     element={<DepartmentStoreViewOrders />}
                   />
                   <Route
-                    path="/department-store/place-order"
+                    path="/department-store/place-store-order"
                     element={<DepartementStorePlaceOrder />}
                   />
                   <Route
-                    path="/department-store/view-store"
+                    path="/department-store/department-store-products"
                     element={<ViewDepartmentStore />}
+                  />
+
+                  {/* Test Routes for cash management */}
+                  <Route
+                    path="/cash-management/cash-management"
+                    element={<CashManagement />}
+                  />
+                  <Route
+                    path="/cash-management/cash-ledger"
+                    element={<CashManagementLedger />}
                   />
                 </Routes>
               </DashBoardManager>
