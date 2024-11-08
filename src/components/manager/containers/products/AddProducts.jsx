@@ -127,8 +127,8 @@ const AddProducts = () => {
           unit: unit,
           amount: Number(basePrice),
         },
-      ], // Submit raw base price without commas
-      pricePlan: plansArray, // Plans as an object
+      ],
+      pricePlan: plansArray,
     };
 
     const submitWithoutPlans = {
@@ -398,6 +398,7 @@ const AddProducts = () => {
               color="brown"
               radius="medium"
               onClick={handleAddPlan}
+              type="button"
             >
               <PlusIcon width={"20px"} height={"20px"} />
               Add Plan

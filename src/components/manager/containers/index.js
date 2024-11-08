@@ -64,6 +64,7 @@ export {
   AuthorityToLoad,
   WelcomeComponent,
   AddCustomer,
+  CreateDepartmentStore,
   AddDepartment,
   UsersList,
   AddProducts,

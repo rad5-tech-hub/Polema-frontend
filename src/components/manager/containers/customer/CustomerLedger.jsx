@@ -1,6 +1,13 @@
 import React from "react";
-import UpdateURL from "../ChangeRoute";
-import { Table, TextField } from "@radix-ui/themes";
+import { TokensIcon } from "@radix-ui/react-icons";
+import {
+  Table,
+  TextField,
+  Heading,
+  Flex,
+  Separator,
+  Button,
+} from "@radix-ui/themes";
 import axios from "axios";
 const root = import.meta.env.VITE_ROOT;
 
@@ -12,6 +19,13 @@ const CustomerLedger = () => {
   };
   return (
     <>
+      <Flex className="mb-4" justify={"between"}>
+        <Heading>Customer Ledger</Heading>
+        <Button className="!bg-theme">
+          <TokensIcon />
+          Filter
+        </Button>
+      </Flex>
       <Table.Root variant="surface">
         <Table.Header>
           <Table.Row>
