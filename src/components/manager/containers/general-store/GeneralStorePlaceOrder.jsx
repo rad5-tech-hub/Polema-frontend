@@ -11,7 +11,7 @@ import {
 } from "@radix-ui/themes";
 import { LoaderIcon } from "react-hot-toast";
 import axios from "axios";
-import { toast } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -25,7 +25,7 @@ const GeneralStorePlaceOrder = () => {
   // State to track all the plans (cards)
   const [plans, setPlans] = useState([
     {
-      name: "",
+      productId: "",
       quantity: "",
       unit: "",
       expectedDeliveryDate: "",
@@ -37,7 +37,7 @@ const GeneralStorePlaceOrder = () => {
     setPlans([
       ...plans,
       {
-        name: "",
+        productId: "",
         quantity: "",
         unit: "",
         expectedDeliveryDate: "",
@@ -57,6 +57,18 @@ const GeneralStorePlaceOrder = () => {
     );
   };
 
+  // Function to reset form
+  const resetForm = () => {
+    setPlans([
+      {
+        productId: "",
+        quantity: "",
+        unit: "",
+        expectedDeliveryDate: "",
+      },
+    ]);
+  };
+
   // Function to handle form submission
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -66,6 +78,12 @@ const GeneralStorePlaceOrder = () => {
     };
 
     const retrToken = localStorage.getItem("token");
+    toast.loading("Submitting Order...", {
+      style: {
+        padding: "30px",
+      },
+      duration: 1500,
+    });
 
     // Check if the token is available
     if (!retrToken) {
@@ -85,9 +103,12 @@ const GeneralStorePlaceOrder = () => {
       );
       console.log(response);
       setIsLoading(false);
+      toast.success(response.data.message);
+      resetForm();
     } catch (error) {
       console.log(error);
       setIsLoading(false);
+      toast.error("An error occured");
     }
   };
 
@@ -137,7 +158,7 @@ const GeneralStorePlaceOrder = () => {
                 <Text className="mb-4">Shelf Name</Text>
                 <Select.Root
                   onValueChange={(value) =>
-                    handleInputChange(plan.id, "name", value)
+                    handleInputChange(plan.id, "productId", value)
                   }
                   required={true}
                 >
@@ -161,6 +182,7 @@ const GeneralStorePlaceOrder = () => {
                 <TextField.Root
                   className="mt-2"
                   placeholder="Enter Quantity"
+                  type="number"
                   value={plan.quantity}
                   required={true}
                   onChange={(e) =>
@@ -173,9 +195,9 @@ const GeneralStorePlaceOrder = () => {
               <div className="w-full">
                 <Text className="mb-4">Unit</Text>
                 <TextField.Root
-                  className="mt-2"
-                  required={true}
-                  placeholder="Enter Unit"
+                  className="mt-2 cursor-not-allowed"
+                  placeholder=" Unit"
+                  disabled={true}
                   value={plan.unit}
                   onChange={(e) =>
                     handleInputChange(plan.id, "unit", e.target.value)
@@ -222,6 +244,7 @@ const GeneralStorePlaceOrder = () => {
           </Button>
         </Flex>
       </form>
+      <Toaster position="top-right" />
     </>
   );
 };

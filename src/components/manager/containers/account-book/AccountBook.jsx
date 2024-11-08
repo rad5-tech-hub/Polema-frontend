@@ -5,7 +5,7 @@ import UpdateURL from "../ChangeRoute";
 import {
   Select,
   Separator,
-  DropdownMenu,
+  Grid,
   Text,
   Flex,
   TextField,
@@ -24,6 +24,7 @@ const AccountBook = () => {
   const [selectedProductId, setSelectedProductId] = useState("");
   const [basePrice, setBasePrice] = useState("");
   const [loading, setLoading] = useState(false);
+  const [bankName, setBankName] = useState("");
 
   const [isCustomer, setIsCustomer] = React.useState(true);
 
@@ -41,6 +42,7 @@ const AccountBook = () => {
   };
 
   const fetchCustomers = async () => {
+    setCustomers([]);
     const retrToken = localStorage.getItem("token");
 
     if (!retrToken) {
@@ -64,6 +66,7 @@ const AccountBook = () => {
   };
 
   const fetchProducts = async () => {
+    setProducts([]);
     const retrToken = localStorage.getItem("token");
 
     if (!retrToken) {
@@ -161,11 +164,12 @@ const AccountBook = () => {
             </Text>
             <Select.Root
               value={selectedCustomerId}
-              onValueChange={setSelectedCustomerId} // Update selected customer ID
+              onValueChange={setSelectedCustomerId}
+              disabled={customers.length === 0}
             >
               <Select.Trigger
                 className="w-full mt-2"
-                placeholder="Select Customer"
+                placeholder={`Select ${isCustomer ? "Customer" : "Supplier"}`}
               />
               <Select.Content position="popper">
                 {customers.map((customer) => (
@@ -183,11 +187,14 @@ const AccountBook = () => {
             </Text>
             <Select.Root
               value={selectedProductId}
+              disabled={products.length === 0}
               onValueChange={setSelectedProductId} // Update selected product ID
             >
               <Select.Trigger
                 className="w-full mt-2"
-                placeholder="Select Product"
+                placeholder={`Select ${
+                  isCustomer ? "Product" : "Raw Material"
+                }`}
               />
               <Select.Content position="popper">
                 {products.map((product) => (
@@ -200,15 +207,28 @@ const AccountBook = () => {
           </div>
         </Flex>
 
-        <div>
-          <Text>Enter Amount</Text>
-          <TextField.Root
-            className="mt-2 w-[50%]"
-            placeholder="Enter Amount in Naira (₦)"
-            value={formatNumber(basePrice)} // Display formatted number
-            onChange={handleBasePriceChange}
-          />
-        </div>
+        <Grid columns={"2"} gap={"5"}>
+          <div className="w-full">
+            <Text>Enter Amount</Text>
+            <TextField.Root
+              className="mt-2 "
+              placeholder="Enter Amount in Naira (₦)"
+              value={formatNumber(basePrice)} // Display formatted number
+              onChange={handleBasePriceChange}
+            />
+          </div>
+          <div className="w-full">
+            <Text>Bank Name</Text>
+            <TextField.Root
+              className="mt-2 "
+              placeholder="Enter Bank Name"
+              value={bankName}
+              onChange={(e) => {
+                setBankName(e.target.value);
+              }}
+            />
+          </div>
+        </Grid>
 
         <Flex justify={"end"} className="mt-4 cursor-pointer">
           <Button className="cursor-pointer" type="submit" disabled={loading}>

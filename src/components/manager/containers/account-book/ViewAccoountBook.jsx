@@ -11,6 +11,7 @@ const ViewAccoountBook = () => {
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [customerActive, setCustomerActive] = useState(true);
 
   const [customerActive, setCustomerActive] = useState(true);
 
@@ -115,7 +116,11 @@ const ViewAccoountBook = () => {
           <Select.Trigger />
           <Select.Content>
             <Select.Item value="customers">Customers</Select.Item>
+<<<<<<< HEAD
             <Select.Item value="suppliers">Suppliers</Select.Item>
+=======
+            <Select.Item value="suppliers"> Suppliers</Select.Item>
+>>>>>>> 1a362733de0af6ed8f4a6e5fe912297e54b5e7f4
           </Select.Content>
         </Select.Root>
       </Flex>
@@ -126,7 +131,13 @@ const ViewAccoountBook = () => {
             <Table.ColumnHeaderCell>
               {customerActive ? "CUSTOMER" : "SUPPLIER"} NAME
             </Table.ColumnHeaderCell>
+<<<<<<< HEAD
             <Table.ColumnHeaderCell>PRODUCT</Table.ColumnHeaderCell>
+=======
+            <Table.ColumnHeaderCell>
+              {customerActive ? "PRODUCT" : "RAW MATERIAL"}
+            </Table.ColumnHeaderCell>
+>>>>>>> 1a362733de0af6ed8f4a6e5fe912297e54b5e7f4
             <Table.ColumnHeaderCell>AMOUNT(₦)</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>

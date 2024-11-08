@@ -8,20 +8,11 @@ import {
   Button,
   Heading,
   Separator,
-  CheckboxGroup,
-  Checkbox,
   TextField,
   Text,
   Spinner,
   Flex,
 } from "@radix-ui/themes";
-
-import {
-  EnvelopeClosedIcon,
-  LockClosedIcon,
-  PersonIcon,
-} from "@radix-ui/react-icons";
-import UpdateURL from "../ChangeRoute";
 
 const root = import.meta.env.VITE_ROOT;
 

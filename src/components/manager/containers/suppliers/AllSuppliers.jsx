@@ -8,6 +8,7 @@ import {
   TextField,
   Spinner,
   Flex,
+  Separator,
   Button,
   DropdownMenu,
 } from "@radix-ui/themes";
@@ -35,10 +36,8 @@ const EditDialog = ({ isOpen, onClose, fetchSuppliers, id }) => {
     setSuspendLoading(true);
     const retrToken = localStorage.getItem("token");
 
-    // Check if the token is available
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
-
       return;
     }
 
@@ -61,154 +60,138 @@ const EditDialog = ({ isOpen, onClose, fetchSuppliers, id }) => {
         }
       );
       setSuspendLoading(false);
-      console.log(response);
       toast.success("Admin Edited successfully", {
         duration: 6500,
-        style: {
-          padding: "30px",
-        },
+        style: { padding: "30px" },
       });
       fetchSuppliers();
       onClose();
     } catch (error) {
       setSuspendLoading(false);
       onClose();
-      console.log(error);
-      {
-        error.response.data.error
-          ? toast.error(error.response.data.error)
-          : toast.error(error.message);
-      }
+      toast.error(error.response?.data?.error || error.message);
     }
   };
+
+  if (!isOpen) return null;
+
   return (
-    <Dialog.Root open={isOpen} onOpenChange={onClose}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="bg-black/50 data-[state=open]:animate-overlayShow fixed inset-0" />
+    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-[101]">
+      <div className="bg-white p-6 max-w-lg w-full rounded shadow-lg relative">
+        <h1 className="text-xl font-semibold mb-4">Edit Supplier</h1>
 
-        <Dialog.Content className=" fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none">
-          <Dialog.Title className=" m-0 text-[17px] font-medium text-black">
-            <Heading as="h1" className="text-[25px]">
-              Edit Supplier
-            </Heading>
-          </Dialog.Title>
-
-          <form action="" className="mt-4">
-            <Flex justify={"between"} width={"100%"}>
-              <label
-                className="text-[15px] text-black  font-medium leading-[35px]"
-                htmlFor="firstname"
-              >
-                First Name
-              </label>
-              <TextField.Root
-                placeholder="Enter First Name"
-                id="firstname"
-                defaultValue={id.firstname}
-                onChange={(e) => setChangedFirstName(e.target.value)}
-                type="text"
-                className="p-1 rounded-sm mb-5 w-fit"
-              />
-            </Flex>
-
-            <Flex justify={"between"} width={"100%"}>
-              <label
-                className="text-[15px] text-black  font-medium leading-[35px]"
-                htmlFor="lastname"
-              >
-                Last Name
-              </label>
-              <TextField.Root
-                placeholder="Enter Last Name"
-                id="lastname"
-                defaultValue={id.lastname}
-                onChange={(e) => setChangesLastName(e.target.value)}
-                type="text"
-                className="p-1 rounded-sm mb-5"
-              />
-            </Flex>
-
-            <Flex justify={"between"} width={"100%"}>
-              <label
-                className="text-[15px] text-black  font-medium leading-[35px]"
-                htmlFor="lastname"
-              >
-                Email Address
-              </label>
-              <TextField.Root
-                placeholder="Enter Last Name"
-                id="lastname"
-                defaultValue={id.email}
-                onChange={(e) => setChangedEmail(e.target.value)}
-                type="text"
-                className="p-1 rounded-sm mb-5"
-              />
-            </Flex>
-
-            <Flex justify={"between"} width={"100%"}>
-              <label
-                className="text-[15px] text-black  font-medium leading-[35px]"
-                htmlFor="phone"
-              >
-                Phone Number
-              </label>
-              <TextField.Root
-                placeholder="Enter Phone Number"
-                id="phone"
-                defaultValue={id.phoneNumber}
-                type="number"
-                onChange={(e) => setChangedPhone(e.target.value)}
-                className="p-1 rounded-sm mb-5"
-              />
-            </Flex>
-
-            <Flex justify={"between"} width={"100%"}>
-              <label
-                className="text-[15px] text-black  font-medium leading-[35px]"
-                htmlFor="address"
-              >
-                Address
-              </label>
-              <TextField.Root
-                placeholder="Enter Address"
-                id="address"
-                defaultValue={id.address}
-                onChange={(e) => setChangedAddress(e.target.value)}
-                type="text"
-                className="p-1 rounded-sm"
-              />
-            </Flex>
-          </form>
-
-          <div className="mt-[25px] flex justify-end">
-            <Dialog.Close asChild>
-              <button
-                onClick={() => onClose()}
-                className="bg-red-700 focus:shadow-red  hover:bg-red-600 text-white inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
-              >
-                No
-              </button>
-            </Dialog.Close>
-            <button
-              onClick={() => {
-                EditSupplier(id);
-              }}
-              className=" ml-4 bg-blue-500 text-white hover:bg-blue-600 focus:shadow-red7 inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
+        <form className="space-y-4">
+          <div>
+            <label
+              htmlFor="firstname"
+              className="block text-sm font-medium text-black"
             >
-              {suspendLoading ? <LoaderIcon /> : "Yes"}
-            </button>
+              First Name
+            </label>
+            <input
+              id="firstname"
+              type="text"
+              placeholder="Enter First Name"
+              defaultValue={id.firstname}
+              onChange={(e) => setChangedFirstName(e.target.value)}
+              className="w-full p-2 border rounded"
+            />
           </div>
-          <Dialog.Close asChild>
-            <button
-              className="text-violet11 hover:bg-violet4 focus:shadow-violet7 absolute top-[10px] right-[10px] inline-flex h-[25px] w-[25px] appearance-none items-center justify-center rounded-full focus:shadow-[0_0_0_2px] focus:outline-none"
-              aria-label="Close"
+
+          <div>
+            <label
+              htmlFor="lastname"
+              className="block text-sm font-medium text-black"
             >
-              <FontAwesomeIcon icon={faClose} color="black" />
-            </button>
-          </Dialog.Close>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+              Last Name
+            </label>
+            <input
+              id="lastname"
+              type="text"
+              placeholder="Enter Last Name"
+              defaultValue={id.lastname}
+              onChange={(e) => setChangesLastName(e.target.value)}
+              className="w-full p-2 border rounded"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-black"
+            >
+              Email Address
+            </label>
+            <input
+              id="email"
+              type="text"
+              placeholder="Enter Email"
+              defaultValue={id.email}
+              onChange={(e) => setChangedEmail(e.target.value)}
+              className="w-full p-2 border rounded"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="phone"
+              className="block text-sm font-medium text-black"
+            >
+              Phone Number
+            </label>
+            <input
+              id="phone"
+              type="number"
+              placeholder="Enter Phone Number"
+              defaultValue={id.phoneNumber}
+              onChange={(e) => setChangedPhone(e.target.value)}
+              className="w-full p-2 border rounded"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="address"
+              className="block text-sm font-medium text-black"
+            >
+              Address
+            </label>
+            <input
+              id="address"
+              type="text"
+              placeholder="Enter Address"
+              defaultValue={id.address}
+              onChange={(e) => setChangedAddress(e.target.value)}
+              className="w-full p-2 border rounded"
+            />
+          </div>
+        </form>
+
+        <div className="mt-6 flex justify-end space-x-4">
+          <button
+            onClick={onClose}
+            className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded"
+          >
+            No
+          </button>
+          <button
+            onClick={() => EditSupplier(id)}
+            disabled={suspendLoading}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            {suspendLoading ? <LoaderIcon /> : "Yes"}
+          </button>
+        </div>
+
+        <button
+          onClick={onClose}
+          className="absolute top-2 right-2 text-black hover:text-gray-700"
+          aria-label="Close"
+        >
+          <FontAwesomeIcon icon={faClose} />
+        </button>
+      </div>
+    </div>
   );
 };
 
@@ -255,26 +238,20 @@ const AllSuppliers = () => {
 
   return (
     <>
-      <TextField.Root placeholder="Search Suppliers.." className="w-[55%] mb-5">
-        <TextField.Slot>
-          <MagnifyingGlassIcon height={"16"} width={"16"} />
-        </TextField.Slot>
-      </TextField.Root>
-
       <div className="">
         <Heading className="mb-3 ">All Suppliers</Heading>
-        <Table.Root size={"3"}>
+        <Separator className="my-4 w-full" />
+        <Table.Root size={"3"} variant="surface">
           <Table.Header>
             <Table.Row>
-              <Table.ColumnHeaderCell>ID</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
 
+              <Table.ColumnHeaderCell>ID</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell>NAME</Table.ColumnHeaderCell>
 
               <Table.ColumnHeaderCell>EMAIL</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell>ADDRESS</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell>PHONE</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
             </Table.Row>
           </Table.Header>
           {pageLoading ? (
@@ -292,13 +269,13 @@ const AllSuppliers = () => {
                       className="cursor-pointer  relative"
                       onClick={() => setViewStaff(supplier)}
                     >
+                      <Table.Cell>{refractor(supplier.createdAt)}</Table.Cell>
                       <Table.Cell>{supplier.supplierTag}</Table.Cell>
 
                       <Table.Cell>{`${supplier.firstname} ${supplier.lastname}`}</Table.Cell>
                       <Table.Cell>{supplier.email}</Table.Cell>
                       <Table.Cell>{supplier.address}</Table.Cell>
                       <Table.Cell>{supplier.phoneNumber}</Table.Cell>
-                      <Table.Cell>{refractor(supplier.createdAt)}</Table.Cell>
                       <Table.Cell>
                         <div className="absolute right-4 top-2">
                           <DropdownMenu.Root>

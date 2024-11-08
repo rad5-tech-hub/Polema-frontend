@@ -6,6 +6,7 @@ import {
   faBuilding,
   faStore,
   faTags,
+  faCommentsDollar,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
@@ -126,8 +127,8 @@ const AddProducts = () => {
           unit: unit,
           amount: Number(basePrice),
         },
-      ], // Submit raw base price without commas
-      pricePlan: plansArray, // Plans as an object
+      ],
+      pricePlan: plansArray,
     };
 
     const submitWithoutPlans = {
@@ -142,6 +143,7 @@ const AddProducts = () => {
       ],
     };
 
+    console.log(pricePlan ? submitObject : submitWithoutPlans);
     try {
       const response = await axios.post(
         `${root}/admin/add-product`,
@@ -396,6 +398,7 @@ const AddProducts = () => {
               color="brown"
               radius="medium"
               onClick={handleAddPlan}
+              type="button"
             >
               <PlusIcon width={"20px"} height={"20px"} />
               Add Plan

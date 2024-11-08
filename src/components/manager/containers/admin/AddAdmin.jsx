@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-
+import { EyeOpenIcon, EyeClosedIcon } from "@radix-ui/react-icons";
 import axios from "axios";
 import UpdateURL from "../ChangeRoute";
 import {
@@ -32,14 +32,8 @@ const AddAdmin = ({ child, setChild }) => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [rolesArray, setRolesArray] = useState([]);
-
-  const data = rolesArray.reduce((acc, role) => {
-    acc[role.name] = {
-      label: role.name,
-      icon: <PersonIcon />,
-    };
-    return acc;
-  }, {});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleValueChange = (value) => {
     setValue(value);
@@ -213,11 +207,20 @@ const AddAdmin = ({ child, setChild }) => {
                 </label>
                 <TextField.Root
                   placeholder="Enter Password"
-                  className=""
-                  type="password"
+                  className="flex"
+                  type={showPassword ? "password" : "text"}
                   id="password"
                   size={"3"}
-                ></TextField.Root>
+                >
+                  <span
+                    className="p-2 mt-1 cursor-pointer"
+                    onClick={() => {
+                      setShowPassword(!showPassword);
+                    }}
+                  >
+                    {showPassword ? <EyeClosedIcon /> : <EyeOpenIcon />}
+                  </span>
+                </TextField.Root>
               </div>
             </div>
 
@@ -299,10 +302,19 @@ const AddAdmin = ({ child, setChild }) => {
                 <TextField.Root
                   placeholder="Confirm Password"
                   className=""
-                  type="password"
+                  type={showConfirmPassword ? "password" : "text"}
                   id="passwordConfirm"
                   size={"3"}
-                ></TextField.Root>
+                >
+                  <span
+                    className="p-2 mt-1 cursor-pointer"
+                    onClick={() => {
+                      setShowConfirmPassword(!showConfirmPassword);
+                    }}
+                  >
+                    {showConfirmPassword ? <EyeClosedIcon /> : <EyeOpenIcon />}
+                  </span>
+                </TextField.Root>
               </div>
             </div>
           </div>
@@ -327,102 +339,3 @@ const AddAdmin = ({ child, setChild }) => {
 };
 
 export default AddAdmin;
-
-{
-  /* <div className="input-field mt-3">
-  <label
-    className="text-[15px]  font-medium leading-[35px]   "
-    htmlFor="products"
-  >
-    Assign Product(s)
-  </label>
-  <Select.Root value={selectedItems.join(", ")} size={"3"}>
-    <Select.Trigger
-      className="w-full"
-      id="products"
-      placeholder="Select Product(s)"
-    >
-      <Flex as="span" align="center" gap="2">
-        <PersonIcon />
-        {selectedItems.length === 0
-          ? "Select Product(s)"
-          : selectedItems.join(", ")}
-      </Flex>
-    </Select.Trigger>
-    <Select.Content position="popper">
-      <CheckboxGroup.Root value={selectedItems}>
-        <CheckboxGroup.Item
-          value="pkc"
-          onClick={() => handleCheckboxChange("pkc")}
-        >
-          PKC
-        </CheckboxGroup.Item>
-        <CheckboxGroup.Item
-          value="engine-oil"
-          onClick={() => handleCheckboxChange("engine-oil")}
-        >
-          Engine Oil
-        </CheckboxGroup.Item>
-        <CheckboxGroup.Item
-          value="drugs"
-          onClick={() => handleCheckboxChange("drugs")}
-        >
-          Drugs (pharmacy)
-        </CheckboxGroup.Item>
-        <CheckboxGroup.Item
-          value="plastics"
-          onClick={() => handleCheckboxChange("plastics")}
-        >
-          Plastics
-        </CheckboxGroup.Item>
-        <CheckboxGroup.Item
-          value="sludge"
-          onClick={() => handleCheckboxChange("sludge")}
-        >
-          Sludge
-        </CheckboxGroup.Item>
-        <CheckboxGroup.Item
-          value="rvo"
-          onClick={() => handleCheckboxChange("rvo")}
-        >
-          RVO (Refined Vegetable Oil)
-        </CheckboxGroup.Item>
-        <CheckboxGroup.Item
-          value="ledger"
-          onClick={() => handleCheckboxChange("ledger")}
-        >
-          Ledger
-        </CheckboxGroup.Item>
-        <CheckboxGroup.Item
-          value="others"
-          onClick={() => handleCheckboxChange("others")}
-        >
-          Others
-        </CheckboxGroup.Item>
-      </CheckboxGroup.Root>
-    </Select.Content>
-  </Select.Root>
-</div> */
-}
-
-{
-  /* {showOtherInput && (
-  <div className="input-field mt-3">
-    <label
-      className="text-[15px]  font-medium leading-[35px]   "
-      htmlFor="products"
-    >
-      Assign Product(s)
-    </label>
-    <TextField.Root
-      placeholder="Add Product"
-      className=""
-      type="text"
-      size={"3"}
-      value={otherValue}
-      onChange={(e) => setOtherValue(e.target.value)}
-      onBlur={handleOtherBlur}
-    />
-  </div>
-)} */
-}

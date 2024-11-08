@@ -59,6 +59,12 @@ const AddSuppliers = () => {
           padding: "30px",
         },
       });
+      // Clear the form fields
+      setFirstName("");
+      setLastName("");
+      setAddress("");
+      setNumber("");
+      setEmail("");
     } catch (error) {
       setIsLoading(false);
       toast.error(error.response.data.error);
@@ -79,13 +85,14 @@ const AddSuppliers = () => {
                   className="text-[15px]  font-medium leading-[35px]   "
                   htmlFor="fullname"
                 >
-                  First Name
+                  First Name <span className="text-red-500">*</span>
                 </label>
                 <TextField.Root
                   placeholder="Enter First Name"
                   className=""
                   type="text"
                   name="firstname"
+                  value={firstname}
                   id="firstname"
                   onChange={(e) => setFirstName(e.target.value)}
                   size={"3"}
@@ -103,6 +110,7 @@ const AddSuppliers = () => {
                   placeholder="Enter email"
                   onChange={(e) => setEmail(e.target.value)}
                   className=""
+                  value={email}
                   name="email"
                   id="email"
                   type="text"
@@ -115,13 +123,14 @@ const AddSuppliers = () => {
                   className="text-[15px]  font-medium leading-[35px]   "
                   htmlFor="number"
                 >
-                  Phone Number
+                  Phone Number<span className="text-red-500">*</span>
                 </label>
                 <TextField.Root
                   placeholder="Enter phone number"
                   onChange={(e) => setNumber(e.target.value)}
                   className=""
                   id="number"
+                  value={number}
                   name="phoneNumber"
                   type="number"
                   size={"3"}
@@ -135,11 +144,12 @@ const AddSuppliers = () => {
                   className="text-[15px]  font-medium leading-[35px]   "
                   htmlFor="password"
                 >
-                  Enter Last Name
+                  Enter Last Name<span className="text-red-500">*</span>
                 </label>
                 <TextField.Root
                   placeholder="Enter Last Name"
                   className=""
+                  value={lastname}
                   onChange={(e) => setLastName(e.target.value)}
                   type="text"
                   name="lastname"
@@ -163,6 +173,7 @@ const AddSuppliers = () => {
                   className=""
                   name="address"
                   type="text"
+                  value={address}
                   id="address"
                   size={"3"}
                 ></TextField.Root>

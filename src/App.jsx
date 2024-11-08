@@ -29,8 +29,10 @@ import {
   CreateRole,
   ViewAccoountBook,
   AccountBook,
+  ViewGeneralOrder,
   AddSuppliers,
   AllDepartments,
+  DepartmentStoreCreate,
   AddDepartment,
   AllAdmins,
   AllRoles,
@@ -182,6 +184,10 @@ const App = () => {
                     path="/general-store/raise-general-order"
                     element={<GeneralStorePlaceOrder />}
                   />
+                  <Route
+                    path="/general-store/view-general-order"
+                    element={<ViewGeneralOrder />}
+                  />
 
                   {/* Test Routes for department store */}
                   <Route
@@ -202,6 +208,7 @@ const App = () => {
                   />
 
                   {/* Test Routes for cash management */}
+                  {/* Routes for cashier */}
                   <Route
                     path="/cash-management/cash-management"
                     element={<CashManagement />}

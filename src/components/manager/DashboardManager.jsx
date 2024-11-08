@@ -129,7 +129,7 @@ const DashBoardManager = ({ children }) => {
         <div className="flex h-screen overflow-hidden ">
           <aside
             ref={sidebar}
-            className={`absolute left-0 font-space top-0 z-[9999] 
+            className={`absolute left-0 font-space top-0 z-[100] 
               bg-[#434343]
               sidebar-container flex border-r-[1px] border-white !text-white shadow-2xl h-screen max-w-[18.0rem] flex-col overflow-y-hidden duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 ${
                 sidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -173,12 +173,12 @@ const DashBoardManager = ({ children }) => {
                       <Spinner />
                     </div>
                   ) : (
-                    <ul className="mb-6 flex flex-col gap-1.5">
+                    <ul className="mb-6 flex flex-col gap-1.5 max-w-[2000px]">
                       {navigation.map((nav, index) => {
                         return (
                           <div>
                             <p
-                              className="flex gap-3 items-center px-4 cursor-pointer"
+                              className="flex gap-3 items-center px-4 cursor-pointer "
                               onClick={() => handleToggle(index)}
                             >
                               <DynamicIcon

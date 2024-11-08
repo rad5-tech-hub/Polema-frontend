@@ -34,6 +34,7 @@ const DepartementStorePlaceOrder = () => {
     const retrToken = localStorage.getItem("token");
     if (!retrToken || !departmentId) return;
 
+    // API REQUEST
     try {
       const response = await axios.get(
         `${root}/dept/get-dept-raw/${departmentId}`,
