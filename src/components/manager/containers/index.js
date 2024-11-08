@@ -5,6 +5,7 @@ import LocalPurchaseOrder from "./raise-tickets/LocalPurchaseOrder";
 import CreateDepartmentStore from "./department-store/CreateDepartmentStore";
 import GeneralStorePlaceOrder from "./general-store/GeneralStorePlaceOrder";
 import ViewShelf from "./general-store/ViewShelf";
+import ShelfContent from "./general-store/ShelfContent";
 import CreateShelf from "./general-store/CreateShelf";
 import ViewPharmacyOrder from "./pharmacy-store/ViewPharmacyOrder";
 import PharmacyPlaceOrder from "./pharmacy-store/PharmacyPlaceOrder";
@@ -77,5 +78,6 @@ export {
   ViewShelf,
   GeneralStorePlaceOrder,
   CashManagement,
+  ShelfContent,
   AuthorityToWeigh,
 };

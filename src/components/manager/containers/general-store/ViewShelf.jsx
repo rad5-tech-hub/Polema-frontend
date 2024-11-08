@@ -1,9 +1,16 @@
 import React, { useEffect } from "react";
 
-import { Heading, Separator, Table, Spinner, Flex } from "@radix-ui/themes";
+import {
+  Heading,
+  DropdownMenu,
+  Separator,
+  Button,
+  Table,
+  Spinner,
+  Flex,
+} from "@radix-ui/themes";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-
 import { refractor } from "../../../date";
 import {
   faSquare,
@@ -50,7 +57,7 @@ const ViewShelf = () => {
     <div>
       <Heading>View Shelf</Heading>
       <Separator className="w-full my-4" />
-      <Table.Root className="relative !h-fit">
+      <Table.Root className="relative !h-fit" variant="surface">
         <Table.Header>
           <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell>SHELF NAME</Table.ColumnHeaderCell>
@@ -81,9 +88,27 @@ const ViewShelf = () => {
                     {item.status}
                   </Flex>
                 </Table.Cell>
-                {/* <div className="p-3 rounded-full cursor-pointer absolute right-[10px] hover:bg-[rgba(225,225,225,1)]">
-                  <FontAwesomeIcon icon={faEllipsisV} />
-                </div> */}
+                <DropdownMenu.Root>
+                  <DropdownMenu.Trigger>
+                    <Button variant="surface" className="cursor-pointer">
+                      <DropdownMenu.TriggerIcon />
+                    </Button>
+                  </DropdownMenu.Trigger>
+                  <DropdownMenu.Content>
+                    <DropdownMenu.Item
+                      shortcut={<FontAwesomeIcon icon={faPen} />}
+                    >
+                      Edit
+                    </DropdownMenu.Item>
+                    {}
+                    <DropdownMenu.Item
+                      color="red"
+                      shortcut={<FontAwesomeIcon icon={faPen} />}
+                    >
+                      Suspend
+                    </DropdownMenu.Item>
+                  </DropdownMenu.Content>
+                </DropdownMenu.Root>
               </Table.Row>
             ))
           )}

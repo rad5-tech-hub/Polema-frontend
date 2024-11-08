@@ -22,6 +22,7 @@ import {
   AddCustomer,
   CreateShelf,
   CustomerPlaceOrder,
+  ShelfContent,
   CustomerLedger,
   AuthorityToWeigh,
   AllProducts,
@@ -178,7 +179,7 @@ const App = () => {
                   />
                   <Route
                     path="/general-store/view-shelf"
-                    element={<ViewShelf />}
+                    element={<ShelfContent />}
                   />
                   <Route
                     path="/general-store/raise-general-order"

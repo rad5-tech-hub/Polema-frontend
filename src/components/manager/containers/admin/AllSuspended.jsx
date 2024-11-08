@@ -27,6 +27,7 @@ const RestoreDialog = ({ isOpen, onClose, runfetch, id }) => {
       toast.error("An error occurred. Try logging in again");
       return;
     }
+
     try {
       const response = await axios.patch(
         `${root}/admin/restore-staff/${id}`,
@@ -38,59 +39,52 @@ const RestoreDialog = ({ isOpen, onClose, runfetch, id }) => {
         }
       );
       setSuspendLoading(false);
-      console.log(response);
       toast.success("Admin Restored successfully", {
         duration: 6500,
-        style: {
-          padding: "30px",
-        },
+        style: { padding: "30px" },
       });
       onClose();
       runfetch();
     } catch (error) {
       setSuspendLoading(false);
       onClose();
-      console.log(error);
       toast.error("Error in restoring staff", {
         duration: 6500,
-        style: {
-          padding: "30px",
-        },
+        style: { padding: "30px" },
       });
     }
   };
 
-  return (
-    <Dialog.Root open={isOpen} onOpenChange={onClose}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="bg-black/50 fixed inset-0" />
-        <Dialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-lg focus:outline-none">
-          <Dialog.Title className="m-0 text-[17px] font-medium text-black">
-            Suspend User
-          </Dialog.Title>
-          <Heading className="mt-[10px] mb-5 text-center text-[15px] text-black leading-normal">
-            {`Are you sure you want to restore this user as an admin ?`}
-          </Heading>
+  if (!isOpen) return null;
 
-          <div className="mt-[25px] flex justify-end">
-            <Dialog.Close asChild>
-              <button
-                onClick={onClose}
-                className="bg-blue-700 text-white inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none"
-              >
-                No
-              </button>
-            </Dialog.Close>
-            <button
-              onClick={() => restoreAdmin(id)}
-              className="ml-4 bg-red-500 text-white hover:bg-red-600 inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none"
-            >
-              {suspendLoading ? <LoaderIcon /> : "Yes"}
-            </button>
-          </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black/50">
+      <div className="relative w-[90vw] max-w-[450px] bg-white rounded-[6px] p-[25px] shadow-md">
+        <div className="flex justify-between items-center">
+          <h2 className="text-[17px] font-medium text-black">Restore User</h2>
+          <button onClick={onClose} className="focus:outline-none">
+            <FontAwesomeIcon icon={faClose} color="black" />
+          </button>
+        </div>
+        <p className="mt-[10px] mb-5 text-center text-[15px] text-black leading-normal">
+          {`Are you sure you want to restore this user as an admin?`}
+        </p>
+        <div className="flex justify-end mt-[25px]">
+          <button
+            onClick={onClose}
+            className="bg-blue-700 text-white px-[15px] h-[35px] rounded-[4px] font-medium focus:outline-none"
+          >
+            No
+          </button>
+          <button
+            onClick={() => restoreAdmin(id)}
+            className="ml-4 bg-red-500 text-white hover:bg-red-600 px-[15px] h-[35px] rounded-[4px] font-medium focus:outline-none"
+          >
+            {suspendLoading ? <LoaderIcon /> : "Yes"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -106,6 +100,7 @@ const DeleteDialog = ({ isOpen, onClose, runfetch, id }) => {
       toast.error("An error occurred. Try logging in again");
       return;
     }
+
     try {
       const response = await axios.delete(`${root}/admin/delete-staff/${id}`, {
         headers: {
@@ -113,49 +108,46 @@ const DeleteDialog = ({ isOpen, onClose, runfetch, id }) => {
         },
       });
       setSuspendLoading(false);
-      console.log(response);
-      onClose();
       toast.success("Admin Deleted successfully");
+      onClose();
       runfetch();
     } catch (error) {
       setSuspendLoading(false);
       onClose();
-      console.log(error);
       toast.error("Error in deleting staff");
     }
   };
 
-  return (
-    <Dialog.Root open={isOpen} onOpenChange={onClose}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="bg-black/50 fixed inset-0" />
-        <Dialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-lg focus:outline-none">
-          <Dialog.Title className="m-0 text-[17px] font-medium text-black">
-            Delete User
-          </Dialog.Title>
-          <Heading className="mt-[10px] mb-5 text-center text-[15px] text-black leading-normal">
-            {`Are you sure you want to permanently remove this user as an admin ?`}
-          </Heading>
+  if (!isOpen) return null;
 
-          <div className="mt-[25px] flex justify-end">
-            <Dialog.Close asChild>
-              <button
-                onClick={onClose}
-                className="bg-blue-700 text-white inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none"
-              >
-                No
-              </button>
-            </Dialog.Close>
-            <button
-              onClick={() => deleteAdmin(id)}
-              className="ml-4 bg-red-500 text-white hover:bg-red-600 inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none"
-            >
-              {suspendLoading ? <LoaderIcon /> : "Yes"}
-            </button>
-          </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black/50">
+      <div className="relative w-[90vw] max-w-[450px] bg-white rounded-[6px] p-[25px] shadow-md">
+        <div className="flex justify-between items-center">
+          <h2 className="text-[17px] font-medium text-black">Delete User</h2>
+          <button onClick={onClose} className="focus:outline-none">
+            <FontAwesomeIcon icon={faClose} color="black" />
+          </button>
+        </div>
+        <p className="mt-[10px] mb-5 text-center text-[15px] text-black leading-normal">
+          {`Are you sure you want to permanently remove this user as an admin?`}
+        </p>
+        <div className="flex justify-end mt-[25px]">
+          <button
+            onClick={onClose}
+            className="bg-blue-700 text-white px-[15px] h-[35px] rounded-[4px] font-medium focus:outline-none"
+          >
+            No
+          </button>
+          <button
+            onClick={() => deleteAdmin(id)}
+            className="ml-4 bg-red-500 text-white hover:bg-red-600 px-[15px] h-[35px] rounded-[4px] font-medium focus:outline-none"
+          >
+            {suspendLoading ? <LoaderIcon /> : "Yes"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 

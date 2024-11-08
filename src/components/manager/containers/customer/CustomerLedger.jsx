@@ -6,17 +6,15 @@ import {
   Heading,
   Flex,
   Separator,
+  Text,
   Button,
 } from "@radix-ui/themes";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowDown } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 const root = import.meta.env.VITE_ROOT;
 
 const CustomerLedger = () => {
-  const fetchLedgerDetails = async () => {
-    try {
-      const response = await axios.get(`${root}/`);
-    } catch (error) {}
-  };
   return (
     <>
       <Flex className="mb-4" justify={"between"}>
@@ -26,7 +24,8 @@ const CustomerLedger = () => {
           Filter
         </Button>
       </Flex>
-      <Table.Root variant="surface">
+      {/* <Table.Root variant="surface">
+
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
@@ -43,7 +42,21 @@ const CustomerLedger = () => {
             <Table.ColumnHeaderCell>BALANCE</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
-      </Table.Root>
+      </Table.Root> */}
+      <div className="min-h-[70vh] justify-center items-center flex">
+        <div className="flex flex-col justify-center items-center gap-3">
+          <Text size={"4"} className="font-amsterdam">
+            Please click the filter button below to view an individual's ledger
+          </Text>
+          <p>
+            <FontAwesomeIcon icon={faArrowDown} size="lg" />
+          </p>
+          <Button className="!bg-theme">
+            <TokensIcon />
+            Filter
+          </Button>
+        </div>
+      </div>
     </>
   );
 };
