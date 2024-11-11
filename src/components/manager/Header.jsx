@@ -12,7 +12,7 @@ const Header = ({ sidebarOpen, setSidebarOpen, user, role, image, text }) => {
   };
 
   return (
-    <header className=" top-0 z-[100] font-amsterdam flex w-full  shadow-md dark:bg-boxdark dark:drop-shadow-none">
+    <header className=" top-0 z-[99] font-amsterdam flex w-full  shadow-md dark:bg-boxdark dark:drop-shadow-none">
       <div className="flex flex-grow items-center justify-between px-4 py-4  md:px-6 2xl:px-11">
         <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
           {/* <!-- Hamburger Toggle BTN --> */}

@@ -13,6 +13,7 @@ import {
   Flex,
   Spinner,
   Heading,
+  TextField,
 } from "@radix-ui/themes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
@@ -23,6 +24,9 @@ const root = import.meta.env.VITE_ROOT;
 // Add Dialog Component
 const AddDialog = ({ isOpen, onClose, itemId, runFetch }) => {
   const [loading, setLoading] = useState(false);
+  const [shelfName, setShelfName] = useState(itemId.name);
+  const [unit, setUnit] = useState(itemId.unit);
+  const [threshold, setThreshold] = useState(itemId.thresholdValue);
 
   const addItem = async () => {
     setLoading(true);
@@ -57,9 +61,31 @@ const AddDialog = ({ isOpen, onClose, itemId, runFetch }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-[101]">
       <div className="bg-white p-6 rounded-lg shadow-lg w-[90vw] max-w-[450px]">
-        <Heading className="mb-4 text-center">Add to {itemId.name}</Heading>
-        <p>Are you sure you want to add this item?</p>
-        {console.log(itemId)}
+        <Heading className="mb-12 text-left">Add to {itemId.name}</Heading>
+        <form action="">
+          <Flex justify={"between"} className="w-full items-center mt-4">
+            <h1 className="w-full">Shelf Name</h1>
+            <TextField.Root
+              className="w-full"
+              disabled
+              defaultValue={shelfName}
+            />
+          </Flex>
+          <Flex justify={"between"} className="w-full items-center mt-4">
+            <h1 className="w-full">Unit</h1>
+            <TextField.Root className="w-full" disabled defaultValue={unit} />
+          </Flex>
+          <Flex justify={"between"} className="w-full items-center mt-4">
+            <h1 className="w-full">Threshold Value</h1>
+            <TextField.Root
+              className="w-full"
+              onChange={(e) => setThreshold(e.target.value)}
+              placeholder="Enter Threshold Value"
+              defaultValue={threshold}
+              value={threshold}
+            />
+          </Flex>
+        </form>
         <div className="mt-6 flex justify-end gap-4">
           <button
             onClick={onClose}

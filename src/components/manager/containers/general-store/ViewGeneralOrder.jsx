@@ -11,9 +11,9 @@ const ViewGeneralOrder = () => {
   const [orders, setOrders] = React.useState([]);
   const [shelf, setShelf] = React.useState([]);
 
-  // Function to fetch Proucts from db
+  // Function to fetch shelf details
   const fetchShelf = async () => {
-    let retrToken = localStorage.getItem("token");
+    const retrToken = localStorage.getItem("token");
 
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
@@ -26,31 +26,39 @@ const ViewGeneralOrder = () => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      setShelf(response.data.products);
+
+      setShelf(response.data.stores);
     } catch (error) {
       console.log(error);
     }
   };
 
+  // Function to fetch view general orders content
   const fetchGeneralOrder = async () => {
-    let retrToken = localStorage.getItem("token");
+    const retrToken = localStorage.getItem("token");
 
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
       return;
     }
+
     try {
       const response = await axios.get(`${root}/dept/view-gen-order`, {
         headers: {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      console.log(response);
+
       setOrders(response.data.Orders);
-    } catch (err) {
-      console.log(err);
-      setOrders([]);
+    } catch (error) {
+      console.log(error);
     }
+  };
+
+  // Function to get shelf name by their ID
+  const matchShelfNameById = (id) => {
+    const shelfName = shelf.find((shelfItem) => shelfItem.id === id);
+    return shelfName.name;
   };
 
   React.useEffect(() => {
@@ -85,7 +93,7 @@ const ViewGeneralOrder = () => {
                   <Table.RowHeaderCell>
                     {refractor(item.createdAt)}
                   </Table.RowHeaderCell>
-                  <Table.Cell>{getProductNameById()}</Table.Cell>
+                  <Table.Cell>{matchShelfNameById(item.productId)}</Table.Cell>
                   <Table.Cell>{item.quantity}</Table.Cell>
                   <Table.Cell>
                     {refractor(item.expectedDeliveryDate)}
