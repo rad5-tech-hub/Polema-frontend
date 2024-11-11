@@ -76,7 +76,7 @@ const AddAdmin = ({ child, setChild }) => {
       lastname: e.target[4].value,
       email: e.target[1].value,
       phoneNumber: e.target[2].value,
-      department: ["marketer"],
+      department: [""],
       roleId: result.id,
       password: e.target[3].value,
       confirmPassword: e.target[8].value,
@@ -101,9 +101,6 @@ const AddAdmin = ({ child, setChild }) => {
       });
 
       setIsLoading(false);
-      setTimeout(() => {
-        window.location.href = "/md/view-admins";
-      }, 1500);
     } catch (error) {
       console.log(error);
 

@@ -155,45 +155,29 @@ const AllProducts = () => {
   };
 
   const EditDialog = () => {
-    const [isloading, setIsLoading] = useState(false);
-    const [pricePlan, setPricePlan] = useState(false);
-    const [basePrice, setBasePrice] = useState("");
     const [departments, setDepartments] = useState([]);
+    const [name, setName] = useState(selectedEditProduct.name);
+    const [unit, setUnit] = useState(selectedEditProduct.price[0].unit);
+    const [basePrice, setBasePrice] = useState(
+      selectedEditProduct.price[0].amount
+    );
+    const [departmentId, setDepartmentId] = useState(
+      selectedEditProduct.departmentId
+    );
+    const [productActive, setProductActive] = useState(
+      selectedEditProduct.category !== "For Purchase"
+    );
 
-    // Function to format number with commas
-    const formatNumber = (num) => {
-      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    };
+    // State for managing dynamic pricing plans
+    const [pricePlans, setPricePlans] = useState(
+      selectedEditProduct.pricePlan || []
+    );
 
-    // Handle base price input change
-    const handleBasePriceChange = (e) => {
-      const inputValue = e.target.value.replace(/,/g, ""); // Remove commas from the input value
-      if (!isNaN(inputValue)) {
-        setBasePrice(inputValue); // Update state with raw number (without commas)
-      }
-    };
-
-    const handlePlanChange = (index, field, value) => {
-      const updatedPlans = [...plans];
-      updatedPlans[index] = {
-        ...updatedPlans[index],
-        [field]: value,
-      };
-      setPlans(updatedPlans);
-    };
-    // Add new plan fields
-    const handleAddPlan = () => {
-      setPlans([...plans, { name: "", discount: "" }]);
-    };
-
-    // Fetch departments from db
+    // Fetch departments from the database
     const fetchDepartments = async () => {
-      let retrToken = localStorage.getItem("token");
-
-      // Check if the token is available
+      const retrToken = localStorage.getItem("token");
       if (!retrToken) {
         toast.error("An error occurred. Try logging in again");
-
         return;
       }
 
@@ -201,111 +185,186 @@ const AllProducts = () => {
         const response = await axios.get(`${root}/dept/get-department`);
         setDepartments(response.data.departments);
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
+    };
+
+    const handleEditSubmit = async (e) => {
+      e.preventDefault();
+      const retrToken = localStorage.getItem("token");
+      if (!retrToken) {
+        toast.error("An error occurred. Try logging in again");
+        return;
+      }
+
+      const body = {
+        category: productActive ? "For Sale" : "For Purchase",
+        price: [
+          {
+            unit: unit,
+            amount: basePrice,
+          },
+        ],
+        pricePlan: pricePlans,
+      };
+      console.log(body);
+    };
+
+    // Add a new blank price plan entry
+    const handleAddPlan = () => {
+      setPricePlans([
+        ...pricePlans,
+        { category: "", amount: "" }, // New empty plan object
+      ]);
+    };
+
+    // Update a specific plan's details
+    const handlePlanChange = (index, field, value) => {
+      const updatedPlans = [...pricePlans];
+      updatedPlans[index][field] = value;
+      setPricePlans(updatedPlans);
     };
 
     useEffect(() => {
       fetchDepartments();
     }, []);
+
     return (
       <>
-        <Flex align={"center"} gap={"2"}>
-          <FontAwesomeIcon
-            icon={faArrowLeft}
-            className="cursor-pointer"
-            onClick={() => {
-              setEditDialogOpen(false);
-            }}
-          />
-          <Heading>Edit {selectedEditProduct.name}</Heading>
+        <Flex align={"center"} justify={"between"} gap={"2"}>
+          <div className="flex items-center gap-2">
+            <FontAwesomeIcon
+              icon={faArrowLeft}
+              className="cursor-pointer"
+              onClick={() => setEditDialogOpen(false)}
+            />
+            <Heading>Edit {selectedEditProduct.name}</Heading>
+          </div>
+
+          {/* Restored Select Component */}
+          <Select.Root
+            defaultValue={
+              selectedEditProduct.category === "For Purchase"
+                ? "raw materials"
+                : "products"
+            }
+            onValueChange={(value) => setProductActive(value === "products")}
+          >
+            <Select.Trigger />
+            <Select.Content>
+              <Select.Item value="products">Products</Select.Item>
+              <Select.Item value="raw materials">Raw Materials</Select.Item>
+            </Select.Content>
+          </Select.Root>
         </Flex>
+
         <Separator className="w-full my-4" />
 
-        <form action="">
-          <Grid columns={"2"} rows={"2"} gapX={"5"} gapY={"2"}>
+        <form onSubmit={handleEditSubmit}>
+          <Grid columns={"2"} gapX={"5"} gapY={"2"}>
+            {/* Product Name */}
             <div className="w-full">
               <Text>Product Name</Text>
               <TextField.Root
                 className="mt-2"
-                value={selectedEditProduct.name}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
               />
             </div>
+
+            {/* Product Unit */}
             <div className="w-full">
               <Text>Product Unit</Text>
               <TextField.Root
                 className="mt-2"
-                value={selectedEditProduct.price[0].unit}
+                value={unit}
+                onChange={(e) => setUnit(e.target.value)}
               />
             </div>
+
+            {/* Base Price */}
             <div className="w-full">
               <Text>Base Price</Text>
               <TextField.Root
                 className="mt-2"
-                value={selectedEditProduct.price[0].amount}
+                value={basePrice}
+                onChange={(e) => setBasePrice(e.target.value)}
               />
             </div>
+
+            {/* Select Department */}
             <div className="w-full">
               <Text>Select Department</Text>
               <Select.Root
-                defaultValue={selectedEditProduct.departmentId}
-                disabled={departments.length == 0}
+                defaultValue={departmentId}
+                onValueChange={(value) => setDepartmentId(value)}
+                disabled={departments.length === 0}
               >
                 <Select.Trigger className="w-full mt-2" />
                 <Select.Content>
-                  {departments.map((department) => {
-                    return (
-                      <Select.Item value={department.id}>
-                        {department.name}
-                      </Select.Item>
-                    );
-                  })}
+                  {departments.map((department) => (
+                    <Select.Item key={department.id} value={department.id}>
+                      {department.name}
+                    </Select.Item>
+                  ))}
                 </Select.Content>
               </Select.Root>
             </div>
           </Grid>
 
-          <div className="input-field mt-4 flex justify-end">
-            <div>
-              {/* <label
-                className="text-[15px] leading-none pr-[15px]"
-                htmlFor="pricePlan"
-              >
-                Price Plan
-              </label> */}
-            </div>
-          </div>
-          {Array.isArray(selectedEditProduct.pricePlan) && (
-            <Card className="mt-4">
-              <Heading>Pricing Plan</Heading>
-              {selectedEditProduct.pricePlan.map((plan) => {
-                return (
-                  <Grid columns={"2"} gap={"3"} className="mt-4">
-                    <div className="w-full">
-                      <Text>Price Plan Name</Text>
-                      <TextField.Root
-                        className="mt-2 w-full"
-                        placeholder="Price Name"
-                        defaultValue={plan.category}
-                      />
-                    </div>
-                    <div className="w-full">
-                      <Text>Plan Discount</Text>
-                      <TextField.Root
-                        className="mt-2 w-full"
-                        defaultValue={plan.amount}
-                        placeholder="Enter Price Discount in Naira"
-                      />
-                    </div>
-                  </Grid>
-                );
-              })}
-              <Button color="brown" className="mt-4" type="button">
-                <FontAwesomeIcon icon={faPlus} />
-                Add Plan
-              </Button>
-            </Card>
-          )}
+          {/* Pricing Plans Section */}
+          <Card className="mt-4">
+            <Heading>Pricing Plan</Heading>
+            {pricePlans.map((plan, index) => (
+              <Grid key={index} columns={"2"} gap={"3"} className="mt-4">
+                <div className="w-full">
+                  <Text>Price Plan Name</Text>
+                  <TextField.Root
+                    className="mt-2 w-full"
+                    placeholder="Price Name"
+                    value={plan.category}
+                    onChange={(e) =>
+                      handlePlanChange(index, "category", e.target.value)
+                    }
+                  />
+                </div>
+                <div className="w-full">
+                  <Text>Plan Discount</Text>
+                  <TextField.Root
+                    className="mt-2 w-full"
+                    placeholder="Enter Price Discount in Naira"
+                    value={plan.amount}
+                    onChange={(e) =>
+                      handlePlanChange(index, "amount", e.target.value)
+                    }
+                  />
+                </div>
+              </Grid>
+            ))}
+            <Button
+              color="brown"
+              className="mt-4"
+              type="button"
+              onClick={handleAddPlan}
+            >
+              <FontAwesomeIcon icon={faPlus} />
+              Add Plan
+            </Button>
+          </Card>
+
+          {/* Form Actions */}
+          <Flex justify={"end"} gap={"4"} className="mt-6">
+            <Button
+              className="!bg-red-500 cursor-pointer"
+              type="button"
+              onClick={() => setEditDialogOpen(false)}
+            >
+              Discard Changes
+            </Button>
+            <Button className="cusor-pointer" type="submit">
+              Edit {selectedEditProduct.name}
+            </Button>
+          </Flex>
         </form>
       </>
     );

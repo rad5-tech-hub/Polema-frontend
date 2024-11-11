@@ -15,13 +15,13 @@ import {
   ViewPharmacyStore,
   LocalPurchaseOrder,
   ViewPharmacyOrder,
-  ViewShelf,
   GeneralStorePlaceOrder,
   AddProducts,
   CreateDepartmentStore,
   AddCustomer,
   CreateShelf,
   CustomerPlaceOrder,
+  ShelfContent,
   CustomerLedger,
   AuthorityToWeigh,
   AllProducts,
@@ -32,7 +32,6 @@ import {
   ViewGeneralOrder,
   AddSuppliers,
   AllDepartments,
-  DepartmentStoreCreate,
   AddDepartment,
   AllAdmins,
   AllRoles,
@@ -178,7 +177,7 @@ const App = () => {
                   />
                   <Route
                     path="/general-store/view-shelf"
-                    element={<ViewShelf />}
+                    element={<ShelfContent />}
                   />
                   <Route
                     path="/general-store/raise-general-order"

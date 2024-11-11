@@ -14,6 +14,7 @@ import {
 } from "@radix-ui/themes";
 import axios from "axios";
 const root = import.meta.env.VITE_ROOT;
+const cloudinaryRoot = import.meta.env.CLOUD_ROOT;
 
 const CreateDepartmentStore = () => {
   const fileInputRef = useRef(null);
@@ -49,10 +50,7 @@ const CreateDepartmentStore = () => {
     formData.append("upload_preset", "ml_default");
 
     try {
-      const result = await axios.post(
-        "https://api.cloudinary.com/v1_1/da4yjuf39/image/upload",
-        formData
-      );
+      const result = await axios.post(cloudinaryRoot, formData);
       console.log("Image uploaded to Cloudinary:", result.data);
       setImage(result.data.secure_url);
       return result.data.secure_url; // Return the image URL from Cloudinary

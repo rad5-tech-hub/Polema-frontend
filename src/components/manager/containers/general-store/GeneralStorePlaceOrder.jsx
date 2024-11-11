@@ -37,6 +37,7 @@ const GeneralStorePlaceOrder = () => {
     setPlans([
       ...plans,
       {
+        id: Date.now(), // Unique id for the new plan
         productId: "",
         quantity: "",
         unit: "",
@@ -47,24 +48,42 @@ const GeneralStorePlaceOrder = () => {
 
   // Function to handle removing a plan by id
   const handleRemovePlan = (id) => {
-    setPlans(plans.filter((plan) => plan.id !== id));
+    setPlans(plans.filter((plan) => plan.id !== id)); // Correct removal by id
   };
 
   // Function to handle input changes for each plan
   const handleInputChange = (id, field, value) => {
-    setPlans(
-      plans.map((plan) => (plan.id === id ? { ...plan, [field]: value } : plan))
-    );
+    if (field === "productId") {
+      // When productId changes, find the corresponding unit from the shelves array
+      const selectedShelf = shelves.find((shelf) => shelf.id === value);
+      const unit = selectedShelf ? selectedShelf.unit : "";
+
+      // Update the plan with the selected productId and the corresponding unit
+      setPlans(
+        plans.map((plan) =>
+          plan.id === id ? { ...plan, [field]: value, unit: unit } : plan
+        )
+      );
+    } else {
+      // For other fields, just update the plan normally
+      setPlans(
+        plans.map((plan) =>
+          plan.id === id ? { ...plan, [field]: value } : plan
+        )
+      );
+    }
   };
 
   // Function to reset form
   const resetForm = () => {
     setPlans([
       {
+        id: Date.now(),
         productId: "",
         quantity: "",
         unit: "",
         expectedDeliveryDate: "",
+        comments: "", // Reset comment
       },
     ]);
   };
@@ -108,7 +127,7 @@ const GeneralStorePlaceOrder = () => {
     } catch (error) {
       console.log(error);
       setIsLoading(false);
-      toast.error("An error occured");
+      toast.error("An error occurred");
     }
   };
 
@@ -148,7 +167,7 @@ const GeneralStorePlaceOrder = () => {
             <Flex justify={"end"}>
               <Text
                 className="text-red-500 cursor-pointer"
-                onClick={() => handleRemovePlan(plan.id)}
+                onClick={() => handleRemovePlan(plan.id)} // Correct removal by id
               >
                 - Remove
               </Text>
@@ -196,12 +215,9 @@ const GeneralStorePlaceOrder = () => {
                 <Text className="mb-4">Unit</Text>
                 <TextField.Root
                   className="mt-2 cursor-not-allowed"
-                  placeholder=" Unit"
+                  placeholder="Unit"
                   disabled={true}
                   value={plan.unit}
-                  onChange={(e) =>
-                    handleInputChange(plan.id, "unit", e.target.value)
-                  }
                 />
               </div>
               <div className="w-full">
@@ -231,7 +247,7 @@ const GeneralStorePlaceOrder = () => {
           type="button"
           onClick={handleAddPlan}
         >
-          Add Plan
+          Add Order
         </Button>
 
         <Flex justify={"end"}>
