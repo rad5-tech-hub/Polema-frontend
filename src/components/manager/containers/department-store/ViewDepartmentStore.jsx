@@ -36,6 +36,7 @@ const ViewDepartmentStore = () => {
       return;
     }
 
+    // Check if the api returns an empty array
     try {
       const response = await axios.get(
         `${root}/dept/${
@@ -52,84 +53,6 @@ const ViewDepartmentStore = () => {
       console.log(error);
     }
   };
-
-  const detailsArray = [
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Paracetamol",
-      stockNumber: 350,
-      stockAvailable: false,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 40,
-      stockAvailable: false,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-  ];
 
   React.useEffect(() => {
     fetchStore();
@@ -153,51 +76,15 @@ const ViewDepartmentStore = () => {
           </Select.Content>
         </Select.Root>
       </Flex>
-      <Separator className="my-2 w-full" />
-
-      <div>
-        <Grid columns={"6"} rows={"3"} gapX={"4"} gapY={"3"}>
-          {store.map((item, index) => {
-            return (
-              <div
-                className="p-5 shadow-xl max-w-[175px] max-h-[101px] rounded-lg relative"
-                key={index}
-              >
-                <div className="absolute top-2 right-2 ">
-                  <FontAwesomeIcon
-                    icon={faPills}
-                    width={"16px"}
-                    className="opacity-40"
-                    height={"16px"}
-                  />
-                </div>
-                <Blockquote>
-                  <p className="text-[0.6rem]">{item.product.name}</p>
-                  <p className="text-3xl  font-amsterdam">{item.quantity}</p>
-                  {item.status === "In Stock" ? (
-                    <p className="text-green-500  flex gap-1 items-center text-[.5rem]">
-                      <FontAwesomeIcon icon={faArrowUp} />
-                      Currently in Stock
-                    </p>
-                  ) : (
-                    <p className="text-red-500  flex gap-1 items-center text-[.5rem]">
-                      <FontAwesomeIcon icon={faArrowDown} />
-                      Currently out of Stock
-                    </p>
-                  )}
-                </Blockquote>
-              </div>
-            );
-          })}
-        </Grid>
-      </div>
 
       {/* Table to show store details */}
       <Table.Root className="mt-6 mb-4" variant="surface">
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>PRODUCT NAME</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>
+              {isProductActive ? "PRODUCT" : "RAW MATERIAL"} NAME
+            </Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>DEPARTMENT</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>UNIT</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>THRESHOLD VALUE</Table.ColumnHeaderCell>
