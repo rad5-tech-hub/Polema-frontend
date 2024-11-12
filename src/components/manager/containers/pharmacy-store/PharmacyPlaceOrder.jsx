@@ -16,9 +16,7 @@ import axios from "axios";
 const root = import.meta.env.VITE_ROOT;
 
 const PharmacyPlaceOrder = () => {
-  // State management for button loader
-  const [isLoading, setIsLoading] = React.useState();
-
+  const [isLoading, setIsLoading] = React.useState(false);
   const [rawMaterials, setRawMaterials] = React.useState([]);
   const [plans, setPlans] = React.useState([
     {
@@ -29,7 +27,6 @@ const PharmacyPlaceOrder = () => {
     },
   ]);
 
-  // Function to fetch raw materials from the database
   const fetchRawMaterials = async () => {
     const retrToken = localStorage.getItem("token");
     if (!retrToken) {
@@ -39,32 +36,42 @@ const PharmacyPlaceOrder = () => {
 
     try {
       const response = await axios.get(`${root}/dept/view-pharmstore-raw`, {
-        headers: {
-          Authorization: `Bearer ${retrToken}`,
-        },
+        headers: { Authorization: `Bearer ${retrToken}` },
       });
-      console.log(response);
       setRawMaterials(response.data.parsedStores);
     } catch (error) {
       console.log(error);
     }
   };
 
-  // Add a new plan (card)
   const addPlan = () => {
     setPlans([
       ...plans,
-      { rawMaterial: "", quantity: "", unit: "", expectedDelivery: "" },
+      { rawMaterial: "", quantity: "", unit: "", expectedDeliveryDate: "" },
     ]);
   };
 
-  // Remove a specific plan (card)
   const removePlan = (index) => {
     const updatedPlans = plans.filter((_, i) => i !== index);
     setPlans(updatedPlans);
   };
 
-  // Handle change in form fields
+  const handleRawMaterialChange = (index, selectedMaterialId) => {
+    const selectedMaterial = rawMaterials.find(
+      (item) => item.productId === selectedMaterialId
+    );
+    const updatedPlans = plans.map((plan, i) =>
+      i === index
+        ? {
+            ...plan,
+            rawMaterial: selectedMaterialId,
+            unit: selectedMaterial ? selectedMaterial.unit : "",
+          }
+        : plan
+    );
+    setPlans(updatedPlans);
+  };
+
   const handleInputChange = (index, field, value) => {
     const updatedPlans = plans.map((plan, i) =>
       i === index ? { ...plan, [field]: value } : plan
@@ -72,44 +79,40 @@ const PharmacyPlaceOrder = () => {
     setPlans(updatedPlans);
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     setIsLoading(true);
     toast.loading("Submitting Form", {
-      style: {
-        padding: "30px",
-      },
+      style: { padding: "30px" },
       duration: 1000,
     });
-    const body = {
-      orders: plans,
-    };
-    console.log(body);
+
+    const body = { orders: plans };
     const retrToken = localStorage.getItem("token");
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
+      setIsLoading(false);
       return;
     }
+
     try {
       const response = await axios.post(
         `${root}/dept/raise-pharm-order`,
         body,
         {
-          headers: {
-            Authorization: `Bearer ${retrToken}`,
-          },
+          headers: { Authorization: `Bearer ${retrToken}` },
         }
       );
-      console.log(response);
       setIsLoading(false);
       toast.success(response.data.message, {
-        style: {
-          padding: "30px",
-        },
+        style: { padding: "30px" },
         duration: 3500,
       });
+
+      // Clear form after successful submission
+      setPlans([
+        { rawMaterial: "", quantity: "", unit: "", expectedDeliveryDate: "" },
+      ]);
     } catch (err) {
       console.log(err);
       setIsLoading(false);
@@ -141,11 +144,13 @@ const PharmacyPlaceOrder = () => {
             <div>
               <Flex className="w-full" gap={"7"}>
                 <div className="w-full">
-                  <Text className="mb-4">Raw Material Needed</Text>
-
+                  <Text className="mb-4">
+                    Raw Material Needed <span className="text-red-500">*</span>
+                  </Text>
                   <Select.Root
+                    disabled={rawMaterials.length === 0}
                     onValueChange={(value) =>
-                      handleInputChange(index, "rawMaterial", value)
+                      handleRawMaterialChange(index, value)
                     }
                   >
                     <Select.Trigger
@@ -156,8 +161,8 @@ const PharmacyPlaceOrder = () => {
                       <Select.Group>
                         {rawMaterials.map((item) => (
                           <Select.Item
-                            key={item.id}
-                            value={item.productId} // Set item.id as the value
+                            key={item.productId}
+                            value={item.productId}
                           >
                             {item.product.name}
                           </Select.Item>
@@ -167,7 +172,9 @@ const PharmacyPlaceOrder = () => {
                   </Select.Root>
                 </div>
                 <div className="w-full">
-                  <Text className="mb-4">Quantity </Text>
+                  <Text className="mb-4">
+                    Quantity<span className="text-red-500">*</span>
+                  </Text>
                   <TextField.Root
                     className="mt-2"
                     placeholder="Enter Quantity"
@@ -184,19 +191,20 @@ const PharmacyPlaceOrder = () => {
                   <Text className="mb-4">Unit</Text>
                   <TextField.Root
                     className="mt-2"
-                    placeholder="Enter Unit"
+                    disabled
+                    placeholder="Unit"
                     value={plan.unit}
-                    onChange={(e) =>
-                      handleInputChange(index, "unit", e.target.value)
-                    }
                   />
                 </div>
                 <div className="w-full">
-                  <Text className="mb-4">Expected Delivery </Text>
+                  <Text className="mb-4">
+                    Expected Delivery<span className="text-red-500">*</span>
+                  </Text>
                   <TextField.Root
                     type="date"
                     className="mt-2"
-                    value={plan.expectedDelivery}
+                    value={plan.expectedDeliveryDate}
+                    required
                     onChange={(e) =>
                       handleInputChange(
                         index,
@@ -215,7 +223,7 @@ const PharmacyPlaceOrder = () => {
           type="button"
           onClick={addPlan}
           size={"3"}
-          className=" border-2 cursor-pointer  !border-theme mt-3"
+          className="border-2 cursor-pointer !border-theme mt-3"
         >
           Add Plan
         </Button>
@@ -224,7 +232,7 @@ const PharmacyPlaceOrder = () => {
           <Button
             type="submit"
             size={"3"}
-            className="!bg-theme border-2 cursor-pointer  !border-theme mt-3"
+            className="!bg-theme border-2 cursor-pointer !border-theme mt-3"
           >
             {isLoading ? <LoaderIcon /> : "Submit Order"}
           </Button>

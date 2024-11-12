@@ -57,7 +57,10 @@ const ViewPharmacyOrder = () => {
 
   // Function to get raw material name by ID
   const getRawMaterialName = (rawMaterialId) => {
-    const rawMaterial = rawMaterials.find((item) => item.id === rawMaterialId);
+    const rawMaterial = rawMaterials.find(
+      (item) => item.product.id === rawMaterialId
+    );
+
     return rawMaterial ? rawMaterial.product.name : "Unknown"; // Return "Unknown" if not found
   };
 
@@ -101,7 +104,7 @@ const ViewPharmacyOrder = () => {
                 </Flex>
               </Table.Cell>
               <DropdownMenu.Root>
-                <DropdownMenu.Trigger>
+                <DropdownMenu.Trigger className="mt-1">
                   <Button variant="surface" className="cursor-pointer">
                     <DropDownIcon />
                   </Button>
