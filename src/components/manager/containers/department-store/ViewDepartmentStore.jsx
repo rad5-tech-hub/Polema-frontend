@@ -22,6 +22,24 @@ import {
 import axios from "axios";
 const root = import.meta.env.VITE_ROOT;
 
+// Function to get company data
+const getCompanyData = () => {
+  let retrToken = localStorage.getItem("token");
+
+  // Check if the token is available
+  if (!retrToken) {
+    toast.error("An error occurred. Try logging in again");
+    return;
+  }
+  try {
+    axios.get("https://github.com", {
+      headers: {
+        Authorization: `Bearer ${retrToken}`,
+      },
+    });
+  } catch (error) {}
+};
+
 const ViewDepartmentStore = () => {
   const [isProductActive, setIsProductActive] = React.useState(true);
   const [store, setStore] = React.useState([]);
