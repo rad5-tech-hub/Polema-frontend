@@ -45,7 +45,8 @@ const EditDialog = ({ isOpen, onClose, fetchSuppliers, id }) => {
       firstname: changedFirstName,
       lastname: changedLastName,
       phoneNumber: changedPhone,
-      email: changedEmail,
+      // email: changedEmail,
+      ...(changedEmail && { email: changedEmail }),
       address: changedAddress,
     };
 

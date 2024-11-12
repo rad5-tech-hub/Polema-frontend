@@ -14,7 +14,7 @@ import {
 } from "@radix-ui/themes";
 import axios from "axios";
 const root = import.meta.env.VITE_ROOT;
-const cloudinaryRoot = import.meta.env.CLOUD_ROOT;
+const cloudinaryRoot = import.meta.env.VITE_CLOUD_ROOT;
 
 const CreateDepartmentStore = () => {
   const fileInputRef = useRef(null);
