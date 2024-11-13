@@ -39,6 +39,7 @@ import {
   SupplierPlaceOrder,
   AllCustomers,
   AllSuppliers,
+  NewWeigh,
   DepartementStorePlaceOrder,
   DepartmentStoreViewOrders,
   ViewDepartmentStore,
@@ -206,7 +207,9 @@ const App = () => {
                     element={<ViewDepartmentStore />}
                   />
 
-                  {/* Test Routes for cash management */}
+                  {/* Weighing operations routes     */}
+                  <Route path="/weighing/new-weigh" element={<NewWeigh />} />
+
                   {/* Routes for cashier */}
                   <Route
                     path="/cash-management/cash-management"

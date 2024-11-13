@@ -44,9 +44,9 @@ const DepartementStorePlaceOrder = () => {
           },
         }
       );
-      setRawMaterials(response.data.products);
+      setRawMaterials(response?.data?.products || []);      
     } catch (error) {
-      console.log(error);
+      console.log(error)  ;
       setRawMaterials([]);
     }
   };

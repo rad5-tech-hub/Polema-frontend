@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import toast, { LoaderIcon, Toaster } from "react-hot-toast";
 
 import {
   Heading,
@@ -74,7 +74,7 @@ const CreateDepartmentStore = () => {
   };
 
   // Function to fetch raw materials
-  const fetchRawMaterials = async () => {
+  const fetchRawMaterials = async (id) => {
     setProductDiabled(true);
     let retrToken = localStorage.getItem("token");
 
@@ -87,9 +87,7 @@ const CreateDepartmentStore = () => {
     try {
       const response = await axios.get(
         `${root}/dept/${
-          isProductActive
-            ? `get-dept-product/${deptId}`
-            : `get-dept-raw/${deptId}`
+          isProductActive ? `get-dept-product/${id}` : `get-dept-raw/${id}`
         }`,
         {
           headers: {
@@ -187,9 +185,6 @@ const CreateDepartmentStore = () => {
     fetchDept();
   }, []);
 
-  React.useEffect(() => {
-    fetchRawMaterials();
-  }, [isProductActive]);
   return (
     <>
       <Flex justify={"between"} align={"center"}>
@@ -254,6 +249,7 @@ const CreateDepartmentStore = () => {
             <Select.Root
               onValueChange={(value) => {
                 setDeptId(value);
+                fetchRawMaterials(value);
               }}
             >
               <Select.Trigger
@@ -270,7 +266,7 @@ const CreateDepartmentStore = () => {
           </div>
           <div className="w-full">
             <Text>
-              {isProductActive ? "Product" : "Raw Material"} Name
+              {isProductActive ? "Product" : "Raw Material"} Name{" "}
               <span className="text-red-500">*</span>
             </Text>
             <Select.Root
@@ -281,9 +277,7 @@ const CreateDepartmentStore = () => {
             >
               <Select.Trigger
                 className="w-full mt-2"
-                placeholder={`${
-                  isProductActive ? "Select Product" : "Select Raw Material"
-                }`}
+                placeholder={"Select a Department First"}
                 disabled={productDisabled}
               />
               <Select.Content>
