@@ -18,6 +18,7 @@ import AddCustomer from "./customer/AddCustomer";
 import AddProducts from "./products/AddProducts";
 import AllRoles from "./roles/AllRoles";
 import UsersList from "./UsersList";
+import NewWeigh from "./weighing-operations/NewWeigh";
 import ViewAccoountBook from "./account-book/ViewAccoountBook";
 import CashManagementLedger from "./cash/CashManagementLedger";
 import AllSuppliers from "./suppliers/AllSuppliers";
@@ -72,6 +73,7 @@ export {
   PharmacyPlaceOrder,
   ViewPharmacyOrder,
   ViewGeneralOrder,
+  NewWeigh,
   GeneralStorePlaceOrder,
   CashManagement,
   ShelfContent,
