@@ -718,6 +718,10 @@ video {
   right: 0%;
 }
 
+.right-\[3px\] {
+  right: 3px;
+}
+
 .z-\[100\] {
   z-index: 100;
 }
