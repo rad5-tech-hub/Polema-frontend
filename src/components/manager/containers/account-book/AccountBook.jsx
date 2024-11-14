@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
+
 import { useNavigate } from "react-router-dom";
 import UpdateURL from "../ChangeRoute";
 import {
@@ -27,6 +28,8 @@ const AccountBook = () => {
   const [bankName, setBankName] = useState("");
   const [comment, setComment] = useState("");
   const [deptID, setDeptID] = useState("");
+
+  const [isCustomer, setIscustomer] = useState("");
 
   const [accountRecipient, setAccountRecipient] = useState("customers");
   const [department, setDepartment] = useState([]);
@@ -176,9 +179,6 @@ const AccountBook = () => {
     };
 
     const submissionData = {
-      [isCustomer ? "customerId" : "supplierId"]: selectedCustomerId,
-      productId: selectedProductId,
-      amount: basePrice,
       bankName: bankName,
       ...(isCustomer() === true && { customerId: selectedCustomerId }),
       ...(isCustomer() === false && { supplierId: selectedCustomerId }),
@@ -199,25 +199,13 @@ const AccountBook = () => {
         submissionData,
         { headers: { Authorization: `Bearer ${retrToken}` } }
       );
-      console.log(response);
       toast.success(response.data.message, {
-        duration: 6500,
         style: {
-          padding: "30px",
+          padding: "20px",
         },
+        duration: 5500,
       });
-
-      // Clear the form fields upon successful submission
-      setSelectedCustomerId("");
-      setSelectedProductId("");
-      setBasePrice("");
-      setBankName("");
-        {
-          headers: {
-            Authorization: `Bearer ${retrToken}`,
-          },
-        }
-      );
+      resetForm();
     } catch (error) {
       console.log(error);
     }
@@ -257,60 +245,13 @@ const AccountBook = () => {
 
       <Separator className="my-3 w-full" />
       <form onSubmit={handleSubmit}>
-        <Flex className="w-full mb-4" gap={"5"}>
-          <div className="w-full">
-            <Text className="mb-4">
-              {isCustomer ? "Customer" : "Supplier"} Name
-            </Text>
-            <Select.Root
-              value={selectedCustomerId}
-              onValueChange={setSelectedCustomerId}
-              disabled={customers.length === 0}
-            >
-              <Select.Trigger
-                className="w-full mt-2"
-                placeholder={`Select ${isCustomer ? "Customer" : "Supplier"}`}
-              />
-              <Select.Content position="popper">
-                {customers.map((customer) => (
-                  <Select.Item key={customer.id} value={customer.id}>
-                    {customer.firstname} {customer.lastname}
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select.Root>
-          </div>
-
-          <div className="w-full">
-            <Text className="mb-4">
-              {isCustomer ? "Product" : "Raw Material"}
-            </Text>
-            <Select.Root
-              value={selectedProductId}
-              disabled={products.length === 0}
-              onValueChange={setSelectedProductId}
-            >
-              <Select.Trigger
-                className="w-full mt-2"
-                placeholder={`Select ${
-                  isCustomer ? "Product" : "Raw Material"
-                }`}
-              />
-              <Select.Content position="popper">
-                {products.map((product) => (
-                  <Select.Item key={product.id} value={product.id}>
-                    {product.name}
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select.Root>
-          </div>
-        </Flex>
         <Grid columns={"2"} gap={"4"}>
           {accountRecipient === "others" && (
             <>
               <div className="w-full">
-                <Text>Input Name</Text>
+                <Text>
+                  Input Name<span className="text-red-500">*</span>{" "}
+                </Text>
                 <TextField.Root
                   className="mt-2 w-full"
                   value={otherName}
@@ -321,11 +262,14 @@ const AccountBook = () => {
                 />
               </div>
               <div className="w-full">
-                <Text>Department</Text>
+                <Text>
+                  Department <span className="text-red-500">*</span>{" "}
+                </Text>
                 <Select.Root
                   onValueChange={(value) => {
                     setDeptID(value);
                   }}
+                  required
                 >
                   <Select.Trigger
                     disabled={department.length === 0}
@@ -350,9 +294,11 @@ const AccountBook = () => {
                 <Text className="mb-4">
                   {accountRecipient === "customers" && "Customer Name"}
                   {accountRecipient === "suppliers" && "Supplier Name"}
+                  <span className="text-red-500">*</span>
                 </Text>
                 <Select.Root
                   value={selectedCustomerId}
+                  required
                   onValueChange={setSelectedCustomerId}
                   disabled={customers.length === 0}
                 >
@@ -377,8 +323,10 @@ const AccountBook = () => {
                 <Text className="mb-4">
                   {accountRecipient === "customers" && "Select Product"}
                   {accountRecipient === "suppliers" && "Select Raw Materials"}
+                  <span className="text-red-500">*</span>
                 </Text>
                 <Select.Root
+                  required
                   value={selectedProductId}
                   disabled={products.length === 0}
                   onValueChange={setSelectedProductId} // Update selected product ID
@@ -404,16 +352,21 @@ const AccountBook = () => {
           )}
 
           <div className="w-full">
-            <Text>Enter Amount</Text>
+            <Text>
+              Enter Amount <span className="text-red-500">*</span>{" "}
+            </Text>
             <TextField.Root
               className="mt-2"
+              required
               placeholder="Enter Amount in Naira (₦)"
               value={formatNumber(basePrice)}
               onChange={handleBasePriceChange}
             />
           </div>
           <div className="w-full">
-            <Text>Bank Name</Text>
+            <Text>
+              Bank Name <span className="text-red-500">*</span>
+            </Text>
             <TextField.Root
               className="mt-2"
               placeholder="Enter Bank Name"
@@ -421,14 +374,19 @@ const AccountBook = () => {
               onChange={(e) => {
                 setBankName(e.target.value);
               }}
+              required
             />
           </div>
 
           <div className="w-full">
-            <Text>Comment</Text>
+            <Text>
+              Comment <span className="text-red-500">*</span>{" "}
+            </Text>
             <TextField.Root
               className="mt-2 "
+              required
               placeholder="Write any comment"
+              value={comment}
               onChange={(e) => {
                 setComment(e.target.value);
               }}
@@ -436,7 +394,12 @@ const AccountBook = () => {
           </div>
         </Grid>
         <Flex justify={"end"} className="mt-4 cursor-pointer">
-          <Button className="cursor-pointer" type="submit" disabled={loading}>
+          <Button
+            className="cursor-pointer !bg-theme mt-4"
+            type="submit"
+            size={"3"}
+            disabled={loading}
+          >
             {loading ? <Spinner /> : "Submit"}
           </Button>
         </Flex>
