@@ -1,4 +1,6 @@
 import WelcomeComponent from "./WelcomeComponent";
+import ViewSupplierOrder from "./suppliers/ViewSupplierOrder";
+import ViewCustomerOrders from "./customer/ViewCustomerOrders";
 import AuthorityToWeigh from "./raise-tickets/AuthorityToWeigh";
 import AuthorityToLoad from "./raise-tickets/AuthorityToLoad";
 import LocalPurchaseOrder from "./raise-tickets/LocalPurchaseOrder";
@@ -77,5 +79,7 @@ export {
   GeneralStorePlaceOrder,
   CashManagement,
   ShelfContent,
+  ViewCustomerOrders,
+  ViewSupplierOrder,
   AuthorityToWeigh,
 };

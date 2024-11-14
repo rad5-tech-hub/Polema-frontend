@@ -40,6 +40,7 @@ import {
   AllCustomers,
   AllSuppliers,
   NewWeigh,
+  ViewCustomerOrders,
   DepartementStorePlaceOrder,
   DepartmentStoreViewOrders,
   ViewDepartmentStore,
@@ -83,6 +84,10 @@ const App = () => {
                   <Route
                     path="customers/place-order"
                     element={<CustomerPlaceOrder />}
+                  />
+                  <Route
+                    path="customers/order"
+                    element={<ViewCustomerOrders />}
                   />
 
                   {/* Account Book Routes */}
