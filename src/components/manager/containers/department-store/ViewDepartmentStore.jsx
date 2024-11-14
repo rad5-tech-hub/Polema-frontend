@@ -29,6 +29,7 @@ const ViewDepartmentStore = () => {
   const [openModal, setOpenModal] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
+  // Fetch store data
   const fetchStore = async () => {
     let retrToken = localStorage.getItem("token");
     if (!retrToken) {
@@ -58,6 +59,7 @@ const ViewDepartmentStore = () => {
     fetchStore();
   }, [isProductActive]);
 
+  // Handle opening modals
   const handleOpenModal = (type, product) => {
     setSelectedProduct(product);
     setOpenModal(type);
@@ -68,11 +70,29 @@ const ViewDepartmentStore = () => {
     setSelectedProduct(null);
   };
 
-  // Callback to delete product from store state
-  const handleDeleteProduct = (deletedProductId) => {
-    setStore((prevStore) =>
-      prevStore.filter((item) => item.id !== deletedProductId)
-    );
+  // Callback to delete product from store state and server
+  const handleDeleteProduct = async () => {
+    try {
+      const retrToken = localStorage.getItem("token");
+      if (!retrToken) {
+        toast.error("An error occurred. Try logging in again");
+        return;
+      }
+
+      await axios.delete(`${root}/deleteproduct/${selectedProduct.id}`, {
+        headers: { Authorization: `Bearer ${retrToken}` },
+      });
+
+      setStore((prevStore) =>
+        prevStore.filter((item) => item.id !== selectedProduct.id)
+      );
+      toast.success("Product deleted successfully");
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      toast.error("Failed to delete product");
+    } finally {
+      closeModal();
+    }
   };
 
   // Callback to update product in store state

@@ -178,15 +178,17 @@ const DashBoardManager = ({ children }) => {
                         return (
                           <div>
                             <p
-                              className="flex gap-3 items-center px-4 cursor-pointer "
+                              className="flex gap-3 items-center justify-between px-4 w-full cursor-pointer "
                               onClick={() => handleToggle(index)}
                             >
-                              <DynamicIcon
-                                iconName={_.camelCase(nav.navParentIcon)}
-                              />
-                              <p className="p-2" title={nav.navParentName}>
-                                {trimString(nav.navParentName, 12)}
-                              </p>
+                              <div className="flex items-center">
+                                <DynamicIcon
+                                  iconName={_.camelCase(nav.navParentIcon)}
+                                />
+                                <p className="p-2" title={nav.navParentName}>
+                                  {trimString(nav.navParentName, 12)}
+                                </p>
+                              </div>
                               {openDropdowns[index] ? (
                                 <CaretUpIcon />
                               ) : (
@@ -212,7 +214,10 @@ const DashBoardManager = ({ children }) => {
                                     >
                                       <Flex gap={"2"} align={"center"}>
                                         <CircleIcon />
-                                        <span title={item.name}>
+                                        <span
+                                          // title={item.name}
+                                          className="text-[15px]"
+                                        >
                                           {" "}
                                           {trimString(item.name, 14)}
                                         </span>
@@ -241,6 +246,7 @@ const DashBoardManager = ({ children }) => {
               text={"text"}
               image={"image"}
             />
+
             <main>
               <div className="mx-auto max-w-screen-xl z-[1] p-4 md:p-6 xl:p-10">
                 {children}

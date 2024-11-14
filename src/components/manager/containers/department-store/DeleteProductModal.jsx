@@ -1,20 +1,30 @@
 import React from "react";
 
 const DeleteProductModal = ({ closeModal, product }) => {
+  // Function to delete prodduct
+  const handleDeleteSubmit = async (e) => {
+    e.preventDefault();
+    console.log(e);
+  };
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[101]">
       <div className="relative lg:w-[40%] w-fit h-[90%] bg-white rounded-lg p-8">
         <b className="text-[20px]">Remove</b>
         <div className="imgContainer w-[81px] h-[81px] border-2 border-dashed border-[#9D9D9D] rounded-[10px] mt-4"></div>
 
-        <form className="mt-8 flex flex-col gap-6">
+        <form
+          className="mt-8 flex flex-col gap-6"
+          onSubmit={handleDeleteSubmit}
+        >
           <div className="productName flex max-sm:flex-col max-sm:items-start justify-between items-center">
             <label htmlFor="productName">Product Name</label>
             <input
               type="text"
-              placeholder={product?.name || "Show product name"}
+              placeholder={product?.product.name || "Show product name"}
               className="border h-[44px] px-4 lg:w-[273px] rounded-lg"
               readOnly
+              disabled
             />
           </div>
 
@@ -25,6 +35,7 @@ const DeleteProductModal = ({ closeModal, product }) => {
               placeholder={product?.unit || "Show Unit"}
               className="border h-[44px] px-4 lg:w-[273px] rounded-lg"
               readOnly
+              disabled
             />
           </div>
 

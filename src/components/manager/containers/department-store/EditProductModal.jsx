@@ -21,9 +21,8 @@ const EditProductModal = ({ closeModal, product }) => {
             <label htmlFor="productName">Product Name</label>
             <input
               type="text"
-              placeholder={product?.name || "Show product name"}
+              placeholder={product?.product.name || "Show product name"}
               className="border h-[44px] px-4 lg:w-[273px] rounded-lg"
-              readOnly
             />
           </div>
 
@@ -34,6 +33,7 @@ const EditProductModal = ({ closeModal, product }) => {
               placeholder={product?.unit || "Show Unit"}
               className="border h-[44px] px-4 lg:w-[273px] rounded-lg"
               readOnly
+              disabled
             />
           </div>
 
@@ -41,7 +41,7 @@ const EditProductModal = ({ closeModal, product }) => {
             <label htmlFor="quantityRemoved">Quantity</label>
             <input
               type="text"
-              placeholder="Enter Quantity"
+              placeholder={product?.quantity || "Enter Quantity"}
               className="border h-[44px] px-4 lg:w-[273px] rounded-lg"
             />
           </div>
@@ -49,7 +49,7 @@ const EditProductModal = ({ closeModal, product }) => {
             <label htmlFor="quantityRemoved">Threshold Value</label>
             <input
               type="text"
-              placeholder="Enter threshold value"
+              placeholder={product?.thresholdValue || "Enter threshold value"}
               className="border h-[44px] px-4 lg:w-[273px] rounded-lg"
             />
           </div>
