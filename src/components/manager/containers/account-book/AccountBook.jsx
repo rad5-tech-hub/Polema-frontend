@@ -28,16 +28,14 @@ const AccountBook = () => {
 
   const [isCustomer, setIsCustomer] = React.useState(true);
 
-  // Function to format number with commas
   const formatNumber = (num) => {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
-  // Handle base price input change
   const handleBasePriceChange = (e) => {
-    const inputValue = e.target.value.replace(/,/g, ""); // Remove commas from the input value
+    const inputValue = e.target.value.replace(/,/g, "");
     if (!isNaN(inputValue)) {
-      setBasePrice(inputValue); // Update state with raw number (without commas)
+      setBasePrice(inputValue);
     }
   };
 
@@ -103,6 +101,7 @@ const AccountBook = () => {
       [isCustomer ? "customerId" : "supplierId"]: selectedCustomerId,
       productId: selectedProductId,
       amount: basePrice,
+      bankName: bankName,
     };
 
     try {
@@ -118,6 +117,12 @@ const AccountBook = () => {
           padding: "30px",
         },
       });
+
+      // Clear the form fields upon successful submission
+      setSelectedCustomerId("");
+      setSelectedProductId("");
+      setBasePrice("");
+      setBankName("");
     } catch (error) {
       console.log(error);
       toast.error(error.message, {
@@ -128,7 +133,6 @@ const AccountBook = () => {
       });
     }
 
-    // Reset loading after submitting
     setLoading(false);
   };
 
@@ -188,7 +192,7 @@ const AccountBook = () => {
             <Select.Root
               value={selectedProductId}
               disabled={products.length === 0}
-              onValueChange={setSelectedProductId} // Update selected product ID
+              onValueChange={setSelectedProductId}
             >
               <Select.Trigger
                 className="w-full mt-2"
@@ -211,16 +215,16 @@ const AccountBook = () => {
           <div className="w-full">
             <Text>Enter Amount</Text>
             <TextField.Root
-              className="mt-2 "
+              className="mt-2"
               placeholder="Enter Amount in Naira (₦)"
-              value={formatNumber(basePrice)} // Display formatted number
+              value={formatNumber(basePrice)}
               onChange={handleBasePriceChange}
             />
           </div>
           <div className="w-full">
             <Text>Bank Name</Text>
             <TextField.Root
-              className="mt-2 "
+              className="mt-2"
               placeholder="Enter Bank Name"
               value={bankName}
               onChange={(e) => {

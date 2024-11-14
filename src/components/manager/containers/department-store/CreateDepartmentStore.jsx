@@ -50,10 +50,10 @@ const CreateDepartmentStore = () => {
     formData.append("upload_preset", "ml_default");
 
     try {
-      const result = await axios.post(cloudinaryRoot, formData);
+      const result = await axios.post(`${root}/dept/upload`, formData);
       console.log("Image uploaded to Cloudinary:", result.data);
-      setImage(result.data.secure_url);
-      return result.data.secure_url; // Return the image URL from Cloudinary
+      setImage(result.data.imageUrl);
+      return result.data.imageUrl; // Return the image URL from Cloudinary
     } catch (error) {
       console.error("Error uploading image:", error);
     } finally {
