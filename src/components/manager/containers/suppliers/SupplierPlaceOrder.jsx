@@ -145,7 +145,9 @@ const SupplierPlaceOrder = () => {
           </div>
         </Flex>
         <Flex className="w-full mb-4" gap={"5"} justify={"end"}>
-          <Button size={"3"}>Add</Button>
+          <Button size={"3"} className=" bg-theme hover:bg-theme/85">
+            Add
+          </Button>
         </Flex>
       </form>
     </>

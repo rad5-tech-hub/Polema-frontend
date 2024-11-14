@@ -249,7 +249,7 @@ const AuthorityToWeigh = () => {
             <Heading>Authority to Weigh</Heading>
             <Button
               size={"2"}
-              className="cursor-pointer "
+              className="cursor-pointer  bg-theme hover:bg-theme/85"
               onClick={() => {
                 setViewPageOpen(true);
               }}
