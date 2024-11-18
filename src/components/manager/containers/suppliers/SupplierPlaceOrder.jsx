@@ -7,10 +7,10 @@ import {
   Text,
   TextField,
   Button,
-  Spinner,
 } from "@radix-ui/themes";
-import toast, { Toaster } from "react-hot-toast";
+import toast, { Toaster, LoaderIcon } from "react-hot-toast";
 import axios from "axios";
+
 const root = import.meta.env.VITE_ROOT;
 
 const SupplierPlaceOrder = () => {
@@ -24,111 +24,98 @@ const SupplierPlaceOrder = () => {
   const [selectedUnit, setSelectedUnit] = useState("");
   const [buttonLoading, setButtonLoading] = useState(false);
 
-  // Function to format number with commas
-  const formatNumber = (num) => {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
+  // Format number with commas
+  const formatNumber = (num) =>
+    num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
-  // Handle base price input change
   const handleBasePriceChange = (e) => {
-    const inputValue = e.target.value.replace(/,/g, ""); // Remove commas from the input value
-    if (!isNaN(inputValue)) {
-      setBasePrice(inputValue); // Update state with raw number (without commas)
+    const value = e.target.value.replace(/,/g, "");
+    if (/^\d*$/.test(value)) {
+      setBasePrice(value);
     }
   };
 
+  // Fetch customers
   const fetchCustomers = async () => {
-    const retrToken = localStorage.getItem("token");
-
-    if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
-      return;
-    }
+    const token = localStorage.getItem("token");
+    if (!token) return toast.error("Please log in again.");
 
     try {
-      const response = await axios.get(`${root}/customer/get-suppliers`, {
-        headers: {
-          Authorization: `Bearer ${retrToken}`,
-        },
+      const { data } = await axios.get(`${root}/customer/get-suppliers`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      setCustomers(response.data.customers);
+      setCustomers(data.customers);
     } catch (error) {
-      console.log(error);
+      console.error("Failed to fetch customers:", error);
+      toast.error("Error fetching customers. Try again later.");
     }
   };
 
+  // Fetch products
   const fetchProducts = async () => {
-    const retrToken = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
+    if (!token) return toast.error("Please log in again.");
 
-    if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
-      return;
-    }
     try {
-      const response = await axios.get(`${root}/admin/get-raw-materials`, {
-        headers: {
-          Authorization: `Bearer ${retrToken}`,
-        },
+      const { data } = await axios.get(`${root}/admin/get-raw-materials`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      setProducts(response.data.products);
+      setProducts(data.products);
     } catch (error) {
-      console.log(error);
+      console.error("Failed to fetch products:", error);
+      toast.error("Error fetching products. Try again later.");
     }
   };
 
-  // Update selectedUnit when selectedProductId changes
+  // Update selected unit when product changes
   useEffect(() => {
-    const selectedProduct = products.find(
-      (product) => product.id === selectedProductId
-    );
-    setSelectedUnit(selectedProduct ? selectedProduct.price[0].unit : ""); // Set the unit of the selected product
+    if (selectedProductId) {
+      const selectedProduct = products.find(
+        (product) => product.id === selectedProductId
+      );
+      setSelectedUnit(selectedProduct ? selectedProduct : "");
+    }
   }, [selectedProductId, products]);
 
-  // Function for submitting
   const handleSubmit = async (e) => {
     e.preventDefault();
     setButtonLoading(true);
-    const retrToken = localStorage.getItem("token");
 
-    if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Please log in again.");
+      setButtonLoading(false);
       return;
     }
-    const body = {
+
+    const orderData = {
       supplierId: selectedCustomerId,
       productId: selectedProductId,
       quantity,
-      price: basePrice,
+      price: selectedUnit.price[0].amount,
       comments: comment,
-      unit: selectedUnit,
+      unit: selectedUnit.price[0].unit,
     };
 
     try {
-      const response = await axios.post(
-        `${root}/customer/raise-supplier-order`,
-        body,
-        {
-          headers: {
-            Authorization: `Bearer ${retrToken}`,
-          },
-        }
-      );
-
-      setButtonLoading(false);
+      await axios.post(`${root}/customer/raise-supplier-order`, orderData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success("Order placed successfully!");
+      setBasePrice("");
+      setSelectedCustomerId("");
+      setSelectedProductId("");
+      setQuantity("");
+      setComment("");
+      setSelectedUnit("");
     } catch (error) {
-      console.log(error);
-      setButtonLoading(false);
+      console.error("Error placing order:", error);
       toast.error(
-        "An error occurred, check your form details and try again later.",
-        {
-          style: {
-            padding: "20px",
-          },
-          duration: 4500,
-        }
+        "Failed to place order. Please check your inputs and try again."
       );
+    } finally {
+      setButtonLoading(false);
     }
-    console.log(body);
   };
 
   useEffect(() => {
@@ -138,20 +125,21 @@ const SupplierPlaceOrder = () => {
 
   return (
     <>
-      <Heading>Place Order</Heading>
+      <Heading>Place Supplier Order</Heading>
       <Separator className="my-3 w-full" />
-      <form action="" onSubmit={handleSubmit}>
-        <Flex className="w-full mb-4" gap={"5"}>
+      <form onSubmit={handleSubmit}>
+        <Flex className="w-full mb-4" gap="5">
+          {/* Supplier Select */}
           <div className="w-full">
-            <Text className="mb-4">Supplier Name</Text>
+            <Text>Supplier Name</Text>
             <Select.Root
               value={selectedCustomerId}
-              onValueChange={setSelectedCustomerId} // Update selected customer ID
+              onValueChange={setSelectedCustomerId}
             >
               <Select.Trigger
                 disabled={customers.length === 0}
                 className="w-full mt-2"
-                placeholder="Select Customer"
+                placeholder="Select Supplier"
               />
               <Select.Content position="popper">
                 {customers.map((customer) => (
@@ -163,11 +151,12 @@ const SupplierPlaceOrder = () => {
             </Select.Root>
           </div>
 
+          {/* Product Select */}
           <div className="w-full">
-            <Text className="mb-4">Product</Text>
+            <Text>Product</Text>
             <Select.Root
               value={selectedProductId}
-              onValueChange={setSelectedProductId} // Update selected product ID
+              onValueChange={setSelectedProductId}
             >
               <Select.Trigger
                 disabled={products.length === 0}
@@ -185,58 +174,55 @@ const SupplierPlaceOrder = () => {
           </div>
         </Flex>
 
-        <Flex className="w-full mb-4" gap={"5"}>
+        {/* Quantity and Unit */}
+        <Flex className="w-full mb-4" gap="5">
           <div className="w-full">
-            <Text className="mb-4"> Quantity</Text>
+            <Text>Quantity</Text>
             <TextField.Root
-              className="mt-2 "
+              className="mt-2"
               placeholder="Input Quantity"
               type="number"
               value={quantity}
-              onChange={(e) => {
-                setQuantity(e.target.value);
-              }}
+              onChange={(e) => setQuantity(e.target.value)}
             />
           </div>
           <div className="w-full">
-            <Text className="mb-4">Product Unit </Text>
+            <Text>Product Unit</Text>
             <TextField.Root
-              className="mt-2 "
-              placeholder="Enter Unit"
-              value={selectedUnit} // Set value to selected unit
+              className="mt-2"
+              placeholder="Unit"
+              value={selectedUnit && selectedUnit.price[0].unit}
               disabled
             />
           </div>
         </Flex>
-        <Flex className="w-full mb-4" gap={"5"}>
+
+        {/* Base Price and Comments */}
+        <Flex className="w-full mb-4" gap="5">
           <div className="w-full">
-            <Text className="mb-4"> Enter Price</Text>
+            <Text>Base Price (₦)</Text>
             <TextField.Root
-              className="mt-2  "
-              placeholder="Enter Price in Naira(₦)"
-              value={formatNumber(basePrice)} // Display formatted number
-              onChange={handleBasePriceChange}
+              disabled
+              value={selectedUnit && selectedUnit.price[0].amount}
+              className="mt-2"
+              placeholder="Enter Price"
             />
           </div>
           <div className="w-full">
-            <Text className="mb-4"> Comment or Specification</Text>
+            <Text>Comment</Text>
             <TextField.Root
-              className="mt-2 "
-              placeholder="Enter Comment or Description"
+              className="mt-2"
+              placeholder="Optional Description"
               value={comment}
-              onChange={(e) => {
-                setComment(e.target.value);
-              }}
+              onChange={(e) => setComment(e.target.value)}
             />
           </div>
         </Flex>
-        <Flex className="w-full mb-4" gap={"5"} justify={"end"}>
-          <Button
-            size={"3"}
-            className="!bg-theme cursor-pointer"
-            disabled={buttonLoading}
-          >
-            {buttonLoading ? <Spinner /> : "Add"}
+
+        {/* Submit Button */}
+        <Flex justify="end" gap="5">
+          <Button size="3" className="!bg-theme" disabled={buttonLoading}>
+            {buttonLoading ? <LoaderIcon /> : "Submit Order"}
           </Button>
         </Flex>
       </form>
