@@ -24,9 +24,9 @@ const Header = ({ sidebarOpen, setSidebarOpen, user, role, image, text }) => {
               e.stopPropagation();
               setSidebarOpen(!sidebarOpen);
             }}
-            className="z-[99999] block rounded-sm border border-stroke bg-white p-1.5 shadow-sm dark:border-strokedark dark:bg-boxdark lg:hidden"
+            className="z-[99999] block rounded-sm border border-stroke bg-white py-1.5 px-4 shadow-sm dark:border-strokedark dark:bg-boxdark lg:hidden"
           >
-            <FontAwesomeIcon icon={faBars} />
+            <FontAwesomeIcon icon={faBars} className="text-[25px]" />
           </button>
           {/* <!-- Hamburger Toggle BTN --> */}
         </div>

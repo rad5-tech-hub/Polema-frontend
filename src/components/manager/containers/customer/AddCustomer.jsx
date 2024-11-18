@@ -203,7 +203,7 @@ const AddCustomer = () => {
 
           <Flex justify={"end"} align={"end"} width={"100%"}>
             <Button
-              className="mt-4 "
+              className="mt-4  bg-theme hover:bg-theme/85"
               size={3}
               type="submit"
               disabled={isLoading}

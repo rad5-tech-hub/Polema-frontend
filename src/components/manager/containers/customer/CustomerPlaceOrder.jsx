@@ -281,7 +281,12 @@ const CustomerPlaceOrder = () => {
           </div>
         </Grid>
         <Flex className="w-full mb-4" gap={"5"} justify={"end"}>
-          <Button size={"3"} type="submit" disabled={buttonLoading}>
+          <Button
+            size={"3"}
+            type="submit"
+            disabled={buttonLoading}
+            className=" bg-theme hover:bg-theme/85"
+          >
             {buttonLoading ? <Spinner /> : "Add"}
           </Button>
         </Flex>
