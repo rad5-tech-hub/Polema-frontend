@@ -1,4 +1,7 @@
 import WelcomeComponent from "./WelcomeComponent";
+import GeneralSupplierLedger from "./suppliers/GeneralSupplierLedger";
+import SupplierLedger from "./suppliers/SupplierLedger";
+import IndividualCustomerLedger from "./customer/IndividualCustomerLedger";
 import ViewSupplierOrder from "./suppliers/ViewSupplierOrder";
 import ViewCustomerOrders from "./customer/ViewCustomerOrders";
 import AuthorityToWeigh from "./raise-tickets/AuthorityToWeigh";
@@ -78,8 +81,11 @@ export {
   NewWeigh,
   GeneralStorePlaceOrder,
   CashManagement,
+  SupplierLedger,
+  IndividualCustomerLedger,
   ShelfContent,
   ViewCustomerOrders,
   ViewSupplierOrder,
+  GeneralSupplierLedger,
   AuthorityToWeigh,
 };

@@ -16,7 +16,7 @@ import axios from "axios";
 
 const root = import.meta.env.VITE_ROOT;
 
-const CustomerLedger = () => {
+const GeneralSupplierLedger = () => {
   const navigate = useNavigate();
   const [customers, setCustomers] = React.useState([]);
   const [searchInput, setSearchInput] = React.useState("");
@@ -31,7 +31,7 @@ const CustomerLedger = () => {
       return;
     }
     try {
-      const response = await axios.get(`${root}/customer/get-customers`, {
+      const response = await axios.get(`${root}/customer/get-suppliers`, {
         headers: {
           Authorization: `Bearer ${retrToken}`,
         },
@@ -78,7 +78,7 @@ const CustomerLedger = () => {
 
   return (
     <>
-      <Heading>Customer Ledger</Heading>
+      <Heading>Supplier Ledger</Heading>
 
       <Separator className="my-4 w-full" />
 
@@ -94,9 +94,10 @@ const CustomerLedger = () => {
           {/* Search Input */}
           <div className="relative w-full max-w-md">
             <TextField.Root
-              placeholder="Enter Customer Name"
+              placeholder="Enter Supplier Name"
               size={"3"}
               className="search-input mx-auto"
+              disabled={customers.length === 0}
               value={searchInput}
               onChange={handleSearchInput}
             >
@@ -118,7 +119,7 @@ const CustomerLedger = () => {
                       );
                       setFilteredCustomers([]);
                       navigate(
-                        `/admin/customers/customer-ledger/${customer.id}`
+                        `/admin/supplier/supplier-ledger/${customer.id}`
                       );
                     }}
                   >
@@ -144,4 +145,4 @@ const CustomerLedger = () => {
   );
 };
 
-export default CustomerLedger;
+export default GeneralSupplierLedger;

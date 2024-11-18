@@ -12,9 +12,11 @@ import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisV } from "@fortawesome/free-solid-svg-icons";
 import toast, { Toaster } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 const root = import.meta.env.VITE_ROOT;
 
 const ViewCustomerOrders = () => {
+  const navigate = useNavigate();
   const [store, setStore] = useState([]);
   const [customerData, setCustomerData] = useState([]);
   const [product, setProducts] = useState([]);
@@ -119,9 +121,7 @@ const ViewCustomerOrders = () => {
   // Function to get matching customer by id
   const getMatchingCustomerById = (id) => {
     const customers = customerData.find((item) => item.id === id);
-    return customers
-      ? `${customers.firstname} ${customers.lastname}`
-      : "Customer Not Found";
+    return customers ? customers : "Customer Not Found";
   };
 
   useEffect(() => {
@@ -157,7 +157,8 @@ const ViewCustomerOrders = () => {
               <Table.Row key={item.id} className="relative">
                 <Table.Cell>{refractor(item.createdAt)}</Table.Cell>
                 <Table.Cell>
-                  {getMatchingCustomerById(item.customerId)}
+                  {getMatchingCustomerById(item.customerId).firstname}{" "}
+                  {getMatchingCustomerById(item.customerId).lastname}
                 </Table.Cell>
                 <Table.Cell>
                   {getMatchingProductByID(item.productId)}
@@ -173,7 +174,17 @@ const ViewCustomerOrders = () => {
                       </Button>
                     </DropdownMenu.Trigger>
                     <DropdownMenu.Content>
-                      <DropdownMenu.Item>View Ledger</DropdownMenu.Item>
+                      <DropdownMenu.Item
+                        onClick={() => {
+                          navigate(
+                            `/admin/customers/customer-ledger/${
+                              getMatchingCustomerById(item.customerId).id
+                            }`
+                          );
+                        }}
+                      >
+                        View Ledger
+                      </DropdownMenu.Item>
                       <DropdownMenu.Item>View Authority</DropdownMenu.Item>
                     </DropdownMenu.Content>
                   </DropdownMenu.Root>
