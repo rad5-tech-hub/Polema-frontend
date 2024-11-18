@@ -16,9 +16,11 @@ import {
   LocalPurchaseOrder,
   ViewPharmacyOrder,
   GeneralStorePlaceOrder,
+  SupplierLedger,
   AddProducts,
   CreateDepartmentStore,
   AddCustomer,
+  IndividualCustomerLedger,
   CreateShelf,
   CustomerPlaceOrder,
   ShelfContent,
@@ -40,6 +42,7 @@ import {
   AllCustomers,
   AllSuppliers,
   NewWeigh,
+  ViewCustomerOrders,
   DepartementStorePlaceOrder,
   DepartmentStoreViewOrders,
   AllDispatchNote,
@@ -99,6 +102,16 @@ const App = () => {
                     path="customers/place-order"
                     element={<CustomerPlaceOrder />}
                   />
+                  <Route
+                    path="customers/order"
+                    element={<ViewCustomerOrders />}
+                  />
+
+                  {/* Customer Ledger Route */}
+                  <Route
+                    path="customers/customer-ledger/:id"
+                    element={<IndividualCustomerLedger />}
+                  />
 
                   {/* Account Book Routes */}
                   <Route path="account-book/add" element={<AccountBook />} />
@@ -119,6 +132,19 @@ const App = () => {
                   <Route
                     path="suppliers/place-supplier-order"
                     element={<SupplierPlaceOrder />}
+                  />
+                  <Route
+                    path="suppliers/view-order"
+                    element={<ViewSupplierOrder />}
+                  />
+                  <Route
+                    path="suppliers/supplier-ledger"
+                    element={<GeneralSupplierLedger />}
+                  />
+                  {/* Individual Supplier Ledger */}
+                  <Route
+                    path="supplier/supplier-ledger/:id"
+                    element={<SupplierLedger />}
                   />
 
                   {/* Product Routes */}
