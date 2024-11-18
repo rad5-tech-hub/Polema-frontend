@@ -42,8 +42,23 @@ import {
   NewWeigh,
   DepartementStorePlaceOrder,
   DepartmentStoreViewOrders,
+  AllDispatchNote,
+  AllGatePass,
+  AllInvoice,
+  CreateDispatchNote,
+  CreateGatepass,
+  CreateInvoice,
+  GatepassReceipt,
+  Invoice,
+  OfficialReceipt,
+  ReceiptDispatchNote,
+  WaybillCreateInvoice,
+  WaybillInvoice,
   ViewDepartmentStore,
 } from "./components/manager/containers";
+// import {
+//
+// } from "./components/manager/containers/receipts";
 
 import PrivateRoute from "./components/PrivateRoute"; // Assume this is adjusted for React Router v6
 import "@radix-ui/themes/styles.css";
@@ -218,6 +233,49 @@ const App = () => {
                   <Route
                     path="/cash-management/cash-ledger"
                     element={<CashManagementLedger />}
+                  />
+
+                  <Route
+                    path="/receipt/all-gatepass"
+                    element={<AllGatePass />}
+                  />
+                  <Route
+                    path="/receipt/all-dispatchnote"
+                    element={<AllDispatchNote />}
+                  />
+                  <Route path="/receipt/all-invoice" element={<AllInvoice />} />
+                  <Route
+                    path="/receipt/create-dispatchnote"
+                    element={<CreateDispatchNote />}
+                  />
+                  <Route
+                    path="/receipt/create-gatepass"
+                    element={<CreateGatepass />}
+                  />
+                  <Route
+                    path="/receipt/create-invoice"
+                    element={<CreateInvoice />}
+                  />
+                  <Route
+                    path="/receipt/gatepass-receipt"
+                    element={<GatepassReceipt />}
+                  />
+                  <Route path="/receipt/invoice" element={<Invoice />} />
+                  <Route
+                    path="/receipt/official-receipt"
+                    element={<OfficialReceipt />}
+                  />
+                  <Route
+                    path="/receipt/dispatchnote-receipt"
+                    element={<ReceiptDispatchNote />}
+                  />
+                  <Route
+                    path="/receipt/create-waybill-invoice"
+                    element={<WaybillCreateInvoice />}
+                  />
+                  <Route
+                    path="/receipt/waybill-invoice"
+                    element={<WaybillInvoice />}
                   />
                 </Routes>
               </DashBoardManager>

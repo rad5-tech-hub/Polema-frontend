@@ -1571,6 +1571,10 @@ video {
   padding-right: 15px;
 }
 
+.pt-\[15vh\] {
+  padding-top: 15vh;
+}
+
 .text-left {
   text-align: left;
 }

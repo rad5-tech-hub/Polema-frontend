@@ -11,6 +11,7 @@ import {
   CheckboxGroup,
   Checkbox,
   TextField,
+  Grid,
   Text,
   Flex,
   Spinner,
@@ -34,6 +35,7 @@ const AddAdmin = ({ child, setChild }) => {
   const [rolesArray, setRolesArray] = useState([]);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [firstName, setFirstName] = useState("");
 
   const handleValueChange = (value) => {
     setValue(value);
@@ -148,8 +150,208 @@ const AddAdmin = ({ child, setChild }) => {
         <Heading className="text-left py-4">Create Admin</Heading>
         <Separator className="w-full" />
         <form onSubmit={handleSubmit}>
+          <Grid columns={"2"} gap={"3"}>
+            <div className="input-field mt-3">
+              <label
+                className="text-[15px]  font-medium leading-[35px]   "
+                htmlFor="fullname"
+              >
+                First Name
+              </label>
+              <TextField.Root
+                placeholder="Enter First Name"
+                className=""
+                type="text"
+                id="firstname"
+                onChange={(e) => {
+                  setFirstName(e.target.value);
+                }}
+                value={firstName}
+                size={"3"}
+              ></TextField.Root>
+            </div>
+            <div className="input-field mt-3">
+              <label
+                className="text-[15px]  font-medium leading-[35px]   "
+                htmlFor="email"
+              >
+                Email
+              </label>
+              <TextField.Root
+                placeholder="Enter email"
+                className=""
+                id="email"
+                type="text"
+                size={"3"}
+              ></TextField.Root>
+            </div>
+            <div className="input-field mt-3">
+              <label
+                className="text-[15px]  font-medium leading-[35px]   "
+                htmlFor="number"
+              >
+                Phone Number
+              </label>
+              <TextField.Root
+                placeholder="Enter phone number"
+                className=""
+                id="number"
+                type="number"
+                size={"3"}
+              ></TextField.Root>
+            </div>
+            <div className="mt-3 input-field">
+              <label
+                className="text-[15px]  font-medium leading-[35px]   "
+                htmlFor="password"
+              >
+                Last Name
+              </label>
+              <TextField.Root
+                placeholder="Enter Last Name"
+                className=""
+                type="text"
+                id="lastname"
+                size={"3"}
+              ></TextField.Root>
+            </div>
+
+            <div className="mt-3 input-field">
+              <label
+                className="text-[15px]  font-medium leading-[35px]   "
+                htmlFor="role"
+              >
+                Assign Role
+              </label>
+              <Select.Root
+                value={value}
+                id={id}
+                onValueChange={handleValueChange}
+                size={"3"}
+              >
+                <Select.Trigger
+                  className="w-full"
+                  id="role"
+                  placeholder="Select role"
+                >
+                  <Flex as="span" align="center" gap="2">
+                    <PersonIcon />
+                    {value}
+                  </Flex>
+                </Select.Trigger>
+                <Select.Content position="popper">
+                  {rolesArray.map((role) => {
+                    return (
+                      <Select.Item value={role.name} id={role.id}>
+                        {role.name}
+                      </Select.Item>
+                    );
+                  })}
+                </Select.Content>
+              </Select.Root>
+            </div>
+
+            <div className="mt-3 input-field">
+              <label
+                className="text-[15px]  font-medium leading-[35px]   "
+                htmlFor="password"
+              >
+                Address
+              </label>
+              <TextField.Root
+                placeholder="Enter Address"
+                className=""
+                type="text"
+                id="department"
+                size={"3"}
+              ></TextField.Root>
+            </div>
+
+            <div className="mt-3 input-field">
+              <label
+                className="text-[15px]  font-medium leading-[35px]   "
+                htmlFor="passwordConfirm"
+              >
+                Confirm Password
+              </label>
+              <TextField.Root
+                placeholder="Confirm Password"
+                className=""
+                type={showConfirmPassword ? "password" : "text"}
+                id="passwordConfirm"
+                size={"3"}
+              >
+                <span
+                  className="p-2 mt-1 cursor-pointer"
+                  onClick={() => {
+                    setShowConfirmPassword(!showConfirmPassword);
+                  }}
+                >
+                  {showConfirmPassword ? <EyeClosedIcon /> : <EyeOpenIcon />}
+                </span>
+              </TextField.Root>
+            </div>
+            <div className="mt-3 input-field">
+              <label
+                className="text-[15px]  font-medium leading-[35px]   "
+                htmlFor="password"
+              >
+                Password
+              </label>
+              <TextField.Root
+                placeholder="Enter Password"
+                className="flex"
+                type={showPassword ? "password" : "text"}
+                id="password"
+                size={"3"}
+              >
+                <span
+                  className="p-2 mt-1 cursor-pointer"
+                  onClick={() => {
+                    setShowPassword(!showPassword);
+                  }}
+                >
+                  {showPassword ? <EyeClosedIcon /> : <EyeOpenIcon />}
+                </span>
+              </TextField.Root>
+            </div>
+            <div className="mt-3 input-field">
+              <label
+                className="text-[15px]  font-medium leading-[35px]   "
+                htmlFor="role"
+              >
+                Department
+              </label>
+              <Select.Root
+                value={value}
+                id={id}
+                onValueChange={handleValueChange}
+                size={"3"}
+              >
+                <Select.Trigger
+                  className="w-full"
+                  id="role"
+                  placeholder="Select role"
+                >
+                  <Flex as="span" align="center" gap="2">
+                    <PersonIcon />
+                    {value}
+                  </Flex>
+                </Select.Trigger>
+                <Select.Content position="popper">
+                  {rolesArray.map((role) => {
+                    return (
+                      <Select.Item value={role.name} id={role.id}>
+                        {role.name}
+                      </Select.Item>
+                    );
+                  })}
+                </Select.Content>
+              </Select.Root>
+            </div>
+          </Grid>
           <div className="flex w-full justify-between gap-8">
-            <div className="left w-[50%]">
+            {/* <div className="left w-[50%]">
               <div className="input-field mt-3">
                 <label
                   className="text-[15px]  font-medium leading-[35px]   "
@@ -222,9 +424,9 @@ const AddAdmin = ({ child, setChild }) => {
                   </span>
                 </TextField.Root>
               </div>
-            </div>
+            </div> */}
 
-            <div className="right w-[50%]">
+            {/* <div className="right w-[50%]">
               <div className="mt-3 input-field">
                 <label
                   className="text-[15px]  font-medium leading-[35px]   "
@@ -316,14 +518,49 @@ const AddAdmin = ({ child, setChild }) => {
                   </span>
                 </TextField.Root>
               </div>
-            </div>
+
+              <div className="mt-3 input-field">
+                <label
+                  className="text-[15px]  font-medium leading-[35px]   "
+                  htmlFor="role"
+                >
+                  Department
+                </label>
+                <Select.Root
+                  value={value}
+                  id={id}
+                  onValueChange={handleValueChange}
+                  size={"3"}
+                >
+                  <Select.Trigger
+                    className="w-full"
+                    id="role"
+                    placeholder="Select role"
+                  >
+                    <Flex as="span" align="center" gap="2">
+                      <PersonIcon />
+                      {value}
+                    </Flex>
+                  </Select.Trigger>
+                  <Select.Content position="popper">
+                    {rolesArray.map((role) => {
+                      return (
+                        <Select.Item value={role.name} id={role.id}>
+                          {role.name}
+                        </Select.Item>
+                      );
+                    })}
+                  </Select.Content>
+                </Select.Root>
+              </div>
+            </div> */}
           </div>
 
           {/* Permissions Div */}
 
           <Flex justify={"end"} align={"end"} width={"100%"}>
             <Button
-              className="mt-4  bg-theme hover:bg-theme/85"
+              className="mt-4 bg-theme hover:bg-theme/85"
               size={3}
               type="submit"
               disabled={isLoading}

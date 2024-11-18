@@ -215,7 +215,7 @@ const DashBoardManager = ({ children }) => {
                                       <Flex gap={"2"} align={"center"}>
                                         <CircleIcon />
                                         <span
-                                          // title={item.name}
+                                          title={item.name}
                                           className="text-[15px]"
                                         >
                                           {" "}
