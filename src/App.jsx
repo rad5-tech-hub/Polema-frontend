@@ -28,6 +28,7 @@ import {
   AuthorityToWeigh,
   AllProducts,
   CreatePharmacyStore,
+  IndividualDepartmentLedger,
   CreateRole,
   ViewAccoountBook,
   AccountBook,
@@ -47,7 +48,11 @@ import {
   DepartmentStoreViewOrders,
   GeneralSupplierLedger,
   ViewSupplierOrder,
+  ViewAuthorityToWeigh,
+  ViewLocalPurchaseOrder,
+  CollectFromGeneralStore,
   ViewDepartmentStore,
+  DepartmentLedger,
 } from "./components/manager/containers";
 
 import PrivateRoute from "./components/PrivateRoute"; // Assume this is adjusted for React Router v6
@@ -92,6 +97,12 @@ const App = () => {
                   <Route
                     path="customers/order"
                     element={<ViewCustomerOrders />}
+                  />
+
+                  {/* Authority to weigh route */}
+                  <Route
+                    path="customers/authority-to-weigh/:customerId/:orderId"
+                    element={<AuthorityToWeigh />}
                   />
 
                   {/* Customer Ledger Route */}
@@ -168,15 +179,21 @@ const App = () => {
                   {/*Raise Tickets Routes*/}
                   <Route
                     path="raise-ticket/l.p.o"
-                    element={<LocalPurchaseOrder />}
+                    element={<ViewLocalPurchaseOrder />}
                   />
-                  <Route
-                    path="raise-ticket/authority-to-weigh"
-                    element={<AuthorityToWeigh />}
-                  />
+
                   <Route
                     path="raise-ticket/authority-to-load"
                     element={<AuthorityToLoad />}
+                  />
+
+                  <Route
+                    path="raise-ticket/store-authority"
+                    element={<CollectFromGeneralStore />}
+                  />
+                  <Route
+                    path="raise-ticket/authority-to-weigh"
+                    element={<ViewAuthorityToWeigh />}
                   />
 
                   {/*  Routes for phamrcy store */}
@@ -246,6 +263,16 @@ const App = () => {
                   <Route
                     path="/cash-management/cash-ledger"
                     element={<CashManagementLedger />}
+                  />
+
+                  {/* Department Ledger */}
+                  <Route
+                    path="/department-ledger"
+                    element={<DepartmentLedger />}
+                  />
+                  <Route
+                    path="/department-ledger/:ledgerName/:id"
+                    element={<IndividualDepartmentLedger />}
                   />
                 </Routes>
               </DashBoardManager>

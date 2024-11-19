@@ -143,7 +143,7 @@ const ViewCustomerOrders = () => {
             <Table.ColumnHeaderCell>CUSTOMER NAME</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>PRODUCT</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>QUANTITY</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>PRICE</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>PRICE(₦)</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>UNIT</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
@@ -185,7 +185,17 @@ const ViewCustomerOrders = () => {
                       >
                         View Ledger
                       </DropdownMenu.Item>
-                      <DropdownMenu.Item>View Authority</DropdownMenu.Item>
+                      <DropdownMenu.Item
+                        onClick={() => {
+                          navigate(
+                            `/admin/customers/authority-to-weigh/${
+                              getMatchingCustomerById(item.customerId).id
+                            }/${item.id}`
+                          );
+                        }}
+                      >
+                        View Authority
+                      </DropdownMenu.Item>
                     </DropdownMenu.Content>
                   </DropdownMenu.Root>
                 </div>

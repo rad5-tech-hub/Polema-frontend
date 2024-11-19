@@ -41,10 +41,10 @@ const ViewShelf = () => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      setShelf(response.data.stores);
+      // setShelf(response.data.stores);
     } catch (error) {
       console.log(error);
-      setShelf([]);
+      // setShelf([]);
     }
   };
 
@@ -65,54 +65,7 @@ const ViewShelf = () => {
           <Table.ColumnHeaderCell>THRESHOLD VALUE</Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell>STATUS</Table.ColumnHeaderCell>
         </Table.Header>
-        <Table.Body>
-          {shelf.length === 0 ? (
-            <div className="p-4">
-              <Spinner />
-            </div>
-          ) : (
-            shelf.map((item, index) => (
-              <Table.Row key={index} className="relative !overflow-visible">
-                <Table.RowHeaderCell>
-                  {refractor(item.createdAt)}
-                </Table.RowHeaderCell>
-                <Table.Cell>{item.name}</Table.Cell>
-                <Table.Cell>{item.unit}</Table.Cell>
-                <Table.Cell>{item.thresholdValue}</Table.Cell>
-                <Table.Cell>
-                  <Flex gap={"1"} align={"center"}>
-                    <FontAwesomeIcon
-                      icon={faSquare}
-                      color={`${item.status != "In Stock" ? "red " : "green"}`}
-                    />
-                    {item.status}
-                  </Flex>
-                </Table.Cell>
-                <DropdownMenu.Root>
-                  <DropdownMenu.Trigger>
-                    <Button variant="surface" className="cursor-pointer">
-                      <DropdownMenu.TriggerIcon />
-                    </Button>
-                  </DropdownMenu.Trigger>
-                  <DropdownMenu.Content>
-                    <DropdownMenu.Item
-                      shortcut={<FontAwesomeIcon icon={faPen} />}
-                    >
-                      Edit
-                    </DropdownMenu.Item>
-                    {}
-                    <DropdownMenu.Item
-                      color="red"
-                      shortcut={<FontAwesomeIcon icon={faPen} />}
-                    >
-                      Suspend
-                    </DropdownMenu.Item>
-                  </DropdownMenu.Content>
-                </DropdownMenu.Root>
-              </Table.Row>
-            ))
-          )}
-        </Table.Body>
+        <Table.Body></Table.Body>
       </Table.Root>
     </div>
   );

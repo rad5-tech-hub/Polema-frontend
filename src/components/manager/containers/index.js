@@ -1,4 +1,9 @@
 import WelcomeComponent from "./WelcomeComponent";
+import ViewAuthorityToWeigh from "./raise-tickets/ViewAuthorityToWeigh";
+import IndividualDepartmentLedger from "./department-ledger/IndividualDepartmentLedger";
+import DepartmentLedger from "./department-ledger/DepartmentLedger";
+import CollectFromGeneralStore from "./raise-tickets/CollectFromGeneralStore";
+import ViewLocalPurchaseOrder from "./raise-tickets/ViewLocalPurchaseOrder";
 import GeneralSupplierLedger from "./suppliers/GeneralSupplierLedger";
 import SupplierLedger from "./suppliers/SupplierLedger";
 import IndividualCustomerLedger from "./customer/IndividualCustomerLedger";
@@ -78,6 +83,7 @@ export {
   PharmacyPlaceOrder,
   ViewPharmacyOrder,
   ViewGeneralOrder,
+  CollectFromGeneralStore,
   NewWeigh,
   GeneralStorePlaceOrder,
   CashManagement,
@@ -85,7 +91,11 @@ export {
   IndividualCustomerLedger,
   ShelfContent,
   ViewCustomerOrders,
+  DepartmentLedger,
   ViewSupplierOrder,
+  IndividualDepartmentLedger,
   GeneralSupplierLedger,
   AuthorityToWeigh,
+  ViewLocalPurchaseOrder,
+  ViewAuthorityToWeigh,
 };

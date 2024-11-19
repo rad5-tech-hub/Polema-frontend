@@ -1,56 +1,49 @@
 import React, { useEffect, useState } from "react";
-
 import {
   Tabs,
   Select,
   Text,
-  Switch,
   Flex,
-  DropdownMenu,
   Spinner,
   TextField,
   Button,
 } from "@radix-ui/themes";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
-import UpdateURL from "../ChangeRoute";
 const root = import.meta.env.VITE_ROOT;
 
 const AuthorityToGiveCash = () => {
   const [customers, setCustomers] = useState([]);
-  const [searchQuery, setSearchQuery] = useState(""); // New state to handle search input
+  const [searchQuery, setSearchQuery] = useState("");
   const [products, setProducts] = useState([]);
   const [searchProductQuery, setSearchProductQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState("");
-  const [basePrice, setBasePrice] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [authorityType, setAuthorityType] = useState("");
   const [othersDescription, setOthersDescription] = useState("");
   const [othersAmount, setOthersAmount] = useState("");
-  const [othersLoading, setOthersLoading] = useState("");
+  const [othersLoading, setOthersLoading] = useState(false);
 
   // Function to format number with commas
   const formatNumber = (num) => {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
-  // Handle base price input change
+  // Handle base price input change and remove commas before setting state
   const handleBasePriceChange = (e) => {
-    const inputValue = e.target.value.replace(/,/g, ""); // Remove commas from the input value
+    const inputValue = e.target.value.replace(/,/g, "");
     if (!isNaN(inputValue)) {
-      setBasePrice(inputValue); // Update state with raw number (without commas)
+      setBasePrice(inputValue);
     }
   };
 
   const fetchCustomers = async () => {
     const retrToken = localStorage.getItem("token");
 
-    // Check if the token is available
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
-
       return;
     }
 
@@ -60,10 +53,8 @@ const AuthorityToGiveCash = () => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      console.log(response);
       setCustomers(response.data.customers);
     } catch (error) {
-      console.log(error);
       toast.error(error.message);
     }
   };
@@ -71,10 +62,8 @@ const AuthorityToGiveCash = () => {
   const fetchProducts = async () => {
     const retrToken = localStorage.getItem("token");
 
-    // Check if the token is available
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
-
       return;
     }
 
@@ -84,38 +73,30 @@ const AuthorityToGiveCash = () => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-
-      console.log(response.data.products);
-      response.data.products.length === 0
-        ? setProducts([])
-        : setProducts(response.data.products);
+      setProducts(response.data.products);
     } catch (error) {
-      console.log(error);
       toast.error(error.message);
     }
   };
 
   const handleCustomersSubmit = async (e) => {
     e.preventDefault();
-
     const retrToken = localStorage.getItem("token");
 
-    // Check if the token is available
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
-
       return;
     }
 
     const body = {
       amount: amount,
-      customerId: selectedCustomer, // Use selected state
-      productId: selectedProduct, // Use selected state
-      creditOrDebit: authorityType, // Use selected state
+      customerId: selectedCustomer,
+      productId: selectedProduct,
+      creditOrDebit: authorityType,
     };
 
     try {
-      setLoading(true); // Start loading
+      setLoading(true);
       const response = await axios.post(
         `${root}/customer/raise-cashticket`,
         body,
@@ -127,21 +108,17 @@ const AuthorityToGiveCash = () => {
       );
       toast.success(response.data.message, {
         duration: 6500,
-        style: {
-          padding: "30px",
-        },
+        style: { padding: "30px" },
       });
-      console.log(response);
 
-      // Reset form fields
       setAmount("");
       setSelectedCustomer(null);
       setSelectedProduct(null);
       setAuthorityType("");
     } catch (error) {
-      console.log(error);
+      toast.error(error.message);
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
@@ -150,10 +127,8 @@ const AuthorityToGiveCash = () => {
     setOthersLoading(true);
     const retrToken = localStorage.getItem("token");
 
-    // Check if the token is available
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
-
       return;
     }
 
@@ -173,16 +148,13 @@ const AuthorityToGiveCash = () => {
           },
         }
       );
-      console.log(response);
-      setOthersLoading(false);
       toast.success(response.data.message);
-
       setOthersAmount("");
       setOthersDescription("");
     } catch (error) {
-      setOthersLoading(false);
-      console.log(error);
       toast.error(error.message);
+    } finally {
+      setOthersLoading(false);
     }
   };
 
@@ -199,7 +171,7 @@ const AuthorityToGiveCash = () => {
           <Tabs.Trigger value="Others">Others</Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="Customers">
-          <form action="" className="mt-6" onSubmit={handleCustomersSubmit}>
+          <form onSubmit={handleCustomersSubmit} className="mt-6">
             <div className="flex w-full justify-between gap-8">
               <div className="w-full">
                 <Text size={"4"}>Customer Name</Text>
@@ -211,10 +183,7 @@ const AuthorityToGiveCash = () => {
                     className="w-full mt-2"
                     placeholder="Select Customer Name"
                   />
-
-                  {/* Dropdown Content */}
                   <Select.Content position="popper">
-                    {/* Search input inside the dropdown */}
                     <div className="p-2">
                       <input
                         type="text"
@@ -224,8 +193,6 @@ const AuthorityToGiveCash = () => {
                         className="w-full p-2 border border-gray-300 rounded"
                       />
                     </div>
-
-                    {/* Filter customers based on the search query */}
                     {customers
                       .filter(
                         (customer) =>
@@ -236,13 +203,11 @@ const AuthorityToGiveCash = () => {
                             .toLowerCase()
                             .includes(searchQuery.toLowerCase())
                       )
-                      .map((customer) => {
-                        return (
-                          <Select.Item key={customer.id} value={customer.id}>
-                            {customer.firstname} {customer.lastname}
-                          </Select.Item>
-                        );
-                      })}
+                      .map((customer) => (
+                        <Select.Item key={customer.id} value={customer.id}>
+                          {customer.firstname} {customer.lastname}
+                        </Select.Item>
+                      ))}
                   </Select.Content>
                 </Select.Root>
               </div>
@@ -257,10 +222,7 @@ const AuthorityToGiveCash = () => {
                     className="w-full mt-2"
                     placeholder="Select Product"
                   />
-
-                  {/* Dropdown Content */}
                   <Select.Content position="popper">
-                    {/* Search input inside the dropdown */}
                     <div className="p-2">
                       <input
                         type="text"
@@ -270,21 +232,17 @@ const AuthorityToGiveCash = () => {
                         className="w-full p-2 border border-gray-300 rounded"
                       />
                     </div>
-
-                    {/* Filter products based on the search query */}
                     {products
                       .filter((product) =>
                         product.name
                           .toLowerCase()
                           .includes(searchProductQuery.toLowerCase())
                       )
-                      .map((product) => {
-                        return (
-                          <Select.Item key={product.id} value={product.id}>
-                            {product.name}
-                          </Select.Item>
-                        );
-                      })}
+                      .map((product) => (
+                        <Select.Item key={product.id} value={product.id}>
+                          {product.name}
+                        </Select.Item>
+                      ))}
                   </Select.Content>
                 </Select.Root>
               </div>
@@ -296,13 +254,13 @@ const AuthorityToGiveCash = () => {
                 <TextField.Root
                   id="amount"
                   className="mt-3"
-                  onChange={(e) => setAmount(e.target.value)}
                   value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
                   placeholder="Enter Amount in Naira (₦)"
                 />
               </div>
               <div className="w-[49%]">
-                <label htmlFor="amount">Authority Type</label>
+                <label htmlFor="authorityType">Authority Type</label>
                 <Select.Root
                   value={authorityType}
                   onValueChange={setAuthorityType}
@@ -331,12 +289,12 @@ const AuthorityToGiveCash = () => {
           </form>
         </Tabs.Content>
         <Tabs.Content value="Others">
-          <form action="" onSubmit={handleOrderSubmit}>
+          <form onSubmit={handleOrderSubmit} className="mt-6">
             <div className="flex w-full mt-4 justify-between gap-8">
               <div className="w-[49%]">
-                <label htmlFor="amount">Description</label>
+                <label htmlFor="othersDescription">Description</label>
                 <TextField.Root
-                  id="amount"
+                  id="othersDescription"
                   className="mt-2"
                   value={othersDescription}
                   placeholder="Enter Ticket Description"
@@ -344,37 +302,14 @@ const AuthorityToGiveCash = () => {
                 />
               </div>
               <div className="w-[49%]">
-                <label htmlFor="amount">Amount</label>
+                <label htmlFor="othersAmount">Amount</label>
                 <TextField.Root
-                  id="amount"
-                  onChange={(e) => setOthersAmount(e.target.value)}
+                  id="othersAmount"
                   className="mt-2"
                   value={othersAmount}
-                  placeholder="Enter Amount "
+                  placeholder="Enter Amount"
+                  onChange={(e) => setOthersAmount(e.target.value)}
                 />
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <div className="w-[49%]">
-                <label htmlFor="amount">Authority Type</label>
-                <Select.Root
-                  value={authorityType}
-                  onValueChange={setAuthorityType}
-                >
-                  <Select.Trigger
-                    className="w-full mt-2"
-                    placeholder="Choose Authority Type"
-                  />
-                  <Select.Content position="popper">
-                    <Select.Item value="debit">
-                      Authority to give Cash
-                    </Select.Item>
-                    <Select.Item value="credit">
-                      Authority to collect Cash
-                    </Select.Item>
-                  </Select.Content>
-                </Select.Root>
               </div>
             </div>
 
@@ -386,7 +321,7 @@ const AuthorityToGiveCash = () => {
           </form>
         </Tabs.Content>
       </Tabs.Root>
-      <Toaster position="top-right" />
+      <Toaster />
     </>
   );
 };

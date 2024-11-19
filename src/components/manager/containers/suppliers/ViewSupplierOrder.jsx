@@ -107,7 +107,7 @@ const ViewSupplierOrder = () => {
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>SUPPLIER</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>RAW MATERIAL</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>PRICE</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>PRICE(₦)</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>QUANTITY</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>COMMENT</Table.ColumnHeaderCell>
           </Table.Row>
