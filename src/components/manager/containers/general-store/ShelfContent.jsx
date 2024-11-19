@@ -155,6 +155,21 @@ const ShelfContent = () => {
     setLoading(false);
   };
 
+  const statusColor = (string) => {
+    switch (string) {
+      case "Out of Stock":
+        return "text-red-500";
+      case "In Stock":
+        return "text-green-500";
+      case "Low Stock":
+        return "text-yellow-500";
+        break;
+
+      default:
+        break;
+    }
+  };
+
   useEffect(() => {
     fetchShelf();
   }, []);
@@ -167,6 +182,7 @@ const ShelfContent = () => {
           <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell>SHELF NAME</Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell>UNIT</Table.ColumnHeaderCell>
+
           <Table.ColumnHeaderCell>THRESHOLD VALUE</Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell>STATUS</Table.ColumnHeaderCell>
         </Table.Header>
@@ -185,12 +201,14 @@ const ShelfContent = () => {
                 </Table.RowHeaderCell>
                 <Table.Cell>{item.name}</Table.Cell>
                 <Table.Cell>{item.unit}</Table.Cell>
+
                 <Table.Cell>{item.thresholdValue}</Table.Cell>
                 <Table.Cell>
                   <Flex gap={"1"} align={"center"}>
                     <FontAwesomeIcon
                       icon={faSquare}
-                      color={item.status !== "In Stock" ? "red" : "green"}
+                      className={`${statusColor(item.status)}`}
+                      // color={item.status !== "In Stock" ? "red" : "green"}
                     />
                     {item.status}
                   </Flex>

@@ -1,4 +1,6 @@
 import React from "react";
+import _ from "lodash";
+import { refractor } from "../../../date";
 import toast, { Toaster } from "react-hot-toast";
 import LocalPurchaseOrder from "./LocalPurchaseOrder";
 import {
@@ -77,7 +79,7 @@ const ViewLocalPurchaseOrder = () => {
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>LPO ID</Table.ColumnHeaderCell>
+            {/* <Table.ColumnHeaderCell>LPO ID</Table.ColumnHeaderCell> */}
             <Table.ColumnHeaderCell>DELIVERED TO</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>LPO EXPIRES</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>ORDER STATUS</Table.ColumnHeaderCell>
@@ -92,12 +94,12 @@ const ViewLocalPurchaseOrder = () => {
           ) : (
             orders.map((order) => (
               <Table.Row key={order.id}>
-                <Table.Cell>{order.date}</Table.Cell>
-                <Table.Cell>{order.lpoId}</Table.Cell>
+                <Table.Cell>{refractor(order.createdAt)}</Table.Cell>
+                {/* <Table.Cell>{order.lpoId}</Table.Cell> */}
                 <Table.Cell>{order.deliveredTo}</Table.Cell>
-                <Table.Cell>{order.lpoExpires}</Table.Cell>
-                <Table.Cell>{order.orderStatus}</Table.Cell>
-                <Table.Cell>{order.ticketStatus}</Table.Cell>
+                <Table.Cell>{refractor(order.expires)}</Table.Cell>
+                <Table.Cell>{""}</Table.Cell>
+                <Table.Cell>{_.upperFirst(order.status)}</Table.Cell>
               </Table.Row>
             ))
           )}

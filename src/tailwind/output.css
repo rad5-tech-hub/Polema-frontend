@@ -682,6 +682,18 @@ video {
   top: 50%;
 }
 
+.top-10 {
+  top: 2.5rem;
+}
+
+.right-\[-5px\] {
+  right: -5px;
+}
+
+.top-\[-3px\] {
+  top: -3px;
+}
+
 .z-0 {
   z-index: 0;
 }
@@ -708,6 +720,10 @@ video {
 
 .z-\[99999\] {
   z-index: 99999;
+}
+
+.z-\[150\] {
+  z-index: 150;
 }
 
 .m-0 {
@@ -741,6 +757,11 @@ video {
 .my-5 {
   margin-top: 1.25rem;
   margin-bottom: 1.25rem;
+}
+
+.mx-4 {
+  margin-left: 1rem;
+  margin-right: 1rem;
 }
 
 .mb-1 {
@@ -888,6 +909,14 @@ video {
   height: 100vh;
 }
 
+.h-\[50px\] {
+  height: 50px;
+}
+
+.h-\[10px\] {
+  height: 10px;
+}
+
 .max-h-48 {
   max-height: 12rem;
 }
@@ -959,6 +988,26 @@ video {
 
 .w-full {
   width: 100%;
+}
+
+.w-80 {
+  width: 20rem;
+}
+
+.w-\[50px\] {
+  width: 50px;
+}
+
+.w-\[40px\] {
+  width: 40px;
+}
+
+.w-\[10px\] {
+  width: 10px;
+}
+
+.w-\[15px\] {
+  width: 15px;
 }
 
 .min-w-\[50px\] {
@@ -1198,6 +1247,22 @@ video {
   border-width: 2px;
 }
 
+.border-\[1\.2px\] {
+  border-width: 1.2px;
+}
+
+.border-\[1\.5px\] {
+  border-width: 1.5px;
+}
+
+.border-\[1\.8px\] {
+  border-width: 1.8px;
+}
+
+.border-\[3px\] {
+  border-width: 3px;
+}
+
 .border-r-\[1px\] {
   border-right-width: 1px;
 }
@@ -1239,6 +1304,15 @@ video {
 .border-white {
   --tw-border-opacity: 1;
   border-color: rgb(255 255 255 / var(--tw-border-opacity));
+}
+
+.border-\[\#f4f4f4\] {
+  --tw-border-opacity: 1;
+  border-color: rgb(244 244 244 / var(--tw-border-opacity));
+}
+
+.border-\[\#000\]\/60 {
+  border-color: rgb(0 0 0 / 0.6);
 }
 
 .\!bg-red-500 {
@@ -1338,6 +1412,11 @@ video {
   background-color: rgb(234 179 8 / var(--tw-bg-opacity));
 }
 
+.bg-green-400 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(74 222 128 / var(--tw-bg-opacity));
+}
+
 .bg-opacity-50 {
   --tw-bg-opacity: 0.5;
 }
@@ -1376,6 +1455,14 @@ video {
 
 .p-\[25px\] {
   padding: 25px;
+}
+
+.p-5 {
+  padding: 1.25rem;
+}
+
+.p-0 {
+  padding: 0px;
 }
 
 .px-2 {
@@ -1497,6 +1584,19 @@ video {
 .text-xs {
   font-size: 0.75rem;
   line-height: 1rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+.text-\[\.9rem\] {
+  font-size: .9rem;
+}
+
+.text-\[\.5rem\] {
+  font-size: .5rem;
 }
 
 .font-bold {
