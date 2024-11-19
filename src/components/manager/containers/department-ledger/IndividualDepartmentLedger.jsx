@@ -10,6 +10,7 @@ const IndividualDepartmentLedger = () => {
   const { id, ledgerName } = useParams();
 
   const [ledger, setLedger] = React.useState([]);
+  const [products, setProducts] = React.useState([]);
   const [failedSearch, setFailedSearch] = React.useState(false);
 
   //   Fucntion to get a department ledger
@@ -32,6 +33,16 @@ const IndividualDepartmentLedger = () => {
       {
         error.response.status === 404 && setFailedSearch(true);
       }
+    }
+  };
+
+  // Function to get products
+  const getProducts = async () => {
+    const retrToken = localStorage.getItem("token");
+
+    if (!retrToken) {
+      console.error("An error occurred. Try logging in again");
+      return;
     }
   };
 

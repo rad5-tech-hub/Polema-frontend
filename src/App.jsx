@@ -253,7 +253,7 @@ const App = () => {
                   />
 
                   {/* Weighing operations routes     */}
-                  <Route path="/weighing/new-weigh" element={<NewWeigh />} />
+                  <Route path="/weighing-operations" element={<NewWeigh />} />
 
                   {/* Routes for cashier */}
                   <Route
