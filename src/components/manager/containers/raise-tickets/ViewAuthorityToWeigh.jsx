@@ -14,6 +14,8 @@ import {
 } from "@radix-ui/themes";
 import axios from "axios";
 
+import { faSquare } from "@fortawesome/free-solid-svg-icons";
+
 const root = import.meta.env.VITE_ROOT;
 
 const ViewAuthorityToWeigh = () => {
@@ -70,6 +72,24 @@ const ViewAuthorityToWeigh = () => {
     return customer ? customer : "Customer Name not found";
   };
 
+  // Function to check status
+  const checkStatus = (arg) => {
+    switch (arg) {
+      case "pending":
+        return "text-yellow-500";
+        break;
+      case "approved":
+        return "text-green-500";
+        break;
+      case "rejected":
+        return "text-red-500";
+        break;
+
+      default:
+        break;
+    }
+  };
+
   React.useEffect(() => {
     fetchCustomers();
     fetchWeighDetails();
@@ -107,7 +127,14 @@ const ViewAuthorityToWeigh = () => {
                     }`}
                   </Table.Cell>
                   <Table.Cell>{item.driver}</Table.Cell>
-                  <Table.Cell>{_.upperFirst(item.status)}</Table.Cell>
+                  <Table.Cell>
+                    {" "}
+                    <FontAwesomeIcon
+                      icon={faSquare}
+                      className={`${checkStatus(item.status)}`}
+                    />{" "}
+                    {_.upperFirst(item.status)}
+                  </Table.Cell>
                   <DropdownMenu.Root>
                     <DropdownMenu.Trigger className="mt-2">
                       <Button variant="soft">

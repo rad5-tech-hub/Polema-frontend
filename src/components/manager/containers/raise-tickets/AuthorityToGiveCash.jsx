@@ -38,6 +38,7 @@ const AuthorityToGiveCash = () => {
   const [departments, setDepartments] = useState([]);
   const [comments, setComments] = useState("");
   const [departmentId, setDepartmentId] = useState("");
+  const [staffAmount, setStaffAmount] = useState("");
 
   const fetchCustomers = async () => {
     const retrToken = localStorage.getItem("token");
@@ -130,6 +131,11 @@ const AuthorityToGiveCash = () => {
       setButtonLoading(false);
       return;
     }
+    const resetForm = () => {
+      setAmount("");
+      setSelectedCustomer("");
+      setSelectedProduct("");
+    };
 
     const body = {
       amount,
@@ -157,13 +163,86 @@ const AuthorityToGiveCash = () => {
           },
         }
       );
-
-      toast.success("Ticket created and sent successfully!");
+      resetForm();
+      toast.success("Ticket created and sent successfully!", {
+        style: {
+          padding: "20px",
+        },
+        duration: 5500,
+      });
       setLoading(false);
     } catch (error) {
       console.error("Error during submission:", error);
       toast.error("Failed to submit the form. Please try again.");
       setLoading(false);
+    }
+  };
+
+  const staffSubmit = async (e) => {
+    e.preventDefault();
+    setOthersLoading(true);
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("An error occurred, try logging in again");
+      setOthersLoading(false);
+      return;
+    }
+
+    const resetForm = () => {
+      setStaffAmount("");
+      setStaffName("");
+      setItemName("");
+      setComments("");
+    };
+
+    const body = {
+      amount: staffAmount,
+      item: itemName,
+      creditOrDebit: authorityType,
+      comments,
+      departmentId,
+    };
+
+    try {
+      // First API call
+      const firstResponse = await axios.post(
+        `${root}/admin/cash-ticket`,
+        body,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const newTicketId = firstResponse.data.ticket.id;
+      setTicketId(newTicketId);
+
+      const secondResponse = await axios.post(
+        `${root}/admin/send-ticket/${newTicketId}`,
+        {
+          adminId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      resetForm();
+      toast.success("Ticket processed successfully!", {
+        style: {
+          padding: "20px",
+        },
+        duration: 5500,
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("An error occurred while processing the ticket.");
+    } finally {
+      setOthersLoading(false);
     }
   };
 
@@ -330,7 +409,7 @@ const AuthorityToGiveCash = () => {
           </form>
         </Tabs.Content>
         <Tabs.Content value="Staff">
-          <form className="mt-6" on>
+          <form className="mt-6" onSubmit={staffSubmit}>
             <Grid columns={"2"} gap={"4"}>
               <div className="w-full">
                 <Text>
@@ -350,7 +429,7 @@ const AuthorityToGiveCash = () => {
                 <Text>Input Item</Text>
                 <TextField.Root
                   className="mt-2"
-                  placeholder="Enter Staff Name"
+                  placeholder="Enter Item Name"
                   value={itemName}
                   onChange={(e) => {
                     setItemName(e.target.value);
@@ -361,10 +440,10 @@ const AuthorityToGiveCash = () => {
                 <Text>Price</Text>
                 <TextField.Root
                   className="mt-2"
-                  value={amount}
+                  value={staffAmount}
                   placeholder="Enter Price"
                   onChange={(e) => {
-                    setAmount(e.target.value);
+                    setStaffAmount(e.target.value);
                   }}
                 >
                   <TextField.Slot>N</TextField.Slot>
@@ -372,7 +451,11 @@ const AuthorityToGiveCash = () => {
               </div>
               <div className="w-full">
                 <Text>Select Department</Text>
-                <Select.Root>
+                <Select.Root
+                  onValueChange={(val) => {
+                    setDepartmentId(val);
+                  }}
+                >
                   <Select.Trigger
                     className="w-full mt-2"
                     placeholder="Select Department"

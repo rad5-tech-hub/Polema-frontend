@@ -1,4 +1,6 @@
+import { faSquare } from "@fortawesome/free-solid-svg-icons";
 import React from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
 import { refractor } from "../../../date";
 import toast, { Toaster } from "react-hot-toast";
@@ -54,6 +56,23 @@ const ViewLocalPurchaseOrder = () => {
   const handleRaiseLPO = () => {
     setShowCreateLPO(true); // Show the LocalPurchaseOrder component
   };
+  // Function to check status
+  const checkStatus = (arg) => {
+    switch (arg) {
+      case "pending":
+        return "text-yellow-500";
+        break;
+      case "approved":
+        return "text-green-500";
+        break;
+      case "rejected":
+        return "text-red-500";
+        break;
+
+      default:
+        break;
+    }
+  };
 
   // If the user clicks "Raise LPO", show LocalPurchaseOrder
   if (showCreateLPO) {
@@ -82,7 +101,7 @@ const ViewLocalPurchaseOrder = () => {
             {/* <Table.ColumnHeaderCell>LPO ID</Table.ColumnHeaderCell> */}
             <Table.ColumnHeaderCell>DELIVERED TO</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>LPO EXPIRES</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>ORDER STATUS</Table.ColumnHeaderCell>
+            {/* <Table.ColumnHeaderCell>ORDER STATUS</Table.ColumnHeaderCell> */}
             <Table.ColumnHeaderCell>TICKET STATUS</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
@@ -98,8 +117,15 @@ const ViewLocalPurchaseOrder = () => {
                 {/* <Table.Cell>{order.lpoId}</Table.Cell> */}
                 <Table.Cell>{order.deliveredTo}</Table.Cell>
                 <Table.Cell>{refractor(order.expires)}</Table.Cell>
-                <Table.Cell>{""}</Table.Cell>
-                <Table.Cell>{_.upperFirst(order.status)}</Table.Cell>
+
+                <Table.Cell>
+                  {" "}
+                  <FontAwesomeIcon
+                    icon={faSquare}
+                    className={`${checkStatus(order.status)}`}
+                  />{" "}
+                  {_.upperFirst(order.status)}
+                </Table.Cell>
               </Table.Row>
             ))
           )}

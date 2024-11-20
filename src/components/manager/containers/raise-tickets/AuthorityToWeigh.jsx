@@ -14,6 +14,7 @@ import {
   Table,
 } from "@radix-ui/themes";
 import { useParams } from "react-router-dom";
+
 const root = import.meta.env.VITE_ROOT;
 import toast, { Toaster } from "react-hot-toast";
 
@@ -34,6 +35,25 @@ const AuthorityToWeigh = () => {
   const [adminDropdownDisabled, setAdminDropdownDisabled] =
     React.useState(true);
   const [ticketId, setTicketId] = React.useState("");
+
+  // Function to check status
+
+  const checkStatus = (arg) => {
+    switch (arg) {
+      case "pending":
+        return "text-yellow-500";
+        break;
+      case "approved":
+        return "text-green-500";
+        break;
+      case "rejected":
+        return "text-red-500";
+        break;
+
+      default:
+        break;
+    }
+  };
 
   // Function to fetch customers from db
   const fetchCustomers = async () => {

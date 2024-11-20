@@ -10,6 +10,7 @@ const root = import.meta.env.VITE_ROOT;
 
 const Notifications = () => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [fetchLoading, setFetchLoading] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadNotifications, setUnreadNotifications] = useState([]);
   const [loading, setLoading] = useState({}); // Tracks loading state for each notification
@@ -18,6 +19,7 @@ const Notifications = () => {
   // Fetch notifications from the API
   const fetchNotifications = async () => {
     const token = localStorage.getItem("token");
+    setFetchLoading(true);
     try {
       const response = await axios.get(`${root}/admin/get-notifications`, {
         headers: {
@@ -34,8 +36,10 @@ const Notifications = () => {
 
       setNotifications(allNotifications);
       setUnreadNotifications(fetchedUnreadNotifications);
+      setFetchLoading(false);
     } catch (error) {
       console.error("Error fetching notifications:", error);
+      setFetchLoading(false);
     }
   };
 
@@ -61,7 +65,7 @@ const Notifications = () => {
   }, []);
 
   const checkNotificationType = (message) => {
-    const possibleNotifications = ["Authority to weigh", "LPO"];
+    const possibleNotifications = ["Authority to weigh", "LPO", "cash ticket"];
 
     const matchingNotification = possibleNotifications.find((notification) =>
       message.includes(notification)
@@ -71,9 +75,10 @@ const Notifications = () => {
       switch (matchingNotification) {
         case "LPO":
           return "/admin/approve-lpo/";
-
         case "Authority to weigh":
           return "/admin/approve-weigh-auth/";
+        case "cash ticket":
+          return "/admin/approve-cash-ticket/";
 
         default:
           console.log("Unknown notification type.");
@@ -106,6 +111,7 @@ const Notifications = () => {
           },
         }
       );
+      fetchNotifications();
     } catch (error) {
       console.error("Error approving ticket:", error);
     } finally {
@@ -138,7 +144,11 @@ const Notifications = () => {
               className="text-[.7rem] cursor-pointer"
               onClick={fetchNotifications}
             >
-              <FontAwesomeIcon icon={faRefresh} />
+              {fetchLoading ? (
+                <Spinner />
+              ) : (
+                <FontAwesomeIcon icon={faRefresh} />
+              )}
             </Button>
           </Flex>
 
@@ -172,7 +182,7 @@ const Notifications = () => {
                           <Text className="text-[.5rem] text-gray-500">
                             {refractor(notification.createdAt)}
                           </Text>
-                          <Flex gap="2" className="mt-1">
+                          {/* <Flex gap="2" className="mt-1">
                             <Button
                               className="text-[.6rem] cursor-pointer"
                               color="red"
@@ -196,7 +206,7 @@ const Notifications = () => {
                                 "Approve"
                               )}
                             </Button>
-                          </Flex>
+                          </Flex> */}
                         </div>
                       </Flex>
                     </div>

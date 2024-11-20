@@ -1158,10 +1158,6 @@ video {
   margin-bottom: calc(1rem * var(--tw-space-y-reverse));
 }
 
-.place-self-start {
-  place-self: start;
-}
-
 .overflow-auto {
   overflow: auto;
 }

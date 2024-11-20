@@ -361,7 +361,9 @@ const LocalPurchaseOrder = () => {
             ></TextField.Root>
           </div>
           <div className="w-full">
-            <Text>Send To</Text>
+            <Text>
+              Send To <span className="text-red-500">*</span>{" "}
+            </Text>
             <Select.Root
               disabled={superAdmins.length === 0}
               required
