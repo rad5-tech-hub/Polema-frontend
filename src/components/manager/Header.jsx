@@ -17,7 +17,10 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
         <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
           <button
             aria-controls="sidebar"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setSidebarOpen(!sidebarOpen);
+            }}
             className="z-[99999] block rounded-sm border border-stroke bg-white p-1.5 shadow-sm dark:border-strokedark dark:bg-boxdark lg:hidden"
           >
             <FontAwesomeIcon icon={faBars} />

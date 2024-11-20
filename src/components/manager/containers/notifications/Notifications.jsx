@@ -62,7 +62,7 @@ const Notifications = () => {
   return (
     <div className="relative" ref={notificationRef}>
       <div
-        className="cursor-pointer relative border-[1px] border-[#000]/60 rounded-lg p-3"
+        className="cursor-pointer relative border-[1px] z-[999] border-[#000]/60 rounded-lg p-3"
         onClick={toggleNotifications}
       >
         <BellIcon />
@@ -75,8 +75,8 @@ const Notifications = () => {
         )}
       </div>
       {isNotificationsOpen && (
-        <Card
-          className="absolute top-10 right-0 w-80 bg-white shadow-md p-4 z-50 border border-gray-200 rounded-md"
+        <div
+          className="absolute top-10 right-0 w-80 !z-[9999] shadow-md p-4 bg-white  border border-gray-200 rounded-md"
           style={{ borderRadius: "8px" }}
         >
           {/* Reload Button */}
@@ -171,7 +171,7 @@ const Notifications = () => {
               </Tabs.Content>
             </Box>
           </Tabs.Root>
-        </Card>
+        </div>
       )}
     </div>
   );

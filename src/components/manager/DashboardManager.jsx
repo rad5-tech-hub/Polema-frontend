@@ -249,17 +249,10 @@ const DashBoardManager = ({ children }) => {
           </aside>
 
           <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
-            <Header
-              sidebarOpen={sidebarOpen}
-              setSidebarOpen={setSidebarOpen}
-              user={"user"}
-              role={"role"}
-              text={"text"}
-              image={"image"}
-            />
+            <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
             <main>
-              <div className="mx-auto max-w-screen-xl z-[1] p-4 md:p-6 xl:p-10">
+              <div className="mx-auto max-w-screen-xl z-[-50] p-4 md:p-6 xl:p-10">
                 {children}
               </div>
             </main>
