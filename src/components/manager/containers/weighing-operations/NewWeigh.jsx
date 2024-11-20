@@ -108,8 +108,6 @@ const NewWeigh = () => {
       console.error("Submission failed:", error);
       setButtonLoading(false);
     }
-
-    console.log(body);
   };
 
   // Function to fetch individual weigh

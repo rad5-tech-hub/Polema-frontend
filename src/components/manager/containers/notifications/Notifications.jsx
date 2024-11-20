@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { refractor } from "../../../date";
 import { BellIcon } from "@radix-ui/react-icons";
-import { Card, Text, Tabs, Box, Flex, Button } from "@radix-ui/themes";
+import { Card, Text, Tabs, Box, Flex, Button, Spinner } from "@radix-ui/themes";
 import { faInfo, faRefresh } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
@@ -12,6 +12,7 @@ const Notifications = () => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadNotifications, setUnreadNotifications] = useState([]);
+  const [loading, setLoading] = useState({}); // Tracks loading state for each notification
   const notificationRef = useRef(null);
 
   // Fetch notifications from the API
@@ -59,6 +60,59 @@ const Notifications = () => {
     };
   }, []);
 
+  const checkNotificationType = (message) => {
+    const possibleNotifications = ["Authority to weigh", "LPO"];
+
+    const matchingNotification = possibleNotifications.find((notification) =>
+      message.includes(notification)
+    );
+
+    if (matchingNotification) {
+      switch (matchingNotification) {
+        case "LPO":
+          return "/admin/approve-lpo/";
+
+        case "Authority to weigh":
+          return "/admin/approve-weigh-auth/";
+
+        default:
+          console.log("Unknown notification type.");
+          return null;
+      }
+    } else {
+      console.log("No matching notification type found.");
+      return null;
+    }
+  };
+
+  const approveTicket = async (message, id) => {
+    const token = localStorage.getItem("token");
+    const notificationType = checkNotificationType(message);
+
+    if (!notificationType) {
+      console.error("Invalid notification type");
+      return;
+    }
+
+    setLoading((prev) => ({ ...prev, [id]: true })); // Set loading for the specific notification
+
+    try {
+      await axios.patch(
+        `${root}${notificationType}/${id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error approving ticket:", error);
+    } finally {
+      setLoading((prev) => ({ ...prev, [id]: false })); // Reset loading state
+    }
+  };
+
   return (
     <div className="relative" ref={notificationRef}>
       <div
@@ -76,10 +130,9 @@ const Notifications = () => {
       </div>
       {isNotificationsOpen && (
         <div
-          className="absolute top-10 right-0 w-80 !z-[9999] shadow-md p-4 bg-white  border border-gray-200 rounded-md"
+          className="absolute top-10 right-0 w-80 !z-[9999] shadow-md p-4 bg-white border border-gray-200 rounded-md"
           style={{ borderRadius: "8px" }}
         >
-          {/* Reload Button */}
           <Flex justify="end" mb="2">
             <Button
               className="text-[.7rem] cursor-pointer"
@@ -119,6 +172,31 @@ const Notifications = () => {
                           <Text className="text-[.5rem] text-gray-500">
                             {refractor(notification.createdAt)}
                           </Text>
+                          <Flex gap="2" className="mt-1">
+                            <Button
+                              className="text-[.6rem] cursor-pointer"
+                              color="red"
+                            >
+                              Disapprove
+                            </Button>
+                            <Button
+                              className="text-[.6rem] cursor-pointer"
+                              color="green"
+                              onClick={() =>
+                                approveTicket(
+                                  notification.message,
+                                  notification.ticketId
+                                )
+                              }
+                              disabled={loading[notification.ticketId]} // Disable button when loading
+                            >
+                              {loading[notification.ticketId] ? (
+                                <Spinner />
+                              ) : (
+                                "Approve"
+                              )}
+                            </Button>
+                          </Flex>
                         </div>
                       </Flex>
                     </div>
@@ -136,7 +214,7 @@ const Notifications = () => {
                       className="mb-3 p-2 rounded hover:bg-gray-100"
                     >
                       <Flex gap="2" align="center">
-                        <Card className="bg-red-400 p-4 w-[40px] place-self-start h-[40px] flex justify-center items-center">
+                        <Card className="bg-red-400 p-4 w-[40px] h-[40px] flex justify-center items-center">
                           <FontAwesomeIcon icon={faInfo} />
                         </Card>
                         <div>
@@ -147,7 +225,7 @@ const Notifications = () => {
                           <Text className="text-[.5rem] text-gray-500">
                             {refractor(notification.createdAt)}
                           </Text>
-                          <Flex gap={"2"} className="mt-1">
+                          <Flex gap="2" className="mt-1">
                             <Button
                               className="text-[.6rem] cursor-pointer"
                               color="red"
@@ -157,8 +235,19 @@ const Notifications = () => {
                             <Button
                               className="text-[.6rem] cursor-pointer"
                               color="green"
+                              onClick={() =>
+                                approveTicket(
+                                  notification.message,
+                                  notification.ticketId
+                                )
+                              }
+                              disabled={loading[notification.ticketId]} // Disable button when loading
                             >
-                              Approve
+                              {loading[notification.ticketId] ? (
+                                <Spinner />
+                              ) : (
+                                "Approve"
+                              )}
                             </Button>
                           </Flex>
                         </div>
