@@ -14,6 +14,8 @@ import {
   AuthorityToLoad,
   ViewPharmacyStore,
   LocalPurchaseOrder,
+  AuthorityToGiveCash,
+  AllWeigh,
   ViewPharmacyOrder,
   GeneralStorePlaceOrder,
   SupplierLedger,
@@ -188,6 +190,11 @@ const App = () => {
                   />
 
                   <Route
+                    path="raise-ticket/cash-authority"
+                    element={<AuthorityToGiveCash />}
+                  />
+
+                  <Route
                     path="raise-ticket/store-authority"
                     element={<CollectFromGeneralStore />}
                   />
@@ -253,7 +260,11 @@ const App = () => {
                   />
 
                   {/* Weighing operations routes     */}
-                  <Route path="/weighing-operations" element={<NewWeigh />} />
+                  <Route
+                    path="/weighing-operations/new-weigh/:id"
+                    element={<NewWeigh />}
+                  />
+                  <Route path="/weighing-operations/" element={<AllWeigh />} />
 
                   {/* Routes for cashier */}
                   <Route

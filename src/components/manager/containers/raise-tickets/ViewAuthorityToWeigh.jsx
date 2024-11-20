@@ -1,12 +1,24 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import _ from "lodash";
 import { refractor } from "../../../date";
-import { Heading, Spinner, Table } from "@radix-ui/themes";
+import { faEllipsisV } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import toast, { Toaster } from "react-hot-toast";
+import {
+  Heading,
+  Spinner,
+  Table,
+  DropdownMenu,
+  Button,
+} from "@radix-ui/themes";
 import axios from "axios";
 
 const root = import.meta.env.VITE_ROOT;
 
 const ViewAuthorityToWeigh = () => {
+  const navigate = useNavigate();
+
   const [weighDetails, setWeighDetails] = React.useState([]);
   const [customers, setCustomers] = React.useState([]);
   const [failledSearch, setFailedSearch] = React.useState(false);
@@ -32,6 +44,7 @@ const ViewAuthorityToWeigh = () => {
         : setWeighDetails(response.data.records);
     } catch (error) {
       console.log(error);
+      toast.error("An error occured");
     }
   };
 
@@ -74,6 +87,7 @@ const ViewAuthorityToWeigh = () => {
             <Table.ColumnHeaderCell>CUSTOMER NAME</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>DRIVER NAME</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>TICKET STATUS</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -94,12 +108,32 @@ const ViewAuthorityToWeigh = () => {
                   </Table.Cell>
                   <Table.Cell>{item.driver}</Table.Cell>
                   <Table.Cell>{_.upperFirst(item.status)}</Table.Cell>
+                  <DropdownMenu.Root>
+                    <DropdownMenu.Trigger className="mt-2">
+                      <Button variant="soft">
+                        <FontAwesomeIcon icon={faEllipsisV} />
+                      </Button>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Content>
+                      <DropdownMenu.Item
+                        onClick={() => {
+                          navigate(
+                            `/admin/weighing-operations/new-weigh/${item.id}`
+                          );
+                        }}
+                      >
+                        New Weigh
+                      </DropdownMenu.Item>
+                      <DropdownMenu.Item>View Approved</DropdownMenu.Item>
+                    </DropdownMenu.Content>
+                  </DropdownMenu.Root>
                 </Table.Row>
               );
             })
           )}
         </Table.Body>
       </Table.Root>
+      <Toaster position="top-right" />
     </>
   );
 };

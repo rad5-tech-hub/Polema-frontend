@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import {
   Tabs,
+  Heading,
   Select,
   Text,
+  Grid,
   Flex,
   Spinner,
   TextField,
   Button,
+  Separator,
 } from "@radix-ui/themes";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
@@ -21,23 +24,20 @@ const AuthorityToGiveCash = () => {
   const [amount, setAmount] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [authorityType, setAuthorityType] = useState("");
+  const [authorityType, setAuthorityType] = useState("credit");
   const [othersDescription, setOthersDescription] = useState("");
   const [othersAmount, setOthersAmount] = useState("");
   const [othersLoading, setOthersLoading] = useState(false);
+  const [superAdmins, setSuperAdmins] = useState([]);
+  const [adminId, setAdminId] = useState("");
+  const [ticketId, setTicketId] = useState("");
 
-  // Function to format number with commas
-  const formatNumber = (num) => {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
-
-  // Handle base price input change and remove commas before setting state
-  const handleBasePriceChange = (e) => {
-    const inputValue = e.target.value.replace(/,/g, "");
-    if (!isNaN(inputValue)) {
-      setBasePrice(inputValue);
-    }
-  };
+  // STATE MANAGAEMENT FOR THE STAFF TABS
+  const [staffName, setStaffName] = useState("");
+  const [itemName, setItemName] = useState("");
+  const [departments, setDepartments] = useState([]);
+  const [comments, setComments] = useState("");
+  const [departmentId, setDepartmentId] = useState("");
 
   const fetchCustomers = async () => {
     const retrToken = localStorage.getItem("token");
@@ -79,104 +79,136 @@ const AuthorityToGiveCash = () => {
     }
   };
 
+  // Function to fetch all super admins
+  const fetchSuperAdmins = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("An error occured,try logging in again.");
+    }
+
+    try {
+      const response = await axios.get(`${root}/admin/all-admin`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setSuperAdmins(response.data.staffList);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Function to fetch departments
+  const fetchDept = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("An error occured,try logging in again.");
+    }
+
+    try {
+      const request = await axios.get(`${root}/dept/view-department`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setDepartments(request.data.departments);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleCustomersSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
     const retrToken = localStorage.getItem("token");
 
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
+      setButtonLoading(false);
       return;
     }
 
     const body = {
-      amount: amount,
+      amount,
       customerId: selectedCustomer,
       productId: selectedProduct,
       creditOrDebit: authorityType,
     };
 
     try {
-      setLoading(true);
-      const response = await axios.post(
-        `${root}/customer/raise-cashticket`,
-        body,
-        {
-          headers: {
-            Authorization: `Bearer ${retrToken}`,
-          },
-        }
-      );
-      toast.success(response.data.message, {
-        duration: 6500,
-        style: { padding: "30px" },
+      const response = await axios.post(`${root}/admin/cash-ticket`, body, {
+        headers: {
+          Authorization: `Bearer ${retrToken}`,
+        },
       });
 
-      setAmount("");
-      setSelectedCustomer(null);
-      setSelectedProduct(null);
-      setAuthorityType("");
-    } catch (error) {
-      toast.error(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+      const ticketId = response.data.ticket.id;
+      setTicketId(ticketId);
 
-  const handleOrderSubmit = async (e) => {
-    e.preventDefault();
-    setOthersLoading(true);
-    const retrToken = localStorage.getItem("token");
-
-    if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
-      return;
-    }
-
-    const body = {
-      amount: othersAmount,
-      staffName: othersDescription,
-      creditOrDebit: authorityType,
-    };
-
-    try {
-      const response = await axios.post(
-        `${root}/customer/raise-cashticket`,
-        body,
+      await axios.post(
+        `${root}/admin/send-ticket/${ticketId}`,
+        { adminId },
         {
           headers: {
             Authorization: `Bearer ${retrToken}`,
           },
         }
       );
-      toast.success(response.data.message);
-      setOthersAmount("");
-      setOthersDescription("");
+
+      toast.success("Ticket created and sent successfully!");
+      setLoading(false);
     } catch (error) {
-      toast.error(error.message);
-    } finally {
-      setOthersLoading(false);
+      console.error("Error during submission:", error);
+      toast.error("Failed to submit the form. Please try again.");
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchCustomers();
     fetchProducts();
+    fetchSuperAdmins();
+    fetchDept();
   }, []);
 
   return (
     <>
+      <div className="flex justify-between items-center mb-4">
+        <Heading>Authority To Give Cash</Heading>
+        <Select.Root
+          defaultValue="give"
+          onValueChange={(value) => {
+            value === "credit"
+              ? setAuthorityType("credit")
+              : setAuthorityType("debit");
+          }}
+        >
+          <Select.Trigger />
+          <Select.Content>
+            <Select.Item value="give">Give Cash</Select.Item>
+            <Select.Item value="collect">Collect Cash</Select.Item>
+          </Select.Content>
+        </Select.Root>
+      </div>
+      <Separator className="my-4 w-full" />
       <Tabs.Root defaultValue="Customers">
         <Tabs.List className="justify-center flex w-full items-center">
           <Tabs.Trigger value="Customers">Customers</Tabs.Trigger>
-          <Tabs.Trigger value="Others">Others</Tabs.Trigger>
+          <Tabs.Trigger value="Staff">Staff</Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="Customers">
           <form onSubmit={handleCustomersSubmit} className="mt-6">
             <div className="flex w-full justify-between gap-8">
               <div className="w-full">
-                <Text size={"4"}>Customer Name</Text>
+                <Text size={"4"}>
+                  Customer Name <span className="text-red-500">*</span>
+                </Text>
                 <Select.Root
                   value={selectedCustomer}
+                  required
                   onValueChange={setSelectedCustomer}
                 >
                   <Select.Trigger
@@ -213,8 +245,11 @@ const AuthorityToGiveCash = () => {
               </div>
 
               <div className="w-full">
-                <Text size={"4"}>Select Product</Text>
+                <Text size={"4"}>
+                  Select Product <span className="text-red-500">*</span>
+                </Text>
                 <Select.Root
+                  required
                   value={selectedProduct}
                   onValueChange={setSelectedProduct}
                 >
@@ -250,9 +285,12 @@ const AuthorityToGiveCash = () => {
 
             <div className="flex w-full mt-4 justify-between gap-8">
               <div className="w-[49%]">
-                <label htmlFor="amount">Enter Amount</label>
+                <label htmlFor="amount">
+                  Enter Amount <span className="text-red-500">*</span>
+                </label>
                 <TextField.Root
                   id="amount"
+                  required
                   className="mt-3"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
@@ -260,22 +298,25 @@ const AuthorityToGiveCash = () => {
                 />
               </div>
               <div className="w-[49%]">
-                <label htmlFor="authorityType">Authority Type</label>
+                <Text>Send To</Text>
                 <Select.Root
-                  value={authorityType}
-                  onValueChange={setAuthorityType}
+                  disabled={superAdmins.length === 0}
+                  onValueChange={(value) => {
+                    setAdminId(value);
+                  }}
                 >
                   <Select.Trigger
-                    className="w-full mt-2"
-                    placeholder="Choose Authority Type"
+                    className="mt-3 w-full"
+                    placeholder="Select Admin"
                   />
-                  <Select.Content position="popper">
-                    <Select.Item value="debit">
-                      Authority to give Cash
-                    </Select.Item>
-                    <Select.Item value="credit">
-                      Authority to collect Cash
-                    </Select.Item>
+                  <Select.Content>
+                    {superAdmins.map((admin) => {
+                      return (
+                        <Select.Item
+                          value={admin.id}
+                        >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
+                      );
+                    })}
                   </Select.Content>
                 </Select.Root>
               </div>
@@ -288,30 +329,93 @@ const AuthorityToGiveCash = () => {
             </Flex>
           </form>
         </Tabs.Content>
-        <Tabs.Content value="Others">
-          <form onSubmit={handleOrderSubmit} className="mt-6">
-            <div className="flex w-full mt-4 justify-between gap-8">
-              <div className="w-[49%]">
-                <label htmlFor="othersDescription">Description</label>
+        <Tabs.Content value="Staff">
+          <form className="mt-6" on>
+            <Grid columns={"2"} gap={"4"}>
+              <div className="w-full">
+                <Text>
+                  Staff Name <span className="text-red-500">*</span>
+                </Text>
                 <TextField.Root
-                  id="othersDescription"
                   className="mt-2"
-                  value={othersDescription}
-                  placeholder="Enter Ticket Description"
-                  onChange={(e) => setOthersDescription(e.target.value)}
+                  placeholder="Enter Staff Name"
+                  value={staffName}
+                  required
+                  onChange={(e) => {
+                    setStaffName(e.target.value);
+                  }}
                 />
               </div>
-              <div className="w-[49%]">
-                <label htmlFor="othersAmount">Amount</label>
+              <div className="w-full">
+                <Text>Input Item</Text>
                 <TextField.Root
-                  id="othersAmount"
                   className="mt-2"
-                  value={othersAmount}
-                  placeholder="Enter Amount"
-                  onChange={(e) => setOthersAmount(e.target.value)}
+                  placeholder="Enter Staff Name"
+                  value={itemName}
+                  onChange={(e) => {
+                    setItemName(e.target.value);
+                  }}
                 />
               </div>
-            </div>
+              <div className="w-full">
+                <Text>Price</Text>
+                <TextField.Root
+                  className="mt-2"
+                  value={amount}
+                  placeholder="Enter Price"
+                  onChange={(e) => {
+                    setAmount(e.target.value);
+                  }}
+                >
+                  <TextField.Slot>N</TextField.Slot>
+                </TextField.Root>
+              </div>
+              <div className="w-full">
+                <Text>Select Department</Text>
+                <Select.Root>
+                  <Select.Trigger
+                    className="w-full mt-2"
+                    placeholder="Select Department"
+                  />
+                  <Select.Content>
+                    {departments.map((dept) => {
+                      return (
+                        <Select.Item key={dept.id} value={dept.id}>
+                          {dept.name}
+                        </Select.Item>
+                      );
+                    })}
+                  </Select.Content>
+                </Select.Root>
+              </div>
+              <div className="w-full">
+                <Text>Comments and Description</Text>
+                <TextField.Root className="mt-2" placeholder="Enter Comments" />
+              </div>
+              <div className="w-full">
+                <Text>Send To</Text>
+                <Select.Root
+                  disabled={superAdmins.length === 0}
+                  onValueChange={(value) => {
+                    setAdminId(value);
+                  }}
+                >
+                  <Select.Trigger
+                    className="w-full mt-2"
+                    placeholder="Select Admin"
+                  />
+                  <Select.Content>
+                    {superAdmins.map((admin) => {
+                      return (
+                        <Select.Item
+                          value={admin.id}
+                        >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
+                      );
+                    })}
+                  </Select.Content>
+                </Select.Root>
+              </div>
+            </Grid>
 
             <Flex justify={"end"} className="mt-4">
               <Button size={"2"} disabled={othersLoading} type="submit">
@@ -321,7 +425,7 @@ const AuthorityToGiveCash = () => {
           </form>
         </Tabs.Content>
       </Tabs.Root>
-      <Toaster />
+      <Toaster position="top-right" />
     </>
   );
 };

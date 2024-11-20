@@ -1,4 +1,6 @@
 import WelcomeComponent from "./WelcomeComponent";
+import AuthorityToGiveCash from "./raise-tickets/AuthorityToGiveCash";
+import AllWeigh from "./weighing-operations/AllWeigh";
 import ViewAuthorityToWeigh from "./raise-tickets/ViewAuthorityToWeigh";
 import IndividualDepartmentLedger from "./department-ledger/IndividualDepartmentLedger";
 import DepartmentLedger from "./department-ledger/DepartmentLedger";
@@ -38,7 +40,7 @@ import AddSuppliers from "./suppliers/AddSuppliers";
 import SupplierPlaceOrder from "./suppliers/SupplierPlaceOrder";
 import CreateRole from "./roles/CreateRole";
 import AllProducts from "./products/AllProducts";
-import AuthorityToGiveCash from "./raise-tickets/AuthorityToGiveCash";
+
 import AllSuspended from "./admin/AllSuspended";
 import CustomerLedger from "./customer/CustomerLedger";
 import CustomerPlaceOrder from "./customer/CustomerPlaceOrder";
@@ -98,4 +100,5 @@ export {
   AuthorityToWeigh,
   ViewLocalPurchaseOrder,
   ViewAuthorityToWeigh,
+  AllWeigh,
 };

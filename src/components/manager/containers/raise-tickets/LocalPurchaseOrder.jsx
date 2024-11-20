@@ -32,6 +32,9 @@ const LocalPurchaseOrder = () => {
   const [expiration, setExpiration] = React.useState("");
   const [comment, setComment] = React.useState("");
   const [period, setPeriod] = React.useState("");
+  const [superAdmins, setSuperAdmins] = React.useState([]);
+  const [adminId, setAdminId] = React.useState("");
+  const [ticketId, setTicketId] = React.useState("");
 
   // Function to fetch suppliers
   const fetchSuppliers = async () => {
@@ -49,6 +52,22 @@ const LocalPurchaseOrder = () => {
         },
       });
       setSuppliers(response.data.customers);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Function to fetch to all super admins
+  const fetchSuperAdmins = async () => {
+    const token = localStorage.getItem("token");
+
+    try {
+      const request = await axios.get(`${root}/admin/all-admin`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setSuperAdmins(request.data.staffList);
     } catch (error) {
       console.log(error);
     }
@@ -89,11 +108,28 @@ const LocalPurchaseOrder = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setButtonLoading(true);
+
+    const resetForm = () => {
+      // Reset form fields after successful post
+      setReceiver("");
+      setChequeNumber("");
+      setVoucherNumber("");
+      setSupplierId("");
+      setRawMaterialId("");
+      setSelectedPrice("");
+      setUnitPrice("");
+      setQuantityOrdered("");
+      setExpiration("");
+      setComment("");
+      setPeriod("");
+    };
+
+    setButtonLoading(true); // Start loading state
     const retrToken = localStorage.getItem("token");
 
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
+      setButtonLoading(false);
       return;
     }
 
@@ -111,45 +147,45 @@ const LocalPurchaseOrder = () => {
     };
 
     try {
+      // FIRST API REQUEST
       const response = await axios.post(`${root}/admin/raise-lpo`, body, {
         headers: {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      setButtonLoading(false);
-      toast.success(response.data.message, {
-        style: {
-          padding: "30px",
-        },
-        duration: 4500,
-      });
 
-      // Reset form fields after successful post
-      setReceiver("");
-      setChequeNumber("");
-      setVoucherNumber("");
-      setSupplierId("");
-      setRawMaterialId("");
-      setSelectedPrice("");
-      setUnitPrice("");
-      setQuantityOrdered("");
-      setExpiration("");
-      setComment("");
-      setPeriod("");
-    } catch (err) {
-      console.log(err);
-      setButtonLoading(false);
-      toast.error("An error occurred, try again later", {
+      const ticketId = response.data.ticket.id; // Get ticket ID
+      setTicketId(ticketId);
+
+      // SECOND API REQUEST
+      const secondResponse = await axios.post(
+        `${root}/admin/send-lpo/${ticketId}`,
+        { adminId },
+        {
+          headers: {
+            Authorization: `Bearer ${retrToken}`, // Use `retrToken` here
+          },
+        }
+      );
+
+      // Success feedback and reset form
+      toast.success("LPO raised and sent successfully!", {
         style: {
           padding: "20px",
         },
-        duration: 4500,
       });
+      resetForm();
+    } catch (error) {
+      console.error("Error occurred during submission:", error);
+      toast.error("Failed to submit the form. Please try again.");
+    } finally {
+      setButtonLoading(false); // Reset loading state
     }
   };
 
   React.useEffect(() => {
     fetchSuppliers();
+    fetchSuperAdmins();
     fetchRaw();
   }, []);
 
@@ -322,9 +358,28 @@ const LocalPurchaseOrder = () => {
               value={comment}
               className="mt-2"
               asChild
+            ></TextField.Root>
+          </div>
+          <div className="w-full">
+            <Text>Send To</Text>
+            <Select.Root
+              disabled={superAdmins.length === 0}
+              required
+              onValueChange={(value) => {
+                setAdminId(value);
+              }}
             >
-              <textarea rows={5} />
-            </TextField.Root>
+              <Select.Trigger className="w-full mt-2" placeholder="Send to " />
+              <Select.Content>
+                {superAdmins.map((admin) => {
+                  return (
+                    <Select.Item
+                      value={admin.id}
+                    >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
+                  );
+                })}
+              </Select.Content>
+            </Select.Root>
           </div>
         </Grid>
         <Flex justify={"end"}>
