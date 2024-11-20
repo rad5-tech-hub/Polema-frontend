@@ -90,6 +90,39 @@ const Notifications = () => {
     }
   };
 
+  const messageType = (message) => {
+    switch (message) {
+      case "lpo":
+        return "/admin/reject-lpo";
+        break;
+
+      default:
+        break;
+    }
+  };
+
+  const disapproveTicket = async (type, id) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      return;
+    }
+
+    try {
+      const response = await axios.patch(
+        `${root}/${messageType(type)}/${id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const approveTicket = async (message, id) => {
     const token = localStorage.getItem("token");
     const notificationType = checkNotificationType(message);
@@ -239,6 +272,12 @@ const Notifications = () => {
                             <Button
                               className="text-[.6rem] cursor-pointer"
                               color="red"
+                              onClick={() => {
+                                disapproveTicket(
+                                  notification.type,
+                                  notification.ticketId
+                                );
+                              }}
                             >
                               Disapprove
                             </Button>
