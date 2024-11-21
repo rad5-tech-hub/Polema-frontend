@@ -4,9 +4,10 @@ import Login from "./pages/Login";
 import Charts from "./components/Charts";
 import Manager from "./components/manager";
 import DashBoardManager from "./components/manager/DashboardManager";
-
+// import ViewSupplierOrder from "./components/manager/containers";
 import {
   AddAdmin,
+  ViewSupplierOrder,
   WelcomeComponent,
   CashManagement,
   PharmacyPlaceOrder,
@@ -16,9 +17,12 @@ import {
   LocalPurchaseOrder,
   ViewPharmacyOrder,
   GeneralStorePlaceOrder,
+  SupplierLedger,
   AddProducts,
   CreateDepartmentStore,
+  GeneralSupplierLedger,
   AddCustomer,
+  IndividualCustomerLedger,
   CreateShelf,
   CustomerPlaceOrder,
   ShelfContent,
@@ -40,10 +44,26 @@ import {
   AllCustomers,
   AllSuppliers,
   NewWeigh,
+  ViewCustomerOrders,
   DepartementStorePlaceOrder,
   DepartmentStoreViewOrders,
+  AllDispatchNote,
+  AllGatePass,
+  AllInvoice,
+  CreateDispatchNote,
+  CreateGatepass,
+  CreateInvoice,
+  GatepassReceipt,
+  Invoice,
+  OfficialReceipt,
+  ReceiptDispatchNote,
+  WaybillCreateInvoice,
+  WaybillInvoice,
   ViewDepartmentStore,
 } from "./components/manager/containers";
+// import {
+//
+// } from "./components/manager/containers/receipts";
 
 import PrivateRoute from "./components/PrivateRoute"; // Assume this is adjusted for React Router v6
 import "@radix-ui/themes/styles.css";
@@ -84,6 +104,16 @@ const App = () => {
                     path="customers/place-order"
                     element={<CustomerPlaceOrder />}
                   />
+                  <Route
+                    path="customers/order"
+                    element={<ViewCustomerOrders />}
+                  />
+
+                  {/* Customer Ledger Route */}
+                  <Route
+                    path="customers/customer-ledger/:id"
+                    element={<IndividualCustomerLedger />}
+                  />
 
                   {/* Account Book Routes */}
                   <Route path="account-book/add" element={<AccountBook />} />
@@ -104,6 +134,19 @@ const App = () => {
                   <Route
                     path="suppliers/place-supplier-order"
                     element={<SupplierPlaceOrder />}
+                  />
+                  <Route
+                    path="suppliers/view-order"
+                    element={<ViewSupplierOrder />}
+                  />
+                  <Route
+                    path="suppliers/supplier-ledger"
+                    element={<GeneralSupplierLedger />}
+                  />
+                  {/* Individual Supplier Ledger */}
+                  <Route
+                    path="supplier/supplier-ledger/:id"
+                    element={<SupplierLedger />}
                   />
 
                   {/* Product Routes */}
@@ -218,6 +261,49 @@ const App = () => {
                   <Route
                     path="/cash-management/cash-ledger"
                     element={<CashManagementLedger />}
+                  />
+
+                  <Route
+                    path="/receipt/all-gatepass"
+                    element={<AllGatePass />}
+                  />
+                  <Route
+                    path="/receipt/all-dispatchnote"
+                    element={<AllDispatchNote />}
+                  />
+                  <Route path="/receipt/all-invoice" element={<AllInvoice />} />
+                  <Route
+                    path="/receipt/create-dispatchnote"
+                    element={<CreateDispatchNote />}
+                  />
+                  <Route
+                    path="/receipt/create-gatepass"
+                    element={<CreateGatepass />}
+                  />
+                  <Route
+                    path="/receipt/create-invoice"
+                    element={<CreateInvoice />}
+                  />
+                  <Route
+                    path="/receipt/gatepass-receipt"
+                    element={<GatepassReceipt />}
+                  />
+                  <Route path="/receipt/invoice" element={<Invoice />} />
+                  <Route
+                    path="/receipt/official-receipt"
+                    element={<OfficialReceipt />}
+                  />
+                  <Route
+                    path="/receipt/vehicle-dispatchnote"
+                    element={<ReceiptDispatchNote />}
+                  />
+                  <Route
+                    path="/receipt/create-waybill-invoice"
+                    element={<WaybillCreateInvoice />}
+                  />
+                  <Route
+                    path="/receipt/waybill-invoice"
+                    element={<WaybillInvoice />}
                   />
                 </Routes>
               </DashBoardManager>

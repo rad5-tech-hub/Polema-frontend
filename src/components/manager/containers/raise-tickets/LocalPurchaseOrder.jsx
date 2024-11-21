@@ -119,7 +119,7 @@ const LocalPurchaseOrder = () => {
       setButtonLoading(false);
       toast.success(response.data.message, {
         style: {
-          padding: "20px",
+          padding: "30px",
         },
         duration: 4500,
       });
@@ -333,7 +333,7 @@ const LocalPurchaseOrder = () => {
           </Button>
         </Flex>
       </form>
-      <Toaster />
+      <Toaster position="top-right" />
     </>
   );
 };

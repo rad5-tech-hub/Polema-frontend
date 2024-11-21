@@ -98,7 +98,7 @@ const CustomerPlaceOrder = () => {
       customerId: selectedCustomerId,
       productId: selectedProductId,
       quantity: quantity,
-      unit: getMatchingUnitFromId(selectedProductId),
+      unit: getMatchingUnitFromId(selectedProductId).price[0].unit,
     };
 
     try {
@@ -140,7 +140,7 @@ const CustomerPlaceOrder = () => {
   // Get Matching unit from product Id
   const getMatchingUnitFromId = (id) => {
     const product = products.find((product) => product.id === id);
-    return product ? product.price[0].unit : "No matching unit";
+    return product ? product : "No matching unit";
   };
 
   // GEt matching product plans form product id
@@ -237,13 +237,13 @@ const CustomerPlaceOrder = () => {
               value={
                 selectedProductId.length == 0
                   ? ""
-                  : getMatchingUnitFromId(selectedProductId)
+                  : getMatchingUnitFromId(selectedProductId).price[0].unit
               }
               placeholder="Select Product First"
             />
           </div>
         </Flex>
-        <Grid className="w-full mb-4" columns={"2"}>
+        <Grid className="w-full mb-4" columns={"2"} gap={"4"}>
           <div className="w-full">
             <Text className="mb-4">Price Discount (Optional)</Text>
             <Select.Root disabled={seletedProductPlan.length === 0}>
@@ -266,18 +266,19 @@ const CustomerPlaceOrder = () => {
               </Select.Content>
             </Select.Root>
           </div>
-          {/* <div className="w-full">
-            <Text className="mb-4">
-              {" "}
-              Enter Price<span className="text-red-500">*</span>
-            </Text>
+          <div className="w-full">
+            <Text className="mb-4"> Product Price</Text>
             <TextField.Root
               className="mt-2  "
-              placeholder="Enter Price in Naira(₦)"
-              value={formatNumber(basePrice)} // Display formatted number
-              onChange={handleBasePriceChange}
+              placeholder="Select Product First"
+              disabled
+              value={
+                selectedProductId.length == 0
+                  ? ""
+                  : getMatchingUnitFromId(selectedProductId).price[0].amount
+              }
             />
-          </div> */}
+          </div>
         </Grid>
         <Flex className="w-full mb-4" gap={"5"} justify={"end"}>
           <Button
