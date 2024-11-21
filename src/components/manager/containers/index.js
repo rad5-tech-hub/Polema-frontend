@@ -1,4 +1,11 @@
 import WelcomeComponent from "./WelcomeComponent";
+import AuthorityToGiveCash from "./raise-tickets/AuthorityToGiveCash";
+import AllWeigh from "./weighing-operations/AllWeigh";
+import ViewAuthorityToWeigh from "./raise-tickets/ViewAuthorityToWeigh";
+import IndividualDepartmentLedger from "./department-ledger/IndividualDepartmentLedger";
+import DepartmentLedger from "./department-ledger/DepartmentLedger";
+import CollectFromGeneralStore from "./raise-tickets/CollectFromGeneralStore";
+import ViewLocalPurchaseOrder from "./raise-tickets/ViewLocalPurchaseOrder";
 import AllDispatchNote from "./receipts/AllDispatchNote";
 import AllGatePass from "./receipts/AllGatePass";
 import AllInvoice from "./receipts/AllInvoice";
@@ -45,7 +52,7 @@ import AddSuppliers from "./suppliers/AddSuppliers";
 import SupplierPlaceOrder from "./suppliers/SupplierPlaceOrder";
 import CreateRole from "./roles/CreateRole";
 import AllProducts from "./products/AllProducts";
-import AuthorityToGiveCash from "./raise-tickets/AuthorityToGiveCash";
+
 import AllSuspended from "./admin/AllSuspended";
 import CustomerLedger from "./customer/CustomerLedger";
 import CustomerPlaceOrder from "./customer/CustomerPlaceOrder";
@@ -91,6 +98,7 @@ export {
   PharmacyPlaceOrder,
   ViewPharmacyOrder,
   ViewGeneralOrder,
+  CollectFromGeneralStore,
   NewWeigh,
   GeneralStorePlaceOrder,
   CashManagement,
@@ -98,9 +106,14 @@ export {
   IndividualCustomerLedger,
   ShelfContent,
   ViewCustomerOrders,
+  DepartmentLedger,
   ViewSupplierOrder,
+  IndividualDepartmentLedger,
   GeneralSupplierLedger,
   AuthorityToWeigh,
+  ViewLocalPurchaseOrder,
+  ViewAuthorityToWeigh,
+  AllWeigh,
   AllInvoice,
   AllGatePass,
   CreateDispatchNote,

@@ -1,23 +1,20 @@
-import { Link } from "react-router-dom";
-import { BellIcon } from "@radix-ui/react-icons";
-import { Card } from "@radix-ui/themes";
-import Logout from "../Logout";
-import ThemeSwitcher from "../ThemeSwitcher";
+import React from "react";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-const LogoIcon = "";
+import Logout from "../Logout";
+import Notifications from "./containers/notifications/Notifications";
 
-const Header = ({ sidebarOpen, setSidebarOpen, user, role, image, text }) => {
+const Header = ({ sidebarOpen, setSidebarOpen }) => {
   const getAdminName = () => {
     const name = localStorage.getItem("adminFirstName");
-    return name;
+    return name || "Admin";
   };
 
   return (
-    <header className=" top-0 z-0 font-amsterdam flex w-full  shadow-md dark:bg-boxdark dark:drop-shadow-none">
-      <div className="flex flex-grow items-center justify-between px-4 py-4  md:px-6 2xl:px-11">
+    <header className="top-0 z-10 font-amsterdam flex w-full shadow-md dark:bg-boxdark dark:drop-shadow-none">
+      <div className="flex flex-grow items-center justify-between px-4 py-4 md:px-6 2xl:px-11">
+        {/* Sidebar Toggle */}
         <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
-          {/* <!-- Hamburger Toggle BTN --> */}
           <button
             aria-controls="sidebar"
             onClick={(e) => {
@@ -28,23 +25,19 @@ const Header = ({ sidebarOpen, setSidebarOpen, user, role, image, text }) => {
           >
             <FontAwesomeIcon icon={faBars} className="text-[25px]" />
           </button>
-          {/* <!-- Hamburger Toggle BTN --> */}
         </div>
 
+        {/* Welcome Message */}
         <div className="hidden sm:block">
           <h1 className="text-[2.0rem] z-0">Welcome {getAdminName()}</h1>
         </div>
 
         <div className="flex items-center gap-3 2xsm:gap-7">
-          <ul className="flex items-center gap-2 2xsm:gap-4"></ul>
+          {/* Notifications */}
+          <Notifications />
 
-          {/* <ThemeSwitcher /> */}
-          <Card className="cursor-pointer">
-            <BellIcon />
-          </Card>
+          {/* Logout Button */}
           <Logout />
-
-          {/* <!-- User Area --> */}
         </div>
       </div>
     </header>

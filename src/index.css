@@ -47,3 +47,12 @@
 .search-input:focus-within {
   width: 100%;
 }
+.notifications-box::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notifications-box::-webkit-scrollbar-thumb {
+  /* background: rgb(128, 128, 128); */
+  background: black;
+  border-radius: 10px;
+}

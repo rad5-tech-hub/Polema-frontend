@@ -123,10 +123,10 @@ const SupplierLedger = () => {
           <Table.ColumnHeaderCell>UNIT</Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell>QUANTIY</Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell className="text-green-500">
-            CREDIT
+            CREDIT(₦)
           </Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell className="text-red-500">
-            DEBIT
+            DEBIT(₦)
           </Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell>BALANCE</Table.ColumnHeaderCell>
         </Table.Header>
