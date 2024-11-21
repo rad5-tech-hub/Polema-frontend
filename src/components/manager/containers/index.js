@@ -1,4 +1,16 @@
 import WelcomeComponent from "./WelcomeComponent";
+import AllDispatchNote from "./receipts/AllDispatchNote";
+import AllGatePass from "./receipts/AllGatePass";
+import AllInvoice from "./receipts/AllInvoice";
+import CreateDispatchNote from "./receipts/CreateDispatchNote";
+import CreateGatepass from "./receipts/CreateGatepass";
+import CreateInvoice from "./receipts/CreateInvoice";
+import GatepassReceipt from "./receipts/GatepassReceipt";
+import Invoice from "./receipts/Invoice";
+import OfficialReceipt from "./receipts/OfficialReceipt";
+import ReceiptDispatchNote from "./receipts/ReceiptDispatchNote";
+import WaybillCreateInvoice from "./receipts/WaybillCreateInvoice";
+import WaybillInvoice from "./receipts/WaybillInvoice";
 import GeneralSupplierLedger from "./suppliers/GeneralSupplierLedger";
 import SupplierLedger from "./suppliers/SupplierLedger";
 import IndividualCustomerLedger from "./customer/IndividualCustomerLedger";
@@ -44,6 +56,7 @@ import ViewDepartmentStore from "./department-store/ViewDepartmentStore";
 import ViewPharmacyStore from "./pharmacy-store/ViewPharmacyStore";
 
 export {
+  AllDispatchNote,
   AddAdmin,
   ViewPharmacyStore,
   DepartementStorePlaceOrder,
@@ -88,4 +101,15 @@ export {
   ViewSupplierOrder,
   GeneralSupplierLedger,
   AuthorityToWeigh,
+  AllInvoice,
+  AllGatePass,
+  CreateDispatchNote,
+  CreateGatepass,
+  CreateInvoice,
+  GatepassReceipt,
+  Invoice,
+  OfficialReceipt,
+  ReceiptDispatchNote,
+  WaybillCreateInvoice,
+  WaybillInvoice,
 };

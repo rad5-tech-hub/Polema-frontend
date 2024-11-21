@@ -124,7 +124,7 @@ const DashBoardManager = ({ children }) => {
   }, []);
 
   return (
-    <Theme>
+    <Theme className="bg-gray-50">
       <div className="dark:bg-boxdark-2 dark:text-bodydark ">
         <div className="flex h-screen overflow-hidden ">
           <aside
@@ -215,7 +215,7 @@ const DashBoardManager = ({ children }) => {
                                       <Flex gap={"2"} align={"center"}>
                                         <CircleIcon />
                                         <span
-                                          // title={item.name}
+                                          title={item.name}
                                           className="text-[15px]"
                                         >
                                           {" "}
