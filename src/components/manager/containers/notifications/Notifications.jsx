@@ -65,7 +65,12 @@ const Notifications = () => {
   }, []);
 
   const checkNotificationType = (message) => {
-    const possibleNotifications = ["Authority to weigh", "LPO", "cash ticket"];
+    const possibleNotifications = [
+      "Authority to weigh",
+      "LPO",
+      "cash ticket",
+      "Authority to collect from General Store",
+    ];
 
     const matchingNotification = possibleNotifications.find((notification) =>
       message.includes(notification)
@@ -79,7 +84,8 @@ const Notifications = () => {
           return "/admin/approve-weigh-auth/";
         case "cash ticket":
           return "/admin/approve-cash-ticket/";
-
+        case "Authority to collect from General Store":
+          return "/admin/approve-store-auth/";
         default:
           console.log("Unknown notification type.");
           return null;
@@ -98,6 +104,8 @@ const Notifications = () => {
       case "weigh":
         return "/admin/reject-weigh-auth";
         break;
+      case "store":
+        return "/admin/reject-store-auth";
 
       default:
         break;
