@@ -52,7 +52,7 @@ const AddProductModal = ({
 
   return (
     <>
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[101]">
         <div className="relative lg:w-[40%] w-fit h-[90%] bg-white rounded-lg p-8">
           <b className="text-[20px]">Add Product</b>
 
