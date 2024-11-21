@@ -4,9 +4,10 @@ import Login from "./pages/Login";
 import Charts from "./components/Charts";
 import Manager from "./components/manager";
 import DashBoardManager from "./components/manager/DashboardManager";
-
+// import ViewSupplierOrder from "./components/manager/containers";
 import {
   AddAdmin,
+  ViewSupplierOrder,
   WelcomeComponent,
   CashManagement,
   PharmacyPlaceOrder,
@@ -19,6 +20,7 @@ import {
   SupplierLedger,
   AddProducts,
   CreateDepartmentStore,
+  GeneralSupplierLedger,
   AddCustomer,
   IndividualCustomerLedger,
   CreateShelf,
@@ -292,7 +294,7 @@ const App = () => {
                     element={<OfficialReceipt />}
                   />
                   <Route
-                    path="/receipt/dispatchnote-receipt"
+                    path="/receipt/vehicle-dispatchnote"
                     element={<ReceiptDispatchNote />}
                   />
                   <Route
