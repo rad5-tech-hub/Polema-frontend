@@ -19,7 +19,7 @@ const CashManagementLedger = () => {
   const [ledger, setLedger] = useState([]);
   const [admins, setAdmins] = useState([]);
   const [currentPage, setCurrentPage] = useState(1); // Current page number
-  const itemsPerPage = 10; // Limit items per page to 10
+  const itemsPerPage = 17; // Limit items per page to 17
 
   const fetchCashManagementLedger = async () => {
     const retrToken = localStorage.getItem("token");
@@ -112,8 +112,12 @@ const CashManagementLedger = () => {
                   {refractor(entry.createdAt)}
                 </Table.RowHeaderCell>
                 <Table.RowHeaderCell>{entry.comment}</Table.RowHeaderCell>
-                <Table.RowHeaderCell>{entry.name}</Table.RowHeaderCell>
-                <Table.RowHeaderCell>{entry.name}</Table.RowHeaderCell>
+                <Table.RowHeaderCell>
+                  {entry.credit > entry.debit && entry.name}
+                </Table.RowHeaderCell>
+                <Table.RowHeaderCell>
+                  {entry.debit > entry.credit && entry.name}
+                </Table.RowHeaderCell>
                 <Table.RowHeaderCell>
                   {matchAdminNameById(entry.approvedByAdminId)}
                 </Table.RowHeaderCell>

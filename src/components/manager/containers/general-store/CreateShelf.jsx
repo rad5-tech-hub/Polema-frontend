@@ -16,6 +16,7 @@ const root = import.meta.env.VITE_ROOT;
 const CreateShelf = () => {
   const [shelfName, setShelfName] = React.useState("");
   const [unit, setUnit] = React.useState("");
+  const [quantity, setQuantity] = React.useState("");
   const [thresholdVal, setThresholdVal] = React.useState([]);
 
   // State managemnt for loadin spinner on button
@@ -51,6 +52,7 @@ const CreateShelf = () => {
       setShelfName("");
       setThresholdVal("");
       setUnit("");
+
       toast.success(response.data.message, {
         style: {
           padding: "30px",
@@ -98,7 +100,7 @@ const CreateShelf = () => {
           <div className="w-full">
             <Text className="mb-4">Threshold Value </Text>
             <TextField.Root
-              className="mt-2 w-[50%]"
+              className="mt-2 "
               required={true}
               onChange={(e) => setThresholdVal(e.target.value)}
               value={thresholdVal}

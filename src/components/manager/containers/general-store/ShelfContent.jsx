@@ -19,41 +19,73 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import { refractor } from "../../../date";
 import { toast } from "react-hot-toast";
+
 const root = import.meta.env.VITE_ROOT;
 
-// Add Dialog Component
-const AddDialog = ({ isOpen, onClose, itemId, runFetch }) => {
+// Utility to handle API calls
+const apiCall = async (url, method, data = null) => {
+  const retrToken = localStorage.getItem("token");
+  if (!retrToken) {
+    toast.error("An error occurred. Try logging in again.");
+    return null;
+  }
+  try {
+    const config = {
+      headers: { Authorization: `Bearer ${retrToken}` },
+    };
+    const response = await axios({
+      url: `${root}${url}`,
+      method: method,
+      data: data,
+      ...config,
+    });
+    return response.data;
+  } catch (error) {
+    toast.error(`Error: ${error.message}`);
+    return null;
+  }
+};
+
+// Dialog Component for Add, Edit, and Remove
+const Dialog = ({ isOpen, onClose, type, itemId, runFetch }) => {
   const [loading, setLoading] = useState(false);
-  const [shelfName, setShelfName] = useState(itemId.name);
-  const [unit, setUnit] = useState(itemId.unit);
-  const [threshold, setThreshold] = useState(itemId.thresholdValue);
+  const [threshold, setThreshold] = useState(
+    itemId ? itemId.thresholdValue : ""
+  );
 
-  const addItem = async () => {
+  const handleAction = async () => {
     setLoading(true);
-    const retrToken = localStorage.getItem("token");
+    let response;
 
-    if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
-      return;
+    switch (type) {
+      case "add":
+        response = await apiCall("/path/to/add", "POST", {
+          shelfId: itemId.id,
+          threshold,
+        });
+        break;
+      case "edit":
+        response = await apiCall(`/path/to/edit/${itemId.id}`, "PATCH", {
+          threshold,
+        });
+        break;
+      case "remove":
+        response = await apiCall(`/path/to/remove/${itemId.id}`, "DELETE");
+        break;
+      default:
+        toast.error("Unknown action");
+        setLoading(false);
+        return;
     }
 
-    try {
-      await axios.post(
-        `${root}/path/to/add`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${retrToken}` },
-        }
+    if (response) {
+      toast.success(
+        `${type.charAt(0).toUpperCase() + type.slice(1)} successful`
       );
-      setLoading(false);
-      onClose();
-      toast.success("Item added successfully");
-      runFetch();
-    } catch (error) {
-      setLoading(false);
-      onClose();
-      toast.error("Error adding item");
+      runFetch(); // Refresh the shelf content
     }
+    setLoading(false);
+    onClose();
   };
 
   if (!isOpen) return null;
@@ -61,31 +93,23 @@ const AddDialog = ({ isOpen, onClose, itemId, runFetch }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-[101]">
       <div className="bg-white p-6 rounded-lg shadow-lg w-[90vw] max-w-[450px]">
-        <Heading className="mb-12 text-left">Add to {itemId.name}</Heading>
-        <form action="">
-          <Flex justify={"between"} className="w-full items-center mt-4">
-            <h1 className="w-full">Shelf Name</h1>
-            <TextField.Root
-              className="w-full"
-              disabled
-              defaultValue={shelfName}
-            />
-          </Flex>
-          <Flex justify={"between"} className="w-full items-center mt-4">
-            <h1 className="w-full">Unit</h1>
-            <TextField.Root className="w-full" disabled defaultValue={unit} />
-          </Flex>
-          <Flex justify={"between"} className="w-full items-center mt-4">
-            <h1 className="w-full">Threshold Value</h1>
-            <TextField.Root
-              className="w-full"
-              onChange={(e) => setThreshold(e.target.value)}
-              placeholder="Enter Threshold Value"
-              defaultValue={threshold}
-              value={threshold}
-            />
-          </Flex>
-        </form>
+        <Heading className="mb-4 text-center">{`${
+          type.charAt(0).toUpperCase() + type.slice(1)
+        } Item`}</Heading>
+        {type !== "remove" ? (
+          <>
+            <TextField.Root className="w-full">
+              <h1 className="w-full">Threshold Value</h1>
+              <TextField.Root
+                onChange={(e) => setThreshold(e.target.value)}
+                value={threshold}
+                placeholder="Enter Threshold Value"
+              />
+            </TextField.Root>
+          </>
+        ) : (
+          <p>Are you sure you want to remove this item?</p>
+        )}
         <div className="mt-6 flex justify-end gap-4">
           <button
             onClick={onClose}
@@ -94,10 +118,20 @@ const AddDialog = ({ isOpen, onClose, itemId, runFetch }) => {
             No
           </button>
           <button
-            onClick={addItem}
-            className="bg-green-500 text-white px-4 py-2 rounded-md"
+            onClick={handleAction}
+            className={`${
+              type === "add"
+                ? "bg-green-500"
+                : type === "edit"
+                ? "bg-yellow-500"
+                : "bg-red-500"
+            } text-white px-4 py-2 rounded-md`}
           >
-            {loading ? <Spinner /> : "Yes"}
+            {loading ? (
+              <Spinner />
+            ) : (
+              type.charAt(0).toUpperCase() + type.slice(1)
+            )}
           </button>
         </div>
       </div>
@@ -105,119 +139,7 @@ const AddDialog = ({ isOpen, onClose, itemId, runFetch }) => {
   );
 };
 
-// Edit Dialog Component
-const EditDialog = ({ isOpen, onClose, itemId, runFetch }) => {
-  const [loading, setLoading] = useState(false);
-
-  const editItem = async () => {
-    setLoading(true);
-    const retrToken = localStorage.getItem("token");
-
-    if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
-      return;
-    }
-
-    try {
-      await axios.patch(
-        `${root}/path/to/edit/${itemId}`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${retrToken}` },
-        }
-      );
-      setLoading(false);
-      onClose();
-      toast.success("Item edited successfully");
-      runFetch();
-    } catch (error) {
-      setLoading(false);
-      onClose();
-      toast.error("Error editing item");
-    }
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-[101]">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-[90vw] max-w-[450px]">
-        <Heading className="mb-4 text-center">Edit Item</Heading>
-
-        <p>Are you sure you want to edit this item?</p>
-        <div className="mt-6 flex justify-end gap-4">
-          <button
-            onClick={onClose}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md"
-          >
-            No
-          </button>
-          <button
-            onClick={editItem}
-            className="bg-yellow-500 text-white px-4 py-2 rounded-md"
-          >
-            {loading ? <Spinner /> : "Yes"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Remove Dialog Component
-const RemoveDialog = ({ isOpen, onClose, itemId, runFetch }) => {
-  const [loading, setLoading] = useState(false);
-
-  const removeItem = async () => {
-    setLoading(true);
-    const retrToken = localStorage.getItem("token");
-
-    if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
-      return;
-    }
-
-    try {
-      await axios.delete(`${root}/path/to/remove/${itemId}`, {
-        headers: { Authorization: `Bearer ${retrToken}` },
-      });
-      setLoading(false);
-      onClose();
-      toast.success("Item removed successfully");
-      runFetch();
-    } catch (error) {
-      setLoading(false);
-      onClose();
-      toast.error("Error removing item");
-    }
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-[101]">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-[90vw] max-w-[450px]">
-        <Heading className="mb-4 text-center">Remove Item</Heading>
-        <p>Are you sure you want to remove this item?</p>
-        <div className="mt-6 flex justify-end gap-4">
-          <button
-            onClick={onClose}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md"
-          >
-            No
-          </button>
-          <button
-            onClick={removeItem}
-            className="bg-red-500 text-white px-4 py-2 rounded-md"
-          >
-            {loading ? <Spinner /> : "Yes"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
+// ShelfContent Component
 const ShelfContent = () => {
   const [shelf, setShelf] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -227,18 +149,24 @@ const ShelfContent = () => {
   const [selectedItemId, setSelectedItemId] = useState(null);
 
   const fetchShelf = async () => {
-    const retrToken = localStorage.getItem("token");
-    if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
-      return;
-    }
-    try {
-      const response = await axios.get(`${root}/dept/view-gen-store`, {
-        headers: { Authorization: `Bearer ${retrToken}` },
-      });
-      setShelf(response.data.stores);
-    } catch (error) {
-      console.log(error);
+    setLoading(true);
+    const data = await apiCall("/dept/view-gen-store", "GET");
+    if (data) setShelf(data.stores);
+    setLoading(false);
+  };
+
+  const statusColor = (string) => {
+    switch (string) {
+      case "Out of Stock":
+        return "text-red-500";
+      case "In Stock":
+        return "text-green-500";
+      case "Low Stock":
+        return "text-yellow-500";
+        break;
+
+      default:
+        break;
     }
   };
 
@@ -254,28 +182,33 @@ const ShelfContent = () => {
           <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell>SHELF NAME</Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell>UNIT</Table.ColumnHeaderCell>
+
           <Table.ColumnHeaderCell>THRESHOLD VALUE</Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell>STATUS</Table.ColumnHeaderCell>
         </Table.Header>
         <Table.Body>
-          {shelf.length === 0 ? (
+          {loading ? (
             <div className="p-4">
               <Spinner />
             </div>
+          ) : shelf.length === 0 ? (
+            <div className="p-4">No items found</div>
           ) : (
-            shelf.map((item, index) => (
-              <Table.Row key={index} className="relative !overflow-visible">
+            shelf.map((item) => (
+              <Table.Row key={item.id} className="relative !overflow-visible">
                 <Table.RowHeaderCell>
                   {refractor(item.createdAt)}
                 </Table.RowHeaderCell>
                 <Table.Cell>{item.name}</Table.Cell>
                 <Table.Cell>{item.unit}</Table.Cell>
+
                 <Table.Cell>{item.thresholdValue}</Table.Cell>
                 <Table.Cell>
                   <Flex gap={"1"} align={"center"}>
                     <FontAwesomeIcon
                       icon={faSquare}
-                      color={`${item.status !== "In Stock" ? "red" : "green"}`}
+                      className={`${statusColor(item.status)}`}
+                      // color={item.status !== "In Stock" ? "red" : "green"}
                     />
                     {item.status}
                   </Flex>
@@ -318,21 +251,26 @@ const ShelfContent = () => {
           )}
         </Table.Body>
       </Table.Root>
-      <AddDialog
+
+      {/* Dialogs */}
+      <Dialog
         isOpen={addDialogOpen}
         onClose={() => setAddDialogOpen(false)}
+        type="add"
         itemId={selectedItemId}
         runFetch={fetchShelf}
       />
-      <EditDialog
+      <Dialog
         isOpen={editDialogOpen}
         onClose={() => setEditDialogOpen(false)}
+        type="edit"
         itemId={selectedItemId}
         runFetch={fetchShelf}
       />
-      <RemoveDialog
+      <Dialog
         isOpen={removeDialogOpen}
         onClose={() => setRemoveDialogOpen(false)}
+        type="remove"
         itemId={selectedItemId}
         runFetch={fetchShelf}
       />

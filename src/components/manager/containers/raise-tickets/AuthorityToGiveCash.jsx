@@ -1,56 +1,50 @@
 import React, { useEffect, useState } from "react";
-
 import {
   Tabs,
+  Heading,
   Select,
   Text,
-  Switch,
+  Grid,
   Flex,
-  DropdownMenu,
   Spinner,
   TextField,
   Button,
+  Separator,
 } from "@radix-ui/themes";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
-import UpdateURL from "../ChangeRoute";
 const root = import.meta.env.VITE_ROOT;
 
 const AuthorityToGiveCash = () => {
   const [customers, setCustomers] = useState([]);
-  const [searchQuery, setSearchQuery] = useState(""); // New state to handle search input
+  const [searchQuery, setSearchQuery] = useState("");
   const [products, setProducts] = useState([]);
   const [searchProductQuery, setSearchProductQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState("");
-  const [basePrice, setBasePrice] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [authorityType, setAuthorityType] = useState("");
+  const [authorityType, setAuthorityType] = useState("credit");
   const [othersDescription, setOthersDescription] = useState("");
   const [othersAmount, setOthersAmount] = useState("");
-  const [othersLoading, setOthersLoading] = useState("");
+  const [othersLoading, setOthersLoading] = useState(false);
+  const [superAdmins, setSuperAdmins] = useState([]);
+  const [adminId, setAdminId] = useState("");
+  const [ticketId, setTicketId] = useState("");
 
-  // Function to format number with commas
-  const formatNumber = (num) => {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
-
-  // Handle base price input change
-  const handleBasePriceChange = (e) => {
-    const inputValue = e.target.value.replace(/,/g, ""); // Remove commas from the input value
-    if (!isNaN(inputValue)) {
-      setBasePrice(inputValue); // Update state with raw number (without commas)
-    }
-  };
+  // STATE MANAGAEMENT FOR THE STAFF TABS
+  const [staffName, setStaffName] = useState("");
+  const [itemName, setItemName] = useState("");
+  const [departments, setDepartments] = useState([]);
+  const [comments, setComments] = useState("");
+  const [departmentId, setDepartmentId] = useState("");
+  const [staffAmount, setStaffAmount] = useState("");
 
   const fetchCustomers = async () => {
     const retrToken = localStorage.getItem("token");
 
-    // Check if the token is available
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
-
       return;
     }
 
@@ -60,10 +54,8 @@ const AuthorityToGiveCash = () => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      console.log(response);
       setCustomers(response.data.customers);
     } catch (error) {
-      console.log(error);
       toast.error(error.message);
     }
   };
@@ -71,10 +63,8 @@ const AuthorityToGiveCash = () => {
   const fetchProducts = async () => {
     const retrToken = localStorage.getItem("token");
 
-    // Check if the token is available
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
-
       return;
     }
 
@@ -84,137 +74,227 @@ const AuthorityToGiveCash = () => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
+      setProducts(response.data.products);
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
-      console.log(response.data.products);
-      response.data.products.length === 0
-        ? setProducts([])
-        : setProducts(response.data.products);
+  // Function to fetch all super admins
+  const fetchSuperAdmins = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("An error occured,try logging in again.");
+    }
+
+    try {
+      const response = await axios.get(`${root}/admin/all-admin`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setSuperAdmins(response.data.staffList);
     } catch (error) {
       console.log(error);
-      toast.error(error.message);
+    }
+  };
+
+  // Function to fetch departments
+  const fetchDept = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("An error occured,try logging in again.");
+    }
+
+    try {
+      const request = await axios.get(`${root}/dept/view-department`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setDepartments(request.data.departments);
+    } catch (error) {
+      console.log(error);
     }
   };
 
   const handleCustomersSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     const retrToken = localStorage.getItem("token");
 
-    // Check if the token is available
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
-
+      setButtonLoading(false);
       return;
     }
-
-    const body = {
-      amount: amount,
-      customerId: selectedCustomer, // Use selected state
-      productId: selectedProduct, // Use selected state
-      creditOrDebit: authorityType, // Use selected state
+    const resetForm = () => {
+      setAmount("");
+      setSelectedCustomer("");
+      setSelectedProduct("");
     };
 
-    try {
-      setLoading(true); // Start loading
-      const response = await axios.post(
-        `${root}/customer/raise-cashticket`,
-        body,
-        {
-          headers: {
-            Authorization: `Bearer ${retrToken}`,
-          },
-        }
-      );
-      toast.success(response.data.message, {
-        duration: 6500,
-        style: {
-          padding: "30px",
-        },
-      });
-      console.log(response);
-
-      // Reset form fields
-      setAmount("");
-      setSelectedCustomer(null);
-      setSelectedProduct(null);
-      setAuthorityType("");
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false); // Stop loading
-    }
-  };
-
-  const handleOrderSubmit = async (e) => {
-    e.preventDefault();
-    setOthersLoading(true);
-    const retrToken = localStorage.getItem("token");
-
-    // Check if the token is available
-    if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
-
-      return;
-    }
-
     const body = {
-      amount: othersAmount,
-      staffName: othersDescription,
+      amount,
+      customerId: selectedCustomer,
+      productId: selectedProduct,
       creditOrDebit: authorityType,
     };
 
     try {
-      const response = await axios.post(
-        `${root}/customer/raise-cashticket`,
-        body,
+      const response = await axios.post(`${root}/admin/cash-ticket`, body, {
+        headers: {
+          Authorization: `Bearer ${retrToken}`,
+        },
+      });
+
+      const ticketId = response.data.ticket.id;
+      setTicketId(ticketId);
+
+      await axios.post(
+        `${root}/admin/send-ticket/${ticketId}`,
+        { adminId },
         {
           headers: {
             Authorization: `Bearer ${retrToken}`,
           },
         }
       );
-      console.log(response);
-      setOthersLoading(false);
-      toast.success(response.data.message);
-
-      setOthersAmount("");
-      setOthersDescription("");
+      resetForm();
+      toast.success("Ticket created and sent successfully!", {
+        style: {
+          padding: "20px",
+        },
+        duration: 5500,
+      });
+      setLoading(false);
     } catch (error) {
+      console.error("Error during submission:", error);
+      toast.error("Failed to submit the form. Please try again.");
+      setLoading(false);
+    }
+  };
+
+  const staffSubmit = async (e) => {
+    e.preventDefault();
+    setOthersLoading(true);
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("An error occurred, try logging in again");
       setOthersLoading(false);
-      console.log(error);
-      toast.error(error.message);
+      return;
+    }
+
+    const resetForm = () => {
+      setStaffAmount("");
+      setStaffName("");
+      setItemName("");
+      setComments("");
+    };
+
+    const body = {
+      amount: staffAmount,
+      item: itemName,
+      creditOrDebit: authorityType,
+      comments,
+      departmentId,
+    };
+
+    try {
+      // First API call
+      const firstResponse = await axios.post(
+        `${root}/admin/cash-ticket`,
+        body,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const newTicketId = firstResponse.data.ticket.id;
+      setTicketId(newTicketId);
+
+      const secondResponse = await axios.post(
+        `${root}/admin/send-ticket/${newTicketId}`,
+        {
+          adminId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      resetForm();
+      toast.success("Ticket processed successfully!", {
+        style: {
+          padding: "20px",
+        },
+        duration: 5500,
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("An error occurred while processing the ticket.");
+    } finally {
+      setOthersLoading(false);
     }
   };
 
   useEffect(() => {
     fetchCustomers();
     fetchProducts();
+    fetchSuperAdmins();
+    fetchDept();
   }, []);
 
   return (
     <>
+      <div className="flex justify-between items-center mb-4">
+        <Heading>Authority To Give Cash</Heading>
+        <Select.Root
+          defaultValue="give"
+          onValueChange={(value) => {
+            value === "credit"
+              ? setAuthorityType("credit")
+              : setAuthorityType("debit");
+          }}
+        >
+          <Select.Trigger />
+          <Select.Content>
+            <Select.Item value="give">Give Cash</Select.Item>
+            <Select.Item value="collect">Collect Cash</Select.Item>
+          </Select.Content>
+        </Select.Root>
+      </div>
+      <Separator className="my-4 w-full" />
       <Tabs.Root defaultValue="Customers">
         <Tabs.List className="justify-center flex w-full items-center">
           <Tabs.Trigger value="Customers">Customers</Tabs.Trigger>
-          <Tabs.Trigger value="Others">Others</Tabs.Trigger>
+          <Tabs.Trigger value="Staff">Staff</Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="Customers">
-          <form action="" className="mt-6" onSubmit={handleCustomersSubmit}>
+          <form onSubmit={handleCustomersSubmit} className="mt-6">
             <div className="flex w-full justify-between gap-8">
               <div className="w-full">
-                <Text size={"4"}>Customer Name</Text>
+                <Text size={"4"}>
+                  Customer Name <span className="text-red-500">*</span>
+                </Text>
                 <Select.Root
                   value={selectedCustomer}
+                  required
                   onValueChange={setSelectedCustomer}
                 >
                   <Select.Trigger
                     className="w-full mt-2"
                     placeholder="Select Customer Name"
                   />
-
-                  {/* Dropdown Content */}
                   <Select.Content position="popper">
-                    {/* Search input inside the dropdown */}
                     <div className="p-2">
                       <input
                         type="text"
@@ -224,8 +304,6 @@ const AuthorityToGiveCash = () => {
                         className="w-full p-2 border border-gray-300 rounded"
                       />
                     </div>
-
-                    {/* Filter customers based on the search query */}
                     {customers
                       .filter(
                         (customer) =>
@@ -236,20 +314,21 @@ const AuthorityToGiveCash = () => {
                             .toLowerCase()
                             .includes(searchQuery.toLowerCase())
                       )
-                      .map((customer) => {
-                        return (
-                          <Select.Item key={customer.id} value={customer.id}>
-                            {customer.firstname} {customer.lastname}
-                          </Select.Item>
-                        );
-                      })}
+                      .map((customer) => (
+                        <Select.Item key={customer.id} value={customer.id}>
+                          {customer.firstname} {customer.lastname}
+                        </Select.Item>
+                      ))}
                   </Select.Content>
                 </Select.Root>
               </div>
 
               <div className="w-full">
-                <Text size={"4"}>Select Product</Text>
+                <Text size={"4"}>
+                  Select Product <span className="text-red-500">*</span>
+                </Text>
                 <Select.Root
+                  required
                   value={selectedProduct}
                   onValueChange={setSelectedProduct}
                 >
@@ -257,10 +336,7 @@ const AuthorityToGiveCash = () => {
                     className="w-full mt-2"
                     placeholder="Select Product"
                   />
-
-                  {/* Dropdown Content */}
                   <Select.Content position="popper">
-                    {/* Search input inside the dropdown */}
                     <div className="p-2">
                       <input
                         type="text"
@@ -270,21 +346,17 @@ const AuthorityToGiveCash = () => {
                         className="w-full p-2 border border-gray-300 rounded"
                       />
                     </div>
-
-                    {/* Filter products based on the search query */}
                     {products
                       .filter((product) =>
                         product.name
                           .toLowerCase()
                           .includes(searchProductQuery.toLowerCase())
                       )
-                      .map((product) => {
-                        return (
-                          <Select.Item key={product.id} value={product.id}>
-                            {product.name}
-                          </Select.Item>
-                        );
-                      })}
+                      .map((product) => (
+                        <Select.Item key={product.id} value={product.id}>
+                          {product.name}
+                        </Select.Item>
+                      ))}
                   </Select.Content>
                 </Select.Root>
               </div>
@@ -292,32 +364,38 @@ const AuthorityToGiveCash = () => {
 
             <div className="flex w-full mt-4 justify-between gap-8">
               <div className="w-[49%]">
-                <label htmlFor="amount">Enter Amount</label>
+                <label htmlFor="amount">
+                  Enter Amount <span className="text-red-500">*</span>
+                </label>
                 <TextField.Root
                   id="amount"
+                  required
                   className="mt-3"
-                  onChange={(e) => setAmount(e.target.value)}
                   value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
                   placeholder="Enter Amount in Naira (₦)"
                 />
               </div>
               <div className="w-[49%]">
-                <label htmlFor="amount">Authority Type</label>
+                <Text>Send To</Text>
                 <Select.Root
-                  value={authorityType}
-                  onValueChange={setAuthorityType}
+                  disabled={superAdmins.length === 0}
+                  onValueChange={(value) => {
+                    setAdminId(value);
+                  }}
                 >
                   <Select.Trigger
-                    className="w-full mt-2"
-                    placeholder="Choose Authority Type"
+                    className="mt-3 w-full"
+                    placeholder="Select Admin"
                   />
-                  <Select.Content position="popper">
-                    <Select.Item value="debit">
-                      Authority to give Cash
-                    </Select.Item>
-                    <Select.Item value="credit">
-                      Authority to collect Cash
-                    </Select.Item>
+                  <Select.Content>
+                    {superAdmins.map((admin) => {
+                      return (
+                        <Select.Item
+                          value={admin.id}
+                        >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
+                      );
+                    })}
                   </Select.Content>
                 </Select.Root>
               </div>
@@ -330,53 +408,97 @@ const AuthorityToGiveCash = () => {
             </Flex>
           </form>
         </Tabs.Content>
-        <Tabs.Content value="Others">
-          <form action="" onSubmit={handleOrderSubmit}>
-            <div className="flex w-full mt-4 justify-between gap-8">
-              <div className="w-[49%]">
-                <label htmlFor="amount">Description</label>
+        <Tabs.Content value="Staff">
+          <form className="mt-6" onSubmit={staffSubmit}>
+            <Grid columns={"2"} gap={"4"}>
+              <div className="w-full">
+                <Text>
+                  Staff Name <span className="text-red-500">*</span>
+                </Text>
                 <TextField.Root
-                  id="amount"
                   className="mt-2"
-                  value={othersDescription}
-                  placeholder="Enter Ticket Description"
-                  onChange={(e) => setOthersDescription(e.target.value)}
+                  placeholder="Enter Staff Name"
+                  value={staffName}
+                  required
+                  onChange={(e) => {
+                    setStaffName(e.target.value);
+                  }}
                 />
               </div>
-              <div className="w-[49%]">
-                <label htmlFor="amount">Amount</label>
+              <div className="w-full">
+                <Text>Input Item</Text>
                 <TextField.Root
-                  id="amount"
-                  onChange={(e) => setOthersAmount(e.target.value)}
                   className="mt-2"
-                  value={othersAmount}
-                  placeholder="Enter Amount "
+                  placeholder="Enter Item Name"
+                  value={itemName}
+                  onChange={(e) => {
+                    setItemName(e.target.value);
+                  }}
                 />
               </div>
-            </div>
-
-            <div className="mt-4">
-              <div className="w-[49%]">
-                <label htmlFor="amount">Authority Type</label>
+              <div className="w-full">
+                <Text>Price</Text>
+                <TextField.Root
+                  className="mt-2"
+                  value={staffAmount}
+                  placeholder="Enter Price"
+                  onChange={(e) => {
+                    setStaffAmount(e.target.value);
+                  }}
+                >
+                  <TextField.Slot>N</TextField.Slot>
+                </TextField.Root>
+              </div>
+              <div className="w-full">
+                <Text>Select Department</Text>
                 <Select.Root
-                  value={authorityType}
-                  onValueChange={setAuthorityType}
+                  onValueChange={(val) => {
+                    setDepartmentId(val);
+                  }}
                 >
                   <Select.Trigger
                     className="w-full mt-2"
-                    placeholder="Choose Authority Type"
+                    placeholder="Select Department"
                   />
-                  <Select.Content position="popper">
-                    <Select.Item value="debit">
-                      Authority to give Cash
-                    </Select.Item>
-                    <Select.Item value="credit">
-                      Authority to collect Cash
-                    </Select.Item>
+                  <Select.Content>
+                    {departments.map((dept) => {
+                      return (
+                        <Select.Item key={dept.id} value={dept.id}>
+                          {dept.name}
+                        </Select.Item>
+                      );
+                    })}
                   </Select.Content>
                 </Select.Root>
               </div>
-            </div>
+              <div className="w-full">
+                <Text>Comments and Description</Text>
+                <TextField.Root className="mt-2" placeholder="Enter Comments" />
+              </div>
+              <div className="w-full">
+                <Text>Send To</Text>
+                <Select.Root
+                  disabled={superAdmins.length === 0}
+                  onValueChange={(value) => {
+                    setAdminId(value);
+                  }}
+                >
+                  <Select.Trigger
+                    className="w-full mt-2"
+                    placeholder="Select Admin"
+                  />
+                  <Select.Content>
+                    {superAdmins.map((admin) => {
+                      return (
+                        <Select.Item
+                          value={admin.id}
+                        >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
+                      );
+                    })}
+                  </Select.Content>
+                </Select.Root>
+              </div>
+            </Grid>
 
             <Flex justify={"end"} className="mt-4">
               <Button size={"2"} disabled={othersLoading} type="submit">

@@ -178,8 +178,19 @@ const DashBoardManager = ({ children }) => {
                         return (
                           <div>
                             <p
-                              className="flex gap-3 items-center justify-between px-4 w-full cursor-pointer "
-                              onClick={() => handleToggle(index)}
+                              className={`flex gap-3 items-center justify-between px-4 w-full cursor-pointer ${
+                                window.location.pathname ===
+                                `${route}/${nav.navParentSlug}`
+                                  ? "bg-[#f4f4f4] rounded-lg shadow-2xl !text-black min-w-[50px]"
+                                  : ""
+                              }`}
+                              onClick={() => {
+                                if (nav.permissions.length === 0) {
+                                  navigate(`${route}/${nav.navParentSlug}`);
+                                } else {
+                                  handleToggle(index);
+                                }
+                              }}
                             >
                               <div className="flex items-center">
                                 <DynamicIcon
@@ -189,17 +200,22 @@ const DashBoardManager = ({ children }) => {
                                   {trimString(nav.navParentName, 12)}
                                 </p>
                               </div>
-                              {openDropdowns[index] ? (
-                                <CaretUpIcon />
-                              ) : (
-                                <CaretDownIcon />
-                              )}
+                              {/* Show dropdown icons only if permissions exist */}
+                              {nav.permissions.length > 0 &&
+                                (openDropdowns[index] ? (
+                                  <CaretUpIcon />
+                                ) : (
+                                  <CaretDownIcon />
+                                ))}
                             </p>
-                            {openDropdowns[index] && (
-                              <ul className="ml-[20px] px-4 text-current">
-                                {nav.permissions.map((item) => {
-                                  return (
+
+                            {/* Dropdown list appears only if permissions exist and dropdown is open */}
+                            {openDropdowns[index] &&
+                              nav.permissions.length > 0 && (
+                                <ul className="ml-[20px] px-4 text-current">
+                                  {nav.permissions.map((item) => (
                                     <li
+                                      key={item.slug}
                                       className={`p-2 cursor-pointer mb-1 ${
                                         window.location.pathname ===
                                         `${route}/${nav.navParentSlug}/${item.slug}`
@@ -212,21 +228,16 @@ const DashBoardManager = ({ children }) => {
                                         )
                                       }
                                     >
-                                      <Flex gap={"2"} align={"center"}>
+                                      <Flex gap="2" align="center">
                                         <CircleIcon />
-                                        <span
-                                          title={item.name}
-                                          className="text-[15px]"
-                                        >
-                                          {" "}
+                                        <span className="text-[15px]">
                                           {trimString(item.name, 14)}
                                         </span>
                                       </Flex>
                                     </li>
-                                  );
-                                })}
-                              </ul>
-                            )}
+                                  ))}
+                                </ul>
+                              )}
                           </div>
                         );
                       })}
@@ -238,17 +249,10 @@ const DashBoardManager = ({ children }) => {
           </aside>
 
           <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
-            <Header
-              sidebarOpen={sidebarOpen}
-              setSidebarOpen={setSidebarOpen}
-              user={"user"}
-              role={"role"}
-              text={"text"}
-              image={"image"}
-            />
+            <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
             <main>
-              <div className="mx-auto max-w-screen-xl z-[1] p-4 md:p-6 xl:p-10">
+              <div className="mx-auto max-w-screen-xl z-[-50] p-4 md:p-6 xl:p-10">
                 {children}
               </div>
             </main>

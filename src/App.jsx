@@ -16,6 +16,8 @@ import {
   AuthorityToLoad,
   ViewPharmacyStore,
   LocalPurchaseOrder,
+  AuthorityToGiveCash,
+  AllWeigh,
   ViewPharmacyOrder,
   GeneralStorePlaceOrder,
   SupplierLedger,
@@ -31,6 +33,7 @@ import {
   AuthorityToWeigh,
   AllProducts,
   CreatePharmacyStore,
+  IndividualDepartmentLedger,
   CreateRole,
   ViewAccoountBook,
   AccountBook,
@@ -60,7 +63,11 @@ import {
   ReceiptDispatchNote,
   WaybillCreateInvoice,
   WaybillInvoice,
+  ViewAuthorityToWeigh,
+  ViewLocalPurchaseOrder,
+  CollectFromGeneralStore,
   ViewDepartmentStore,
+  DepartmentLedger,
 } from "./components/manager/containers";
 // import {
 //
@@ -108,6 +115,12 @@ const App = () => {
                   <Route
                     path="customers/order"
                     element={<ViewCustomerOrders />}
+                  />
+
+                  {/* Authority to weigh route */}
+                  <Route
+                    path="customers/authority-to-weigh/:customerId/:orderId"
+                    element={<AuthorityToWeigh />}
                   />
 
                   {/* Customer Ledger Route */}
@@ -184,15 +197,26 @@ const App = () => {
                   {/*Raise Tickets Routes*/}
                   <Route
                     path="raise-ticket/l.p.o"
-                    element={<LocalPurchaseOrder />}
+                    element={<ViewLocalPurchaseOrder />}
                   />
-                  <Route
-                    path="raise-ticket/authority-to-weigh"
-                    element={<AuthorityToWeigh />}
-                  />
+
                   <Route
                     path="raise-ticket/authority-to-load"
                     element={<AuthorityToLoad />}
+                  />
+
+                  <Route
+                    path="raise-ticket/cash-authority"
+                    element={<AuthorityToGiveCash />}
+                  />
+
+                  <Route
+                    path="raise-ticket/store-authority"
+                    element={<CollectFromGeneralStore />}
+                  />
+                  <Route
+                    path="raise-ticket/authority-to-weigh"
+                    element={<ViewAuthorityToWeigh />}
                   />
 
                   {/*  Routes for phamrcy store */}
@@ -252,7 +276,11 @@ const App = () => {
                   />
 
                   {/* Weighing operations routes     */}
-                  <Route path="/weighing/new-weigh" element={<NewWeigh />} />
+                  <Route
+                    path="/weighing-operations/new-weigh/:id"
+                    element={<NewWeigh />}
+                  />
+                  <Route path="/weighing-operations/" element={<AllWeigh />} />
 
                   {/* Routes for cashier */}
                   <Route
@@ -262,6 +290,16 @@ const App = () => {
                   <Route
                     path="/cash-management/cash-ledger"
                     element={<CashManagementLedger />}
+                  />
+
+                  {/* Department Ledger */}
+                  <Route
+                    path="/department-ledger"
+                    element={<DepartmentLedger />}
+                  />
+                  <Route
+                    path="/department-ledger/:ledgerName/:id"
+                    element={<IndividualDepartmentLedger />}
                   />
 
                   <Route
