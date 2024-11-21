@@ -75,6 +75,7 @@ const CreateDepartmentStore = () => {
 
   // Function to fetch raw materials
   const fetchRawMaterials = async (id) => {
+    setProducts([]);
     setProductDiabled(true);
     let retrToken = localStorage.getItem("token");
 
@@ -248,6 +249,7 @@ const CreateDepartmentStore = () => {
             </Text>
             <Select.Root
               onValueChange={(value) => {
+                setProducts([]);
                 setDeptId(value);
                 fetchRawMaterials(value);
               }}
@@ -266,10 +268,11 @@ const CreateDepartmentStore = () => {
           </div>
           <div className="w-full">
             <Text>
-              {isProductActive ? "Product" : "Raw Material"} Name{" "}
+              {isProductActive ? "Product" : "Raw Material"} Name
               <span className="text-red-500">*</span>
             </Text>
             <Select.Root
+              disabled={products.length === 0}
               onValueChange={(value) => {
                 setProductId(value);
                 getMatchingProductNameById(value);
