@@ -81,57 +81,66 @@ const LoginContent = () => {
           <div style={{ textAlign: "center", color: "#f1f1f1" }}>
             <Heading mb="6">POLEMA</Heading>
           </div>
-          <Card className="p-4">
-            <form onSubmit={handleLoginForm}>
-              <div style={{ textAlign: "center" }}>
-                <Heading mb="6">USER LOGIN</Heading>
-              </div>
-              <TextField.Root
-                placeholder="Enter Email"
-                className="mt-4"
-                size={"3"}
-              >
-                <TextField.Slot>
-                  <EnvelopeClosedIcon height="16" width="16" />
-                </TextField.Slot>
-              </TextField.Root>
-
-              <TextField.Root
-                placeholder="Password"
-                className="mt-4"
-                type={passwordVisible ? "text" : "password"} // Toggle between text and password
-                size={"3"}
-              >
-                <TextField.Slot>
-                  <LockClosedIcon height="16" width="16" />
-                </TextField.Slot>
-                <TextField.Slot
-                  onClick={togglePasswordVisibility}
-                  className="cursor-pointer"
+          <Card className="p-10 h-[60vh] bg-[#F1F1F1D4] relative">
+            <form
+              onSubmit={handleLoginForm}
+              className="flex flex-col justify-between h-full"
+            >
+              <div>
+                <div style={{ textAlign: "center" }}>
+                  <Heading mb="6" className="text-[#434343]">
+                    USER LOGIN
+                  </Heading>
+                </div>
+                <TextField.Root
+                  placeholder="Enter Email"
+                  className="mt-4"
+                  size={"3"}
                 >
-                  {passwordVisible ? (
-                    <EyeOpenIcon height="16" width="16" /> // Eye closed icon when visible
+                  <TextField.Slot>
+                    <EnvelopeClosedIcon height="16" width="16" />
+                  </TextField.Slot>
+                </TextField.Root>
+
+                <TextField.Root
+                  placeholder="Password"
+                  className="mt-4"
+                  type={passwordVisible ? "text" : "password"} // Toggle between text and password
+                  size={"3"}
+                >
+                  <TextField.Slot>
+                    <LockClosedIcon height="16" width="16" />
+                  </TextField.Slot>
+                  <TextField.Slot
+                    onClick={togglePasswordVisibility}
+                    className="cursor-pointer"
+                  >
+                    {passwordVisible ? (
+                      <EyeOpenIcon height="16" width="16" /> // Eye closed icon when visible
+                    ) : (
+                      <EyeClosedIcon height="16" width="16" /> // Eye open icon when hidden
+                    )}
+                  </TextField.Slot>
+                </TextField.Root>
+
+                <p className="text-right mt-2 text-[.7rem] cursor-pointer underline">
+                  Forgot Password?
+                </p>
+              </div>
+
+              <div className="btn w-full">
+                <Button
+                  type="submit"
+                  className="w-[100%] bg-theme hover:bg-theme/85 h-[40px]"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <p className="text-white">Please Wait...</p>
                   ) : (
-                    <EyeClosedIcon height="16" width="16" /> // Eye open icon when hidden
+                    "Submit"
                   )}
-                </TextField.Slot>
-              </TextField.Root>
-
-              <p className="text-right mt-2 text-[.7rem] cursor-pointer underline">
-                Forgot Password?
-              </p>
-
-              <Button
-                type="submit"
-                className="w-[100%] mt-4 bg-[#444242]"
-                disabled={loading}
-              >
-                {loading ? (
-                  <p className="text-white">Please Wait...</p>
-                ) : (
-                  "Submit"
-                )}
-              </Button>
+                </Button>
+              </div>
             </form>
           </Card>
         </div>

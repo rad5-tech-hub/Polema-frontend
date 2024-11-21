@@ -124,7 +124,7 @@ const DashBoardManager = ({ children }) => {
   }, []);
 
   return (
-    <Theme>
+    <Theme className="bg-gray-50">
       <div className="dark:bg-boxdark-2 dark:text-bodydark ">
         <div className="flex h-screen overflow-hidden ">
           <aside

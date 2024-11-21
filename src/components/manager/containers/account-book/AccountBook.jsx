@@ -395,9 +395,8 @@ const AccountBook = () => {
         </Grid>
         <Flex justify={"end"} className="mt-4 cursor-pointer">
           <Button
-            className="cursor-pointer !bg-theme mt-4"
+            className="cursor-pointer bg-theme hover:bg-theme/85"
             type="submit"
-            size={"3"}
             disabled={loading}
           >
             {loading ? <Spinner /> : "Submit"}
