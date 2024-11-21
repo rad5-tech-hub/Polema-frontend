@@ -52,7 +52,7 @@ import AddSuppliers from "./suppliers/AddSuppliers";
 import SupplierPlaceOrder from "./suppliers/SupplierPlaceOrder";
 import CreateRole from "./roles/CreateRole";
 import AllProducts from "./products/AllProducts";
-
+import InvoiceAuthorityToWeigh from "./raise-tickets/InvoiceAuthorityToWeigh";
 import AllSuspended from "./admin/AllSuspended";
 import CustomerLedger from "./customer/CustomerLedger";
 import CustomerPlaceOrder from "./customer/CustomerPlaceOrder";
@@ -61,7 +61,7 @@ import DepartementStorePlaceOrder from "./department-store/DepartementStorePlace
 import DepartmentStoreViewOrders from "./department-store/DepartmentStoreViewOrders";
 import ViewDepartmentStore from "./department-store/ViewDepartmentStore";
 import ViewPharmacyStore from "./pharmacy-store/ViewPharmacyStore";
-import InvoiceAuthorityToWeigh from "./raise-tickets/InvoiceAuthorityToWeigh";
+
 export {
   AllDispatchNote,
   AddAdmin,

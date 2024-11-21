@@ -5,7 +5,7 @@ import Charts from "./components/Charts";
 import Manager from "./components/manager";
 import DashBoardManager from "./components/manager/DashboardManager";
 // import ViewSupplierOrder from "./components/manager/containers";
-import InvoiceAuthorityToWeigh from "./components/manager/containers/raise-tickets/InvoiceAuthorityToWeigh";
+
 import {
   AddAdmin,
   ViewSupplierOrder,
@@ -13,6 +13,7 @@ import {
   CashManagement,
   PharmacyPlaceOrder,
   CashManagementLedger,
+  InvoiceAuthorityToWeigh,
   AuthorityToLoad,
   ViewPharmacyStore,
   LocalPurchaseOrder,
@@ -347,7 +348,7 @@ const App = () => {
 
                   {/* Invoice for Authority to weigh */}
                   <Route
-                    path="/tickets/invoice-authority-to-weigh"
+                    path="/tickets/view-auth-to-weigh/:id"
                     element={<InvoiceAuthorityToWeigh />}
                   />
                 </Routes>
