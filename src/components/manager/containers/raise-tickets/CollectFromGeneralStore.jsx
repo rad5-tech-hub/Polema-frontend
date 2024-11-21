@@ -8,6 +8,7 @@ import {
   Flex,
   Card,
   Select,
+  Spinner,
 } from "@radix-ui/themes";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
@@ -15,12 +16,42 @@ import toast, { Toaster } from "react-hot-toast";
 const root = import.meta.env.VITE_ROOT;
 
 const CollectFromGeneralStore = () => {
-  const [toName, setToName] = useState(""); // Received by field
-  const [comments, setComments] = useState(""); // Comments field
-  const [departments, setDepartments] = useState([]); // Departments fetched from API
+  const [buttonLoading, setButtonLoading] = React.useState(false);
+  const [toName, setToName] = useState("");
+  const [comments, setComments] = useState("");
+  const [departments, setDepartments] = useState([]);
   const [items, setItems] = useState([
     { departmentId: "", quantityOrdered: "" },
   ]); // Items array
+  const [superAdmins, setSuperAdmins] = useState([]);
+  const [superAdminId, setSuperAdminId] = useState("");
+  const [ticketID, setTicketId] = useState("");
+
+  // Function to fetch super ADmins
+  const fetchSuperAdmins = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("An error occurred,try logging in again", {
+        style: {
+          padding: "20px",
+        },
+        duration: 5500,
+      });
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${root}/admin/all-admin`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setSuperAdmins(response.data.staffList);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   // Fetch departments for Select dropdown
   const fetchGenStore = async () => {
@@ -66,15 +97,26 @@ const CollectFromGeneralStore = () => {
     }, {});
   };
 
+  // Function to clear the form
+  const clearForm = () => {
+    setToName("");
+    setComments("");
+    setItems([{ departmentId: "", quantityOrdered: "" }]);
+  };
+
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Check for if there token
+    // Set button to loading state
+    setButtonLoading(true);
+
+    // Check for token
     const token = localStorage.getItem("token");
 
     if (!token) {
       toast.error("An error occurred, try logging in again.");
+      setButtonLoading(false);
       return;
     }
 
@@ -88,25 +130,26 @@ const CollectFromGeneralStore = () => {
 
     if (duplicateDepartment) {
       toast.error("Error: You cannot select the same department twice.");
+      setButtonLoading(false);
       return;
     }
 
     if (Object.keys(sanitizedItems).length === 0) {
       toast.error("Please add at least one valid item.");
+      setButtonLoading(false);
       return;
     }
 
-    console.log(duplicateDepartment);
-
     const body = {
-      receivedBy: toName,
+      recievedBy: toName,
       comments,
-      item: sanitizedItems, // Final object of departmentId as keys and quantityOrdered as values
+      items: sanitizedItems, // Final object of departmentId as keys and quantityOrdered as values
     };
 
     console.log(body);
 
     try {
+      // First API request
       const response = await axios.post(
         `${root}/admin/raise-store-collection`,
         body,
@@ -116,16 +159,45 @@ const CollectFromGeneralStore = () => {
           },
         }
       );
-      // Handle response if needed
+
+      // Set ticket ID from response
+      const ticketId = response.data.ticket.id;
+      setTicketId(ticketId);
+
+      // Validate superAdminId before the second request
+      if (!superAdminId) {
+        throw new Error("Super admin ID is required for the second request.");
+      }
+
+      // Second API request
+      const secondRequest = await axios.post(
+        `${root}/admin/send-store-auth/${ticketId}`,
+        {
+          adminId: superAdminId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Success toast
+      toast.success("Form submitted and authentication sent successfully!");
+      // Optionally clear form here
+      clearForm();
     } catch (e) {
-      console.log(e);
+      console.error(e);
       toast.error("An error occurred while submitting the form.");
+    } finally {
+      // Reset button loading state
+      setButtonLoading(false);
     }
   };
-
   // Fetch departments on component mount
   useEffect(() => {
     fetchGenStore();
+    fetchSuperAdmins();
   }, []);
 
   return (
@@ -208,19 +280,46 @@ const CollectFromGeneralStore = () => {
         </Card>
 
         {/* Comments Field */}
-        <div className="w-full">
-          <Text>Specifications and comments</Text>
-          <TextField.Root
-            placeholder="Enter Comments"
-            value={comments}
-            onChange={(e) => setComments(e.target.value)}
-          />
+        <div className="flex gap-4">
+          <div className="w-full">
+            <Text>Specifications and comments</Text>
+            <TextField.Root
+              placeholder="Enter Comments"
+              className="mt-2"
+              value={comments}
+              onChange={(e) => setComments(e.target.value)}
+            />
+          </div>
+          <div className="w-full">
+            <Text>Send To</Text>
+            <Select.Root
+              onValueChange={(val) => {
+                setSuperAdminId(val);
+              }}
+              required
+            >
+              <Select.Trigger
+                className="w-full mt-2"
+                placeholder="Select Admin"
+              />
+              <Select.Content>
+                {superAdmins.map((admins) => {
+                  return (
+                    <Select.Item
+                      key={admins.id}
+                      value={admins.id}
+                    >{`${admins.firstname} ${admins.lastname}`}</Select.Item>
+                  );
+                })}
+              </Select.Content>
+            </Select.Root>
+          </div>
         </div>
 
         {/* Submit Button */}
         <Flex justify={"end"} className="mt-4">
           <Button className="!bg-theme" size={"3"}>
-            Submit
+            {buttonLoading ? <Spinner /> : "Submit"}
           </Button>
         </Flex>
       </form>

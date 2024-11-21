@@ -95,6 +95,9 @@ const Notifications = () => {
       case "lpo":
         return "/admin/reject-lpo";
         break;
+      case "weigh":
+        return "/admin/reject-weigh-auth";
+        break;
 
       default:
         break;
@@ -110,7 +113,7 @@ const Notifications = () => {
 
     try {
       const response = await axios.patch(
-        `${root}/${messageType(type)}/${id}`,
+        `${root}${messageType(type)}/${id}`,
         {},
         {
           headers: {
@@ -215,31 +218,6 @@ const Notifications = () => {
                           <Text className="text-[.5rem] text-gray-500">
                             {refractor(notification.createdAt)}
                           </Text>
-                          {/* <Flex gap="2" className="mt-1">
-                            <Button
-                              className="text-[.6rem] cursor-pointer"
-                              color="red"
-                            >
-                              Disapprove
-                            </Button>
-                            <Button
-                              className="text-[.6rem] cursor-pointer"
-                              color="green"
-                              onClick={() =>
-                                approveTicket(
-                                  notification.message,
-                                  notification.ticketId
-                                )
-                              }
-                              disabled={loading[notification.ticketId]} // Disable button when loading
-                            >
-                              {loading[notification.ticketId] ? (
-                                <Spinner />
-                              ) : (
-                                "Approve"
-                              )}
-                            </Button>
-                          </Flex> */}
                         </div>
                       </Flex>
                     </div>

@@ -151,7 +151,9 @@ const ViewAuthorityToWeigh = () => {
                       >
                         New Weigh
                       </DropdownMenu.Item>
-                      <DropdownMenu.Item>View Approved</DropdownMenu.Item>
+                      {item.status === "approved" && (
+                        <DropdownMenu.Item>View Approved</DropdownMenu.Item>
+                      )}
                     </DropdownMenu.Content>
                   </DropdownMenu.Root>
                 </Table.Row>
