@@ -61,7 +61,7 @@ import DepartementStorePlaceOrder from "./department-store/DepartementStorePlace
 import DepartmentStoreViewOrders from "./department-store/DepartmentStoreViewOrders";
 import ViewDepartmentStore from "./department-store/ViewDepartmentStore";
 import ViewPharmacyStore from "./pharmacy-store/ViewPharmacyStore";
-
+import InvoiceAuthorityToWeigh from "./raise-tickets/InvoiceAuthorityToWeigh";
 export {
   AllDispatchNote,
   AddAdmin,
@@ -125,4 +125,5 @@ export {
   ReceiptDispatchNote,
   WaybillCreateInvoice,
   WaybillInvoice,
+  InvoiceAuthorityToWeigh,
 };
