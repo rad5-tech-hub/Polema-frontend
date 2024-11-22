@@ -6,11 +6,13 @@ import IndividualDepartmentLedger from "./department-ledger/IndividualDepartment
 import DepartmentLedger from "./department-ledger/DepartmentLedger";
 import CollectFromGeneralStore from "./raise-tickets/CollectFromGeneralStore";
 import ViewLocalPurchaseOrder from "./raise-tickets/ViewLocalPurchaseOrder";
+
 import AllDispatchNote from "./receipts/AllDispatchNote";
 import AllGatePass from "./receipts/AllGatePass";
 import AllInvoice from "./receipts/AllInvoice";
 import CreateDispatchNote from "./receipts/CreateDispatchNote";
 import CreateGatepass from "./receipts/CreateGatepass";
+import AllReceipts from "./receipts/AllReceipts";
 import CreateInvoice from "./receipts/CreateInvoice";
 import GatepassReceipt from "./receipts/GatepassReceipt";
 import Invoice from "./receipts/Invoice";
@@ -18,6 +20,7 @@ import OfficialReceipt from "./receipts/OfficialReceipt";
 import ReceiptDispatchNote from "./receipts/ReceiptDispatchNote";
 import WaybillCreateInvoice from "./receipts/WaybillCreateInvoice";
 import WaybillInvoice from "./receipts/WaybillInvoice";
+import AllWayBill from "./receipts/AllWayBill";
 import GeneralSupplierLedger from "./suppliers/GeneralSupplierLedger";
 import SupplierLedger from "./suppliers/SupplierLedger";
 import IndividualCustomerLedger from "./customer/IndividualCustomerLedger";
@@ -52,7 +55,7 @@ import AddSuppliers from "./suppliers/AddSuppliers";
 import SupplierPlaceOrder from "./suppliers/SupplierPlaceOrder";
 import CreateRole from "./roles/CreateRole";
 import AllProducts from "./products/AllProducts";
-
+import InvoiceAuthorityToWeigh from "./raise-tickets/InvoiceAuthorityToWeigh";
 import AllSuspended from "./admin/AllSuspended";
 import CustomerLedger from "./customer/CustomerLedger";
 import CustomerPlaceOrder from "./customer/CustomerPlaceOrder";
@@ -61,7 +64,7 @@ import DepartementStorePlaceOrder from "./department-store/DepartementStorePlace
 import DepartmentStoreViewOrders from "./department-store/DepartmentStoreViewOrders";
 import ViewDepartmentStore from "./department-store/ViewDepartmentStore";
 import ViewPharmacyStore from "./pharmacy-store/ViewPharmacyStore";
-import InvoiceAuthorityToWeigh from "./raise-tickets/InvoiceAuthorityToWeigh";
+
 export {
   AllDispatchNote,
   AddAdmin,
@@ -121,8 +124,10 @@ export {
   CreateInvoice,
   GatepassReceipt,
   Invoice,
+  AllReceipts,
   OfficialReceipt,
   ReceiptDispatchNote,
+  AllWayBill,
   WaybillCreateInvoice,
   WaybillInvoice,
   InvoiceAuthorityToWeigh,

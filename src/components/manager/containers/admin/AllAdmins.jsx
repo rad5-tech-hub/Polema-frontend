@@ -493,15 +493,6 @@ const AllAdmins = () => {
         <EditDialog />
       ) : (
         <div>
-          {/* <TextField.Root
-            placeholder="Search admins.."
-            className="w-[55%] mb-5"
-          >
-            <TextField.Slot>
-              <MagnifyingGlassIcon height={"16"} width={"16"} />
-            </TextField.Slot>
-          </TextField.Root> */}
-
           <Heading>Admins</Heading>
           <Table.Root variant="surface" size={"3"} className="mt-4">
             <Table.Header>
@@ -510,6 +501,7 @@ const AllAdmins = () => {
                 <Table.ColumnHeaderCell>EMAIL</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell>ROLE</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
+                <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
               </Table.Row>
             </Table.Header>
             {loading ? (
@@ -544,7 +536,7 @@ const AllAdmins = () => {
                         >
                           {refractor(staff.createdAt)}
                         </Table.Cell>
-                        <div className="absolute right-4 top-2">
+                        <div className="mt-2 right-4 top-2">
                           <DropdownMenu.Root>
                             <DropdownMenu.Trigger>
                               <Button

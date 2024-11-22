@@ -35,13 +35,15 @@ const DepartementStorePlaceOrder = () => {
     if (!retrToken || !departmentId) return;
 
     // API REQUEST
-    // get-dept-raw/${departmentId}
     try {
-      const response = await axios.get(`${root}/dept/view-deptstore-raw`, {
-        headers: {
-          Authorization: `Bearer ${retrToken}`,
-        },
-      });
+      const response = await axios.get(
+        `${root}/dept/get-dept-raw/${departmentId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${retrToken}`,
+          },
+        }
+      );
       setRawMaterials(response?.data?.products || []);
     } catch (error) {
       console.log(error);

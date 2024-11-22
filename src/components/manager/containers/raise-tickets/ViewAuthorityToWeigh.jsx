@@ -152,7 +152,15 @@ const ViewAuthorityToWeigh = () => {
                         New Weigh
                       </DropdownMenu.Item>
                       {item.status === "approved" && (
-                        <DropdownMenu.Item>View Approved</DropdownMenu.Item>
+                        <DropdownMenu.Item
+                          onClick={() => {
+                            navigate(
+                              `/admin/tickets/view-auth-to-weigh/${item.id}`
+                            );
+                          }}
+                        >
+                          View Approved
+                        </DropdownMenu.Item>
                       )}
                     </DropdownMenu.Content>
                   </DropdownMenu.Root>

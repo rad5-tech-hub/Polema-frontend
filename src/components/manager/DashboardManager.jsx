@@ -230,7 +230,10 @@ const DashBoardManager = ({ children }) => {
                                     >
                                       <Flex gap="2" align="center">
                                         <CircleIcon />
-                                        <span className="text-[15px]">
+                                        <span
+                                          className="text-[15px]"
+                                          title={item.name}
+                                        >
                                           {trimString(item.name, 14)}
                                         </span>
                                       </Flex>
