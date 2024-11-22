@@ -15,7 +15,8 @@ const root = import.meta.env.VITE_ROOT;
 
 const LoginContent = () => {
   const [loading, setLoading] = useState(false); // Spinner state
-  const [passwordVisible, setPasswordVisible] = useState(false); // Password visibility state
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [email, setEmail] = useState("");
   const navigate = useNavigate();
 
   const handleLoginForm = async (e) => {
@@ -24,7 +25,7 @@ const LoginContent = () => {
 
     try {
       const response = await axios.post(`${root}/admin/login`, {
-        email: e.target[0].value,
+        email: email,
         password: e.target[1].value,
       });
 
@@ -94,6 +95,10 @@ const LoginContent = () => {
                 </div>
                 <TextField.Root
                   placeholder="Enter Email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                  }}
                   className="mt-4"
                   size={"3"}
                 >
@@ -123,7 +128,12 @@ const LoginContent = () => {
                   </TextField.Slot>
                 </TextField.Root>
 
-                <p className="text-right mt-2 text-[.7rem] cursor-pointer underline">
+                <p
+                  className="text-right mt-2 text-[.7rem] cursor-pointer underline"
+                  onClick={() => {
+                    navigate("/forgot-password");
+                  }}
+                >
                   Forgot Password?
                 </p>
               </div>

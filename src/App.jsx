@@ -4,7 +4,6 @@ import Login from "./pages/Login";
 import Charts from "./components/Charts";
 import Manager from "./components/manager";
 import DashBoardManager from "./components/manager/DashboardManager";
-// import ViewSupplierOrder from "./components/manager/containers";
 
 import {
   AddAdmin,
@@ -72,11 +71,8 @@ import {
   ViewDepartmentStore,
   DepartmentLedger,
 } from "./components/manager/containers";
-// import {
-//
-// } from "./components/manager/containers/receipts";
 
-import PrivateRoute from "./components/PrivateRoute"; // Assume this is adjusted for React Router v6
+import PrivateRoute from "./components/PrivateRoute";
 import "@radix-ui/themes/styles.css";
 import "./index.css";
 
