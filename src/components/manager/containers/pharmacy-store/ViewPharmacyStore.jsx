@@ -1,16 +1,15 @@
 import { refractor } from "../../../date";
-
 import {
   Heading,
   Select,
   Flex,
   Grid,
+  DropdownMenu,
   Separator,
   Table,
   Button,
 } from "@radix-ui/themes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
   faPills,
   faArrowLeft,
@@ -21,6 +20,11 @@ import {
 import { LoaderIcon } from "react-hot-toast";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import toast from "react-hot-toast";
+
+import TopUpModal from "./TopupModal";
+import RemoveModal from "./RemoveModal";
+import EditModal from "./EditModal";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -29,18 +33,20 @@ const ViewPharmacyStore = () => {
   const [gridLoading, setGridLoading] = useState(true);
   const [fetchedProducts, setFetchedProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10; // Set the number of items per page
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalAction, setModalAction] = useState(null);
+  const itemsPerPage = 10;
 
-  // Function to fetch store data
   const fetchStore = async () => {
-    let retrToken = localStorage.getItem("token");
-    setGridLoading(true); // Start loading when fetching
-    setFetchedProducts([]);
-
+    const retrToken = localStorage.getItem("token");
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
       return;
     }
+
+    setGridLoading(true);
+    setFetchedProducts([]);
 
     try {
       const response = await axios.get(
@@ -55,43 +61,48 @@ const ViewPharmacyStore = () => {
       );
       setFetchedProducts(response.data.parsedStores);
     } catch (error) {
-      console.log(error);
+      console.error(error);
+      toast.error("Failed to fetch products");
     } finally {
-      setGridLoading(false); // Stop loading once data is fetched
+      setGridLoading(false);
     }
   };
 
-  // Function to toggle between raw materials and products
-  const toggleToRaw = (arg) => {
-    setIsRawMaterials(arg); // Update state and let useEffect handle fetching
-  };
+  const toggleToRaw = (arg) => setIsRawMaterials(arg);
 
-  // Fetch store whenever isRawMaterials changes
   useEffect(() => {
     fetchStore();
   }, [isRawMaterials]);
 
-  // Calculate total pages
   const totalPages = Math.ceil(fetchedProducts.length / itemsPerPage);
 
-  // Get the products to display on the current page
   const currentItems = fetchedProducts.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  // Handle next page
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
     }
   };
 
-  // Handle previous page
   const handlePrevPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
     }
+  };
+
+  const openModal = (action, item) => {
+    setModalAction(action);
+    setSelectedItem(item);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedItem(null);
+    setModalAction(null);
   };
 
   return (
@@ -115,8 +126,6 @@ const ViewPharmacyStore = () => {
       <Separator className="my-4 w-full" />
 
       <div className="overflow-auto max-h-[430px]">
-        {" "}
-        {/* Add a scrollable container */}
         <Grid columns={"6"} rows={"3"} gap={"2"} className="grid-container">
           {gridLoading ? (
             <div className="flex justify-center items-center">
@@ -125,7 +134,6 @@ const ViewPharmacyStore = () => {
           ) : (
             currentItems.map((item) => {
               let statusColor;
-
               if (item.status === "Low Stock") {
                 statusColor = "text-yellow-500";
               } else if (item.status === "In Stock") {
@@ -146,6 +154,30 @@ const ViewPharmacyStore = () => {
                     icon={faPills}
                     className="absolute top-[10px] right-[10px]"
                   />
+                  <DropdownMenu.Root>
+                    <DropdownMenu.Trigger className="mt-2 mr-1">
+                      <Button variant="soft">
+                        <FontAwesomeIcon icon={faEllipsisV} />
+                      </Button>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Content>
+                      <DropdownMenu.Item
+                        onClick={() => openModal("Top Up", item)}
+                      >
+                        Top Up
+                      </DropdownMenu.Item>
+                      <DropdownMenu.Item
+                        onClick={() => openModal("Remove", item)}
+                      >
+                        Remove
+                      </DropdownMenu.Item>
+                      <DropdownMenu.Item
+                        onClick={() => openModal("Edit", item)}
+                      >
+                        Edit
+                      </DropdownMenu.Item>
+                    </DropdownMenu.Content>
+                  </DropdownMenu.Root>
                 </div>
               );
             })
@@ -177,6 +209,7 @@ const ViewPharmacyStore = () => {
             <Table.ColumnHeaderCell className="text-[#919191]">
               STATUS
             </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -191,7 +224,6 @@ const ViewPharmacyStore = () => {
           ) : (
             currentItems.map((item) => {
               let statusColor;
-
               if (item.status === "Low Stock") {
                 statusColor = "text-yellow-500";
               } else if (item.status === "In Stock") {
@@ -201,19 +233,44 @@ const ViewPharmacyStore = () => {
               }
 
               return (
-                <Table.Row key={item.productTag} className="relative">
+                <Table.Row key={item.productTag}>
                   <Table.Cell>{refractor(item.createdAt)}</Table.Cell>
                   <Table.Cell>{item.product.name}</Table.Cell>
                   <Table.Cell>{item.productTag}</Table.Cell>
-                  <Table.Cell>{item.category}</Table.Cell>
+                  <Table.Cell>{item.product.category}</Table.Cell>
                   <Table.Cell>{item.unit}</Table.Cell>
-                  <Table.Cell>{item.thresholdValue}</Table.Cell>
-                  <Table.Cell>
-                    <FontAwesomeIcon
-                      icon={faSquare}
-                      className={`${statusColor} mr-2`}
-                    />
+                  <Table.Cell>{item.stockValue}</Table.Cell>
+                  <Table.Cell className={`${statusColor} text-[.8em]`}>
                     {item.status}
+                  </Table.Cell>
+                  <Table.Cell>
+                    <DropdownMenu.Root>
+                      <DropdownMenu.Trigger>
+                        <Button variant="soft">
+                          <FontAwesomeIcon icon={faEllipsisV} />
+                        </Button>
+                      </DropdownMenu.Trigger>
+                      <DropdownMenu.Content>
+                        <DropdownMenu.Item
+                          className="hover:bg-theme hover:text-white"
+                          onClick={() => openModal("Top Up", item)}
+                        >
+                          Top Up
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Item
+                          className="hover:bg-theme hover:text-white"
+                          onClick={() => openModal("Remove", item)}
+                        >
+                          Remove
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Item
+                          className="hover:bg-theme hover:text-white"
+                          onClick={() => openModal("Edit", item)}
+                        >
+                          Edit
+                        </DropdownMenu.Item>
+                      </DropdownMenu.Content>
+                    </DropdownMenu.Root>
                   </Table.Cell>
                 </Table.Row>
               );
@@ -221,26 +278,29 @@ const ViewPharmacyStore = () => {
           )}
         </Table.Body>
       </Table.Root>
-      {/* Pagination Buttons */}
-      <Flex justify={"center"} align={"center"} gap={"2"} className="mt-4">
+
+      <Flex justify={"center"} align={"center"} className="mt-4">
         <Button
-          disabled={currentPage === 1}
           onClick={handlePrevPage}
+          disabled={currentPage === 1}
           className="mr-2"
         >
           <FontAwesomeIcon icon={faArrowLeft} />
         </Button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <Button
-          disabled={currentPage === totalPages}
-          onClick={handleNextPage}
-          className="ml-2"
-        >
+        <Button onClick={handleNextPage} disabled={currentPage === totalPages}>
           <FontAwesomeIcon icon={faArrowRight} />
         </Button>
       </Flex>
+
+      {isModalOpen && modalAction === "Top Up" && (
+        <TopUpModal item={selectedItem} closeModal={closeModal} />
+      )}
+      {isModalOpen && modalAction === "Remove" && (
+        <RemoveModal item={selectedItem} closeModal={closeModal} />
+      )}
+      {isModalOpen && modalAction === "Edit" && (
+        <EditModal item={selectedItem} closeModal={closeModal} />
+      )}
     </>
   );
 };
