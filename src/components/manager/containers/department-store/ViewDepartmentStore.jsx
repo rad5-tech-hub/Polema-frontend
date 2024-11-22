@@ -31,7 +31,7 @@ const ViewDepartmentStore = () => {
 
   // Fetch store data
   const fetchStore = async () => {
-    let retrToken = localStorage.getItem("token");
+    const retrToken = localStorage.getItem("token");
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
       return;
@@ -48,7 +48,8 @@ const ViewDepartmentStore = () => {
       );
       setStore(response.data.stores);
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching store data:", error);
+      toast.error("Failed to fetch store data");
     } finally {
       setLoading(false);
     }
@@ -60,7 +61,7 @@ const ViewDepartmentStore = () => {
   }, [isProductActive]);
 
   // Handle opening modals
-  const handleOpenModal = (type, product) => {
+  const handleOpenModal = (type, product = null) => {
     setSelectedProduct(product);
     setOpenModal(type);
   };
@@ -72,13 +73,13 @@ const ViewDepartmentStore = () => {
 
   // Callback to delete product from store state and server
   const handleDeleteProduct = async () => {
-    try {
-      const retrToken = localStorage.getItem("token");
-      if (!retrToken) {
-        toast.error("An error occurred. Try logging in again");
-        return;
-      }
+    const retrToken = localStorage.getItem("token");
+    if (!retrToken) {
+      toast.error("An error occurred. Try logging in again");
+      return;
+    }
 
+    try {
       await axios.delete(`${root}/deleteproduct/${selectedProduct.id}`, {
         headers: { Authorization: `Bearer ${retrToken}` },
       });
@@ -111,7 +112,7 @@ const ViewDepartmentStore = () => {
 
   return (
     <div>
-      <Flex justify={"between"}>
+      <Flex justify={"between"} align="center">
         <Heading>View Store</Heading>
         <Select.Root
           defaultValue="products"
