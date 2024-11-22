@@ -6,11 +6,13 @@ import IndividualDepartmentLedger from "./department-ledger/IndividualDepartment
 import DepartmentLedger from "./department-ledger/DepartmentLedger";
 import CollectFromGeneralStore from "./raise-tickets/CollectFromGeneralStore";
 import ViewLocalPurchaseOrder from "./raise-tickets/ViewLocalPurchaseOrder";
+
 import AllDispatchNote from "./receipts/AllDispatchNote";
 import AllGatePass from "./receipts/AllGatePass";
 import AllInvoice from "./receipts/AllInvoice";
 import CreateDispatchNote from "./receipts/CreateDispatchNote";
 import CreateGatepass from "./receipts/CreateGatepass";
+import AllReceipts from "./receipts/AllReceipts";
 import CreateInvoice from "./receipts/CreateInvoice";
 import GatepassReceipt from "./receipts/GatepassReceipt";
 import Invoice from "./receipts/Invoice";
@@ -18,6 +20,7 @@ import OfficialReceipt from "./receipts/OfficialReceipt";
 import ReceiptDispatchNote from "./receipts/ReceiptDispatchNote";
 import WaybillCreateInvoice from "./receipts/WaybillCreateInvoice";
 import WaybillInvoice from "./receipts/WaybillInvoice";
+import AllWayBill from "./receipts/AllWayBill";
 import GeneralSupplierLedger from "./suppliers/GeneralSupplierLedger";
 import SupplierLedger from "./suppliers/SupplierLedger";
 import IndividualCustomerLedger from "./customer/IndividualCustomerLedger";
@@ -121,8 +124,10 @@ export {
   CreateInvoice,
   GatepassReceipt,
   Invoice,
+  AllReceipts,
   OfficialReceipt,
   ReceiptDispatchNote,
+  AllWayBill,
   WaybillCreateInvoice,
   WaybillInvoice,
   InvoiceAuthorityToWeigh,

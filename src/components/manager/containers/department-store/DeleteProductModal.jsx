@@ -35,7 +35,7 @@ const DeleteProductModal = ({ closeModal, product, runFetch }) => {
       const response = await axios.patch(
         `${root}/dept/edit-deptstore/${product.id}`,
         {
-          quantity,
+          quantity: Number(product.quantity) - Number(quantity),
         },
         {
           headers: {

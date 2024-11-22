@@ -18,13 +18,6 @@ const AddProductModal = ({
   const handleAddProduct = async (e) => {
     e.preventDefault();
     setButtonLoading(true);
-    if (quantity < product.quantity) {
-      toast.error("Add a value higher in quantity", {
-        duration: 4500,
-      });
-      setButtonLoading(false);
-      return;
-    }
 
     try {
       const token = localStorage.getItem("token");
@@ -32,7 +25,7 @@ const AddProductModal = ({
       const response = await axios.patch(
         `${root}/dept/edit-deptstore/${product.id}`,
         {
-          quantity,
+          quantity: Number(quantity) + Number(product.quantity),
         },
         {
           headers: { Authorization: `Bearer ${token}` },

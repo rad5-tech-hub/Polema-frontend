@@ -15,6 +15,7 @@ import {
   CashManagementLedger,
   InvoiceAuthorityToWeigh,
   AuthorityToLoad,
+  AllReceipts,
   ViewPharmacyStore,
   LocalPurchaseOrder,
   AuthorityToGiveCash,
@@ -31,6 +32,7 @@ import {
   CustomerPlaceOrder,
   ShelfContent,
   CustomerLedger,
+  AllWayBill,
   AuthorityToWeigh,
   AllProducts,
   CreatePharmacyStore,
@@ -303,15 +305,21 @@ const App = () => {
                     element={<IndividualDepartmentLedger />}
                   />
 
+                  {/* Receipts Route */}
                   <Route
-                    path="/receipt/all-gatepass"
+                    path="/receipts/gate-pass-note"
                     element={<AllGatePass />}
                   />
                   <Route
-                    path="/receipt/all-dispatchnote"
+                    path="/receipts/vehicle-dispatch-note"
                     element={<AllDispatchNote />}
                   />
-                  <Route path="/receipt/all-invoice" element={<AllInvoice />} />
+                  <Route path="/receipts/invoice" element={<AllInvoice />} />
+                  <Route path="/receipts/waybill" element={<AllWayBill />} />
+                  <Route
+                    path="/receipts/official-receipt"
+                    element={<AllReceipts />}
+                  />
                   <Route
                     path="/receipt/create-dispatchnote"
                     element={<CreateDispatchNote />}
