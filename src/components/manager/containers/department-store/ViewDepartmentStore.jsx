@@ -17,7 +17,7 @@ import {
   Spinner,
 } from "@radix-ui/themes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEllipsisV } from "@fortawesome/free-solid-svg-icons";
+import { faEllipsisV, faSquare } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 
 const root = import.meta.env.VITE_ROOT;
@@ -52,6 +52,24 @@ const ViewDepartmentStore = () => {
       toast.error("Failed to fetch store data");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Function to get the right status color based on status
+  const sqColor = (arg) => {
+    switch (arg) {
+      case "In Stock":
+        return "text-green-500";
+        break;
+      case "Out Stock":
+        return "text-red-500";
+        break;
+      case "Low Stock":
+        return "text-yellow-500";
+        break;
+
+      default:
+        break;
     }
   };
 
@@ -140,6 +158,7 @@ const ViewDepartmentStore = () => {
             <Table.ColumnHeaderCell>QUANTITY</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>THRESHOLD VALUE</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>STATUS</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
 
@@ -175,8 +194,14 @@ const ViewDepartmentStore = () => {
                 <Table.RowHeaderCell>
                   {storeItem.thresholdValue}
                 </Table.RowHeaderCell>
-                <Table.RowHeaderCell>{storeItem.status}</Table.RowHeaderCell>
-                <div className="absolute top-1 right-1">
+                <Table.RowHeaderCell>
+                  <FontAwesomeIcon
+                    icon={faSquare}
+                    className={`mr-1 ${sqColor(storeItem.status)}`}
+                  />
+                  {storeItem.status}
+                </Table.RowHeaderCell>
+                <div className="mt-2 mr-1 top-1 right-1">
                   <DropdownMenu.Root>
                     <DropdownMenu.Trigger>
                       <Button variant="surface">
@@ -186,7 +211,7 @@ const ViewDepartmentStore = () => {
                     <DropdownMenu.Content>
                       <DropdownMenu.Group>
                         <DropdownMenu.Item
-                          onClick={() => handleOpenModal("add")}
+                          onClick={() => handleOpenModal("add", storeItem)}
                         >
                           Add
                         </DropdownMenu.Item>
@@ -198,7 +223,7 @@ const ViewDepartmentStore = () => {
                         <DropdownMenu.Item
                           onClick={() => handleOpenModal("delete", storeItem)}
                         >
-                          Delete
+                          Remove
                         </DropdownMenu.Item>
                       </DropdownMenu.Group>
                     </DropdownMenu.Content>
@@ -212,7 +237,9 @@ const ViewDepartmentStore = () => {
 
       {openModal === "add" && (
         <AddProductModal
+          product={selectedProduct}
           closeModal={closeModal}
+          runFetch={fetchStore}
           onAddProduct={handleAddProduct}
         />
       )}
@@ -220,12 +247,14 @@ const ViewDepartmentStore = () => {
         <EditProductModal
           product={selectedProduct}
           closeModal={closeModal}
+          runFetch={fetchStore}
           onEditProduct={handleEditProduct}
         />
       )}
       {openModal === "delete" && (
         <DeleteProductModal
           product={selectedProduct}
+          runFetch={fetchStore}
           closeModal={closeModal}
           onDeleteProduct={handleDeleteProduct}
         />

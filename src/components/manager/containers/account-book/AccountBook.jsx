@@ -191,8 +191,6 @@ const AccountBook = () => {
       ...(!customerOrSupplier() && { departmentId: deptID }),
     };
 
-    console.log(submissionData);
-
     try {
       const response = await axios.post(
         `${root}/customer/create-account`,

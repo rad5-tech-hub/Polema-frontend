@@ -173,7 +173,6 @@ const AllSuspended = () => {
         },
       });
       setLoading(false);
-      console.log(response.data);
 
       setSuspended(response.data.suspendedStaffList);
       toast.success(response.data.message, {
