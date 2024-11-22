@@ -8,7 +8,7 @@ const RemoveModal = ({ closeModal, product }) => {
   };
 
   return (
-    <div className="w-full fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[101]">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[101]">
       <div className="relative lg:w-[40%] w-fit h-[90%] bg-white rounded-lg p-8">
         <b className="text-[20px]">Remove</b>
         <div className="imgContainer w-[81px] h-[81px] border-2 border-dashed border-[#9D9D9D] rounded-[10px] mt-4"></div>

@@ -6,7 +6,7 @@ import IndividualDepartmentLedger from "./department-ledger/IndividualDepartment
 import DepartmentLedger from "./department-ledger/DepartmentLedger";
 import CollectFromGeneralStore from "./raise-tickets/CollectFromGeneralStore";
 import ViewLocalPurchaseOrder from "./raise-tickets/ViewLocalPurchaseOrder";
-
+import ConfirmEmail from "../../../pages/ConfirmEmail";
 import AllDispatchNote from "./receipts/AllDispatchNote";
 import AllGatePass from "./receipts/AllGatePass";
 import AllInvoice from "./receipts/AllInvoice";
@@ -64,8 +64,9 @@ import DepartementStorePlaceOrder from "./department-store/DepartementStorePlace
 import DepartmentStoreViewOrders from "./department-store/DepartmentStoreViewOrders";
 import ViewDepartmentStore from "./department-store/ViewDepartmentStore";
 import ViewPharmacyStore from "./pharmacy-store/ViewPharmacyStore";
-
+import NewPassword from "../../../pages/NewPassword";
 export {
+  NewPassword,
   AllDispatchNote,
   AddAdmin,
   ViewPharmacyStore,
@@ -131,4 +132,5 @@ export {
   WaybillCreateInvoice,
   WaybillInvoice,
   InvoiceAuthorityToWeigh,
+  ConfirmEmail,
 };

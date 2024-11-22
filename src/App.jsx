@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Charts from "./components/Charts";
 import Manager from "./components/manager";
 import DashBoardManager from "./components/manager/DashboardManager";
+import NewPassword from "./pages/NewPassword";
 // import ViewSupplierOrder from "./components/manager/containers";
 
 import {
@@ -79,6 +80,7 @@ import {
 import PrivateRoute from "./components/PrivateRoute"; // Assume this is adjusted for React Router v6
 import "@radix-ui/themes/styles.css";
 import "./index.css";
+import ConfirmEmail from "./pages/ConfirmEmail";
 
 const App = () => {
   return (
@@ -87,6 +89,10 @@ const App = () => {
         {/* Public Routes */}
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
+        {/* confirm email */}
+        <Route path="/confirm-email" element={<ConfirmEmail />} />
+        {/* Create new password */}
+        <Route path="/create-new-password" element={<NewPassword />} />
 
         {/* Protected Routes */}
         <Route path="/admin" element={<DashBoardManager />} />
