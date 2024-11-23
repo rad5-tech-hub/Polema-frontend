@@ -25,7 +25,7 @@ const LoginContent = () => {
 
     try {
       const response = await axios.post(`${root}/admin/login`, {
-        email: e.target[0].value,
+        email: email,
         password: e.target[1].value,
       });
 

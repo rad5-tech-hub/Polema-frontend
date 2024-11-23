@@ -73,11 +73,8 @@ import {
   ViewDepartmentStore,
   DepartmentLedger,
 } from "./components/manager/containers";
-// import {
-//
-// } from "./components/manager/containers/receipts";
 
-import PrivateRoute from "./components/PrivateRoute"; // Assume this is adjusted for React Router v6
+import PrivateRoute from "./components/PrivateRoute";
 import "@radix-ui/themes/styles.css";
 import "./index.css";
 import ConfirmEmail from "./pages/ConfirmEmail";
