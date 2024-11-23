@@ -154,30 +154,6 @@ const ViewPharmacyStore = () => {
                     icon={faPills}
                     className="absolute top-[10px] right-[10px]"
                   />
-                  <DropdownMenu.Root>
-                    <DropdownMenu.Trigger className="mt-2 mr-1">
-                      <Button variant="soft">
-                        <FontAwesomeIcon icon={faEllipsisV} />
-                      </Button>
-                    </DropdownMenu.Trigger>
-                    <DropdownMenu.Content>
-                      <DropdownMenu.Item
-                        onClick={() => openModal("Top Up", item)}
-                      >
-                        Top Up
-                      </DropdownMenu.Item>
-                      <DropdownMenu.Item
-                        onClick={() => openModal("Remove", item)}
-                      >
-                        Remove
-                      </DropdownMenu.Item>
-                      <DropdownMenu.Item
-                        onClick={() => openModal("Edit", item)}
-                      >
-                        Edit
-                      </DropdownMenu.Item>
-                    </DropdownMenu.Content>
-                  </DropdownMenu.Root>
                 </div>
               );
             })
@@ -237,10 +213,15 @@ const ViewPharmacyStore = () => {
                   <Table.Cell>{refractor(item.createdAt)}</Table.Cell>
                   <Table.Cell>{item.product.name}</Table.Cell>
                   <Table.Cell>{item.productTag}</Table.Cell>
-                  <Table.Cell>{item.product.category}</Table.Cell>
+                  <Table.Cell>{item.category}</Table.Cell>
                   <Table.Cell>{item.unit}</Table.Cell>
-                  <Table.Cell>{item.stockValue}</Table.Cell>
-                  <Table.Cell className={`${statusColor} text-[.8em]`}>
+                  <Table.Cell>{item.thresholdValue}</Table.Cell>
+
+                  <Table.Cell>
+                    <FontAwesomeIcon
+                      icon={faSquare}
+                      className={`${statusColor} text-[.8em] mr-2`}
+                    />
                     {item.status}
                   </Table.Cell>
                   <Table.Cell>
@@ -293,7 +274,11 @@ const ViewPharmacyStore = () => {
       </Flex>
 
       {isModalOpen && modalAction === "Top Up" && (
-        <TopUpModal item={selectedItem} closeModal={closeModal} />
+        <TopUpModal
+          item={selectedItem}
+          closeModal={closeModal}
+          product={selectedItem}
+        />
       )}
       {isModalOpen && modalAction === "Remove" && (
         <RemoveModal item={selectedItem} closeModal={closeModal} />

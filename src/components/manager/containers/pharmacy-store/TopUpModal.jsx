@@ -10,37 +10,21 @@ const TopUpModal = ({ closeModal, product, departmentId, onAddProduct }) => {
   // Function to handle product addition submission
   const handleAddProduct = async (e) => {
     e.preventDefault();
-
-    // Validate input fields
-    if (!quantity || !thresholdValue) {
-      toast.error("Please enter both quantity and threshold value.");
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("An error occured, try loggin in again");
       return;
     }
 
     try {
-      const token = localStorage.getItem("token");
-
-      // API call to add product with productId in the payload
-      const response = await axios.patch(
-        `${root}/dept/edit-deptstore`,
+      const response = await axios.post(
+        `${root}/dept/add-quantity-pharm/${product.id}`,
         {
-          productId: product?.productId, // Ensure productId is passed correctly
-          departmentId, // Pass departmentId directly from props
-          quantity,
-          thresholdValue,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
+          amount: quantity,
         }
       );
-
-      // Update product list using callback function from the parent component
-      onAddProduct(response.data.product);
-      toast.success("Product added successfully!");
-      closeModal();
     } catch (error) {
-      console.error("Failed to add product:", error);
-      toast.error("Unable to add product. Please try again later.");
+      console.log(error);
     }
   };
 
@@ -49,19 +33,13 @@ const TopUpModal = ({ closeModal, product, departmentId, onAddProduct }) => {
       <div className="relative lg:w-[40%] w-fit h-[90%] bg-white rounded-lg p-8">
         <b className="text-[20px]">Top up</b>
 
-        {/* Image Upload Section */}
-        <div className="imgEdit flex items-center mt-4 gap-8">
-          <div className="imgContainer w-[81px] h-[81px] border-2 border-dashed border-[#9D9D9D] rounded-[10px]"></div>
-        </div>
-
-        {/* Form for adding product details */}
         <form className="mt-8 flex flex-col gap-6" onSubmit={handleAddProduct}>
           {/* Product Name */}
           <div className="productName flex max-sm:flex-col max-sm:items-start justify-between items-center">
             <label htmlFor="productName">Product Name</label>
             <input
               type="text"
-              placeholder={product?.name || "Show product name"}
+              placeholder={product?.product.name || "Show product name"}
               className="border h-[44px] px-4 lg:w-[273px] rounded-lg"
               readOnly
               disabled
