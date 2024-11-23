@@ -13,10 +13,9 @@ import {
 
 const root = import.meta.env.VITE_ROOT;
 
-const LoginContent = () => {
+const NewPasswordContent = () => {
   const [loading, setLoading] = useState(false); // Spinner state
   const [passwordVisible, setPasswordVisible] = useState(false); // Password visibility state
-  const [email, setEmail] = useState("");
   const navigate = useNavigate();
 
   const handleLoginForm = async (e) => {
@@ -25,7 +24,7 @@ const LoginContent = () => {
 
     try {
       const response = await axios.post(`${root}/admin/login`, {
-        email: email,
+        email: e.target[0].value,
         password: e.target[1].value,
       });
 
@@ -82,7 +81,7 @@ const LoginContent = () => {
           <div style={{ textAlign: "center", color: "#f1f1f1" }}>
             <Heading mb="6">POLEMA</Heading>
           </div>
-          <Card className="p-10 h-[60vh] bg-[#F1F1F1D4] relative">
+          <Card className="p-10 h-[50vh] bg-[#F1F1F1D4] relative">
             <form
               onSubmit={handleLoginForm}
               className="flex flex-col justify-between h-full"
@@ -90,52 +89,29 @@ const LoginContent = () => {
               <div>
                 <div style={{ textAlign: "center" }}>
                   <Heading mb="6" className="text-[#434343]">
-                    USER LOGIN
+                    CHANGE PASSWORD
                   </Heading>
                 </div>
-                <TextField.Root
-                  placeholder="Enter Email"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                  }}
-                  className="mt-4"
-                  size={"3"}
-                >
-                  <TextField.Slot>
-                    <EnvelopeClosedIcon height="16" width="16" />
-                  </TextField.Slot>
-                </TextField.Root>
-
-                <TextField.Root
-                  placeholder="Password"
-                  className="mt-4"
-                  type={passwordVisible ? "text" : "password"} // Toggle between text and password
-                  size={"3"}
-                >
-                  <TextField.Slot>
-                    <LockClosedIcon height="16" width="16" />
-                  </TextField.Slot>
-                  <TextField.Slot
-                    onClick={togglePasswordVisibility}
-                    className="cursor-pointer"
+                <div className="flex flex-col gap-4">
+                  <TextField.Root
+                    placeholder="Enter New Password"
+                    className="mt-4"
+                    size={"3"}
                   >
-                    {passwordVisible ? (
-                      <EyeOpenIcon height="16" width="16" /> // Eye closed icon when visible
-                    ) : (
-                      <EyeClosedIcon height="16" width="16" /> // Eye open icon when hidden
-                    )}
-                  </TextField.Slot>
-                </TextField.Root>
-
-                <p
-                  className="text-right mt-2 text-[.7rem] cursor-pointer underline"
-                  onClick={() => {
-                    navigate(`/confirm-email`);
-                  }}
-                >
-                  Forgot Password?
-                </p>
+                    <TextField.Slot>
+                      <EnvelopeClosedIcon height="16" width="16" />
+                    </TextField.Slot>
+                  </TextField.Root>
+                  <TextField.Root
+                    placeholder="Confirm New Password"
+                    className="mt-4"
+                    size={"3"}
+                  >
+                    <TextField.Slot>
+                      <EnvelopeClosedIcon height="16" width="16" />
+                    </TextField.Slot>
+                  </TextField.Root>
+                </div>
               </div>
 
               <div className="btn w-full">
@@ -160,4 +136,4 @@ const LoginContent = () => {
   );
 };
 
-export default LoginContent;
+export default NewPasswordContent;
