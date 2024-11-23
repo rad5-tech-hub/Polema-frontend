@@ -991,6 +991,34 @@ video {
   height: 100vh;
 }
 
+.h-\[64px\] {
+  height: 64px;
+}
+
+.h-\[70px\] {
+  height: 70px;
+}
+
+.h-\[170px\] {
+  height: 170px;
+}
+
+.h-\[50vh\] {
+  height: 50vh;
+}
+
+.h-\[40vh\] {
+  height: 40vh;
+}
+
+.h-\[30vh\] {
+  height: 30vh;
+}
+
+.h-\[35vh\] {
+  height: 35vh;
+}
+
 .max-h-48 {
   max-height: 12rem;
 }
