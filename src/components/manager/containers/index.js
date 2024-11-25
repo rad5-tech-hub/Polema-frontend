@@ -11,6 +11,7 @@ import AllDispatchNote from "./receipts/AllDispatchNote";
 import AllGatePass from "./receipts/AllGatePass";
 import AllInvoice from "./receipts/AllInvoice";
 import CreateDispatchNote from "./receipts/CreateDispatchNote";
+import EditRole from "./roles/EditRole";
 import CreateGatepass from "./receipts/CreateGatepass";
 import AllReceipts from "./receipts/AllReceipts";
 import CreateInvoice from "./receipts/CreateInvoice";
@@ -123,6 +124,7 @@ export {
   CreateDispatchNote,
   CreateGatepass,
   CreateInvoice,
+  EditRole,
   GatepassReceipt,
   Invoice,
   AllReceipts,

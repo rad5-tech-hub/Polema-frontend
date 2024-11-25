@@ -946,12 +946,20 @@ video {
   height: 35px;
 }
 
+.h-\[35vh\] {
+  height: 35vh;
+}
+
 .h-\[40px\] {
   height: 40px;
 }
 
 .h-\[44px\] {
   height: 44px;
+}
+
+.h-\[50vh\] {
+  height: 50vh;
 }
 
 .h-\[60vh\] {
@@ -989,34 +997,6 @@ video {
 
 .h-screen {
   height: 100vh;
-}
-
-.h-\[64px\] {
-  height: 64px;
-}
-
-.h-\[70px\] {
-  height: 70px;
-}
-
-.h-\[170px\] {
-  height: 170px;
-}
-
-.h-\[50vh\] {
-  height: 50vh;
-}
-
-.h-\[40vh\] {
-  height: 40vh;
-}
-
-.h-\[30vh\] {
-  height: 30vh;
-}
-
-.h-\[35vh\] {
-  height: 35vh;
 }
 
 .max-h-48 {
@@ -1304,6 +1284,12 @@ video {
 
 .gap-8 {
   gap: 2rem;
+}
+
+.space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(0.5rem * var(--tw-space-x-reverse));
+  margin-left: calc(0.5rem * calc(1 - var(--tw-space-x-reverse)));
 }
 
 .space-x-4 > :not([hidden]) ~ :not([hidden]) {

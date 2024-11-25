@@ -180,6 +180,10 @@ const ViewPharmacyStore = () => {
               UNIT
             </Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell className="text-[#919191]">
+              QUANTITY
+            </Table.ColumnHeaderCell>
+
+            <Table.ColumnHeaderCell className="text-[#919191]">
               THRESHOLD VALUE
             </Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell className="text-[#919191]">
@@ -215,6 +219,7 @@ const ViewPharmacyStore = () => {
                   <Table.Cell>{item.productTag}</Table.Cell>
                   <Table.Cell>{item.category}</Table.Cell>
                   <Table.Cell>{item.unit}</Table.Cell>
+                  <Table.Cell>{item.quantity}</Table.Cell>
                   <Table.Cell>{item.thresholdValue}</Table.Cell>
 
                   <Table.Cell>
@@ -276,15 +281,24 @@ const ViewPharmacyStore = () => {
       {isModalOpen && modalAction === "Top Up" && (
         <TopUpModal
           item={selectedItem}
+          runFetch={fetchStore}
           closeModal={closeModal}
           product={selectedItem}
         />
       )}
       {isModalOpen && modalAction === "Remove" && (
-        <RemoveModal item={selectedItem} closeModal={closeModal} />
+        <RemoveModal
+          product={selectedItem}
+          closeModal={closeModal}
+          runFetch={fetchStore}
+        />
       )}
       {isModalOpen && modalAction === "Edit" && (
-        <EditModal item={selectedItem} closeModal={closeModal} />
+        <EditModal
+          product={selectedItem}
+          closeModal={closeModal}
+          runFetch={fetchStore}
+        />
       )}
     </>
   );

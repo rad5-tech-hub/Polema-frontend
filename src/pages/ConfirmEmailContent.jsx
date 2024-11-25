@@ -4,39 +4,46 @@ import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { TextField, Heading, Card, Button } from "@radix-ui/themes";
-import { useParams } from "react-router-dom";
-import {
-  LockClosedIcon,
-  EnvelopeClosedIcon,
-  EyeOpenIcon,
-  EyeClosedIcon,
-} from "@radix-ui/react-icons"; // Add icons for eye open and closed
+
+import { EnvelopeClosedIcon } from "@radix-ui/react-icons";
 
 const root = import.meta.env.VITE_ROOT;
 
 const ConfirmEmailContent = () => {
-  const { id } = useParams();
-  const [loading, setLoading] = useState(false); // Spinner state
-  const [passwordVisible, setPasswordVisible] = useState(false); // Password visibility state
+  const [loading, setLoading] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
   const handleLoginForm = async (e) => {
     e.preventDefault();
-    setLoading(true); // Show spinner
+    setLoading(true);
 
     try {
       const response = await axios.post(`${root}/admin/forgot`, {
         email,
       });
+      toast.success("Password reset link sent to your email.", {
+        style: {
+          padding: "20px",
+        },
+        duration: 4500,
+      });
+      setLoading(false);
+      setEmail("");
     } catch (error) {
-      console.log(error);
+      setLoading(false);
+      if (error.response.status === 404) {
+        setErrorMessage("Email Not Found");
+      }
+      if (error.message.status === 429) {
+        setErrorMessage("Too many requests.Try again in 15 minutes");
+      }
+      if (error.message.status === 500) {
+        setErrorMessage("An error occurred,try again later");
+      }
     }
-  };
-
-  const togglePasswordVisibility = () => {
-    setPasswordVisible(!passwordVisible);
   };
 
   return (
@@ -81,7 +88,7 @@ const ConfirmEmailContent = () => {
                     <EnvelopeClosedIcon height="16" width="16" />
                   </TextField.Slot>
                 </TextField.Root>
-                <p className="text-red-500 text-sm">{errorMessage}</p>
+                <p className="text-red-500 text-sm mb-3">{errorMessage}</p>
               </div>
 
               <div className="btn w-full">

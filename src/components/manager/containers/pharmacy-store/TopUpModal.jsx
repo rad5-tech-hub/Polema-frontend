@@ -1,15 +1,18 @@
 import React, { useState } from "react";
+import { Spinner } from "@radix-ui/themes";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const TopUpModal = ({ closeModal, product, departmentId, onAddProduct }) => {
+const TopUpModal = ({ closeModal, product, runFetch }) => {
   const [quantity, setQuantity] = useState("");
   const [thresholdValue, setThresholdValue] = useState("");
+  const [buttonLoading, setButtonLoading] = useState(false);
   const root = import.meta.env.VITE_ROOT;
 
   // Function to handle product addition submission
   const handleAddProduct = async (e) => {
     e.preventDefault();
+    setButtonLoading(true);
     const token = localStorage.getItem("token");
     if (!token) {
       toast.error("An error occured, try loggin in again");
@@ -17,13 +20,20 @@ const TopUpModal = ({ closeModal, product, departmentId, onAddProduct }) => {
     }
 
     try {
-      const response = await axios.post(
+      const response = await axios.patch(
         `${root}/dept/add-quantity-pharm/${product.id}`,
         {
           amount: quantity,
         }
       );
+      setButtonLoading(false);
+      setTimeout(() => {
+        closeModal();
+      }, 3000);
+
+      runFetch();
     } catch (error) {
+      setButtonLoading(false);
       console.log(error);
     }
   };
@@ -84,7 +94,7 @@ const TopUpModal = ({ closeModal, product, departmentId, onAddProduct }) => {
               type="submit"
               className="rounded-xl shadow-md h-[40px] px-8 bg-[#444242] hover:bg-[#444242]/85 text-white"
             >
-              Add
+              {buttonLoading ? <Spinner /> : "Add"}
             </button>
           </div>
         </form>

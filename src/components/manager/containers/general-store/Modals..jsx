@@ -262,9 +262,7 @@ const RemoveModal = ({ isOpen, onClose, item }) => {
       }, 2000);
       runFetch();
     } catch (error) {
-      toast.error(
-        error?.response?.data?.message || "An error occurred,try again"
-      );
+      toast.error(error?.response?.data?.message);
 
       setButtonLoading(false);
     }

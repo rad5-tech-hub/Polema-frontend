@@ -5,7 +5,6 @@ import Charts from "./components/Charts";
 import Manager from "./components/manager";
 import DashBoardManager from "./components/manager/DashboardManager";
 import NewPassword from "./pages/NewPassword";
-// import ViewSupplierOrder from "./components/manager/containers";
 
 import {
   AddAdmin,
@@ -21,6 +20,7 @@ import {
   LocalPurchaseOrder,
   AuthorityToGiveCash,
   AllWeigh,
+  EditRole,
   ViewPharmacyOrder,
   GeneralStorePlaceOrder,
   SupplierLedger,
@@ -188,6 +188,7 @@ const App = () => {
                     path="admins/suspended-admins"
                     element={<AllSuspended />}
                   />
+                  <Route path="admins/edit-role/:id" element={<EditRole />} />
 
                   {/* Department Routes */}
                   <Route

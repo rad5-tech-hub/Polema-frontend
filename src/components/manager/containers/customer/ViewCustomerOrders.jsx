@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { refractor } from "../../../date";
 import {
   Spinner,
+  Flex,
   Heading,
   Separator,
   Table,
@@ -10,9 +11,11 @@ import {
 } from "@radix-ui/themes";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEllipsisV } from "@fortawesome/free-solid-svg-icons";
+import { faEllipsisV, faFilter } from "@fortawesome/free-solid-svg-icons";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import FilterModal from "./FilterModal";
+
 const root = import.meta.env.VITE_ROOT;
 
 const ViewCustomerOrders = () => {
@@ -20,12 +23,11 @@ const ViewCustomerOrders = () => {
   const [store, setStore] = useState([]);
   const [customerData, setCustomerData] = useState([]);
   const [product, setProducts] = useState([]);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
-  // Function to fetch customers
   const fetchCustomers = async () => {
     const retrToken = localStorage.getItem("token");
 
-    // Check if the token is available
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again", {
         duration: 6500,
@@ -33,7 +35,6 @@ const ViewCustomerOrders = () => {
           padding: "30px",
         },
       });
-
       return;
     }
     try {
@@ -43,34 +44,20 @@ const ViewCustomerOrders = () => {
         },
       });
 
-      {
-        response.data.customers.length === 0
-          ? setCustomerData([])
-          : setCustomerData(response.data.customers);
-      }
-
-      setLoading(false);
+      setCustomerData(
+        response.data.customers.length ? response.data.customers : []
+      );
     } catch (error) {
-      setLoading(false);
-      {
-        error.message
-          ? toast.error(error.message, {
-              duration: 6500,
-              style: {
-                padding: "30px",
-              },
-            })
-          : toast.error("An Error Occured", {
-              duration: 6500,
-              style: {
-                padding: "30px",
-              },
-            });
-      }
+      console.error(error);
+      toast.error("An error occurred", {
+        duration: 6500,
+        style: {
+          padding: "30px",
+        },
+      });
     }
   };
 
-  // Function to fetch products
   const fetchProducts = async () => {
     const retrToken = localStorage.getItem("token");
 
@@ -91,7 +78,6 @@ const ViewCustomerOrders = () => {
     }
   };
 
-  // Function to fetch orders details
   const fetchOrders = async () => {
     const retrToken = localStorage.getItem("token");
 
@@ -112,13 +98,11 @@ const ViewCustomerOrders = () => {
     }
   };
 
-  // Function to get matching products by id
   const getMatchingProductByID = (id) => {
     const products = product.find((item) => item.id === id);
     return products ? products.name : "Product Not Found";
   };
 
-  // Function to get matching customer by id
   const getMatchingCustomerById = (id) => {
     const customers = customerData.find((item) => item.id === id);
     return customers ? customers : "Customer Not Found";
@@ -132,10 +116,21 @@ const ViewCustomerOrders = () => {
 
   return (
     <>
+      {/* <Flex justify={"between"} align={"center"}>
+        
+        <Button
+          size={"3"}
+          color="brown"
+          onClick={() => setIsFilterModalOpen(true)}
+        >
+          <FontAwesomeIcon icon={faFilter} />
+          Filter
+        </Button>
+      </Flex> */}
+
       <Heading>View Orders</Heading>
       <Separator className="my-4 w-full" />
 
-      {/* Table to view orders details */}
       <Table.Root variant="surface" className="mt-4">
         <Table.Header>
           <Table.Row>
@@ -145,6 +140,7 @@ const ViewCustomerOrders = () => {
             <Table.ColumnHeaderCell>QUANTITY</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>PRICE(₦)</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>UNIT</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -154,7 +150,13 @@ const ViewCustomerOrders = () => {
             </div>
           ) : (
             store.map((item, index) => (
-              <Table.Row key={item.id} className="relative">
+              <Table.Row
+                key={item.id}
+                className="relative"
+                onClick={() => {
+                  //add modal functionaity function here
+                }}
+              >
                 <Table.Cell>{refractor(item.createdAt)}</Table.Cell>
                 <Table.Cell>
                   {getMatchingCustomerById(item.customerId).firstname}{" "}
@@ -166,7 +168,7 @@ const ViewCustomerOrders = () => {
                 <Table.Cell>{item.quantity}</Table.Cell>
                 <Table.Cell>{item.price}</Table.Cell>
                 <Table.Cell>{item.unit}</Table.Cell>
-                <div className="absolute right-[3px] mt-1">
+                <div className=" right-[3px] mt-1">
                   <DropdownMenu.Root>
                     <DropdownMenu.Trigger>
                       <Button variant="soft">
@@ -175,24 +177,24 @@ const ViewCustomerOrders = () => {
                     </DropdownMenu.Trigger>
                     <DropdownMenu.Content>
                       <DropdownMenu.Item
-                        onClick={() => {
+                        onClick={() =>
                           navigate(
                             `/admin/customers/customer-ledger/${
                               getMatchingCustomerById(item.customerId).id
                             }`
-                          );
-                        }}
+                          )
+                        }
                       >
                         View Ledger
                       </DropdownMenu.Item>
                       <DropdownMenu.Item
-                        onClick={() => {
+                        onClick={() =>
                           navigate(
                             `/admin/customers/authority-to-weigh/${
                               getMatchingCustomerById(item.customerId).id
                             }/${item.id}`
-                          );
-                        }}
+                          )
+                        }
                       >
                         View Authority
                       </DropdownMenu.Item>
@@ -204,6 +206,10 @@ const ViewCustomerOrders = () => {
           )}
         </Table.Body>
       </Table.Root>
+      <FilterModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+      />
       <Toaster position="top-right" />
     </>
   );
