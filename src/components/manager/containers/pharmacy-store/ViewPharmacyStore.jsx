@@ -25,7 +25,7 @@ import toast from "react-hot-toast";
 // import TopUpModal from "./TopUpModal";
 import RemoveModal from "./RemoveModal";
 
-import AddModal from "./TopupModal";
+import AddModal from "./TopUpModal";
 import EditModal from "./EditModal";
 
 const root = import.meta.env.VITE_ROOT;
