@@ -20,6 +20,7 @@ const DocumentsModal = ({ isOpen, onClose, customerName, id }) => {
   const navigate = useNavigate();
   const [entries, setEntries] = React.useState([]);
   const [failedSearch, setFailedSearch] = React.useState(false);
+  const [docOrders, setDocOrders] = React.useState("");
 
   // Function to generate invoice
   const fetchInvoice = async () => {
@@ -43,6 +44,7 @@ const DocumentsModal = ({ isOpen, onClose, customerName, id }) => {
         }
       );
       setEntries(response.data.ledgerSummary.ledgerEntries);
+      setDocOrders(response.data.order);
     } catch (error) {
       console.log(error);
       setFailedSearch(true);
@@ -126,11 +128,32 @@ const DocumentsModal = ({ isOpen, onClose, customerName, id }) => {
 
               <div className="w-[80px] h-[80px] rounded-md bg-gray-400/40  mt-2 border-2"></div>
               <div className="weigh-details">
-                <p className="p-2">Vehicle NO:</p>
-                <p className="p-2">Driver's Name:</p>
-                <p className="p-2">Tar Quantity:</p>
-                <p className="p-2">Gross Quantity:</p>
-                <p className="p-2">Net Quantity:</p>
+                {docOrders && (
+                  <p className="p-2">
+                    Vehicle NO:{docOrders.authToWeighTickets.vehicleNo}
+                  </p>
+                )}
+
+                {docOrders && (
+                  <p className="p-2">
+                    Driver's Name:{docOrders.authToWeighTickets.driver}
+                  </p>
+                )}
+                {docOrders && (
+                  <p className="p-2">
+                    Tar Quantity:{docOrders.weighBridge.tar}
+                  </p>
+                )}
+                {docOrders && (
+                  <p className="p-2">
+                    Gross Quantity:{docOrders.weighBridge.gross}
+                  </p>
+                )}
+                {docOrders && (
+                  <p className="p-2">
+                    Net Quantity:{docOrders.weighBridge.net}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -145,7 +168,7 @@ const DocumentsModal = ({ isOpen, onClose, customerName, id }) => {
               </button>
               <button
                 onClick={() => {
-                  navigate(`/receipt/create-gatepass/${id}`);
+                  navigate(`/admin/receipt/create-gatepass/${id}`);
                 }}
                 type="button"
                 className="border-[1px] rounded-xl shadow-md h-[40px] px-2 border-[#919191] bg-white hover:bg-gray-50 text-[#919191]"
@@ -153,10 +176,13 @@ const DocumentsModal = ({ isOpen, onClose, customerName, id }) => {
                 Generate Gate Pass
               </button>
               <button
+                onClick={() => {
+                  navigate(`/admin/receipt/create-waybill-invoice/${id}`);
+                }}
                 type="button"
                 className="border-[1px] rounded-xl shadow-md h-[40px] px-2 border-[#919191] bg-white hover:bg-gray-50 text-[#919191]"
               >
-                Generate Receipt
+                Generate Waybill
               </button>
             </Flex>
           </Flex>
