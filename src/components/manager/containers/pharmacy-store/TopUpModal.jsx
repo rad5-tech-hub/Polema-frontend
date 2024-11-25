@@ -3,7 +3,7 @@ import { Spinner } from "@radix-ui/themes";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const TopUpModal = ({ closeModal, product, runFetch }) => {
+const AddModal = ({ closeModal, product, runFetch }) => {
   const [quantity, setQuantity] = useState("");
   const [thresholdValue, setThresholdValue] = useState("");
   const [buttonLoading, setButtonLoading] = useState(false);
@@ -103,4 +103,4 @@ const TopUpModal = ({ closeModal, product, runFetch }) => {
   );
 };
 
-export default TopUpModal;
+export default AddModal;

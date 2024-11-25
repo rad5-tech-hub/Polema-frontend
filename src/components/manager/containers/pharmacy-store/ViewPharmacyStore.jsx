@@ -22,8 +22,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-import TopUpModal from "./TopupModal";
+// import TopUpModal from "./TopUpModal";
 import RemoveModal from "./RemoveModal";
+
+import AddModal from "./TopupModal";
 import EditModal from "./EditModal";
 
 const root = import.meta.env.VITE_ROOT;
@@ -279,7 +281,7 @@ const ViewPharmacyStore = () => {
       </Flex>
 
       {isModalOpen && modalAction === "Top Up" && (
-        <TopUpModal
+        <AddModal
           item={selectedItem}
           runFetch={fetchStore}
           closeModal={closeModal}

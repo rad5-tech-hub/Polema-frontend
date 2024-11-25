@@ -94,7 +94,7 @@ const NewWeigh = () => {
           },
         }
       );
-      toast.success("Ticket Raised Successfully");
+      toast.success("New Weigh Successful");
       setButtonLoading(false);
       setFullName("");
       setQuantityNet("");

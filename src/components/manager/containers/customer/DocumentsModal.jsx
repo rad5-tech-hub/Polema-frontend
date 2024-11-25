@@ -1,7 +1,10 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toast, { Toaster } from "react-hot-toast";
 const root = import.meta.env.VITE_ROOT;
 import axios from "axios";
+import { faClose } from "@fortawesome/free-solid-svg-icons";
 import {
   Flex,
   Text,
@@ -14,6 +17,7 @@ import {
 
 const DocumentsModal = ({ isOpen, onClose, customerName, id }) => {
   if (!isOpen) return null;
+  const navigate = useNavigate();
   const [entries, setEntries] = React.useState([]);
   const [failedSearch, setFailedSearch] = React.useState(false);
 
@@ -27,8 +31,8 @@ const DocumentsModal = ({ isOpen, onClose, customerName, id }) => {
     }
 
     try {
-      const response = await axios.post(
-        `${root}/customer/create-invoice/${id}`,
+      const response = await axios.get(
+        `${root}/customer/get-summary/${id}`,
         {
           body: "",
         },
@@ -38,7 +42,7 @@ const DocumentsModal = ({ isOpen, onClose, customerName, id }) => {
           },
         }
       );
-      setEntries(response.data.invoice.ledgerEntries);
+      setEntries(response.data.ledgerSummary.ledgerEntries);
     } catch (error) {
       console.log(error);
       setFailedSearch(true);
@@ -53,8 +57,8 @@ const DocumentsModal = ({ isOpen, onClose, customerName, id }) => {
   return (
     <>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[101]">
-        <div className="bg-white p-6 rounded shadow-md w-[90%] max-w-[850px]">
-          <Flex justify={"between"}>
+        <div className="bg-white p-6 rounded shadow-md w-[90%] max-w-[850px] relative">
+          <Flex justify={"between"} className="mt-8">
             <div className="left">
               <p className="text-sm font-bold opacity-50">Customer Name:</p>
               <p className="textt-lg font-bold font-space">{customerName}</p>
@@ -131,9 +135,41 @@ const DocumentsModal = ({ isOpen, onClose, customerName, id }) => {
             </div>
           </div>
 
-          <Flex justify="end">
-            <Button size="3" variant="soft" color="brown" onClick={onClose}>
-              Close
+          <Flex justify={"end"} className="mt-5">
+            <Flex gap={"2"}>
+              <button
+                type="button"
+                className="border-[1px] rounded-xl shadow-md h-[40px] px-2 border-[#919191] bg-white hover:bg-gray-50 text-[#919191]"
+              >
+                Generate Invoice
+              </button>
+              <button
+                onClick={() => {
+                  navigate(`/receipt/create-gatepass/${id}`);
+                }}
+                type="button"
+                className="border-[1px] rounded-xl shadow-md h-[40px] px-2 border-[#919191] bg-white hover:bg-gray-50 text-[#919191]"
+              >
+                Generate Gate Pass
+              </button>
+              <button
+                type="button"
+                className="border-[1px] rounded-xl shadow-md h-[40px] px-2 border-[#919191] bg-white hover:bg-gray-50 text-[#919191]"
+              >
+                Generate Receipt
+              </button>
+            </Flex>
+          </Flex>
+
+          <Flex justify="end" className="absolute  right-[10px] top-[10px]">
+            <Button
+              size="3"
+              variant="soft"
+              color="brown"
+              className="cursor-pointer"
+              onClick={onClose}
+            >
+              <FontAwesomeIcon icon={faClose} />
             </Button>
           </Flex>
         </div>

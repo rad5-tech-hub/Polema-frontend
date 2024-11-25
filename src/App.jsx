@@ -329,7 +329,7 @@ const App = () => {
                     element={<CreateDispatchNote />}
                   />
                   <Route
-                    path="/receipt/create-gatepass"
+                    path="/receipt/create-gatepass/:id"
                     element={<CreateGatepass />}
                   />
                   <Route

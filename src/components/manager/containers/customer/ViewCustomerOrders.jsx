@@ -196,7 +196,7 @@ const ViewCustomerOrders = () => {
                           )
                         }
                       >
-                        View Authority
+                        New Authority
                       </DropdownMenu.Item>
                     </DropdownMenu.Content>
                   </DropdownMenu.Root>
