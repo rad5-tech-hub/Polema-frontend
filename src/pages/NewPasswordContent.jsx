@@ -9,13 +9,13 @@ import {
   EnvelopeClosedIcon,
   EyeOpenIcon,
   EyeClosedIcon,
-} from "@radix-ui/react-icons"; // Add icons for eye open and closed
+} from "@radix-ui/react-icons";
 
 const root = import.meta.env.VITE_ROOT;
 
 const NewPasswordContent = () => {
-  const [loading, setLoading] = useState(false); // Spinner state
-  const [passwordVisible, setPasswordVisible] = useState(false); // Password visibility state
+  const [loading, setLoading] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const navigate = useNavigate();
 
   const handleLoginForm = async (e) => {

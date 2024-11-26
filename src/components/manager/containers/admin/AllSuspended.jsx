@@ -175,12 +175,6 @@ const AllSuspended = () => {
       setLoading(false);
 
       setSuspended(response.data.suspendedStaffList);
-      toast.success(response.data.message, {
-        duration: 6500,
-        style: {
-          padding: "30px",
-        },
-      });
     } catch (error) {
       setLoading(false);
       toast.error(error.response?.data?.message || error.message, {

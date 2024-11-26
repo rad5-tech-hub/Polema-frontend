@@ -52,7 +52,7 @@ const CreateRole = ({ child, setChild }) => {
 
   // Fetch token from local storage
   const fetchToken = async () => {
-    const retrToken = await localStorage.getItem("token");
+    const retrToken = localStorage.getItem("token");
 
     setToken(retrToken);
   };
@@ -103,12 +103,6 @@ const CreateRole = ({ child, setChild }) => {
         );
 
         console.log(response);
-        toast.success("Role created successfully", {
-          duration: 6500,
-          style: {
-            padding: "25px",
-          },
-        });
       } catch (error) {
         if (error.response) {
           console.log(error.response.data);
@@ -199,6 +193,7 @@ const CreateRole = ({ child, setChild }) => {
                   placeholder="Enter Role"
                   className=""
                   type="text"
+                  required
                   id="role"
                   size={"3"}
                 ></TextField.Root>

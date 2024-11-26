@@ -186,7 +186,6 @@ const AccountBook = () => {
 
       [isCustomer() ? "credit" : "debit"]: basePrice,
       comments: comment,
-      bankName,
       ...(isCustomer() === null && { other: otherName }),
       ...(!customerOrSupplier() && { departmentId: deptID }),
     };
