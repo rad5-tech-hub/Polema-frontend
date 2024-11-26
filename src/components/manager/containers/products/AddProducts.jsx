@@ -90,7 +90,7 @@ const AddProducts = () => {
 
     try {
       const response = await axios.get(`${root}/dept/get-department`);
-      console.log(response);
+
       setDepartment(response.data.departments);
     } catch (error) {
       console.log(error);
