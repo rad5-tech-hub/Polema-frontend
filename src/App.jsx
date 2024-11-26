@@ -5,7 +5,6 @@ import Charts from "./components/Charts";
 import Manager from "./components/manager";
 import DashBoardManager from "./components/manager/DashboardManager";
 import NewPassword from "./pages/NewPassword";
-// import ViewSupplierOrder from "./components/manager/containers";
 
 import {
   AddAdmin,
@@ -21,6 +20,7 @@ import {
   LocalPurchaseOrder,
   AuthorityToGiveCash,
   AllWeigh,
+  EditRole,
   ViewPharmacyOrder,
   GeneralStorePlaceOrder,
   SupplierLedger,
@@ -188,6 +188,7 @@ const App = () => {
                     path="admins/suspended-admins"
                     element={<AllSuspended />}
                   />
+                  <Route path="admins/edit-role/:id" element={<EditRole />} />
 
                   {/* Department Routes */}
                   <Route
@@ -328,7 +329,7 @@ const App = () => {
                     element={<CreateDispatchNote />}
                   />
                   <Route
-                    path="/receipt/create-gatepass"
+                    path="/receipt/create-gatepass/:id"
                     element={<CreateGatepass />}
                   />
                   <Route
@@ -349,7 +350,7 @@ const App = () => {
                     element={<ReceiptDispatchNote />}
                   />
                   <Route
-                    path="/receipt/create-waybill-invoice"
+                    path="/receipt/create-waybill-invoice/:id"
                     element={<WaybillCreateInvoice />}
                   />
                   <Route

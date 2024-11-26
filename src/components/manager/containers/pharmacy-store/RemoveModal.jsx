@@ -1,23 +1,66 @@
 import React from "react";
+import { Spinner } from "@radix-ui/themes";
+import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
+const root = import.meta.env.VITE_ROOT;
 
-const RemoveModal = ({ closeModal, product }) => {
-  // Function to delete prodduct
+const RemoveModal = ({ closeModal, product, runFetch }) => {
+  const [quantity, setQuantity] = React.useState("");
+  const [buttonLoading, setButtonLoading] = React.useState(false);
   const handleDeleteSubmit = async (e) => {
     e.preventDefault();
-    console.log(e);
+    setButtonLoading(true);
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("An error occurred, try logging in again", {
+        style: {
+          padding: "20px",
+        },
+        duration: 6000,
+      });
+      return;
+    }
+
+    try {
+      const response = await axios.patch(
+        `${root}/dept/remove-quantity-pharm/${product.id}`,
+        {
+          amount: quantity,
+        }
+      );
+
+      setTimeout(() => {
+        closeModal();
+      }, 2500);
+
+      runFetch();
+    } catch (error) {
+      console.log(error);
+      setButtonLoading(false);
+      toast.error(
+        error.response?.data?.message || "An error occured ,try again later",
+        {
+          style: {
+            padding: "20px",
+          },
+          duration: 5000,
+        }
+      );
+    }
   };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[101]">
       <div className="relative lg:w-[40%] w-fit h-[90%] bg-white rounded-lg p-8">
         <b className="text-[20px]">Remove</b>
-        <div className="imgContainer w-[81px] h-[81px] border-2 border-dashed border-[#9D9D9D] rounded-[10px] mt-4"></div>
 
         <form
           className="mt-8 flex flex-col gap-6"
           onSubmit={handleDeleteSubmit}
         >
-          <div className="productName flex max-sm:flex-col max-sm:items-start justify-between items-center">
+          <div className="productName flex gap-4 max-sm:flex-col max-sm:items-start justify-between items-center">
             <label htmlFor="productName">Product Name</label>
             <input
               type="text"
@@ -28,7 +71,7 @@ const RemoveModal = ({ closeModal, product }) => {
             />
           </div>
 
-          <div className="unit flex max-sm:flex-col max-sm:items-start justify-between items-center">
+          <div className="unit flex  gap-4  max-sm:flex-col max-sm:items-start justify-between items-center">
             <label htmlFor="unit">Unit</label>
             <input
               type="text"
@@ -39,9 +82,13 @@ const RemoveModal = ({ closeModal, product }) => {
             />
           </div>
 
-          <div className="productName flex max-sm:flex-col max-sm:items-start justify-between items-center">
-            <label htmlFor="quantityRemoved">Quantity Removed</label>
+          <div className="productName  gap-4  flex max-sm:flex-col max-sm:items-start justify-between items-center">
+            <label htmlFor="quantityRemoved">Quantity </label>
             <input
+              value={quantity}
+              onChange={(e) => {
+                setQuantity(e.target.value);
+              }}
               type="text"
               placeholder="Enter Quantity"
               className="border h-[44px] px-4 lg:w-[273px] rounded-lg"
@@ -60,11 +107,12 @@ const RemoveModal = ({ closeModal, product }) => {
               type="submit"
               className="rounded-xl shadow-md h-[40px] px-8 bg-[#444242] hover:bg-[#444242]/85 text-white"
             >
-              Remove
+              {buttonLoading ? <Spinner /> : "Remove"}
             </button>
           </div>
         </form>
       </div>
+      <Toaster position="top-right" />
     </div>
   );
 };

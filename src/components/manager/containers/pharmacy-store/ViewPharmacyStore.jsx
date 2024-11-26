@@ -22,8 +22,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-import TopUpModal from "./TopupModal";
+// import TopUpModal from "./TopUpModal";
 import RemoveModal from "./RemoveModal";
+
+import AddModal from "./AddModal";
 import EditModal from "./EditModal";
 
 const root = import.meta.env.VITE_ROOT;
@@ -154,30 +156,6 @@ const ViewPharmacyStore = () => {
                     icon={faPills}
                     className="absolute top-[10px] right-[10px]"
                   />
-                  <DropdownMenu.Root>
-                    <DropdownMenu.Trigger className="mt-2 mr-1">
-                      <Button variant="soft">
-                        <FontAwesomeIcon icon={faEllipsisV} />
-                      </Button>
-                    </DropdownMenu.Trigger>
-                    <DropdownMenu.Content>
-                      <DropdownMenu.Item
-                        onClick={() => openModal("Top Up", item)}
-                      >
-                        Top Up
-                      </DropdownMenu.Item>
-                      <DropdownMenu.Item
-                        onClick={() => openModal("Remove", item)}
-                      >
-                        Remove
-                      </DropdownMenu.Item>
-                      <DropdownMenu.Item
-                        onClick={() => openModal("Edit", item)}
-                      >
-                        Edit
-                      </DropdownMenu.Item>
-                    </DropdownMenu.Content>
-                  </DropdownMenu.Root>
                 </div>
               );
             })
@@ -203,6 +181,10 @@ const ViewPharmacyStore = () => {
             <Table.ColumnHeaderCell className="text-[#919191]">
               UNIT
             </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-[#919191]">
+              QUANTITY
+            </Table.ColumnHeaderCell>
+
             <Table.ColumnHeaderCell className="text-[#919191]">
               THRESHOLD VALUE
             </Table.ColumnHeaderCell>
@@ -237,10 +219,16 @@ const ViewPharmacyStore = () => {
                   <Table.Cell>{refractor(item.createdAt)}</Table.Cell>
                   <Table.Cell>{item.product.name}</Table.Cell>
                   <Table.Cell>{item.productTag}</Table.Cell>
-                  <Table.Cell>{item.product.category}</Table.Cell>
+                  <Table.Cell>{item.category}</Table.Cell>
                   <Table.Cell>{item.unit}</Table.Cell>
-                  <Table.Cell>{item.stockValue}</Table.Cell>
-                  <Table.Cell className={`${statusColor} text-[.8em]`}>
+                  <Table.Cell>{item.quantity}</Table.Cell>
+                  <Table.Cell>{item.thresholdValue}</Table.Cell>
+
+                  <Table.Cell>
+                    <FontAwesomeIcon
+                      icon={faSquare}
+                      className={`${statusColor} text-[.8em] mr-2`}
+                    />
                     {item.status}
                   </Table.Cell>
                   <Table.Cell>
@@ -293,13 +281,26 @@ const ViewPharmacyStore = () => {
       </Flex>
 
       {isModalOpen && modalAction === "Top Up" && (
-        <TopUpModal item={selectedItem} closeModal={closeModal} />
+        <AddModal
+          item={selectedItem}
+          runFetch={fetchStore}
+          closeModal={closeModal}
+          product={selectedItem}
+        />
       )}
       {isModalOpen && modalAction === "Remove" && (
-        <RemoveModal item={selectedItem} closeModal={closeModal} />
+        <RemoveModal
+          product={selectedItem}
+          closeModal={closeModal}
+          runFetch={fetchStore}
+        />
       )}
       {isModalOpen && modalAction === "Edit" && (
-        <EditModal item={selectedItem} closeModal={closeModal} />
+        <EditModal
+          product={selectedItem}
+          closeModal={closeModal}
+          runFetch={fetchStore}
+        />
       )}
     </>
   );

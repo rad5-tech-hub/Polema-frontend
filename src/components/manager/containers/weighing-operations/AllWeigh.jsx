@@ -6,6 +6,7 @@ const root = import.meta.env.VITE_ROOT;
 
 const AllWeigh = () => {
   const [weighDetails, setWeighDetails] = React.useState([]);
+  const [failedSearch, setFailedSearch] = React.useState(false);
 
   // Function to fetch all weigh details
   const fetchWeighDetails = async () => {
@@ -20,6 +21,9 @@ const AllWeigh = () => {
       setWeighDetails(response.data.data);
     } catch (error) {
       console.log(error);
+      {
+        error.response.status === 404 && setFailedSearch(true);
+      }
     }
   };
 
@@ -49,7 +53,9 @@ const AllWeigh = () => {
         </Table.Header>
         <Table.Body>
           {weighDetails.length === 0 ? (
-            <Spinner />
+            <div className="p-4">
+              {failedSearch ? "No records found" : <Spinner />}
+            </div>
           ) : (
             weighDetails.map((item) => {
               return (

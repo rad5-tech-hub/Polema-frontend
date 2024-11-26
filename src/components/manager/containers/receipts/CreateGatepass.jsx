@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 
+import { useParams } from "react-router-dom";
+
 const CreateGatepass = () => {
+  const { id } = useParams();
+
   const [openDropdown, setOpenDropdown] = useState(""); // Tracks which dropdown is open
   const [selectedRecipient, setSelectedRecipient] = useState("");
   const [selectedProduct, setSelectedProduct] = useState("");

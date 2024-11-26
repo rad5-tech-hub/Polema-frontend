@@ -1,46 +1,40 @@
 import React, { useState } from "react";
+import { Spinner } from "@radix-ui/themes";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const TopUpModal = ({ closeModal, product, departmentId, onAddProduct }) => {
+const AddModal = ({ closeModal, product, runFetch }) => {
   const [quantity, setQuantity] = useState("");
   const [thresholdValue, setThresholdValue] = useState("");
+  const [buttonLoading, setButtonLoading] = useState(false);
   const root = import.meta.env.VITE_ROOT;
 
   // Function to handle product addition submission
   const handleAddProduct = async (e) => {
     e.preventDefault();
-
-    // Validate input fields
-    if (!quantity || !thresholdValue) {
-      toast.error("Please enter both quantity and threshold value.");
+    setButtonLoading(true);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("An error occured, try loggin in again");
       return;
     }
 
     try {
-      const token = localStorage.getItem("token");
-
-      // API call to add product with productId in the payload
       const response = await axios.patch(
-        `${root}/dept/edit-deptstore`,
+        `${root}/dept/add-quantity-pharm/${product.id}`,
         {
-          productId: product?.productId, // Ensure productId is passed correctly
-          departmentId, // Pass departmentId directly from props
-          quantity,
-          thresholdValue,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
+          amount: quantity,
         }
       );
+      setButtonLoading(false);
+      setTimeout(() => {
+        closeModal();
+      }, 3000);
 
-      // Update product list using callback function from the parent component
-      onAddProduct(response.data.product);
-      toast.success("Product added successfully!");
-      closeModal();
+      runFetch();
     } catch (error) {
-      console.error("Failed to add product:", error);
-      toast.error("Unable to add product. Please try again later.");
+      setButtonLoading(false);
+      console.log(error);
     }
   };
 
@@ -49,19 +43,13 @@ const TopUpModal = ({ closeModal, product, departmentId, onAddProduct }) => {
       <div className="relative lg:w-[40%] w-fit h-[90%] bg-white rounded-lg p-8">
         <b className="text-[20px]">Top up</b>
 
-        {/* Image Upload Section */}
-        <div className="imgEdit flex items-center mt-4 gap-8">
-          <div className="imgContainer w-[81px] h-[81px] border-2 border-dashed border-[#9D9D9D] rounded-[10px]"></div>
-        </div>
-
-        {/* Form for adding product details */}
         <form className="mt-8 flex flex-col gap-6" onSubmit={handleAddProduct}>
           {/* Product Name */}
           <div className="productName flex max-sm:flex-col max-sm:items-start justify-between items-center">
             <label htmlFor="productName">Product Name</label>
             <input
               type="text"
-              placeholder={product?.name || "Show product name"}
+              placeholder={product?.product.name || "Show product name"}
               className="border h-[44px] px-4 lg:w-[273px] rounded-lg"
               readOnly
               disabled
@@ -106,7 +94,7 @@ const TopUpModal = ({ closeModal, product, departmentId, onAddProduct }) => {
               type="submit"
               className="rounded-xl shadow-md h-[40px] px-8 bg-[#444242] hover:bg-[#444242]/85 text-white"
             >
-              Add
+              {buttonLoading ? <Spinner /> : "Add"}
             </button>
           </div>
         </form>
@@ -115,4 +103,4 @@ const TopUpModal = ({ closeModal, product, departmentId, onAddProduct }) => {
   );
 };
 
-export default TopUpModal;
+export default AddModal;

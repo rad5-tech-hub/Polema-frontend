@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import DocumentsModal from "./DocumentsModal";
 import toast, { Toaster } from "react-hot-toast";
 import { refractor } from "../../../date";
 import { useParams } from "react-router-dom";
@@ -14,6 +15,8 @@ const IndividualCustomerLedger = () => {
   const [customer, setCustomers] = useState([]);
   const [entries, setEntries] = useState([]);
   const [products, setProducts] = useState([]);
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [transactionId, setTransactionId] = useState("");
 
   // Fucntion to fetch customers
   const fetchCustomers = async () => {
@@ -92,6 +95,13 @@ const IndividualCustomerLedger = () => {
     return product ? product.name : "Product not Found";
   };
 
+  // Function handle opening of modal and other functionalities
+  const handleModal = (tranxId) => {
+    if (tranxId === null) return;
+    setModalOpen(true);
+    setTransactionId(tranxId);
+  };
+
   React.useEffect(() => {
     fetchCustomers();
     fetchProducts();
@@ -138,7 +148,13 @@ const IndividualCustomerLedger = () => {
           ) : (
             entries.map((entry, index) => {
               return (
-                <Table.Row key={index}>
+                <Table.Row
+                  key={index}
+                  className="cursor-pointer hover:bg-gray-300/10"
+                  onClick={() => {
+                    handleModal(entry.tranxId);
+                  }}
+                >
                   <Table.Cell>{refractor(entry.createdAt)}</Table.Cell>
                   <Table.Cell>{getProductbyID(entry.productId)}</Table.Cell>
                   <Table.Cell>{entry.quantity}</Table.Cell>
@@ -156,6 +172,14 @@ const IndividualCustomerLedger = () => {
           )}
         </Table.Body>
       </Table.Root>
+      <DocumentsModal
+        isOpen={isModalOpen}
+        onClose={() => setModalOpen(false)}
+        customerName={`${getCustomerByID(id).firstname} ${
+          getCustomerByID(id).lastname
+        }`}
+        id={transactionId}
+      />
     </>
   );
 };
