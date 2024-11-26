@@ -140,6 +140,7 @@ const CreateInvoice = () => {
             <p>Send To:</p>
             <Select.Root
               size={"3"}
+              required
               disabled={superAdmins.length === 0}
               onValueChange={(val) => setAdminId(val)}
             >

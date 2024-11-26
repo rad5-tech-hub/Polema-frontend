@@ -253,6 +253,7 @@ const AllSuppliers = () => {
               <Table.ColumnHeaderCell>EMAIL</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell>ADDRESS</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell>PHONE</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
             </Table.Row>
           </Table.Header>
           {pageLoading ? (
@@ -278,7 +279,7 @@ const AllSuppliers = () => {
                       <Table.Cell>{supplier.address}</Table.Cell>
                       <Table.Cell>{supplier.phoneNumber}</Table.Cell>
                       <Table.Cell>
-                        <div className="absolute right-4 top-2">
+                        <div className=" right-4 top-2">
                           <DropdownMenu.Root>
                             <DropdownMenu.Trigger>
                               <Button

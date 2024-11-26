@@ -102,7 +102,12 @@ const CreateRole = ({ child, setChild }) => {
           }
         );
 
-        console.log(response);
+        toast.success("Role created successully", {
+          style: {
+            padding: "20px",
+          },
+          duration: 10000,
+        });
       } catch (error) {
         if (error.response) {
           console.log(error.response.data);

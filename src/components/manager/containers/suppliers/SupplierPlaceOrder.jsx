@@ -93,7 +93,7 @@ const SupplierPlaceOrder = () => {
       productId: selectedProductId,
       quantity,
       price: selectedUnit.price[0].amount,
-      comments: comment,
+      ...(comment && { comments: comment }),
       unit: selectedUnit.price[0].unit,
     };
 
@@ -101,7 +101,12 @@ const SupplierPlaceOrder = () => {
       await axios.post(`${root}/customer/raise-supplier-order`, orderData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success("Order placed successfully!");
+      toast.success("Order placed successfully!", {
+        style: {
+          padding: "20px",
+        },
+        duration: 10000,
+      });
       setBasePrice("");
       setSelectedCustomerId("");
       setSelectedProductId("");

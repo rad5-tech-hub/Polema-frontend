@@ -654,10 +654,6 @@ video {
   right: 2rem;
 }
 
-.right-\[-50px\] {
-  right: -50px;
-}
-
 .right-\[-5px\] {
   right: -5px;
 }
@@ -1031,8 +1027,8 @@ video {
   width: 8rem;
 }
 
-.w-96 {
-  width: 24rem;
+.w-80 {
+  width: 20rem;
 }
 
 .w-\[100\%\] {
@@ -1122,10 +1118,6 @@ video {
 
 .w-full {
   width: 100%;
-}
-
-.w-80 {
-  width: 20rem;
 }
 
 .min-w-\[50px\] {
