@@ -106,20 +106,6 @@ const DocumentsModal = ({ isOpen, onClose, customerName, id }) => {
               <p className=" opacity-40 text-sm mt-4 mb-3">
                 Additional Product
               </p>
-              <Grid columns={"2"} gap={"3"}>
-                <div>
-                  <Text>Item Name</Text>
-                  <TextField.Root placeholder="Input Name" />
-                </div>
-                <div>
-                  <Text>Price</Text>
-                  <TextField.Root placeholder="Enter Price" />
-                </div>
-                <div>
-                  <Text>Quantity Ordered</Text>
-                  <TextField.Root placeholder="Enter Quantity" />
-                </div>
-              </Grid>
             </div>
             <div className="right  p-4 w-[40%]">
               <Text className="font-bold font-amsterdam">
