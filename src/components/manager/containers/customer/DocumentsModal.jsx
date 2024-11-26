@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toast, { Toaster } from "react-hot-toast";
@@ -21,6 +21,7 @@ const DocumentsModal = ({ isOpen, onClose, customerName, id }) => {
   const [entries, setEntries] = React.useState([]);
   const [failedSearch, setFailedSearch] = React.useState(false);
   const [docOrders, setDocOrders] = React.useState("");
+  const [summary, setSummary] = useState("");
 
   // Function to generate invoice
   const fetchInvoice = async () => {
@@ -44,6 +45,7 @@ const DocumentsModal = ({ isOpen, onClose, customerName, id }) => {
         }
       );
       setEntries(response.data.ledgerSummary.ledgerEntries);
+      setSummary(response.data.ledgerSummary);
       setDocOrders(response.data.order);
     } catch (error) {
       console.log(error);
@@ -74,8 +76,17 @@ const DocumentsModal = ({ isOpen, onClose, customerName, id }) => {
           <Separator className="mt-4 w-full" />
           <div className="flex justify-between w-full">
             <div className="left w-[60%] border-black/30 p-4 border-r-2">
-              <Flex justify={"between"} cl>
-                <p className="text-green-500">Credit:</p>
+              <Flex justify={"between"}>
+                {summary.credit !== "0.00" ? (
+                  <p className="text-green-500">
+                    Previous Credit: {summary.credit}
+                  </p>
+                ) : (
+                  <p className="text-green-500">
+                    Previous Credit: {summary.credit}
+                  </p>
+                )}
+
                 <p>Paid to:</p>
               </Flex>
 
@@ -96,51 +107,77 @@ const DocumentsModal = ({ isOpen, onClose, customerName, id }) => {
               ) : (
                 entries.map((entry) => {
                   return (
-                    <p className="p-2">
-                      {entry.quantity} {entry.unit}
-                    </p>
+                    <Grid className="p-1" gap={"1"} columns={"3"}>
+                      <p className="p-1 text-xs">
+                        {entry.creditType === null &&
+                          `${entry.quantity} ${entry.unit} of`}{" "}
+                        {entry.product.name}
+                      </p>
+                      <p className="p-1 text-xs">
+                        {entry.creditType !== null && (
+                          <p>Paid with {entry.creditType}</p>
+                        )}
+                      </p>
+                      <p
+                        className={`${
+                          entry.creditType === null
+                            ? "text-red-500"
+                            : "text-green-500"
+                        } text-xs p-1`}
+                      >
+                        {entry.debit}
+                      </p>
+                    </Grid>
                   );
                 })
               )}
-
-              <p className=" opacity-40 text-sm mt-4 mb-3">
-                Additional Product
-              </p>
             </div>
             <div className="right  p-4 w-[40%]">
               <Text className="font-bold font-amsterdam">
                 Weigh Bridge Summary
               </Text>
 
-              <div className="w-[80px] h-[80px] rounded-md bg-gray-400/40  mt-2 border-2"></div>
-              <div className="weigh-details">
-                {docOrders && (
-                  <p className="p-2">
-                    Vehicle NO:{docOrders.authToWeighTickets.vehicleNo}
-                  </p>
-                )}
+              <div
+                className="w-[80px] h-[80px] rounded-md bg-gray-400/40 mt-2 border-2"
+                style={{
+                  backgroundImage: entries[0]?.weighImage
+                    ? `url(${entries[0].weighImage})`
+                    : undefined,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              ></div>
 
-                {docOrders && (
-                  <p className="p-2">
-                    Driver's Name:{docOrders.authToWeighTickets.driver}
-                  </p>
-                )}
-                {docOrders && (
-                  <p className="p-2">
-                    Tar Quantity:{docOrders.weighBridge.tar}
-                  </p>
-                )}
-                {docOrders && (
-                  <p className="p-2">
-                    Gross Quantity:{docOrders.weighBridge.gross}
-                  </p>
-                )}
-                {docOrders && (
-                  <p className="p-2">
-                    Net Quantity:{docOrders.weighBridge.net}
-                  </p>
-                )}
-              </div>
+              {docOrders.authToWeighTickets !== null && (
+                <div className="weigh-details">
+                  {docOrders && (
+                    <p className="p-2">
+                      Vehicle NO:{docOrders.authToWeighTickets.vehicleNo}
+                    </p>
+                  )}
+
+                  {docOrders && (
+                    <p className="p-2">
+                      Driver's Name:{docOrders.authToWeighTickets.driver}
+                    </p>
+                  )}
+                  {docOrders && (
+                    <p className="p-2">
+                      Tar Quantity:{docOrders.weighBridge.tar}
+                    </p>
+                  )}
+                  {docOrders && (
+                    <p className="p-2">
+                      Gross Quantity:{docOrders.weighBridge.gross}
+                    </p>
+                  )}
+                  {docOrders && (
+                    <p className="p-2">
+                      Net Quantity:{docOrders.weighBridge.net}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -148,6 +185,9 @@ const DocumentsModal = ({ isOpen, onClose, customerName, id }) => {
             <Flex gap={"2"}>
               <button
                 type="button"
+                onClick={() => {
+                  navigate(`/admin/receipt/create-invoice/${id}`);
+                }}
                 className="border-[1px] rounded-xl shadow-md h-[40px] px-2 border-[#919191] bg-white hover:bg-gray-50 text-[#919191]"
               >
                 Generate Invoice

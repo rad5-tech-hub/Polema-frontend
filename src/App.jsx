@@ -333,7 +333,7 @@ const App = () => {
                     element={<CreateGatepass />}
                   />
                   <Route
-                    path="/receipt/create-invoice"
+                    path="/receipt/create-invoice/:id"
                     element={<CreateInvoice />}
                   />
                   <Route
