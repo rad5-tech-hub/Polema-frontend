@@ -1,7 +1,11 @@
 import React from "react";
 import { Table, Heading } from "@radix-ui/themes";
+import axios from "axios";
+const root = import.meta.env.VITE_ROOT;
 
 const AllInvoice = () => {
+  // Function to fetch invoice details
+
   return (
     <>
       <Heading>View all Invoice</Heading>
