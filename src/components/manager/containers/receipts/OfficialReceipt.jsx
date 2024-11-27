@@ -1,9 +1,33 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+const root = import.meta.env.VITE_ROOT;
 import { faPrint } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import polemaLogo from "../../../../static/image/polema-logo.png";
+import toast from "react-hot-toast";
 
 const OfficialReceipt = () => {
+  const { id } = useParams();
+  const [receiptDetails, setReceiptDetails] = useState({});
+  // Function to fetch receipt details
+  // const fetchDetails = async () => {
+  //   const token = localStorage.getItem("");
+
+  //   if (!token) {
+  //     toast.error("An error occurred, try logging in again");
+  //     return;
+  //   }
+
+  //   try {
+  //     const resposnse = await axios.get(`${root}/`)
+  //   } catch (error) {
+
+  //     console.log(error);
+
+  //   }
+  // };
+
   const receiptRef = useRef();
 
   const handlePrint = () => {

@@ -341,7 +341,7 @@ const App = () => {
                   />
                   <Route path="/receipt/invoices" element={<Invoice />} />
                   <Route
-                    path="/receipt/official-receipt"
+                    path="/receipt/official-receipt/:id"
                     element={<OfficialReceipt />}
                   />
 

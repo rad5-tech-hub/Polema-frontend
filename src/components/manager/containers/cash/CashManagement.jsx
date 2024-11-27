@@ -181,7 +181,7 @@ const CashManagement = () => {
                 className="w-full mt-2"
                 placeholder="Select Admin"
               />
-              <Select.Content>
+              <Select.Content position="popper">
                 {admins.map((admin) => (
                   <Select.Item key={admin.id} value={admin.id}>
                     {admin.firstname} {admin.lastname}

@@ -159,9 +159,6 @@ const CreateRole = ({ child, setChild }) => {
       setPermissionBox(response.data.navParentsWithPermissions);
       console.log(response);
 
-      {
-        response.status === 200 && toast.success("Loaded Successfully.");
-      }
       setPermissionsLoading(false);
     } catch (err) {
       toast.error(err.message, {
