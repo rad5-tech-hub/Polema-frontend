@@ -100,8 +100,9 @@ const CreateGatepass = () => {
           adminId,
         }
       );
-      console.log(secondResponse);
-
+      toast.success("Successfully sent to admin", {
+        duration: 10000,
+      });
       setButtonLoading(false);
       resetForm();
     } catch (error) {

@@ -70,6 +70,9 @@ const Notifications = () => {
       "LPO",
       "cash ticket",
       "Authority to collect from General Store",
+      "vehicle dispatch receipt",
+      "Invoice",
+      "gatepass",
     ];
 
     const matchingNotification = possibleNotifications.find((notification) =>
@@ -86,6 +89,12 @@ const Notifications = () => {
           return "/admin/approve-cash-ticket/";
         case "Authority to collect from General Store":
           return "/admin/approve-store-auth/";
+        case "vehicle dispatch receipt":
+          return "/customer/approve-vehicle/";
+        case "Invoice":
+          return "/customer/approveInvoice/";
+        case "gatepass":
+          return "/customer/approve-gatepass/";
         default:
           console.log("Unknown notification type.");
           return null;
@@ -106,6 +115,15 @@ const Notifications = () => {
         break;
       case "store":
         return "/admin/reject-store-auth";
+      case "gatepass":
+        return "/customer/reject-gatepass";
+
+      case "invoice":
+        return "/customer/rejectInvoice";
+      case "cash":
+        return "/admin/reject-cash-ticket";
+      case "vehicle":
+        return "/customer/reject-vehicle";
 
       default:
         break;

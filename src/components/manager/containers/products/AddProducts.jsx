@@ -10,6 +10,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
+import { LoaderIcon } from "react-hot-toast";
 import * as Switch from "@radix-ui/react-switch";
 import {
   Card,
@@ -413,7 +414,7 @@ const AddProducts = () => {
             type="submit"
             disabled={isloading}
           >
-            {isloading ? <Spinner /> : "Create"}
+            {isloading ? <LoaderIcon /> : "Create"}
           </Button>
         </Flex>
       </form>

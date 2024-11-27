@@ -14,6 +14,8 @@ const root = import.meta.env.VITE_ROOT;
 const AllGatePass = () => {
   const navigate = useNavigate();
   const [passDetails, setPassDetails] = useState([]);
+  const [failedSearch, setFailedSearch] = useState(false);
+  const [failedText, setFailedText] = useState("");
 
   // Function to fetch gatepass details
   const fetchGatePass = async () => {
@@ -36,6 +38,10 @@ const AllGatePass = () => {
         },
       });
       setPassDetails(response.data.gatePasses);
+      if (response.data.gatePasses.length === 0) {
+        setFailedSearch(true);
+        setFailedText("No records");
+      }
     } catch (error) {
       console.log(error);
     }
@@ -92,7 +98,7 @@ const AllGatePass = () => {
         <Table.Body>
           {passDetails.length === 0 ? (
             <div className="p-4">
-              <Spinner />
+              {failedSearch ? <>{failedText}</> : <Spinner />}
             </div>
           ) : (
             paginatedInvoices.map((entry) => {

@@ -140,6 +140,7 @@ const SupplierPlaceOrder = () => {
             <Select.Root
               value={selectedCustomerId}
               onValueChange={setSelectedCustomerId}
+              required
             >
               <Select.Trigger
                 disabled={customers.length === 0}
@@ -158,15 +159,16 @@ const SupplierPlaceOrder = () => {
 
           {/* Product Select */}
           <div className="w-full">
-            <Text>Product</Text>
+            <Text>Raw Material</Text>
             <Select.Root
               value={selectedProductId}
+              required
               onValueChange={setSelectedProductId}
             >
               <Select.Trigger
                 disabled={products.length === 0}
                 className="w-full mt-2"
-                placeholder="Select Product"
+                placeholder="Select Raw Material"
               />
               <Select.Content position="popper">
                 {products.map((product) => (
@@ -187,6 +189,7 @@ const SupplierPlaceOrder = () => {
               className="mt-2"
               placeholder="Input Quantity"
               type="number"
+              required
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
             />
@@ -226,7 +229,11 @@ const SupplierPlaceOrder = () => {
 
         {/* Submit Button */}
         <Flex justify="end" gap="5">
-          <Button size="3" className="!bg-theme" disabled={buttonLoading}>
+          <Button
+            size="3"
+            className="!bg-theme cursor-pointer"
+            disabled={buttonLoading}
+          >
             {buttonLoading ? <LoaderIcon /> : "Submit Order"}
           </Button>
         </Flex>

@@ -159,7 +159,10 @@ const CreateInvoice = () => {
           </div>
         </div>
         <div className="btn flex justify-end max-sm:flex-col">
-          <button className="h-[40px] bg-theme hover:bg-theme/85 text-white px-8 rounded-lg shadow-lg my-12">
+          <button
+            disabled={btnLoading}
+            className="h-[40px] bg-theme hover:bg-theme/85 text-white px-8 rounded-lg shadow-lg my-12"
+          >
             {btnLoading ? <LoaderIcon /> : "Send"}
           </button>
         </div>

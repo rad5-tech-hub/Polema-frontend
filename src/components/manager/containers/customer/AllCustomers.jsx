@@ -121,7 +121,6 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
           <input
             placeholder="Enter Phone Number"
             defaultValue={id.phoneNumber}
-            type="number"
             onChange={(e) => setChangedPhone(e.target.value)}
             className="w-full p-2 mb-5 rounded-sm border"
           />
@@ -249,6 +248,7 @@ const AllCustomers = () => {
             <Table.ColumnHeaderCell>EMAIL</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>ADDRESS</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>PHONE</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
 
@@ -280,7 +280,7 @@ const AllCustomers = () => {
                     <Table.Cell>{customer.address}</Table.Cell>
                     <Table.Cell>{customer.phoneNumber}</Table.Cell>
                     <Table.Cell>
-                      <div className="absolute right-4 top-2">
+                      <div className=" right-4 top-2">
                         <DropdownMenu.Root>
                           <DropdownMenu.Trigger>
                             <Button
