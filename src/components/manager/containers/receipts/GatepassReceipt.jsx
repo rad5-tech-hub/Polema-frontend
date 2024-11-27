@@ -33,7 +33,7 @@ const GatepassReceipt = () => {
         },
       });
       setGatePassLoading(false);
-      4;
+
       setPassDetails(response.data.gatePass);
     } catch (error) {
       console.log(error);
@@ -117,16 +117,24 @@ const GatepassReceipt = () => {
                   ["Date", refractor(passDetails.createdAt)],
                   [
                     "Driver's Name",
-                    passDetails.transaction.authToWeighTickets.driver,
+                    passDetails.transaction.authToWeighTickets === null
+                      ? ""
+                      : passDetails.transaction?.authToWeighTickets?.driver ||
+                        "",
                   ],
                   ["Escort's Name", passDetails.escortName],
                   [
                     "Vehicle No",
-                    passDetails.transaction.authToWeighTickets.vehicleNo,
+                    passDetails.transaction.authToWeighTickets === null
+                      ? ""
+                      : passDetails.transaction?.authToWeighTickets?.driver ||
+                        "",
                   ],
                   [
                     "Goods/Invoice No",
-                    passDetails.transaction.waybill.invoice.invoiceNumber,
+                    passDetails.transaction.waybill === null
+                      ? ""
+                      : passDetails.transaction.waybill.invoice.invoiceNumber,
                   ],
                   [
                     "Owner of Goods",

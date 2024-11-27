@@ -91,7 +91,7 @@ const IndividualDepartmentLedger = () => {
                   <Table.Cell>
                     {item.debit > item.credit && item.name}
                   </Table.Cell>
-                  <Table.Cell>{item.productId}</Table.Cell>
+                  <Table.Cell>{item.productName}</Table.Cell>
                   <Table.Cell>{item.unit}</Table.Cell>
                   <Table.Cell>{item.quantity}</Table.Cell>
                   <Table.Cell className="text-green-500 font-bold">

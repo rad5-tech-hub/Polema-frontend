@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { DropdownMenu } from "@radix-ui/themes";
 import _ from "lodash";
@@ -9,6 +9,7 @@ import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquare, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
 import toast, { Toaster } from "react-hot-toast";
+
 const root = import.meta.env.VITE_ROOT;
 
 const AllGatePass = () => {
@@ -17,15 +18,13 @@ const AllGatePass = () => {
   const [failedSearch, setFailedSearch] = useState(false);
   const [failedText, setFailedText] = useState("");
 
-  // Function to fetch gatepass details
+  // Fetch gate pass details
   const fetchGatePass = async () => {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      toast.error("An error occurred , try logging in again", {
-        style: {
-          padding: "20px",
-        },
+      toast.error("An error occurred, try logging in again", {
+        style: { padding: "20px" },
         duration: 10000,
       });
       return;
@@ -33,19 +32,25 @@ const AllGatePass = () => {
 
     try {
       const response = await axios.get(`${root}/customer/get-all-gatepass`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-      setPassDetails(response.data.gatePasses);
-      if (response.data.gatePasses.length === 0) {
+
+      const { gatePasses } = response.data;
+      setPassDetails(gatePasses);
+
+      if (gatePasses.length === 0) {
         setFailedSearch(true);
-        setFailedText("No records");
+        setFailedText("No records found.");
+      } else {
+        setFailedSearch(false);
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
+      setFailedSearch(true);
+      setFailedText("Failed to fetch data.");
     }
   };
+
   const getSquareColor = (arg) => {
     switch (arg) {
       case "pending":
@@ -55,14 +60,12 @@ const AllGatePass = () => {
       case "rejected":
         return "text-red-500";
       default:
-        break;
+        return "";
     }
   };
-  // Function to disable dropdown
-  const disableDropdown = (arg) => {
-    if (arg === "pending" || arg === "rejected") return true;
-    else return false;
-  };
+
+  const disableDropdown = (arg) => arg === "pending" || arg === "rejected";
+
   const {
     currentData: paginatedInvoices,
     currentPage,
@@ -71,7 +74,7 @@ const AllGatePass = () => {
     goToPreviousPage,
   } = usePagination(passDetails, 15);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchGatePass();
   }, []);
 
@@ -79,82 +82,85 @@ const AllGatePass = () => {
     <>
       <Heading>View All Gate Pass Note</Heading>
 
-      {/* Table showing gate pass details */}
+      {/* Table */}
       <Table.Root variant="surface" className="mt-3">
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>DRIVER NAME</Table.ColumnHeaderCell>
-            {/* <Table.ColumnHeaderCell>ESCORT NAME</Table.ColumnHeaderCell> */}
             <Table.ColumnHeaderCell>CUSTOMER NAME</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>GOODS</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>VEHICLE NO.</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>DESTINATION</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>DEPARTURE TIME</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>STATUS</Table.ColumnHeaderCell>
-            <Table.Cell></Table.Cell>
+            <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {passDetails.length === 0 ? (
+          {paginatedInvoices.length === 0 ? (
             <div className="p-4">
-              {failedSearch ? <>{failedText}</> : <Spinner />}
+              {failedSearch ? <Text>{failedText}</Text> : <Spinner />}
             </div>
           ) : (
-            paginatedInvoices.map((entry) => {
-              return (
-                <Table.Row>
-                  <Table.Cell>{refractor(entry.createdAt)}</Table.Cell>
-                  <Table.Cell>
-                    {entry.transaction.authToWeighTickets.driver}
-                  </Table.Cell>
-                  {/* <Table.Cell>{entry.escortName}</Table.Cell> */}
-                  <Table.Cell>{`${entry.transaction.corder.firstname} ${entry.transaction.corder.lastname}`}</Table.Cell>
-                  <Table.Cell>{entry.transaction.porders.name}</Table.Cell>
-                  <Table.Cell>
-                    {entry.transaction.authToWeighTickets.vehicleNo}
-                  </Table.Cell>
-                  <Table.Cell>{entry.destination}</Table.Cell>
-                  <Table.Cell>{refractorToTime(entry.createdAt)}</Table.Cell>
-                  <Table.Cell>
-                    {
-                      <Flex align={"center"} gap={"1"}>
-                        <FontAwesomeIcon
-                          icon={faSquare}
-                          className={`${getSquareColor(entry.status)}`}
-                        />
-                        {_.upperFirst(entry.status)}
-                      </Flex>
-                    }
-                  </Table.Cell>
-                  <Table.Cell>
+            paginatedInvoices.map((entry) => (
+              <Table.Row key={entry.id}>
+                <Table.Cell>{refractor(entry.createdAt)}</Table.Cell>
+                <Table.Cell>
+                  {entry?.transaction?.authToWeighTickets?.driver || "N/A"}
+                </Table.Cell>
+                <Table.Cell>
+                  {`${entry?.transaction?.corder?.firstname || ""} ${
+                    entry?.transaction?.corder?.lastname || ""
+                  }`}
+                </Table.Cell>
+                <Table.Cell>
+                  {entry?.transaction?.porders?.name || "N/A"}
+                </Table.Cell>
+                <Table.Cell>
+                  {entry?.transaction?.authToWeighTickets?.vehicleNo || "N/A"}
+                </Table.Cell>
+                <Table.Cell>{entry.destination || "N/A"}</Table.Cell>
+                <Table.Cell>{refractorToTime(entry.createdAt)}</Table.Cell>
+                <Table.Cell>
+                  <Flex align="center" gap="1">
+                    <FontAwesomeIcon
+                      icon={faSquare}
+                      className={`${getSquareColor(entry.status)}`}
+                    />
+                    {_.upperFirst(entry.status)}
+                  </Flex>
+                </Table.Cell>
+                <Table.Cell>
+                  {disableDropdown(entry.status) ? (
+                    <Button variant="soft" disabled>
+                      <FontAwesomeIcon icon={faEllipsisV} />
+                    </Button>
+                  ) : (
                     <DropdownMenu.Root>
-                      <DropdownMenu.Trigger
-                        disabled={disableDropdown(entry.status)}
-                      >
+                      <DropdownMenu.Trigger>
                         <Button variant="soft">
                           <FontAwesomeIcon icon={faEllipsisV} />
                         </Button>
                       </DropdownMenu.Trigger>
                       <DropdownMenu.Content>
                         <DropdownMenu.Item
-                          onClick={() => {
-                            navigate(
-                              `/admin/receipt/view-gatepass/${entry.id}`
-                            );
-                          }}
+                          onClick={() =>
+                            navigate(`/admin/receipt/view-gatepass/${entry.id}`)
+                          }
                         >
                           View Approved Gate Pass
                         </DropdownMenu.Item>
                       </DropdownMenu.Content>
                     </DropdownMenu.Root>
-                  </Table.Cell>
-                </Table.Row>
-              );
-            })
+                  )}
+                </Table.Cell>
+              </Table.Row>
+            ))
           )}
         </Table.Body>
       </Table.Root>
+
       {/* Pagination Controls */}
       <Flex justify="center" align="center" gap="3" className="mt-4">
         <Button disabled={currentPage === 1} onClick={goToPreviousPage}>
@@ -167,6 +173,7 @@ const AllGatePass = () => {
           Next
         </Button>
       </Flex>
+
       <Toaster position="top-right" />
     </>
   );

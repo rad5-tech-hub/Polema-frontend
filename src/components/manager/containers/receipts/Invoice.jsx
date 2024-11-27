@@ -51,11 +51,10 @@ const Invoice = () => {
     { item: "6", description: "Water", rate: 150, amount: 300 },
   ]);
 
-  const totalCreditBalance = tableData.reduce(
-    (total, row) => total + row.amount,
-    0
-  );
-
+  const totalCreditBalance = tableData.reduce((total, row) => {
+    const higherValue = Math.max(row.credit || 0, row.debit || 0);
+    return Number(total) + Number(higherValue);
+  }, 0);
   const handlePrint = () => {
     window.print();
   };
@@ -197,13 +196,16 @@ const Invoice = () => {
                       {index + 1}
                     </td>
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
+                      {row.quantity &&
+                        row.unit &&
+                        `${row.quantity}  ${row.unit} of`}{" "}
                       {row.productName}
                     </td>
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                      {row.rate}
+                      {row.order.rate}
                     </td>
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                      {row.amount}
+                      {row.debit > row.credit ? row.debit : row.credot}
                     </td>
                   </tr>
                 ))}
@@ -214,7 +216,7 @@ const Invoice = () => {
                     colSpan="3"
                     className="text-right px-4 py-2 font-bold text-sm sm:text-base"
                   >
-                    TOTAL CREDIT BALANCE:
+                    TOTAL BALANCE:
                   </td>
                   <td className="border border-[#43434380] px-4 py-2 font-bold text-sm sm:text-base">
                     {totalCreditBalance.toLocaleString()}
