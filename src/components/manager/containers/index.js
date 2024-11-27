@@ -66,7 +66,9 @@ import DepartmentStoreViewOrders from "./department-store/DepartmentStoreViewOrd
 import ViewDepartmentStore from "./department-store/ViewDepartmentStore";
 import ViewPharmacyStore from "./pharmacy-store/ViewPharmacyStore";
 import NewPassword from "../../../pages/NewPassword";
+import OfficialReceiptInvoice from "./receipts/OfficeReceiptInvoice";
 export {
+  OfficialReceiptInvoice,
   NewPassword,
   AllDispatchNote,
   AddAdmin,

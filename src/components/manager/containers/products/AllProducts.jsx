@@ -14,14 +14,9 @@ import {
   Separator,
   Card,
 } from "@radix-ui/themes";
-
+import * as Switch from "@radix-ui/react-switch";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faPen,
-  faArrowLeft,
-  faPlus,
-  faEllipsisV,
-} from "@fortawesome/free-solid-svg-icons";
+import { faPen, faArrowLeft, faPlus } from "@fortawesome/free-solid-svg-icons";
 //All imports for the Dialog Box
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import { Heading, Table, Spinner } from "@radix-ui/themes";
@@ -463,7 +458,8 @@ const AllProducts = () => {
                                 variant="surface"
                                 className="cursor-pointer"
                               >
-                                <FontAwesomeIcon icon={faEllipsisV} />
+                                <DropDownIcon />
+                                {/* <DropdownMenu.TriggerIcon /> */}
                               </Button>
                             </DropdownMenu.Trigger>
                             <DropdownMenu.Content>
