@@ -255,7 +255,7 @@ const CustomerPlaceOrder = () => {
                     : "Select plan"
                 }
               />
-              <Select.Content>
+              <Select.Content position="popper">
                 {seletedProductPlan.map((plan) => {
                   return (
                     <Select.Item value={plan.category}>
