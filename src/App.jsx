@@ -78,6 +78,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import "@radix-ui/themes/styles.css";
 import "./index.css";
 import ConfirmEmail from "./pages/ConfirmEmail";
+import OfficialReceiptInvoice from "./components/manager/containers/receipts/OfficeReceiptInvoice";
 
 const App = () => {
   return (
@@ -341,6 +342,10 @@ const App = () => {
                     element={<GatepassReceipt />}
                   />
                   <Route path="/receipt/invoices" element={<Invoice />} />
+                  <Route
+                    path="/receipt/official-receipt-invoice"
+                    element={<OfficialReceiptInvoice />}
+                  />
                   <Route
                     path="/receipt/official-receipt"
                     element={<OfficialReceipt />}
