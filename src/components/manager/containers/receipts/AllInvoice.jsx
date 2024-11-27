@@ -1,10 +1,12 @@
 import React from "react";
+
+import { DropdownMenu } from "@radix-ui/themes";
 import _ from "lodash";
 import { refractor, refractorToTime } from "../../../date";
 import toast, { Toaster } from "react-hot-toast";
 import { Table, Flex, Heading, Spinner, Button, Text } from "@radix-ui/themes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSquare } from "@fortawesome/free-solid-svg-icons";
+import { faSquare, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { usePagination } from "../../../../hooks/usePagination";
 
@@ -49,6 +51,12 @@ const AllInvoice = () => {
     }
   };
 
+  // Function to disable dropdown
+  const disableDropdown = (arg) => {
+    if (arg === "pending" || arg === "rejected") return true;
+    else return false;
+  };
+
   React.useEffect(() => {
     fetchInvoice();
   }, []);
@@ -60,7 +68,7 @@ const AllInvoice = () => {
     totalPages,
     goToNextPage,
     goToPreviousPage,
-  } = usePagination(invoices);
+  } = usePagination(invoices, 17);
 
   return (
     <>
@@ -76,6 +84,7 @@ const AllInvoice = () => {
             <Table.ColumnHeaderCell>VEHICLE NO.</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>TIME OUT</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>RECEIPT STATUS</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -99,6 +108,22 @@ const AllInvoice = () => {
                     />
                     {_.upperFirst(invoice.status)}
                   </Flex>
+                </Table.Cell>
+                <Table.Cell>
+                  <DropdownMenu.Root>
+                    <DropdownMenu.Trigger
+                      disabled={disableDropdown(invoice.status)}
+                    >
+                      <Button variant="soft">
+                        <FontAwesomeIcon icon={faEllipsisV} />
+                      </Button>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Content>
+                      <DropdownMenu.Item>
+                        View Approved Invoice
+                      </DropdownMenu.Item>
+                    </DropdownMenu.Content>
+                  </DropdownMenu.Root>
                 </Table.Cell>
               </Table.Row>
             ))

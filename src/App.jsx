@@ -316,7 +316,7 @@ const App = () => {
                   />
                   <Route
                     path="/receipts/vehicle-dispatch-note"
-                    element={<AllDispatchNote />}
+                    element={<CreateDispatchNote />}
                   />
                   <Route path="/receipts/invoice" element={<AllInvoice />} />
                   <Route path="/receipts/waybill" element={<AllWayBill />} />
@@ -324,20 +324,18 @@ const App = () => {
                     path="/receipts/official-receipt"
                     element={<AllReceipts />}
                   />
-                  <Route
-                    path="/receipt/create-dispatchnote"
-                    element={<CreateDispatchNote />}
-                  />
+
                   <Route
                     path="/receipt/create-gatepass/:id"
                     element={<CreateGatepass />}
                   />
+
                   <Route
                     path="/receipt/create-invoice/:id"
                     element={<CreateInvoice />}
                   />
                   <Route
-                    path="/receipt/gatepass-receipt"
+                    path="/receipt/view-gatepass/:id"
                     element={<GatepassReceipt />}
                   />
                   <Route path="/receipt/invoice" element={<Invoice />} />
@@ -345,10 +343,10 @@ const App = () => {
                     path="/receipt/official-receipt"
                     element={<OfficialReceipt />}
                   />
-                  <Route
+                  {/* <Route
                     path="/receipt/vehicle-dispatchnote"
                     element={<ReceiptDispatchNote />}
-                  />
+                  /> */}
                   <Route
                     path="/receipt/create-waybill-invoice/:id"
                     element={<WaybillCreateInvoice />}

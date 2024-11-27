@@ -80,7 +80,7 @@ const CreateDispatchNote = () => {
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
-          <div className="timeout relative">
+          {/* <div className="timeout relative">
             <label>Time of Despatch</label>
             <div
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full flex items-center cursor-pointer justify-between"
@@ -139,7 +139,7 @@ const CreateDispatchNote = () => {
                 </div>
               </div>
             )}
-          </div>
+          </div> */}
         </div>
         <div className="btn flex justify-end max-sm:flex-col">
           <button

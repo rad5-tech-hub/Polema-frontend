@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-export const usePagination = (data = []) => {
-  const itemsPerPage = 17; // Fixed number of items per page
+export const usePagination = (data = [], number) => {
+  const itemsPerPage = number; // Fixed number of items per page
   const [currentPage, setCurrentPage] = useState(1);
 
   const totalPages = Math.ceil(data.length / itemsPerPage);
