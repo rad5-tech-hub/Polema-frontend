@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisV, faSquare } from "@fortawesome/free-solid-svg-icons";
 import { DropdownMenu, Flex } from "@radix-ui/themes";
@@ -11,6 +12,7 @@ import axios from "axios";
 const root = import.meta.env.VITE_ROOT;
 
 const AllInvoice = () => {
+  const navigate = useNavigate();
   const [invoices, setInvoices] = useState([]);
   // Function to view invoice details
 
@@ -108,7 +110,11 @@ const AllInvoice = () => {
                         </Button>
                       </DropdownMenu.Trigger>
                       <DropdownMenu.Content>
-                        <DropdownMenu.Item>
+                        <DropdownMenu.Item
+                          onClick={() => {
+                            navigate(`/admin/receipts/invoice/${invoice.id}`);
+                          }}
+                        >
                           View Approved Invoice
                         </DropdownMenu.Item>
                       </DropdownMenu.Content>
