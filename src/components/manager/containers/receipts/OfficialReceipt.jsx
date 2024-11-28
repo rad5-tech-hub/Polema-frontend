@@ -1,9 +1,63 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
+import { refractor } from "../../../date";
+import { Spinner } from "@radix-ui/themes";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+const root = import.meta.env.VITE_ROOT;
 import { faPrint } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import polemaLogo from "../../../../static/image/polema-logo.png";
+import toast, { Toaster } from "react-hot-toast";
 
 const OfficialReceipt = () => {
+  const { id } = useParams();
+
+  const [fetchComplete, setFetchComplete] = useState(false);
+
+  const [receiptDetails, setReceiptDetails] = useState({});
+  // Function to fetch receipt details
+  const fetchDetails = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("An error occurred, try logging in again");
+      return;
+    }
+
+    try {
+      const resposnse = await axios.get(`${root}/customer/get-official/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setReceiptDetails(resposnse.data.receipt);
+      setFetchComplete(true);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Funciton to format money
+  function formatMoney(value, separator = ",") {
+    if (typeof value !== "number" && typeof value !== "string") {
+      throw new Error("Value must be a number or a string.");
+    }
+
+    const [integerPart, decimalPart] = value.toString().split(".");
+    const formattedInteger = integerPart.replace(
+      /\B(?=(\d{3})+(?!\d))/g,
+      separator
+    );
+
+    return decimalPart !== undefined
+      ? `${formattedInteger}.${decimalPart}`
+      : formattedInteger;
+  }
+
+  React.useEffect(() => {
+    fetchDetails();
+  }, []);
+
   const receiptRef = useRef();
 
   const handlePrint = () => {
@@ -121,5 +175,4 @@ const OfficialReceipt = () => {
     </div>
   );
 };
-
 export default OfficialReceipt;

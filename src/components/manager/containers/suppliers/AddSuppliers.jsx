@@ -15,7 +15,7 @@ import {
   Spinner,
   Flex,
 } from "@radix-ui/themes";
-
+import { LoaderIcon } from "react-hot-toast";
 const root = import.meta.env.VITE_ROOT;
 
 const AddSuppliers = () => {
@@ -188,7 +188,7 @@ const AddSuppliers = () => {
               type="submit"
               disabled={isLoading}
             >
-              {isLoading ? <Spinner size={"2"} /> : "Create"}
+              {isLoading ? <LoaderIcon /> : "Create"}
             </Button>
           </Flex>
         </form>

@@ -144,43 +144,43 @@ const EditDialog = () => {
     };
 
     console.log(pricePlan ? submitObject : submitWithoutPlans);
-    try {
-      const response = await axios.post(
-        `${root}/admin/add-product`,
-        pricePlan ? submitObject : submitWithoutPlans,
-        {
-          headers: {
-            Authorization: `Bearer ${retrToken}`,
-          },
-        }
-      );
-      setIsLoading(false);
-      toast.success(response.data.message, {
-        duration: 6500,
-        style: {
-          padding: "30px",
-        },
-      });
+    // try {
+    //   const response = await axios.post(
+    //     `${root}/admin/add-product`,
+    //     pricePlan ? submitObject : submitWithoutPlans,
+    //     {
+    //       headers: {
+    //         Authorization: `Bearer ${retrToken}`,
+    //       },
+    //     }
+    //   );
+    //   setIsLoading(false);
+    //   toast.success(response.data.message, {
+    //     duration: 6500,
+    //     style: {
+    //       padding: "30px",
+    //     },
+    //   });
 
-      // Reset form fields after successful submission
-      setProductName("");
-      setBasePrice("");
-      setUnit("");
-      setPlans([{ name: "", discount: "" }]);
-      setSelectedDept("");
-      setSelectedCategory("products");
-      setPricePlan(false);
+    //   // Reset form fields after successful submission
+    //   setProductName("");
+    //   setBasePrice("");
+    //   setUnit("");
+    //   setPlans([{ name: "", discount: "" }]);
+    //   setSelectedDept("");
+    //   setSelectedCategory("products");
+    //   setPricePlan(false);
 
-      console.log(response);
-    } catch (error) {
-      console.log(error);
-      setIsLoading(false);
-      {
-        error.response.data.error
-          ? toast.error(error.response.data.error)
-          : toast.error(error.response.data.message);
-      }
-    }
+    //   console.log(response);
+    // } catch (error) {
+    //   console.log(error);
+    //   setIsLoading(false);
+    //   {
+    //     error.response.data.error
+    //       ? toast.error(error.response.data.error)
+    //       : toast.error(error.response.data.message);
+    //   }
+    // }
   };
 
   useEffect(() => {
@@ -190,7 +190,7 @@ const EditDialog = () => {
   return (
     <div>
       <Flex justify={"between"} align={"center"}>
-        <Heading className="text-left py-4">Create Product</Heading>
+        <Heading className="text-left py-4">Edit Product</Heading>
 
         <Select.Root
           defaultValue="products"

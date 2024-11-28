@@ -56,3 +56,16 @@
   background: black;
   border-radius: 10px;
 }
+
+/* Notifications panel animation */
+.notifications-panel {
+  transition: transform 0.3s ease-in-out;
+}
+
+.notifications-panel.translate-x-0 {
+  transform: translateX(0); /* Fully visible */
+}
+
+.notifications-panel.translate-x-full {
+  transform: translateX(150%); /* Slide out of view */
+}

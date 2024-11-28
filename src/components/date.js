@@ -8,4 +8,14 @@ const refractor = (ISO_DATE) => {
   return formattedDate;
 };
 
-export { refractor };
+const refractorToTime = (ISO_DATE) => {
+  const date = new Date(ISO_DATE);
+  const formattedTime = date.toLocaleString("en-US", {
+    hour: "numeric",
+    minute: "numeric",
+    hour12: true,
+  });
+  return formattedTime;
+};
+
+export { refractor, refractorToTime };

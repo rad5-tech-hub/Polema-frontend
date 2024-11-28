@@ -102,7 +102,12 @@ const CreateRole = ({ child, setChild }) => {
           }
         );
 
-        console.log(response);
+        toast.success("Role created successully", {
+          style: {
+            padding: "20px",
+          },
+          duration: 10000,
+        });
       } catch (error) {
         if (error.response) {
           console.log(error.response.data);
@@ -154,9 +159,6 @@ const CreateRole = ({ child, setChild }) => {
       setPermissionBox(response.data.navParentsWithPermissions);
       console.log(response);
 
-      {
-        response.status === 200 && toast.success("Loaded Successfully.");
-      }
       setPermissionsLoading(false);
     } catch (err) {
       toast.error(err.message, {

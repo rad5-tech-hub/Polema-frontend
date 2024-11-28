@@ -69,6 +69,7 @@ import {
   WaybillInvoice,
   ViewAuthorityToWeigh,
   ViewLocalPurchaseOrder,
+  EditDialog,
   CollectFromGeneralStore,
   ViewDepartmentStore,
   DepartmentLedger,
@@ -178,6 +179,10 @@ const App = () => {
                   <Route
                     path="products/view-products"
                     element={<AllProducts />}
+                  />
+                  <Route
+                    path="products/edit-products/:id"
+                    element={<EditDialog />}
                   />
 
                   {/* Admin Routes */}
@@ -317,43 +322,39 @@ const App = () => {
                   />
                   <Route
                     path="/receipts/vehicle-dispatch-note"
-                    element={<AllDispatchNote />}
+                    element={<CreateDispatchNote />}
                   />
                   <Route path="/receipts/invoice" element={<AllInvoice />} />
+                  <Route path="/receipts/invoice/:id" element={<Invoice />} />
                   <Route path="/receipts/waybill" element={<AllWayBill />} />
                   <Route
                     path="/receipts/official-receipt"
                     element={<AllReceipts />}
                   />
-                  <Route
-                    path="/receipt/create-dispatchnote"
-                    element={<CreateDispatchNote />}
-                  />
+
                   <Route
                     path="/receipt/create-gatepass/:id"
                     element={<CreateGatepass />}
                   />
+
                   <Route
-                    path="/receipt/create-invoice"
+                    path="/receipt/create-invoice/:id"
                     element={<CreateInvoice />}
                   />
                   <Route
-                    path="/receipt/gatepass-receipt"
+                    path="/receipt/view-gatepass/:id"
                     element={<GatepassReceipt />}
                   />
-                  <Route path="/receipt/invoices" element={<Invoice />} />
+                  {/* <Route path="/receipt/invoices" element={<Invoice />} /> */}
                   <Route
-                    path="/receipt/official-receipt-invoice"
+                    path="/receipt/generate-receipt/:id"
                     element={<OfficialReceiptInvoice />}
                   />
                   <Route
-                    path="/receipt/official-receipt"
+                    path="/receipt/official-receipt/:id"
                     element={<OfficialReceipt />}
                   />
-                  <Route
-                    path="/receipt/vehicle-dispatchnote"
-                    element={<ReceiptDispatchNote />}
-                  />
+
                   <Route
                     path="/receipt/create-waybill-invoice/:id"
                     element={<WaybillCreateInvoice />}

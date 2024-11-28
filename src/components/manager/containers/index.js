@@ -67,9 +67,11 @@ import ViewDepartmentStore from "./department-store/ViewDepartmentStore";
 import ViewPharmacyStore from "./pharmacy-store/ViewPharmacyStore";
 import NewPassword from "../../../pages/NewPassword";
 import OfficialReceiptInvoice from "./receipts/OfficeReceiptInvoice";
+import EditDialog from "./products/EditDialog";
 export {
   OfficialReceiptInvoice,
   NewPassword,
+  EditDialog,
   AllDispatchNote,
   AddAdmin,
   ViewPharmacyStore,

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { refractor } from "../../../date";
 import {
   Table,
   Select,
   Heading,
+  DropdownMenu,
   Separator,
   Spinner,
   Button,
@@ -12,10 +14,15 @@ import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowLeft,
+  faEllipsisV,
+  faArrowRight,
+} from "@fortawesome/free-solid-svg-icons";
 const root = import.meta.env.VITE_ROOT;
 
 const CashManagementLedger = () => {
+  const navigate = useNavigate();
   const [ledger, setLedger] = useState([]);
   const [admins, setAdmins] = useState([]);
   const [currentPage, setCurrentPage] = useState(1); // Current page number
@@ -98,6 +105,7 @@ const CashManagementLedger = () => {
             <Table.ColumnHeaderCell>CREDIT</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>DEBIT</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>BALANCE</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -128,6 +136,28 @@ const CashManagementLedger = () => {
                   {entry.debit}
                 </Table.RowHeaderCell>
                 <Table.RowHeaderCell>{entry.balance}</Table.RowHeaderCell>
+                <Table.RowHeaderCell>
+                  {entry.credit > entry.debit && (
+                    <DropdownMenu.Root>
+                      <DropdownMenu.Trigger>
+                        <Button variant="soft">
+                          <FontAwesomeIcon icon={faEllipsisV} />
+                        </Button>
+                      </DropdownMenu.Trigger>
+                      <DropdownMenu.Content>
+                        <DropdownMenu.Item
+                          onClick={() => {
+                            navigate(
+                              `/admin/receipt/generate-receipt/${entry.id}`
+                            );
+                          }}
+                        >
+                          Generate Receipt
+                        </DropdownMenu.Item>
+                      </DropdownMenu.Content>
+                    </DropdownMenu.Root>
+                  )}
+                </Table.RowHeaderCell>
               </Table.Row>
             ))
           )}
