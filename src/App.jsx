@@ -340,7 +340,7 @@ const App = () => {
                     path="/receipt/view-gatepass/:id"
                     element={<GatepassReceipt />}
                   />
-                  <Route path="/receipt/invoices" element={<Invoice />} />
+                  {/* <Route path="/receipt/invoices" element={<Invoice />} /> */}
                   <Route
                     path="/receipt/generate-receipt/:id"
                     element={<OfficialReceiptInvoice />}

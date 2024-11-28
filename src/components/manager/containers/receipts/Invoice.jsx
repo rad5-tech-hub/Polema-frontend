@@ -145,7 +145,7 @@ const Invoice = () => {
                 <div className="address flex gap-2 items-center mt-4">
                   <label className="text-sm sm:text-lg">Address:</label>
                   <p className="border-b-4 border-dotted border-[#43434380] w-full pl-4 text-[#434343] text-xs sm:text-base">
-                    {invoice.customer.address}
+                    {invoice.customer.address && invoice.customer.address}
                   </p>
                 </div>
                 <div className="vehicle-no flex gap-2 items-center mt-4">
@@ -202,10 +202,10 @@ const Invoice = () => {
                       {row.productName}
                     </td>
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                      {row.order.rate}
+                      {row?.order?.rate && row.order.rate}
                     </td>
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                      {row.debit > row.credit ? row.debit : row.credot}
+                      {row.debit > row.credit ? row.debit : row.credit}
                     </td>
                   </tr>
                 ))}

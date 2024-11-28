@@ -83,6 +83,16 @@ const NewWeigh = () => {
       gross,
       image: imageURL,
     };
+    if (imageURL.length === 0) {
+      toast.error("Select an Image", {
+        style: {
+          padding: "20px",
+        },
+        duration: 5000,
+      });
+      setButtonLoading(false);
+      return;
+    }
 
     try {
       const request = await axios.post(
