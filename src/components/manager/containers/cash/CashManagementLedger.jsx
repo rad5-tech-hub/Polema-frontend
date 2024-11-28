@@ -148,7 +148,7 @@ const CashManagementLedger = () => {
                         <DropdownMenu.Item
                           onClick={() => {
                             navigate(
-                              `/admin/receipt/official-receipt/${entry.id}`
+                              `/admin/receipt/generate-receipt/${entry.id}`
                             );
                           }}
                         >
