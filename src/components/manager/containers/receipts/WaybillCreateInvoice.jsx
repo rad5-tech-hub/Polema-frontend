@@ -13,13 +13,14 @@ const WaybillCreateInvoice = () => {
   const [selectedTransport, setSelectedTransport] = useState("");
 
   // State management for the form details
-  const [driverLicense, setDriverLiscense] = React.useState("");
-  const [superAdmins, setSuperAdmins] = React.useState([]);
-  const [bagNumber, setBagNumber] = React.useState("");
-  const [carriedByWho, setCarriedByWho] = React.useState("");
+  const [driverLicense, setDriverLiscense] = useState("");
+  const [superAdmins, setSuperAdmins] = useState([]);
+  const [bagNumber, setBagNumber] = useState("");
+  const [carriedByWho, setCarriedByWho] = useState("");
   const [adminId, setAdminId] = useState("");
   const [wayBillId, setWayBillId] = useState("");
-
+  const [invoiceNo, setInvoiceNo] = useState("");
+  const [address, setAddress] = useState("");
   // Function to fetch entry details
   const fetchEntryDetails = async () => {
     const token = localStorage.getItem("token");
@@ -38,11 +39,11 @@ const WaybillCreateInvoice = () => {
       setLedgerEntries(response.data.order);
     } catch (error) {
       console.log(error);
-      toast.error("An error occurred ,try again.");
+      toast.error("An error occurred, try again.");
     }
   };
 
-  //  Function to fetch super admins
+  // Function to fetch super admins
   const fetchSuperAdmmins = async () => {
     const token = localStorage.getItem("token");
 
@@ -75,6 +76,7 @@ const WaybillCreateInvoice = () => {
 
     if (!token) {
       toast.error("An error occurred, try logging in again");
+      setButtonLoading(false);
       return;
     }
 
@@ -110,13 +112,20 @@ const WaybillCreateInvoice = () => {
         }
       );
 
+      // Reset form inputs (except disabled ones)
+      setDriverLiscense("");
+      setBagNumber("");
+      setSelectedTransport("");
+      setAdminId("");
+      setAddress("");
+      setInvoiceNo("");
       // Success message after both requests
       setButtonLoading(false);
       toast.success("Waybill created and sent successfully!", {
         style: {
           padding: "20px",
         },
-        duration: 6000,
+        duration: 10000,
       });
     } catch (error) {
       console.error("Error during request:", error);
@@ -155,6 +164,10 @@ const WaybillCreateInvoice = () => {
           <div className="address">
             <label>Address</label>
             <input
+              value={address}
+              onChange={(e) => {
+                setAddress(e.target.value);
+              }}
               type="text"
               placeholder="Enter Address"
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
@@ -201,6 +214,10 @@ const WaybillCreateInvoice = () => {
           <div className="invoice-no">
             <label>Invoice No</label>
             <input
+              value={invoiceNo}
+              onChange={(e) => {
+                setInvoiceNo(e.target.value);
+              }}
               placeholder="Input"
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />

@@ -173,7 +173,6 @@ const AllDepartments = () => {
   const EditDialog = () => {
     const editDept = async (e) => {
       setLoading(true);
-      console.log(e);
 
       e.preventDefault();
       const retrToken = localStorage.getItem("token");

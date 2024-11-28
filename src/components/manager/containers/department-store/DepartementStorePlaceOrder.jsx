@@ -119,7 +119,6 @@ const DepartementStorePlaceOrder = () => {
       unit: plan.unit,
       expectedDeliveryDate: plan.expectedDeliveryDate,
     }));
-    console.log(orders);
 
     try {
       const response = await axios.post(
@@ -134,7 +133,12 @@ const DepartementStorePlaceOrder = () => {
         }
       );
       setBtnLoading(false);
-      toast.success("Order placed successfully");
+      toast.success("Order placed successfully", {
+        style: {
+          padding: "20px",
+        },
+        duration: 10000,
+      });
     } catch (error) {
       console.error("Failed to place order:", error);
       setBtnLoading(false);
@@ -169,7 +173,7 @@ const DepartementStorePlaceOrder = () => {
                     className="mt-2 w-full"
                     placeholder="Select Department"
                   />
-                  <Select.Content>
+                  <Select.Content position="popper">
                     {dept.map((item) => (
                       <Select.Item key={item.id} value={item.id}>
                         {item.name}
@@ -199,7 +203,7 @@ const DepartementStorePlaceOrder = () => {
                     className="mt-2 w-full"
                     placeholder="Select Raw Material"
                   />
-                  <Select.Content>
+                  <Select.Content position="popper">
                     {rawMaterials.map((material) => (
                       <Select.Item key={material.id} value={material.id}>
                         {material.name}
@@ -259,6 +263,7 @@ const DepartementStorePlaceOrder = () => {
           </Button>
         </Flex>
       </form>
+      <Toaster position="top-right" />
     </div>
   );
 };

@@ -1,60 +1,134 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { TextField, Select, Flex, Button, Spinner } from "@radix-ui/themes";
 import { useParams } from "react-router-dom";
+import toast, { Toaster, LoaderIcon } from "react-hot-toast";
+
+const root = import.meta.env.VITE_ROOT;
 
 const CreateGatepass = () => {
   const { id } = useParams();
-
-  const [openDropdown, setOpenDropdown] = useState(""); // Tracks which dropdown is open
-  const [selectedRecipient, setSelectedRecipient] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState("");
-  const [selectedOwner, setSelectedOwner] = useState("");
-  const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
-  const [selectedHour, setSelectedHour] = useState("12");
-  const [selectedMinute, setSelectedMinute] = useState("00");
-  const [selectedPeriod, setSelectedPeriod] = useState("AM");
-
+  const [escort, setEscort] = useState("");
+  const [buttonLoading, setButtonLoading] = useState(false);
+  const [adminId, setAdminId] = useState("");
+  const [destination, setDestination] = useState("");
+  const [entryDetails, setEntryDetails] = useState({});
+  const [superAdmins, setSuperAdmins] = useState([]);
   const hours = [...Array(12).keys()].map((h) => (h + 1).toString());
   const minutes = [...Array(60).keys()].map((m) =>
     m.toString().padStart(2, "0")
   );
   const periods = ["AM", "PM"];
 
-  const toggleDropdown = (dropdown) => {
-    if (openDropdown === dropdown) {
-      setOpenDropdown(""); // Close the dropdown if it's already open
-    } else {
-      setOpenDropdown(dropdown); // Open the selected dropdown
+  const fetchDetails = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("An error occurred, try logging in again");
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${root}/customer/get-summary/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setEntryDetails(response.data);
+    } catch (error) {
+      console.error("Error fetching details:", error);
+      toast.error("Failed to fetch gate pass details");
     }
   };
 
-  const handleSelectRecipient = (recipient) => {
-    setSelectedRecipient(recipient);
-    setOpenDropdown("");
+  const fetchSuperAdmins = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("An error occurred ,try logging in again", {
+        duration: 10000,
+      });
+    }
+    try {
+      const response = await axios.get(`${root}/admin/all-admin`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setSuperAdmins(response.data.staffList);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  const handleSelectProduct = (product) => {
-    setSelectedProduct(product);
-    setOpenDropdown("");
+  // Function to submit form
+  const submitForm = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+    setButtonLoading(true);
+    if (!token) {
+      toast.error("An error occurred, try logging in again");
+      return;
+    }
+
+    const resetForm = function () {
+      setDestination("");
+      setEscort("");
+    };
+    const body = {
+      escortName: escort,
+      destination,
+    };
+    try {
+      const response = await axios.post(
+        `${root}/customer/create-gatepass/${id}`,
+        body,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // SECOND API REQUEST
+      const passID = response.data.gatepass.id;
+
+      const secondResponse = await axios.post(
+        `${root}/customer/send-gate-pass/${passID}`,
+        {
+          adminId,
+        }
+      );
+      toast.success("Successfully sent to admin", {
+        duration: 10000,
+      });
+      setButtonLoading(false);
+      resetForm();
+    } catch (error) {
+      console.log(error);
+      setButtonLoading(false);
+    }
   };
 
-  const handleSelectOwner = (owner) => {
-    setSelectedOwner(owner);
-    setOpenDropdown("");
-  };
+  useEffect(() => {
+    fetchDetails();
+    fetchSuperAdmins();
+  }, []);
 
   return (
     <div className="p-6 relative mb-16">
       <div className="invoice py-2">
-        <b className="text-[#434343]">Gate Pass Note</b>
+        <b className="text-[#434343] font-amsterdam">Gate Pass Note</b>
       </div>
-      <form className="my-8">
+      <form className="my-8" onSubmit={submitForm}>
         <div className="my-8 grid grid-cols-2 max-sm:grid-cols-1 gap-8 border-t-[1px] border-[#9191914] py-8">
           <div className="drivers-name">
             <label>Driver's Name</label>
             <input
               type="text"
-              placeholder="Input"
+              disabled
+              value={entryDetails.order?.authToWeighTickets?.driver || ""}
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
@@ -62,176 +136,86 @@ const CreateGatepass = () => {
             <label>Escort's Name</label>
             <input
               type="text"
+              value={escort}
+              onChange={(e) => {
+                setEscort(e.target.value);
+              }}
               placeholder="Input Name"
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
-
           <div className="vehicle-no">
             <label>Vehicle No</label>
             <input
-              type="number"
-              placeholder="Input"
+              type="text"
+              disabled
+              value={entryDetails.order?.authToWeighTickets?.vehicleNo || ""}
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
-
-          <div className="product relative">
-            <label>Product</label>
-            <div
-              className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full flex items-center justify-between cursor-pointer"
-              onClick={() => toggleDropdown("product")}
-            >
-              <span className="text-gray-700">
-                {selectedProduct || "Select Product"}
-              </span>
-              <i className="fas fa-chevron-down text-gray-500"></i>
-            </div>
-            {openDropdown === "product" && (
-              <div className="absolute top-20 bg-white shadow-md rounded-lg p-4 z-50 w-full">
-                {["Product A", "Product B", "Product C"].map((product) => (
-                  <div
-                    key={product}
-                    className="py-2 px-2 text-gray-700 cursor-pointer hover:bg-theme hover:text-white"
-                    onClick={() => handleSelectProduct(product)}
-                  >
-                    {product}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="Invoice-no">
-            <label>Invoice No.</label>
-            <input
-              type="number"
-              placeholder="Input"
-              className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
-            />
-          </div>
-
-          <div className="owner relative">
+          <div className="owner">
             <label>Owner of Goods</label>
-            <div
-              className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full flex items-center justify-between cursor-pointer"
-              onClick={() => toggleDropdown("owner")}
-            >
-              <span className="text-gray-700">
-                {selectedOwner || "Select Owner"}
-              </span>
-              <i className="fas fa-chevron-down text-gray-500"></i>
-            </div>
-            {openDropdown === "owner" && (
-              <div className="absolute top-20 bg-white shadow-md rounded-lg p-4 z-50 w-full">
-                {["Owner A", "Owner B", "Owner C"].map((owner) => (
-                  <div
-                    key={owner}
-                    className="py-2 px-2 text-gray-700 cursor-pointer hover:bg-theme hover:text-white"
-                    onClick={() => handleSelectOwner(owner)}
-                  >
-                    {owner}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="Destination">
-            <label>Input Address</label>
             <input
               type="text"
-              placeholder="Select customer"
+              disabled
+              value={`${
+                entryDetails.ledgerSummary?.ledgerEntries[0]?.customer
+                  ?.firstname || ""
+              } ${
+                entryDetails.ledgerSummary?.ledgerEntries[0]?.customer
+                  ?.lastname || ""
+              }`}
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
-          <div className="timeout relative">
-            <label>Time of Departure</label>
-            <div
-              className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full flex items-center cursor-pointer justify-between"
-              onClick={() => setIsTimePickerOpen((prev) => !prev)}
+          <div>
+            <label htmlFor="">Destination</label>
+            <TextField.Root
+              size={"3"}
+              className="mt-2"
+              placeholder="Enter Destination"
+              value={destination}
+              onChange={(e) => {
+                setDestination(e.target.value);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="">Send To:</label>
+            <Select.Root
+              size={"3"}
+              disabled={superAdmins.length === 0}
+              onValueChange={(value) => {
+                setAdminId(value);
+              }}
             >
-              <span className="text-gray-700">{`${selectedHour}:${selectedMinute}`}</span>
-              <span className="text-gray-700">{selectedPeriod}</span>
-              <i className="fas fa-clock text-gray-500"></i>
-            </div>
-            {isTimePickerOpen && (
-              <div className="absolute top-16 bg-white shadow-md rounded-lg p-4 z-50 w-full max-w-xs">
-                <div className="flex justify-between">
-                  <div className="overflow-y-auto h-32 w-1/3 text-center no-scrollbar">
-                    {hours.map((hour) => (
-                      <div
-                        key={hour}
-                        className={`py-2 px-2 text-gray-700 cursor-pointer ${
-                          hour === selectedHour ? "text-theme font-bold" : ""
-                        }`}
-                        onClick={() => setSelectedHour(hour)}
-                      >
-                        {hour}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="overflow-y-auto h-32 w-1/3 text-center no-scrollbar">
-                    {minutes.map((minute) => (
-                      <div
-                        key={minute}
-                        className={`py-2 px-2 text-gray-700 cursor-pointer ${
-                          minute === selectedMinute
-                            ? "text-theme font-bold"
-                            : ""
-                        }`}
-                        onClick={() => setSelectedMinute(minute)}
-                      >
-                        {minute}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="overflow-y-auto h-32 w-1/3 text-center no-scrollbar">
-                    {periods.map((period) => (
-                      <div
-                        key={period}
-                        className={`py-2 px-2 text-gray-700 cursor-pointer ${
-                          period === selectedPeriod
-                            ? "text-theme font-bold"
-                            : ""
-                        }`}
-                        onClick={() => setSelectedPeriod(period)}
-                      >
-                        {period}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
+              <Select.Trigger
+                className="w-full mt-2"
+                placeholder="Select Admin"
+              />
+              <Select.Content position="popper">
+                {superAdmins.map((admin) => {
+                  return (
+                    <Select.Item
+                      value={admin.id}
+                    >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
+                  );
+                })}
+              </Select.Content>
+            </Select.Root>
           </div>
         </div>
-        <div className="btn flex justify-end max-sm:flex-col">
-          <button
-            type="button" // Ensures it's treated as a regular button, not a form submission button
-            className="h-[40px] bg-theme hover:bg-theme/85 text-white px-8 rounded-lg shadow-lg my-12"
-            onClick={(e) => {
-              e.preventDefault(); // Prevent form submission
-              toggleDropdown("recipient"); // Open the dropdown
-            }}
+        <Flex justify={"end"}>
+          <Button
+            size={"4"}
+            className="bg-theme cursor-pointer font-amsterdam"
+            disabled={buttonLoading}
           >
-            Send to
-          </button>
-          {openDropdown === "recipient" && (
-            <div className="absolute right-4 bottom-[-80px] bg-white shadow-md rounded-lg p-6 z-50">
-              {["Security", "Admin", "Logistics"].map((recipient) => (
-                <div
-                  key={recipient}
-                  className="py-2 px-4 rounded-lg text-gray-700 cursor-pointer hover:bg-theme hover:text-white"
-                  onClick={() => handleSelectRecipient(recipient)}
-                >
-                  {recipient}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+            {buttonLoading ? <LoaderIcon /> : "Submit"}
+          </Button>
+        </Flex>
       </form>
+      <Toaster position="top-right" />
     </div>
   );
 };

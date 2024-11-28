@@ -10,13 +10,12 @@ const root = import.meta.env.VITE_ROOT;
 
 const Notifications = () => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isSlidingOut, setIsSlidingOut] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadNotifications, setUnreadNotifications] = useState([]);
-  const [loading, setLoading] = useState({}); // Tracks loading state for each notification
   const notificationRef = useRef(null);
 
-  // Fetch notifications from the API
   const fetchNotifications = async () => {
     const token = localStorage.getItem("token");
     setFetchLoading(true);
@@ -44,7 +43,19 @@ const Notifications = () => {
   };
 
   const toggleNotifications = () => {
-    setIsNotificationsOpen((prev) => !prev);
+    if (isNotificationsOpen) {
+      slideOutNotifications();
+    } else {
+      setIsNotificationsOpen(true);
+    }
+  };
+
+  const slideOutNotifications = () => {
+    setIsSlidingOut(true); // Start slide-out animation
+    setTimeout(() => {
+      setIsNotificationsOpen(false); // Hide panel after animation
+      setIsSlidingOut(false); // Reset sliding state
+    }, 300); // Match animation duration
   };
 
   const closeNotifications = (event) => {
@@ -52,7 +63,7 @@ const Notifications = () => {
       notificationRef.current &&
       !notificationRef.current.contains(event.target)
     ) {
-      setIsNotificationsOpen(false);
+      slideOutNotifications();
     }
   };
 
@@ -63,105 +74,6 @@ const Notifications = () => {
       document.removeEventListener("click", closeNotifications, true);
     };
   }, []);
-
-  const checkNotificationType = (message) => {
-    const possibleNotifications = [
-      "Authority to weigh",
-      "LPO",
-      "cash ticket",
-      "Authority to collect from General Store",
-    ];
-
-    const matchingNotification = possibleNotifications.find((notification) =>
-      message.includes(notification)
-    );
-
-    if (matchingNotification) {
-      switch (matchingNotification) {
-        case "LPO":
-          return "/admin/approve-lpo/";
-        case "Authority to weigh":
-          return "/admin/approve-weigh-auth/";
-        case "cash ticket":
-          return "/admin/approve-cash-ticket/";
-        case "Authority to collect from General Store":
-          return "/admin/approve-store-auth/";
-        default:
-          console.log("Unknown notification type.");
-          return null;
-      }
-    } else {
-      console.log("No matching notification type found.");
-      return null;
-    }
-  };
-
-  const messageType = (message) => {
-    switch (message) {
-      case "lpo":
-        return "/admin/reject-lpo";
-        break;
-      case "weigh":
-        return "/admin/reject-weigh-auth";
-        break;
-      case "store":
-        return "/admin/reject-store-auth";
-
-      default:
-        break;
-    }
-  };
-
-  const disapproveTicket = async (type, id) => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      return;
-    }
-
-    try {
-      const response = await axios.patch(
-        `${root}${messageType(type)}/${id}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const approveTicket = async (message, id) => {
-    const token = localStorage.getItem("token");
-    const notificationType = checkNotificationType(message);
-
-    if (!notificationType) {
-      console.error("Invalid notification type");
-      return;
-    }
-
-    setLoading((prev) => ({ ...prev, [id]: true })); // Set loading for the specific notification
-
-    try {
-      await axios.patch(
-        `${root}${notificationType}/${id}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      fetchNotifications();
-    } catch (error) {
-      console.error("Error approving ticket:", error);
-    } finally {
-      setLoading((prev) => ({ ...prev, [id]: false })); // Reset loading state
-    }
-  };
 
   return (
     <div className="relative" ref={notificationRef}>
@@ -178,125 +90,92 @@ const Notifications = () => {
           </div>
         )}
       </div>
-      {isNotificationsOpen && (
-        <div
-          className="absolute top-10 right-0 w-80 !z-[9999] shadow-md p-4 bg-white border border-gray-200 rounded-md"
-          style={{ borderRadius: "8px" }}
-        >
-          <Flex justify="end" mb="2">
-            <Button
-              className="text-[.7rem] cursor-pointer"
-              onClick={fetchNotifications}
-            >
-              {fetchLoading ? (
-                <Spinner />
+      <div
+        className={`notifications-panel absolute top-10 right-[-70px] w-[25rem] z-[9999] shadow-md p-4 bg-white border border-gray-200 rounded-md transition-transform duration-300 ${
+          isNotificationsOpen && !isSlidingOut
+            ? "translate-x-0"
+            : "translate-x-full"
+        }`}
+        style={{ borderRadius: "8px" }}
+      >
+        <Flex justify="end" mb="2">
+          <Button
+            className="text-[.7rem] cursor-pointer"
+            onClick={fetchNotifications}
+          >
+            {fetchLoading ? <Spinner /> : <FontAwesomeIcon icon={faRefresh} />}
+          </Button>
+        </Flex>
+
+        <Tabs.Root defaultValue="all">
+          <Tabs.List>
+            <Tabs.Trigger value="all">All</Tabs.Trigger>
+            <Tabs.Trigger value="unread">Unread</Tabs.Trigger>
+          </Tabs.List>
+
+          <Box
+            pt="3"
+            style={{ maxHeight: "300px", overflowY: "auto" }}
+            className="notifications-box"
+          >
+            <Tabs.Content value="all">
+              {notifications.length > 0 ? (
+                notifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className="mb-3 p-2 rounded hover:bg-gray-100"
+                  >
+                    <Flex gap="2" align="center">
+                      <Card className="bg-green-400 p-4 w-[40px] h-[40px] flex justify-center items-center">
+                        <FontAwesomeIcon icon={faInfo} />
+                      </Card>
+                      <div>
+                        <Text className="text-[.7rem] font-medium">
+                          {notification.message}
+                        </Text>
+                        <br />
+                        <Text className="text-[.5rem] text-gray-500">
+                          {refractor(notification.createdAt)}
+                        </Text>
+                      </div>
+                    </Flex>
+                  </div>
+                ))
               ) : (
-                <FontAwesomeIcon icon={faRefresh} />
+                <Text className="text-gray-500">No notifications</Text>
               )}
-            </Button>
-          </Flex>
+            </Tabs.Content>
 
-          <Tabs.Root defaultValue="all">
-            <Tabs.List>
-              <Tabs.Trigger value="all">All</Tabs.Trigger>
-              <Tabs.Trigger value="unread">Unread</Tabs.Trigger>
-            </Tabs.List>
-
-            <Box
-              pt="3"
-              style={{ maxHeight: "300px", overflowY: "auto" }}
-              className="notifications-box"
-            >
-              <Tabs.Content value="all">
-                {notifications.length > 0 ? (
-                  notifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className="mb-3 p-2 rounded hover:bg-gray-100"
-                    >
-                      <Flex gap="2" align="center">
-                        <Card className="bg-green-400 p-4 w-[40px] h-[40px] flex justify-center items-center">
-                          <FontAwesomeIcon icon={faInfo} />
-                        </Card>
-                        <div>
-                          <Text className="text-[.7rem] font-medium">
-                            {notification.message}
-                          </Text>
-                          <br />
-                          <Text className="text-[.5rem] text-gray-500">
-                            {refractor(notification.createdAt)}
-                          </Text>
-                        </div>
-                      </Flex>
-                    </div>
-                  ))
-                ) : (
-                  <Text className="text-gray-500">No notifications</Text>
-                )}
-              </Tabs.Content>
-
-              <Tabs.Content value="unread">
-                {unreadNotifications.length > 0 ? (
-                  unreadNotifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className="mb-3 p-2 rounded hover:bg-gray-100"
-                    >
-                      <Flex gap="2" align="center">
-                        <Card className="bg-red-400 p-4 w-[40px] h-[40px] flex justify-center items-center">
-                          <FontAwesomeIcon icon={faInfo} />
-                        </Card>
-                        <div>
-                          <Text className="text-[.7rem] font-medium">
-                            {notification.message}
-                          </Text>
-                          <br />
-                          <Text className="text-[.5rem] text-gray-500">
-                            {refractor(notification.createdAt)}
-                          </Text>
-                          <Flex gap="2" className="mt-1">
-                            <Button
-                              className="text-[.6rem] cursor-pointer"
-                              color="red"
-                              onClick={() => {
-                                disapproveTicket(
-                                  notification.type,
-                                  notification.ticketId
-                                );
-                              }}
-                            >
-                              Disapprove
-                            </Button>
-                            <Button
-                              className="text-[.6rem] cursor-pointer"
-                              color="green"
-                              onClick={() =>
-                                approveTicket(
-                                  notification.message,
-                                  notification.ticketId
-                                )
-                              }
-                              disabled={loading[notification.ticketId]} // Disable button when loading
-                            >
-                              {loading[notification.ticketId] ? (
-                                <Spinner />
-                              ) : (
-                                "Approve"
-                              )}
-                            </Button>
-                          </Flex>
-                        </div>
-                      </Flex>
-                    </div>
-                  ))
-                ) : (
-                  <Text className="text-gray-500">No unread notifications</Text>
-                )}
-              </Tabs.Content>
-            </Box>
-          </Tabs.Root>
-        </div>
-      )}
+            <Tabs.Content value="unread">
+              {unreadNotifications.length > 0 ? (
+                unreadNotifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className="mb-3 p-2 rounded hover:bg-gray-100"
+                  >
+                    <Flex gap="2" align="center">
+                      <Card className="bg-red-400 p-4 w-[40px] h-[40px] flex justify-center items-center">
+                        <FontAwesomeIcon icon={faInfo} />
+                      </Card>
+                      <div>
+                        <Text className="text-[.7rem] font-medium">
+                          {notification.message}
+                        </Text>
+                        <br />
+                        <Text className="text-[.5rem] text-gray-500">
+                          {refractor(notification.createdAt)}
+                        </Text>
+                      </div>
+                    </Flex>
+                  </div>
+                ))
+              ) : (
+                <Text className="text-gray-500">No unread notifications</Text>
+              )}
+            </Tabs.Content>
+          </Box>
+        </Tabs.Root>
+      </div>
     </div>
   );
 };

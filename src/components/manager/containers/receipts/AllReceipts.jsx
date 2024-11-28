@@ -7,6 +7,7 @@ const AllReceipts = () => {
       <Heading>View All Receipts</Heading>
 
       {/* Table showing receipts data */}
+      <Table.Root></Table.Root>
     </>
   );
 };

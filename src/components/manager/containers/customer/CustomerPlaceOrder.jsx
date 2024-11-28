@@ -12,7 +12,7 @@ import {
 } from "@radix-ui/themes";
 import axios from "axios";
 const root = import.meta.env.VITE_ROOT;
-import toast, { Toaster } from "react-hot-toast";
+import toast, { LoaderIcon, Toaster } from "react-hot-toast";
 
 const CustomerPlaceOrder = () => {
   const [basePrice, setBasePrice] = useState("");
@@ -116,7 +116,7 @@ const CustomerPlaceOrder = () => {
         style: {
           padding: "30px",
         },
-        duration: 4000,
+        duration: 10000,
       });
 
       // Reset form fields
@@ -287,7 +287,7 @@ const CustomerPlaceOrder = () => {
             disabled={buttonLoading}
             className=" bg-theme hover:bg-theme/85"
           >
-            {buttonLoading ? <Spinner /> : "Add"}
+            {buttonLoading ? <LoaderIcon /> : "Add"}
           </Button>
         </Flex>
       </form>
