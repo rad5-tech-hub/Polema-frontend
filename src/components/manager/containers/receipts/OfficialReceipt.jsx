@@ -105,13 +105,13 @@ const OfficialReceipt = () => {
               </p>
 
               {/* Logo and Addresses */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center max-sm:mt-8">
+              <div className="flex items-center justify-center">
                 <img
                   src={polemaLogo}
                   alt="Polema-logo"
                   className="w-[100px] sm:w-[150px]"
                 />
-                <div className="text-sm sm:text-base flex flex-col sm:flex-row justify-between sm:gap-12 w-full mt-4 sm:mt-0">
+                <div className="text-sm sm:text-base flex items-center gap-4 px-4">
                   <div className="sm:w-1/2">
                     <b>FACTORY/OFFICE:</b>
                     <br /> Osisioma Industry Layout,
@@ -131,7 +131,7 @@ const OfficialReceipt = () => {
               </div>
 
               {/* Receipt Title */}
-              <h4 className="font-bold text-[20px] sm:text-[32px] text-[#919191] mt-12 border-b-2 border-[#D2D2D2] mx-auto w-fit">
+              <h4 className="font-bold text-[20px] sm:text-[32px] text-[#919191] mt-4 border-b-2 border-[#D2D2D2] mx-auto w-fit">
                 OFFICIAL RECEIPT
               </h4>
 
