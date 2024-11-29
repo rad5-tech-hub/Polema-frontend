@@ -141,6 +141,18 @@ const DepartementStorePlaceOrder = () => {
         },
         duration: 10000,
       });
+
+      // Clear the form by resetting the 'plans' state
+      setPlans([
+        {
+          id: Date.now(),
+          departmentId: "",
+          productId: "",
+          quantity: "",
+          unit: "",
+          expectedDeliveryDate: "",
+        },
+      ]);
     } catch (error) {
       console.error("Failed to place order:", error);
       setBtnLoading(false);

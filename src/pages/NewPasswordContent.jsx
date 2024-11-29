@@ -3,60 +3,52 @@ import Image from "../static/image/login-bg.png";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { TextField, Heading, Card, Button } from "@radix-ui/themes";
+import { TextField, Heading, Card, Button, Spinner } from "@radix-ui/themes";
 import {
   LockClosedIcon,
   EnvelopeClosedIcon,
   EyeOpenIcon,
   EyeClosedIcon,
 } from "@radix-ui/react-icons";
+import { useSearchParams } from "react-router-dom";
 
 const root = import.meta.env.VITE_ROOT;
 
 const NewPasswordContent = () => {
+  const [searchParams] = useSearchParams();
+  const id = searchParams.get("token");
+
   const [loading, setLoading] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
 
   const handleLoginForm = async (e) => {
     e.preventDefault();
-    setLoading(true); // Show spinner
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match!");
+      return;
+    }
+
+    setLoading(true);
 
     try {
-      const response = await axios.post(`${root}/admin/login`, {
-        email: e.target[0].value,
-        password: e.target[1].value,
+      const response = await axios.patch(`${root}/admin/reset-password`, {
+        token: id, // Pass the token properly as part of the body
+        password,
+        confirmPassword,
       });
 
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("adminFirstName", response.data.admin.firstname);
-
-      toast.success("Login Successful", {
-        style: {
-          padding: "30px",
-        },
-        duration: 6000,
-      });
-      navigate("/admin");
+      // Handle success, navigate to login or show success message
+      toast.success("Password successfully updated!");
+      navigate("/login"); // Example redirection
     } catch (error) {
-      // Handle error
-      if (error.response) {
-        toast.error(error.response.data.error, {
-          style: {
-            padding: "30px",
-          },
-          duration: 7500,
-        });
-      } else if (error.request) {
-        toast.error("Network Error", {
-          style: {
-            padding: "30px",
-          },
-          duration: 7500,
-        });
-      }
+      console.log(error);
+      toast.error("Failed to update password, please try again.");
     } finally {
-      setLoading(false); // Remove spinner after request completes
+      setLoading(false);
     }
   };
 
@@ -95,20 +87,28 @@ const NewPasswordContent = () => {
                 <div className="flex flex-col gap-4">
                   <TextField.Root
                     placeholder="Enter New Password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     className="mt-4"
-                    size={"3"}
+                    size="3"
+                    type={"text"} // Toggle password visibility
                   >
                     <TextField.Slot>
-                      <EnvelopeClosedIcon height="16" width="16" />
+                      <LockClosedIcon height="16" width="16" />
                     </TextField.Slot>
                   </TextField.Root>
                   <TextField.Root
                     placeholder="Confirm New Password"
                     className="mt-4"
-                    size={"3"}
+                    size="3"
+                    value={confirmPassword}
+                    required
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    type="text"
                   >
                     <TextField.Slot>
-                      <EnvelopeClosedIcon height="16" width="16" />
+                      <LockClosedIcon height="16" width="16" />
                     </TextField.Slot>
                   </TextField.Root>
                 </div>
@@ -120,11 +120,7 @@ const NewPasswordContent = () => {
                   className="w-[100%] bg-theme hover:bg-theme/85 h-[40px]"
                   disabled={loading}
                 >
-                  {loading ? (
-                    <p className="text-white">Please Wait...</p>
-                  ) : (
-                    "Submit"
-                  )}
+                  {loading ? <Spinner /> : "Submit"}
                 </Button>
               </div>
             </form>

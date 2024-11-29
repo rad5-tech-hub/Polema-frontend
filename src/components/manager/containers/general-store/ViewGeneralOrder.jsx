@@ -92,7 +92,6 @@ const ViewGeneralOrder = () => {
                   <Table.Cell>
                     {refractor(item.expectedDeliveryDate)}
                   </Table.Cell>
-                  <Table.Cell>{item.status}</Table.Cell>
                 </Table.Row>
               );
             })
