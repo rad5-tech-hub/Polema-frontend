@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
 import { refractor } from "../../../date";
@@ -14,7 +15,12 @@ import {
   Separator,
   Grid,
 } from "@radix-ui/themes";
-import { faInfo, faRefresh, faClose } from "@fortawesome/free-solid-svg-icons";
+import {
+  faInfo,
+  faRefresh,
+  faClose,
+  faCheckCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
@@ -667,8 +673,16 @@ const Notifications = () => {
                   notifications.map((notification) => (
                     <div
                       key={notification.id}
-                      className="mb-3 p-2 rounded hover:bg-gray-100"
+                      className="mb-3 p-2 rounded hover:bg-gray-100 relative"
                     >
+                      {notification.read && (
+                        <div className="check  absolute top-0 left-0 z-[10]">
+                          <FontAwesomeIcon
+                            icon={faCheckCircle}
+                            className="text-green-500 w-[10px]"
+                          />
+                        </div>
+                      )}
                       <Flex gap="2" align="center">
                         <Card className="bg-green-400 p-4 w-[40px] h-[40px] flex justify-center items-center">
                           <FontAwesomeIcon icon={faInfo} />
@@ -715,7 +729,7 @@ const Notifications = () => {
                               {refractor(notification.createdAt)}
                             </Text>
                           </div>
-                          {console.log(notification.read)}
+
                           {notification.read && (
                             <div className="delete-icon cursor-zoom-in">
                               <FontAwesomeIcon

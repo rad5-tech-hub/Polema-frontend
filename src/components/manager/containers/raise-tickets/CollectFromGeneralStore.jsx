@@ -302,7 +302,7 @@ const CollectFromGeneralStore = () => {
                 className="w-full mt-2"
                 placeholder="Select Admin"
               />
-              <Select.Content>
+              <Select.Content position="popper">
                 {superAdmins.map((admins) => {
                   return (
                     <Select.Item
