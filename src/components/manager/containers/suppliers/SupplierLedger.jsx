@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
 import React from "react";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
-import { refractor } from "../../../date";
+import { refractor, formatMoney } from "../../../date";
 import { useParams } from "react-router-dom";
 import {
   Heading,
@@ -244,10 +244,12 @@ const SupplierLedger = () => {
                   <Table.Cell>{entry.unit}</Table.Cell>
                   <Table.Cell>{entry.quantity}</Table.Cell>
                   <Table.Cell className="text-green-500">
-                    {entry.credit > entry.debit && entry.credit}
+                    {formatMoney(
+                      entry.credit > entry.debit ? entry.credit : ""
+                    )}
                   </Table.Cell>
                   <Table.Cell className="text-red-500">
-                    {entry.debit > entry.credit && entry.debit}
+                    {formatMoney(entry.debit > entry.credit ? entry.debit : "")}
                   </Table.Cell>
                   <Table.Cell>{entry.balance}</Table.Cell>
                 </Table.Row>

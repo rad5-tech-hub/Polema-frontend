@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
 import { refractor } from "../../../date";
 import { BellIcon } from "@radix-ui/react-icons";
@@ -701,19 +701,31 @@ const Notifications = () => {
                       }}
                       className="mb-3 p-2 rounded hover:bg-gray-100 cursor-pointer"
                     >
-                      <Flex gap="2" align="center">
+                      <Flex gap="2" align="center" className="relative">
                         <Card className="bg-red-400 p-4 w-[40px] h-[40px] flex justify-center items-center">
                           <FontAwesomeIcon icon={faInfo} />
                         </Card>
-                        <div>
-                          <Text className="text-[.7rem] font-medium">
-                            {notification.message}
-                          </Text>
-                          <br />
-                          <Text className="text-[.5rem] text-gray-500">
-                            {refractor(notification.createdAt)}
-                          </Text>
-                        </div>
+                        <Flex justify={"between"} gap={"3"}>
+                          <div>
+                            <Text className="text-[.7rem] font-medium">
+                              {notification.message}
+                            </Text>
+                            <br />
+                            <Text className="text-[.5rem] text-gray-500">
+                              {refractor(notification.createdAt)}
+                            </Text>
+                          </div>
+                          {console.log(notification.read)}
+                          {notification.read && (
+                            <div className="delete-icon cursor-zoom-in">
+                              <FontAwesomeIcon
+                                icon={faTrash}
+                                color="red"
+                                className="w-[10px]"
+                              />
+                            </div>
+                          )}
+                        </Flex>
                       </Flex>
                     </div>
                   ))
