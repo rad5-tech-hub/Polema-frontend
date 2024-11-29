@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { refractor } from "../../../date";
+import { refractor, formatMoney } from "../../../date";
 import { DeleteIcon, DropDownIcon } from "../../../icons";
 import {
   DropdownMenu,
@@ -88,7 +88,7 @@ const AllProducts = () => {
             </Select.Root>
           </Flex>
 
-          <Table.Root size="3" variant="surface">
+          <Table.Root size="3" variant="surface" className="mt-4">
             <Table.Header>
               <Table.Row>
                 <Table.ColumnHeaderCell>Date</Table.ColumnHeaderCell>
@@ -117,6 +117,7 @@ const AllProducts = () => {
                 {products.map((product) => (
                   <Table.Row key={product.id}>
                     <Table.Cell>{refractor(product.createdAt)}</Table.Cell>
+                    <Table.Cell>{product.name}</Table.Cell>
                     <Table.Cell>{product.category}</Table.Cell>
                     <Table.Cell>
                       {product.price.map((p, index) => (
@@ -125,11 +126,10 @@ const AllProducts = () => {
                     </Table.Cell>
                     <Table.Cell>
                       {product.price.map((p, index) => (
-                        <div key={index}>₦{p.amount}</div>
+                        <div key={index}>₦{formatMoney(p.amount)}</div>
                       ))}
                     </Table.Cell>
 
-                    <Table.Cell>{product.name}</Table.Cell>
                     <Table.Cell>
                       <DropdownMenu.Root>
                         <DropdownMenu.Trigger>

@@ -21,7 +21,7 @@ import toast, { Toaster } from "react-hot-toast";
 
 const root = import.meta.env.VITE_ROOT;
 
-const EditDialog = ({ product }) => {
+const EditDialog = ({ product, onClose }) => {
   const [isloading, setIsLoading] = useState(false);
   const [pricePlan, setPricePlan] = useState(false);
   const [basePrice, setBasePrice] = useState(product.price[0].amount);
@@ -122,7 +122,7 @@ const EditDialog = ({ product }) => {
     const submitObject = {
       name: e.target[0].value,
       category: selectedCategory === "products" ? "For Sale" : "For Purchase",
-      departmentId: deptID,
+      departmentId: product.departmentId ? product.departmentId : deptID,
       price: [
         {
           unit: unit,
@@ -135,7 +135,7 @@ const EditDialog = ({ product }) => {
     const submitWithoutPlans = {
       name: productName,
       category: selectedCategory === "products" ? "For Sale" : "For Purchase",
-      departmentId: deptID,
+      departmentId: product.departmentId ? product.departmentId : deptID,
       price: [
         {
           unit: unit,
@@ -146,7 +146,7 @@ const EditDialog = ({ product }) => {
 
     console.log(pricePlan ? submitObject : submitWithoutPlans);
     try {
-      const response = await axios.post(
+      const response = await axios.patch(
         `${root}/admin/edit-product/${product.id}`,
         pricePlan ? submitObject : submitWithoutPlans,
         {
@@ -171,6 +171,10 @@ const EditDialog = ({ product }) => {
       setSelectedDept("");
       setSelectedCategory("products");
       setPricePlan(false);
+
+      setTimeout(() => {
+        onClose();
+      }, 3000);
 
       console.log(response);
     } catch (error) {

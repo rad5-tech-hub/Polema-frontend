@@ -28,7 +28,7 @@ const EditModal = ({ closeModal, product, runFetch }) => {
     const body = {
       ...(category && { category }),
       ...(unit && { unit }),
-      ...(threshold && { thresholdValue: threshold }),
+      // ...(threshold && { thresholdValue: threshold }),
       ...(productTag && { productTag: productTag }),
     };
 
@@ -131,11 +131,12 @@ const EditModal = ({ closeModal, product, runFetch }) => {
               <label htmlFor="">Threshold Value</label>
               <input
                 type="text"
-                value={threshold}
+                // value={threshold}
                 onChange={(e) => {
                   setThreshold(e.target.value);
                 }}
-                placeholder={product?.thresholdValue || "Enter threshold value"}
+                disabled
+                value={product?.thresholdValue || "Enter threshold value"}
                 className="border h-[44px] px-4 lg:w-[273px] rounded-lg"
               />
             </div>

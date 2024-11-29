@@ -52,7 +52,7 @@ const Notifications = () => {
         case "gatepass":
           return "customer/view-gatepass";
         case "invoice":
-          return "customer/get-invoice";
+          return "customer/invoice-pdf";
         case "weigh":
           return "admin/view-auth-weigh";
         default:
@@ -352,7 +352,8 @@ const Notifications = () => {
                           ticketDetails.ledgerEntries.map((entry) => {
                             return (
                               <p className="text-[.7rem]">
-                                {entry.quantity} {entry.unit}
+                                {entry.quantity} {entry.unit} of{" "}
+                                {entry.productName}
                               </p>
                             );
                           })
@@ -479,11 +480,25 @@ const Notifications = () => {
                           TYPE
                         </Text>
                         {ticketDetails.creditOrDebit === "credit" ? (
-                          <p className="text-[.7rem] text-green-500">CREDIT</p>
+                          <p className="text-[.7rem] text-green-500">
+                            Gave Cash
+                          </p>
                         ) : (
-                          <p className="text-[.7rem] text-red-500">DEBIT</p>
+                          <p className="text-[.7rem] text-red-500">
+                            Collected Cas
+                          </p>
                         )}
                       </div>
+                      {ticketDetails?.customer && (
+                        <div>
+                          <Text className="text-[.56rem] font-black tracking-wide">
+                            NAME
+                          </Text>
+                          <p className="text-[.7rem]">
+                            {`${ticketDetails.customer.firstname} ${ticketDetails.customer.lastname}`}
+                          </p>
+                        </div>
+                      )}
                     </>
                   )}
 
@@ -684,7 +699,7 @@ const Notifications = () => {
                         setSelectedTicket(notification);
                         setDetailsPageOpen(true);
                       }}
-                      className="mb-3 p-2 rounded hover:bg-gray-100"
+                      className="mb-3 p-2 rounded hover:bg-gray-100 cursor-pointer"
                     >
                       <Flex gap="2" align="center">
                         <Card className="bg-red-400 p-4 w-[40px] h-[40px] flex justify-center items-center">

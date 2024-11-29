@@ -155,7 +155,7 @@ const DocumentsModal = ({ isOpen, onClose, customerName, id }) => {
               <div
                 className="w-[80px] h-[80px] cursor-pointer rounded-md bg-gray-400/40 mt-2 border-2"
                 ref={divRef}
-                onClick={handleFullscreen}
+                onClick={entries[0].weighImage.length !== 0 && handleFullscreen}
                 style={{
                   backgroundImage:
                     entries[0]?.weighImage && `url(${entries[0].weighImage})`,
