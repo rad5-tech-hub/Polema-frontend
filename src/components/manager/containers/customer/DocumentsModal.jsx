@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toast, { Toaster } from "react-hot-toast";
@@ -17,6 +17,21 @@ import {
 
 const DocumentsModal = ({ isOpen, onClose, customerName, id }) => {
   if (!isOpen) return null;
+  const divRef = useRef(null);
+
+  const handleFullscreen = () => {
+    if (divRef.current) {
+      if (divRef.current.requestFullscreen) {
+        divRef.current.requestFullscreen();
+      } else if (divRef.current.webkitRequestFullscreen) {
+        // Safari
+        divRef.current.webkitRequestFullscreen();
+      } else if (divRef.current.msRequestFullscreen) {
+        // IE11
+        divRef.current.msRequestFullscreen();
+      }
+    }
+  };
   const navigate = useNavigate();
   const [entries, setEntries] = React.useState([]);
   const [failedSearch, setFailedSearch] = React.useState(false);
@@ -138,11 +153,12 @@ const DocumentsModal = ({ isOpen, onClose, customerName, id }) => {
               </Text>
 
               <div
-                className="w-[80px] h-[80px] rounded-md bg-gray-400/40 mt-2 border-2"
+                className="w-[80px] h-[80px] cursor-pointer rounded-md bg-gray-400/40 mt-2 border-2"
+                ref={divRef}
+                onClick={handleFullscreen}
                 style={{
-                  backgroundImage: entries[0]?.weighImage
-                    ? `url(${entries[0].weighImage})`
-                    : undefined,
+                  backgroundImage:
+                    entries[0]?.weighImage && `url(${entries[0].weighImage})`,
                   backgroundSize: "cover",
                   backgroundPosition: "center",
                 }}

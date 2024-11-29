@@ -135,35 +135,37 @@ const ViewAuthorityToWeigh = () => {
                     />{" "}
                     {_.upperFirst(item.status)}
                   </Table.Cell>
-                  <DropdownMenu.Root>
-                    <DropdownMenu.Trigger className="mt-2">
-                      <Button variant="soft">
-                        <FontAwesomeIcon icon={faEllipsisV} />
-                      </Button>
-                    </DropdownMenu.Trigger>
-                    <DropdownMenu.Content>
-                      <DropdownMenu.Item
-                        onClick={() => {
-                          navigate(
-                            `/admin/weighing-operations/new-weigh/${item.id}`
-                          );
-                        }}
-                      >
-                        New Weigh
-                      </DropdownMenu.Item>
-                      {item.status === "approved" && (
+                  {item.status !== "pending" && (
+                    <DropdownMenu.Root>
+                      <DropdownMenu.Trigger className="mt-2">
+                        <Button variant="soft">
+                          <FontAwesomeIcon icon={faEllipsisV} />
+                        </Button>
+                      </DropdownMenu.Trigger>
+                      <DropdownMenu.Content>
                         <DropdownMenu.Item
                           onClick={() => {
                             navigate(
-                              `/admin/tickets/view-auth-to-weigh/${item.id}`
+                              `/admin/weighing-operations/new-weigh/${item.id}`
                             );
                           }}
                         >
-                          View Approved
+                          New Weigh
                         </DropdownMenu.Item>
-                      )}
-                    </DropdownMenu.Content>
-                  </DropdownMenu.Root>
+                        {item.status === "approved" && (
+                          <DropdownMenu.Item
+                            onClick={() => {
+                              navigate(
+                                `/admin/tickets/view-auth-to-weigh/${item.id}`
+                              );
+                            }}
+                          >
+                            View Approved
+                          </DropdownMenu.Item>
+                        )}
+                      </DropdownMenu.Content>
+                    </DropdownMenu.Root>
+                  )}
                 </Table.Row>
               );
             })

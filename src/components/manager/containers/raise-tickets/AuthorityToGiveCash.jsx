@@ -247,6 +247,10 @@ const AuthorityToGiveCash = () => {
       setOthersLoading(false);
     }
   };
+  const formatWithCommas = (value) => {
+    const numericValue = value.replace(/[^0-9]/g, ""); // Remove non-numeric characters
+    return Number(numericValue).toLocaleString(); // Format with commas
+  };
 
   useEffect(() => {
     fetchCustomers();
@@ -374,24 +378,23 @@ const AuthorityToGiveCash = () => {
                   required
                   className="mt-3"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={(e) => {
+                    const formattedAmount = formatWithCommas(e.target.value);
+                    setAmount(formattedAmount);
+                  }}
                   placeholder="Enter Amount in Naira (₦)"
                 />
               </div>
 
               <div className="comments w-[50%]">
-                <label htmlFor="comments">Comment or Desription</label>
+                <label htmlFor="comments">Comment or Description</label>
                 <TextField.Root
                   id="comments"
                   required
                   className="mt-3"
                   value={comments}
-                  onChange={(e) => {
-                    setComments(e.target.value);
-                  }}
-                  // value={amount}
-                  // onChange={(e) => setAmount(e.target.value)}
-                  placeholder="Enter Amount in Naira (₦)"
+                  onChange={(e) => setComments(e.target.value)}
+                  placeholder="Enter a description..."
                 />
               </div>
             </div>
@@ -399,22 +402,19 @@ const AuthorityToGiveCash = () => {
               <Text>Send To</Text>
               <Select.Root
                 disabled={superAdmins.length === 0}
-                onValueChange={(value) => {
-                  setAdminId(value);
-                }}
+                onValueChange={(value) => setAdminId(value)}
               >
                 <Select.Trigger
                   className="mt-3 w-full"
                   placeholder="Select Admin"
                 />
                 <Select.Content position="popper">
-                  {superAdmins.map((admin) => {
-                    return (
-                      <Select.Item
-                        value={admin.id}
-                      >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
-                    );
-                  })}
+                  {superAdmins.map((admin) => (
+                    <Select.Item
+                      key={admin.id}
+                      value={admin.id}
+                    >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
+                  ))}
                 </Select.Content>
               </Select.Root>
             </div>
@@ -426,6 +426,7 @@ const AuthorityToGiveCash = () => {
             </Flex>
           </form>
         </Tabs.Content>
+
         <Tabs.Content value="Staff">
           <form className="mt-6" onSubmit={staffSubmit}>
             <Grid columns={"2"} gap={"4"}>
