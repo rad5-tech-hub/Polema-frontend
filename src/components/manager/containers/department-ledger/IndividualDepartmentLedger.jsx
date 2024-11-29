@@ -91,13 +91,12 @@ const IndividualDepartmentLedger = () => {
                   <Table.Cell>{item.unit}</Table.Cell>
                   <Table.Cell>{item.quantity}</Table.Cell>
                   <Table.Cell className="text-green-500 font-bold">
-                    {item.credit > item.debit && item.credit}
-                    {formatMoney(item.credit > item.debit && item.credit, ",")}
+                    {formatMoney(item.credit > item.debit ? item.credit : "")}
                   </Table.Cell>
                   <Table.Cell className="text-red-500 font-bold">
-                    {item.debit > item.credit && item.debit}
+                    {formatMoney(item.debit > item.credit ? item.debit : "")}
                   </Table.Cell>
-                  <Table.Cell>{item.balance}</Table.Cell>
+                  <Table.Cell>{formatMoney(item.balance)}</Table.Cell>
                 </Table.Row>
               );
             })
