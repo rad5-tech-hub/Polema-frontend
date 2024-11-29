@@ -135,11 +135,13 @@ const AuthorityToGiveCash = () => {
       setAmount("");
       setSelectedCustomer("");
       setSelectedProduct("");
+      setComments("");
     };
 
     const body = {
       amount,
       customerId: selectedCustomer,
+      comments,
       productId: selectedProduct,
       creditOrDebit: authorityType,
     };
@@ -376,29 +378,45 @@ const AuthorityToGiveCash = () => {
                   placeholder="Enter Amount in Naira (₦)"
                 />
               </div>
-              <div className="w-[49%]">
-                <Text>Send To</Text>
-                <Select.Root
-                  disabled={superAdmins.length === 0}
-                  onValueChange={(value) => {
-                    setAdminId(value);
+
+              <div className="comments w-[50%]">
+                <label htmlFor="comments">Comment or Desription</label>
+                <TextField.Root
+                  id="comments"
+                  required
+                  className="mt-3"
+                  value={comments}
+                  onChange={(e) => {
+                    setComments(e.target.value);
                   }}
-                >
-                  <Select.Trigger
-                    className="mt-3 w-full"
-                    placeholder="Select Admin"
-                  />
-                  <Select.Content position="popper">
-                    {superAdmins.map((admin) => {
-                      return (
-                        <Select.Item
-                          value={admin.id}
-                        >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
-                      );
-                    })}
-                  </Select.Content>
-                </Select.Root>
+                  // value={amount}
+                  // onChange={(e) => setAmount(e.target.value)}
+                  placeholder="Enter Amount in Naira (₦)"
+                />
               </div>
+            </div>
+            <div className="w-[49%]">
+              <Text>Send To</Text>
+              <Select.Root
+                disabled={superAdmins.length === 0}
+                onValueChange={(value) => {
+                  setAdminId(value);
+                }}
+              >
+                <Select.Trigger
+                  className="mt-3 w-full"
+                  placeholder="Select Admin"
+                />
+                <Select.Content position="popper">
+                  {superAdmins.map((admin) => {
+                    return (
+                      <Select.Item
+                        value={admin.id}
+                      >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
+                    );
+                  })}
+                </Select.Content>
+              </Select.Root>
             </div>
 
             <Flex justify={"end"} className="mt-4">

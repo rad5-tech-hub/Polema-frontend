@@ -244,6 +244,22 @@ const Notifications = () => {
                           {`${ticketDetails.transaction.corder.firstname} ${ticketDetails.transaction.corder.lastname}`}
                         </p>
                       </div>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          DESTINATION
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {ticketDetails.destination}
+                        </p>
+                      </div>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          PRODUCT NAME
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {ticketDetails.transaction.porders.name}
+                        </p>
+                      </div>
                     </>
                   )}
 
@@ -274,6 +290,14 @@ const Notifications = () => {
                           {ticketDetails.destination}
                         </p>
                       </div>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          ESCORT NAME
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {ticketDetails.escortName}
+                        </p>
+                      </div>
                     </>
                   )}
 
@@ -290,11 +314,51 @@ const Notifications = () => {
                       </div>
                       <div>
                         <Text className="text-[.56rem] font-black tracking-wide">
-                          UNIT PRICE
+                          PRODUCT
                         </Text>
                         <p className="text-[.7rem]">
-                          {ticketDetails.unitPrice}
+                          {ticketDetails.product.name}
                         </p>
+                      </div>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          BANK NAME
+                        </Text>
+                        <p className="text-[.7rem]">{ticketDetails.bankName}</p>
+                      </div>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          QUANTITY ORDERED
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {ticketDetails.quantityOrdered}
+                        </p>
+                      </div>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          VEHICLE NO
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {ticketDetails.vehicleNo}
+                        </p>
+                      </div>
+
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          LEDGER ENTRIES
+                        </Text>
+                        {/* Ledger Entries */}
+                        {Array.isArray(ticketDetails.ledgerEntries) ? (
+                          ticketDetails.ledgerEntries.map((entry) => {
+                            return (
+                              <p className="text-[.7rem]">
+                                {entry.quantity} {entry.unit}
+                              </p>
+                            );
+                          })
+                        ) : (
+                          <div>No entries</div>
+                        )}
                       </div>
                     </>
                   )}
@@ -310,7 +374,7 @@ const Notifications = () => {
                       </div>
                       <div>
                         <Text className="text-[.56rem] font-black tracking-wide">
-                          TRANSACTION NAME
+                          NAME
                         </Text>
                         <p className="text-[.7rem]">
                           {`${ticketDetails.transactions?.corder.firstname} ${ticketDetails.transactions?.corder.lastname}`}
@@ -322,6 +386,14 @@ const Notifications = () => {
                         </Text>
                         <p className="text-[.7rem]">
                           {ticketDetails.transactions.quantity}
+                        </p>
+                      </div>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          VEHICLE NO
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {ticketDetails.vehicleNo}
                         </p>
                       </div>
                     </>
@@ -364,6 +436,14 @@ const Notifications = () => {
                       </div>
                       <div>
                         <Text className="text-[.56rem] font-black tracking-wide">
+                          DELIVERED TO
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {ticketDetails.deliveredTo}
+                        </p>
+                      </div>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
                           COMMENT
                         </Text>
                         <p className="text-[.7rem]">{ticketDetails.comments}</p>
@@ -376,6 +456,14 @@ const Notifications = () => {
                     <>
                       <div>
                         <Text className="text-[.56rem] font-black tracking-wide">
+                          PRODUCT
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {ticketDetails.product.name}
+                        </p>
+                      </div>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
                           AMOUNT
                         </Text>
                         <p className="text-[.7rem]">{ticketDetails.amount}</p>
@@ -385,6 +473,16 @@ const Notifications = () => {
                           COMMENTS
                         </Text>
                         <p className="text-[.7rem]">{ticketDetails.comments}</p>
+                      </div>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          TYPE
+                        </Text>
+                        {ticketDetails.creditOrDebit === "credit" ? (
+                          <p className="text-[.7rem] text-green-500">CREDIT</p>
+                        ) : (
+                          <p className="text-[.7rem] text-red-500">DEBIT</p>
+                        )}
                       </div>
                     </>
                   )}

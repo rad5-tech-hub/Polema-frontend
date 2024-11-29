@@ -323,11 +323,14 @@ const LocalPurchaseOrder = () => {
         </Flex>
         <Flex gap={"5"} className="mt-4">
           <div className="w-full">
-            <Text>L.P.O Expires</Text>
+            <Text>
+              L.P.O Expires <span className="text-red-500">*</span>{" "}
+            </Text>
             <TextField.Root
               placeholder="Enter Reveiver"
               className="mt-2"
               type="date"
+              required
               value={expiration}
               onChange={(e) => {
                 setExpiration(e.target.value);
