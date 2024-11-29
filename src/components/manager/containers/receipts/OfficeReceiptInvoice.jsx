@@ -57,7 +57,7 @@ const OfficialReceiptInvoice = () => {
       const response = await axios.post(
         `${root}/customer/create-official-receipt/${id}`,
         {
-          ofValue: ofValue,
+          of: ofValue,
           being:
             typeof receiptDetails != "string" ? receiptDetails.comment : "",
         },

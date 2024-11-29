@@ -388,7 +388,7 @@ const AuthorityToGiveCash = () => {
                     className="mt-3 w-full"
                     placeholder="Select Admin"
                   />
-                  <Select.Content>
+                  <Select.Content position="popper">
                     {superAdmins.map((admin) => {
                       return (
                         <Select.Item

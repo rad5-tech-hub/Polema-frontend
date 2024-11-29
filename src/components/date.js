@@ -18,4 +18,21 @@ const refractorToTime = (ISO_DATE) => {
   return formattedTime;
 };
 
-export { refractor, refractorToTime };
+// Funciton to format money
+function formatMoney(value, separator) {
+  if (typeof value !== "number" && typeof value !== "string") {
+    throw new Error("Value must be a number or a string.");
+  }
+
+  const [integerPart, decimalPart] = value.toString().split(".");
+  const formattedInteger = integerPart.replace(
+    /\B(?=(\d{3})+(?!\d))/g,
+    separator
+  );
+
+  return decimalPart !== undefined
+    ? `${formattedInteger}.${decimalPart}`
+    : formattedInteger;
+}
+
+export { refractor, refractorToTime, formatMoney };

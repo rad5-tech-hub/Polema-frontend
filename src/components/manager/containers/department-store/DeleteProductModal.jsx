@@ -23,19 +23,19 @@ const DeleteProductModal = ({ closeModal, product, runFetch }) => {
       });
     }
 
-    if (quantity > product.quantity) {
-      toast.error("Add a value lesser in quantity", {
-        duration: 4500,
-      });
-      setButtonLoading(false);
-      return;
-    }
+    // if (quantity > product.quantity) {
+    //   toast.error("Add a value lesser in quantity", {
+    //     duration: 4500,
+    //   });
+    //   setButtonLoading(false);
+    //   return;
+    // }
 
     try {
       const response = await axios.patch(
-        `${root}/dept/edit-deptstore/${product.id}`,
+        `${root}/dept/remove-quantity-dept/${product.id}`,
         {
-          quantity: Number(product.quantity) - Number(quantity),
+          amount: quantity,
         },
         {
           headers: {
@@ -49,6 +49,17 @@ const DeleteProductModal = ({ closeModal, product, runFetch }) => {
     } catch (error) {
       console.log(error);
       setButtonLoading(false);
+      if (error.status === 400) {
+        toast.error(
+          "Insufficient quantity in the store to remove this amount",
+          {
+            style: {
+              padding: "20px",
+            },
+            duration: 5000,
+          }
+        );
+      }
     }
   };
 

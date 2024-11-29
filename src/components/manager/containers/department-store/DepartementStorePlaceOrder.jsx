@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import {
   Heading,
   Card,
@@ -254,7 +256,7 @@ const DepartementStorePlaceOrder = () => {
           </Card>
         ))}
         <Button className="mt-4" onClick={addPlan}>
-          Add Plan
+          <FontAwesomeIcon icon={faPlus} />
         </Button>
 
         <Flex className="mt-4" justify={"end"}>

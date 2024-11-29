@@ -1,4 +1,5 @@
 import WelcomeComponent from "./WelcomeComponent";
+import EditDialog from "./products/EditDialog";
 import AuthorityToGiveCash from "./raise-tickets/AuthorityToGiveCash";
 import AllWeigh from "./weighing-operations/AllWeigh";
 import ViewAuthorityToWeigh from "./raise-tickets/ViewAuthorityToWeigh";
@@ -137,4 +138,5 @@ export {
   WaybillInvoice,
   InvoiceAuthorityToWeigh,
   ConfirmEmail,
+  EditDialog,
 };

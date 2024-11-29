@@ -15,6 +15,7 @@ import {
   CashManagementLedger,
   InvoiceAuthorityToWeigh,
   AuthorityToLoad,
+  EditDialog,
   AllReceipts,
   ViewPharmacyStore,
   LocalPurchaseOrder,
@@ -178,6 +179,10 @@ const App = () => {
                   <Route
                     path="products/view-products"
                     element={<AllProducts />}
+                  />
+                  <Route
+                    path="products/edit-product/:id"
+                    element={<EditDialog />}
                   />
 
                   {/* Admin Routes */}

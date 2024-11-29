@@ -18,12 +18,14 @@ import {
 } from "@radix-ui/themes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisV, faSquare } from "@fortawesome/free-solid-svg-icons";
+
 import axios from "axios";
 
 const root = import.meta.env.VITE_ROOT;
 
 const ViewDepartmentStore = () => {
   const [isProductActive, setIsProductActive] = useState(true);
+  const [failedSearch, setFailedSearch] = useState(false);
   const [store, setStore] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openModal, setOpenModal] = useState(null);
@@ -157,7 +159,7 @@ const ViewDepartmentStore = () => {
             <Table.ColumnHeaderCell>UNIT</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>QUANTITY</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>THRESHOLD VALUE</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>STATUS</Table.ColumnHeaderCell>
+
             <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
@@ -171,7 +173,7 @@ const ViewDepartmentStore = () => {
                   align="center"
                   style={{ height: "100px" }}
                 >
-                  <Spinner size="large" />
+                  {failedSearch ? "No records found" : <Spinner size="2" />}
                 </Flex>
               </Table.Cell>
             </Table.Row>
