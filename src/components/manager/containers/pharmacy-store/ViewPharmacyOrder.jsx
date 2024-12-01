@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from "react";
+
 import { refractor } from "../../../date";
 import { faPills } from "@fortawesome/free-solid-svg-icons";
 import { DropdownMenu } from "@radix-ui/themes";
-import { Table, Heading, Separator, Flex, Button } from "@radix-ui/themes";
+import {
+  Table,
+  Heading,
+  Separator,
+  Flex,
+  Button,
+  Spinner,
+} from "@radix-ui/themes";
 import { DropDownIcon } from "../../../icons";
 import { faSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -14,6 +22,7 @@ const root = import.meta.env.VITE_ROOT;
 const ViewPharmacyOrder = () => {
   const [orders, setOrders] = useState([]);
   const [rawMaterials, setRawMaterials] = useState([]);
+  const [failedSearch, setFailedSearch] = useState(false);
 
   // Function to fetch info about orders placed
   const fetchOrders = async () => {
@@ -32,6 +41,9 @@ const ViewPharmacyOrder = () => {
       setOrders(response.data.Orders);
     } catch (error) {
       console.log(error);
+      {
+        (error.status === 404) & setFailedSearch(true);
+      }
     }
   };
 
@@ -67,7 +79,7 @@ const ViewPharmacyOrder = () => {
   useEffect(() => {
     fetchOrders();
     fetchRaw();
-  }, []); // Added fetchRaw to run on component mount
+  }, []);
 
   return (
     <>
@@ -83,39 +95,46 @@ const ViewPharmacyOrder = () => {
           <Table.ColumnHeaderCell>UNIT</Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell>EXPECTED DELIVERY</Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell>STATUS</Table.ColumnHeaderCell>
+          <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
         </Table.Header>
         <Table.Body>
-          {orders.map((order) => (
-            <Table.Row key={order.id}>
-              <Table.Cell>{refractor(order.createdAt)}</Table.Cell>
-              <Table.Cell>
-                <Flex align={"center"} gap={"1"}>
-                  <FontAwesomeIcon icon={faPills} />
-                  {getRawMaterialName(order.rawMaterial)}{" "}
-                </Flex>
-              </Table.Cell>
-              <Table.Cell>{order.quantity}</Table.Cell>
-              <Table.Cell>{order.unit}</Table.Cell>
-              <Table.Cell>{refractor(order.expectedDeliveryDate)}</Table.Cell>
-              <Table.Cell>
-                <Flex align={"center"} gap={"1"}>
-                  <FontAwesomeIcon icon={faSquare} />
-                  CONFIRMED
-                </Flex>
-              </Table.Cell>
-              <DropdownMenu.Root>
-                <DropdownMenu.Trigger className="mt-1">
-                  <Button variant="surface" className="cursor-pointer">
-                    <DropDownIcon />
-                  </Button>
-                </DropdownMenu.Trigger>
-                <DropdownMenu.Content>
-                  <DropdownMenu.Item>Move to LPO</DropdownMenu.Item>
-                  <DropdownMenu.Item>Update Status</DropdownMenu.Item>
-                </DropdownMenu.Content>
-              </DropdownMenu.Root>
-            </Table.Row>
-          ))}
+          {orders.length === 0 ? (
+            <div className="p-4">
+              {failedSearch ? "No records found" : <Spinner />}
+            </div>
+          ) : (
+            orders.map((order) => (
+              <Table.Row key={order.id}>
+                <Table.Cell>{refractor(order.createdAt)}</Table.Cell>
+                <Table.Cell>
+                  <Flex align={"center"} gap={"1"}>
+                    <FontAwesomeIcon icon={faPills} />
+                    {getRawMaterialName(order.rawMaterial)}{" "}
+                  </Flex>
+                </Table.Cell>
+                <Table.Cell>{order.quantity}</Table.Cell>
+                <Table.Cell>{order.unit}</Table.Cell>
+                <Table.Cell>{refractor(order.expectedDeliveryDate)}</Table.Cell>
+                <Table.Cell>
+                  <Flex align={"center"} gap={"1"}>
+                    <FontAwesomeIcon icon={faSquare} />
+                    CONFIRMED
+                  </Flex>
+                </Table.Cell>
+                <DropdownMenu.Root>
+                  <DropdownMenu.Trigger className="mt-1">
+                    <Button variant="surface" className="cursor-pointer">
+                      <DropDownIcon />
+                    </Button>
+                  </DropdownMenu.Trigger>
+                  <DropdownMenu.Content>
+                    <DropdownMenu.Item>Move to LPO</DropdownMenu.Item>
+                    {/* <DropdownMenu.Item>Update Status</DropdownMenu.Item> */}
+                  </DropdownMenu.Content>
+                </DropdownMenu.Root>
+              </Table.Row>
+            ))
+          )}
         </Table.Body>
       </Table.Root>
     </>

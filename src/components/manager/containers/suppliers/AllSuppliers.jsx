@@ -29,7 +29,7 @@ const AllSuppliers = () => {
     goToNextPage,
     goToPreviousPage,
     goToPage,
-  } = usePagination(suppliers, 1);
+  } = usePagination(suppliers, 15);
 
   const fetchSuppliers = async () => {
     const retrToken = localStorage.getItem("token");

@@ -158,7 +158,7 @@ const PharmacyPlaceOrder = () => {
                       className="mt-2 w-full"
                       placeholder="Select Raw Material"
                     />
-                    <Select.Content>
+                    <Select.Content position="popper">
                       <Select.Group>
                         {rawMaterials.map((item) => (
                           <Select.Item
