@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-
+import { useNavigate } from "react-router-dom";
 import { refractor } from "../../../date";
 import { faPills } from "@fortawesome/free-solid-svg-icons";
 import { DropdownMenu } from "@radix-ui/themes";
@@ -20,6 +20,7 @@ import { toast } from "react-hot-toast"; // Make sure to import toast
 const root = import.meta.env.VITE_ROOT;
 
 const ViewPharmacyOrder = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [rawMaterials, setRawMaterials] = useState([]);
   const [failedSearch, setFailedSearch] = useState(false);
@@ -128,7 +129,15 @@ const ViewPharmacyOrder = () => {
                     </Button>
                   </DropdownMenu.Trigger>
                   <DropdownMenu.Content>
-                    <DropdownMenu.Item>Move to LPO</DropdownMenu.Item>
+                    <DropdownMenu.Item
+                      onClick={() => {
+                        navigate(
+                          `/admin/raise-ticket/l.p.o/${order.id}/${order.rawMaterial}`
+                        );
+                      }}
+                    >
+                      Raise LPO
+                    </DropdownMenu.Item>
                     {/* <DropdownMenu.Item>Update Status</DropdownMenu.Item> */}
                   </DropdownMenu.Content>
                 </DropdownMenu.Root>

@@ -39,6 +39,34 @@ const Notifications = () => {
   const [selectedTicket, setSelectedTicket] = useState("");
 
   // Component for individual notification info
+  const [storeDetails, setStoreDetails] = useState([]);
+
+  // Function to fetch general store
+  const fetchGeneralStore = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("An error occurred, try logging in again.");
+    }
+
+    try {
+      const { data } = await axios.get(`${root}/dept/view-gen-store`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setStoreDetails(data.stores);
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Function to fetch store item name by id
+  const fetchStoreNameByID = (id) => {
+    const store = storeDetails.find((item) => item.id === id);
+    return store && store;
+  };
 
   const IndividualInfo = () => {
     const [ticketDetails, setTicketDetails] = useState();
@@ -525,6 +553,20 @@ const Notifications = () => {
                         </Text>
                         <p className="text-[.7rem]">{ticketDetails.comments}</p>
                       </div>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          ITEMS
+                        </Text>
+                        {ticketDetails.items &&
+                          Object.entries(ticketDetails.items).map(
+                            ([goodsName, quantity]) => (
+                              <p key={goodsName} className="text-[.7rem]">
+                                {fetchStoreNameByID(goodsName).name}: {quantity}{" "}
+                                {fetchStoreNameByID(goodsName).unit}
+                              </p>
+                            )
+                          )}
+                      </div>
                     </>
                   )}
                 </Grid>
@@ -611,6 +653,7 @@ const Notifications = () => {
   useEffect(() => {
     document.addEventListener("click", closeNotifications, true);
     fetchNotifications();
+    fetchGeneralStore();
     return () => {
       document.removeEventListener("click", closeNotifications, true);
     };

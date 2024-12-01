@@ -350,7 +350,7 @@ const AuthorityToWeigh = () => {
                     placeholder="Select Admin"
                     className="w-full mt-2"
                   />
-                  <Select.Content>
+                  <Select.Content position="popper">
                     {admins.map((item) => {
                       return (
                         <Select.Item key={item.id} value={item.id}>

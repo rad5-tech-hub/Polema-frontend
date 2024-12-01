@@ -1,4 +1,5 @@
 import WelcomeComponent from "./WelcomeComponent";
+import BlankLPO from "./raise-tickets/BlankLPO";
 import EditDialog from "./products/EditDialog";
 import AuthorityToGiveCash from "./raise-tickets/AuthorityToGiveCash";
 import AllWeigh from "./weighing-operations/AllWeigh";
@@ -139,4 +140,5 @@ export {
   InvoiceAuthorityToWeigh,
   ConfirmEmail,
   EditDialog,
+  BlankLPO,
 };

@@ -239,7 +239,7 @@ const CollectFromGeneralStore = () => {
                     placeholder="Select Store"
                     className="w-full mt-2"
                   />
-                  <Select.Content>
+                  <Select.Content position="popper">
                     {departments.map((dept) => (
                       <Select.Item key={dept.id} value={dept.id}>
                         {dept.name}

@@ -121,9 +121,9 @@ const EditModal = ({ isOpen, onClose, item, runFetch }) => {
 
   const [buttonLoading, setButtonLoading] = React.useState(false);
   // State management for form details
-  const [shelfName, setShelfName] = React.useState("");
-  const [unit, setUnit] = React.useState("");
-  const [threshold, setThreshold] = React.useState("");
+  const [shelfName, setShelfName] = React.useState(item.name);
+  const [unit, setUnit] = React.useState(item?.unit);
+  const [threshold, setThreshold] = React.useState(item?.thresholdValue);
 
   const handleEdit = async (e) => {
     e.preventDefault();
@@ -141,7 +141,7 @@ const EditModal = ({ isOpen, onClose, item, runFetch }) => {
         {
           name: shelfName,
           unit,
-          thresholdValue: threshold,
+          // thresholdValue: threshold,
         },
         {
           headers: {
@@ -192,7 +192,7 @@ const EditModal = ({ isOpen, onClose, item, runFetch }) => {
                 placeholder={item?.unit || ""}
               />
             </div>
-            <div className="flex mt-2 items-center w-full">
+            {/* <div className="flex mt-2 items-center w-full">
               <Text className="w-full">Threshold Value</Text>
               <TextField.Root
                 type="text"
@@ -203,7 +203,7 @@ const EditModal = ({ isOpen, onClose, item, runFetch }) => {
                 className="w-full p-2 mb-4"
                 placeholder={item?.thresholdValue || ""}
               />
-            </div>
+            </div> */}
 
             <div className="btns flex gap-4 absolute bottom-8 right-8">
               <button
@@ -228,7 +228,7 @@ const EditModal = ({ isOpen, onClose, item, runFetch }) => {
   );
 };
 
-const RemoveModal = ({ isOpen, onClose, item }) => {
+const RemoveModal = ({ isOpen, onClose, item, runFetch }) => {
   if (!isOpen) return null;
 
   const [buttonLoading, setButtonLoading] = React.useState(false);
