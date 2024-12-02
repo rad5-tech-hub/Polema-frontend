@@ -20,6 +20,7 @@ import {
   faRefresh,
   faClose,
   faCheckCircle,
+  faCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
@@ -56,7 +57,6 @@ const Notifications = () => {
         },
       });
       setStoreDetails(data.stores);
-      console.log(data);
     } catch (error) {
       console.log(error);
     }
@@ -240,7 +240,7 @@ const Notifications = () => {
 
     return (
       <>
-        <div className="absolute bg-white h-full z-10 rounded-md top-0 left-0 p-6 right-[-70px] w-[25rem]">
+        <div className="absolute bg-white h-full z-[11] rounded-md top-0 left-0 p-6 right-[-70px] w-[25rem]">
           <div
             className="absolute right-[17px] top-[10px] cursor-pointer"
             onClick={() => {
@@ -715,14 +715,18 @@ const Notifications = () => {
                 {notifications.length > 0 ? (
                   notifications.map((notification) => (
                     <div
+                      onClick={() => {
+                        setSelectedTicket(notification);
+                        setDetailsPageOpen(true);
+                      }}
                       key={notification.id}
                       className="mb-3 p-2 rounded hover:bg-gray-100 relative"
                     >
-                      {notification.read && (
+                      {!notification.read && (
                         <div className="check  absolute top-0 left-0 z-[10]">
                           <FontAwesomeIcon
-                            icon={faCheckCircle}
-                            className="text-green-500 w-[10px]"
+                            icon={faCircle}
+                            className="text-red-500 w-[10px]"
                           />
                         </div>
                       )}

@@ -35,11 +35,13 @@ const NewPasswordContent = () => {
     setLoading(true);
 
     try {
-      const response = await axios.patch(`${root}/admin/reset-password`, {
-        token: id, // Pass the token properly as part of the body
-        password,
-        confirmPassword,
-      });
+      const response = await axios.patch(
+        `${root}/admin/reset-password?token=${id}`,
+        {
+          password,
+          confirmPassword,
+        }
+      );
 
       // Handle success, navigate to login or show success message
       toast.success("Password successfully updated!");
