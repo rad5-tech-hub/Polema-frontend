@@ -1,3 +1,4 @@
+import Onboarding from "./onboarding/Onboarding";
 import WelcomeComponent from "./WelcomeComponent";
 import BlankLPO from "./raise-tickets/BlankLPO";
 import EditDialog from "./products/EditDialog";
@@ -141,4 +142,5 @@ export {
   ConfirmEmail,
   EditDialog,
   BlankLPO,
+  Onboarding,
 };

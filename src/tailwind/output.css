@@ -2048,6 +2048,11 @@ video {
   color: rgb(234 179 8 / var(--tw-text-opacity, 1));
 }
 
+.text-gray-600 {
+  --tw-text-opacity: 1;
+  color: rgb(75 85 99 / var(--tw-text-opacity, 1));
+}
+
 .underline {
   text-decoration-line: underline;
 }
@@ -2332,10 +2337,6 @@ video {
 
   .sm\:mt-8 {
     margin-top: 2rem;
-  }
-
-  .sm\:block {
-    display: block;
   }
 
   .sm\:w-1\/2 {

@@ -66,7 +66,7 @@ import {
   GatepassReceipt,
   Invoice,
   OfficialReceipt,
-  ReceiptDispatchNote,
+  Onboarding,
   WaybillCreateInvoice,
   WaybillInvoice,
   ViewAuthorityToWeigh,
@@ -95,7 +95,16 @@ const App = () => {
         <Route path="/create-new-password" element={<NewPassword />} />
 
         {/* Protected Routes */}
-        <Route path="/admin" element={<DashBoardManager />} />
+        <Route
+          path="/admin"
+          element={
+            <PrivateRoute>
+              <DashBoardManager>
+                <Onboarding />
+              </DashBoardManager>
+            </PrivateRoute>
+          }
+        />
 
         {/* Dashboard Layout - Wrap all private routes */}
         <Route
