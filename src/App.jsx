@@ -80,6 +80,7 @@ import "@radix-ui/themes/styles.css";
 import "./index.css";
 import ConfirmEmail from "./pages/ConfirmEmail";
 import OfficialReceiptInvoice from "./components/manager/containers/receipts/OfficeReceiptInvoice";
+import OfficialLPO from "./components/manager/containers/raise-tickets/OfficialLPO";
 
 const App = () => {
   return (
@@ -230,6 +231,10 @@ const App = () => {
                   <Route
                     path="raise-ticket/authority-to-weigh"
                     element={<ViewAuthorityToWeigh />}
+                  />
+                  <Route
+                    path="raise-ticket/officialLPO"
+                    element={<OfficialLPO />}
                   />
 
                   {/*  Routes for phamrcy store */}
