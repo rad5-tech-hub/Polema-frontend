@@ -1,10 +1,11 @@
-import { faSquare } from "@fortawesome/free-solid-svg-icons";
+import { faSquare, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
 import { refractor } from "../../../date";
 import toast, { Toaster } from "react-hot-toast";
 import LocalPurchaseOrder from "./LocalPurchaseOrder";
+
 import {
   Heading,
   Table,
@@ -12,6 +13,7 @@ import {
   Button,
   Flex,
   Spinner,
+  DropdownMenu,
 } from "@radix-ui/themes";
 import axios from "axios";
 const root = import.meta.env.VITE_ROOT;
@@ -101,8 +103,9 @@ const ViewLocalPurchaseOrder = () => {
             {/* <Table.ColumnHeaderCell>LPO ID</Table.ColumnHeaderCell> */}
             <Table.ColumnHeaderCell>DELIVERED TO</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>LPO EXPIRES</Table.ColumnHeaderCell>
-            {/* <Table.ColumnHeaderCell>ORDER STATUS</Table.ColumnHeaderCell> */}
+
             <Table.ColumnHeaderCell>TICKET STATUS</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -125,6 +128,20 @@ const ViewLocalPurchaseOrder = () => {
                     className={`${checkStatus(order.status)}`}
                   />{" "}
                   {_.upperFirst(order.status)}
+                </Table.Cell>
+                <Table.Cell>
+                  {order.status === "approved" && (
+                    <DropdownMenu.Root>
+                      <DropdownMenu.Trigger>
+                        <Button variant="soft">
+                          <FontAwesomeIcon icon={faEllipsisV} />
+                        </Button>
+                      </DropdownMenu.Trigger>
+                      <DropdownMenu.Content>
+                        <DropdownMenu.Item>View Approved LPO</DropdownMenu.Item>
+                      </DropdownMenu.Content>
+                    </DropdownMenu.Root>
+                  )}
                 </Table.Cell>
               </Table.Row>
             ))

@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { refractor } from "../../../date";
+import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEllipsisV } from "@fortawesome/free-solid-svg-icons";
+import { refractor, formatMoney } from "../../../date";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
-import { Spinner } from "@radix-ui/themes";
+import { Spinner, Button } from "@radix-ui/themes";
 const root = import.meta.env.VITE_ROOT;
-import { Heading, Separator, Table } from "@radix-ui/themes";
+import { Heading, Separator, Table, DropdownMenu } from "@radix-ui/themes";
 
 const DepartmentStoreViewOrders = () => {
+  const navigate = useNavigate();
   const [deptOrders, setDeptOrders] = useState([]);
   const [failedSearch, setFailedSearch] = useState(false);
   const [department, setDepartment] = useState([]);
@@ -108,6 +112,7 @@ const DepartmentStoreViewOrders = () => {
             <Table.ColumnHeaderCell>QUANTITY</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>UNIT</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>EXPECTED DELIVERY</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -126,6 +131,28 @@ const DepartmentStoreViewOrders = () => {
                   <Table.Cell>{item.unit}</Table.Cell>
                   <Table.Cell>
                     {refractor(item.expectedDeliveryDate)}
+                  </Table.Cell>
+                  <Table.Cell>
+                    <DropdownMenu.Root>
+                      <DropdownMenu.Trigger>
+                        <Button variant="soft">
+                          <FontAwesomeIcon icon={faEllipsisV} />
+                        </Button>
+                      </DropdownMenu.Trigger>
+                      <DropdownMenu.Content>
+                        <DropdownMenu.Item
+                          onClick={() => {
+                            navigate(
+                              `/admin/raise-ticket/l.p.o/${formatMoney(
+                                item.quantity
+                              )}/${item.productId}`
+                            );
+                          }}
+                        >
+                          Raise LPO
+                        </DropdownMenu.Item>
+                      </DropdownMenu.Content>
+                    </DropdownMenu.Root>
                   </Table.Cell>
                 </Table.Row>
               );
