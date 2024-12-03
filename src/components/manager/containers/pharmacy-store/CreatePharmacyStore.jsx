@@ -97,7 +97,17 @@ const CreatePharmacyStore = () => {
 
       setProducts(response.data.products);
     } catch (error) {
-      toast.error(error.message);
+      // toast.error(error.message);
+      console.log(error);
+
+      if (error.status === 404) {
+        toast.error("No products in pharmacy", {
+          style: {
+            padding: "20px",
+          },
+          duration: 5500,
+        });
+      }
     }
   };
 
@@ -128,7 +138,6 @@ const CreatePharmacyStore = () => {
       ...(category.trim() && { category }),
       ...(uploadedImage.trim() && { image: uploadedImage }),
     };
-    console.log(body);
 
     try {
       const response = await axios.post(
@@ -143,7 +152,7 @@ const CreatePharmacyStore = () => {
 
       setButtonLoading(false);
       toast.success(response.data.message, { duration: 5000 });
-      console.log(response);
+
       // Reset form fields
       setProductID("");
       setCategory("");
@@ -264,7 +273,7 @@ const CreatePharmacyStore = () => {
                 }
                 className="w-full"
               />
-              <Select.Content>
+              <Select.Content position="popper">
                 {products.map((product) => (
                   <Select.Item key={product.id} value={product.id}>
                     {product.name}

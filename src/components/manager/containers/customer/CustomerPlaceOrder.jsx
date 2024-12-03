@@ -23,6 +23,7 @@ const CustomerPlaceOrder = () => {
   const [seletedProductPlan, setSelectedProductPlan] = useState([]);
   const [quantity, setQuantity] = useState("");
   const [buttonLoading, setButtonLoading] = useState(false);
+  const [planAmount, setPlanAmount] = useState("");
 
   // Function to format number with commas
   const formatNumber = (num) => {
@@ -99,6 +100,7 @@ const CustomerPlaceOrder = () => {
       productId: selectedProductId,
       quantity: quantity,
       unit: getMatchingUnitFromId(selectedProductId).price[0].unit,
+      ...(planAmount && { discount: Number(planAmount) }),
     };
 
     try {
@@ -246,7 +248,12 @@ const CustomerPlaceOrder = () => {
         <Grid className="w-full mb-4" columns={"2"} gap={"4"}>
           <div className="w-full">
             <Text className="mb-4">Price Discount (Optional)</Text>
-            <Select.Root disabled={seletedProductPlan.length === 0}>
+            <Select.Root
+              disabled={seletedProductPlan.length === 0}
+              onValueChange={(val) => {
+                setPlanAmount(val);
+              }}
+            >
               <Select.Trigger
                 className="mt-2 w-full"
                 placeholder={
@@ -258,7 +265,7 @@ const CustomerPlaceOrder = () => {
               <Select.Content position="popper">
                 {seletedProductPlan.map((plan) => {
                   return (
-                    <Select.Item value={plan.category}>
+                    <Select.Item value={plan.amount}>
                       {plan.category}
                     </Select.Item>
                   );

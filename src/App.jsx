@@ -15,9 +15,11 @@ import {
   CashManagementLedger,
   InvoiceAuthorityToWeigh,
   AuthorityToLoad,
+  EditDialog,
   AllReceipts,
   ViewPharmacyStore,
   LocalPurchaseOrder,
+  BlankLPO,
   AuthorityToGiveCash,
   AllWeigh,
   EditRole,
@@ -64,7 +66,7 @@ import {
   GatepassReceipt,
   Invoice,
   OfficialReceipt,
-  ReceiptDispatchNote,
+  Onboarding,
   WaybillCreateInvoice,
   WaybillInvoice,
   ViewAuthorityToWeigh,
@@ -93,7 +95,16 @@ const App = () => {
         <Route path="/create-new-password" element={<NewPassword />} />
 
         {/* Protected Routes */}
-        <Route path="/admin" element={<DashBoardManager />} />
+        <Route
+          path="/admin"
+          element={
+            <PrivateRoute>
+              <DashBoardManager>
+                <Onboarding />
+              </DashBoardManager>
+            </PrivateRoute>
+          }
+        />
 
         {/* Dashboard Layout - Wrap all private routes */}
         <Route
@@ -179,6 +190,10 @@ const App = () => {
                     path="products/view-products"
                     element={<AllProducts />}
                   />
+                  <Route
+                    path="products/edit-product/:id"
+                    element={<EditDialog />}
+                  />
 
                   {/* Admin Routes */}
                   <Route path="admins/create-role" element={<CreateRole />} />
@@ -206,6 +221,10 @@ const App = () => {
                   <Route
                     path="raise-ticket/l.p.o"
                     element={<ViewLocalPurchaseOrder />}
+                  />
+                  <Route
+                    path="raise-ticket/l.p.o/:id/:rawId"
+                    element={<BlankLPO />}
                   />
 
                   <Route

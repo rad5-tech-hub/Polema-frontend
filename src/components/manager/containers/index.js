@@ -1,4 +1,7 @@
+import Onboarding from "./onboarding/Onboarding";
 import WelcomeComponent from "./WelcomeComponent";
+import BlankLPO from "./raise-tickets/BlankLPO";
+import EditDialog from "./products/EditDialog";
 import AuthorityToGiveCash from "./raise-tickets/AuthorityToGiveCash";
 import AllWeigh from "./weighing-operations/AllWeigh";
 import ViewAuthorityToWeigh from "./raise-tickets/ViewAuthorityToWeigh";
@@ -137,4 +140,7 @@ export {
   WaybillInvoice,
   InvoiceAuthorityToWeigh,
   ConfirmEmail,
+  EditDialog,
+  BlankLPO,
+  Onboarding,
 };

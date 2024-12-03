@@ -113,6 +113,7 @@ const NewWeigh = () => {
       setExtraNet("");
       setTar("");
       setGross("");
+      setImageURL(null);
       setImageURL("");
     } catch (error) {
       console.error("Submission failed:", error);

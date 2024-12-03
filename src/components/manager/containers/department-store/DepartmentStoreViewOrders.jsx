@@ -108,7 +108,6 @@ const DepartmentStoreViewOrders = () => {
             <Table.ColumnHeaderCell>QUANTITY</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>UNIT</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>EXPECTED DELIVERY</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>STATUS</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>

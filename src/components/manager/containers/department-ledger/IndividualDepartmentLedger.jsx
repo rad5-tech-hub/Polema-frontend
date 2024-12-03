@@ -1,5 +1,5 @@
 import React from "react";
-import { refractor } from "../../../date";
+import { refractor, formatMoney } from "../../../date";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
@@ -60,8 +60,8 @@ const IndividualDepartmentLedger = () => {
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>CUSTOMER NAME</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>SUPPLIER NAME</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>NAME</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>COMMENTS</Table.ColumnHeaderCell>
 
             <Table.ColumnHeaderCell>PRODUCTS</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>UNITS</Table.ColumnHeaderCell>
@@ -85,22 +85,18 @@ const IndividualDepartmentLedger = () => {
               return (
                 <Table.Row key={index}>
                   <Table.Cell>{refractor(item.createdAt)}</Table.Cell>
-                  <Table.Cell>
-                    {item.credit > item.debit && item.name}
-                  </Table.Cell>
-                  <Table.Cell>
-                    {item.debit > item.credit && item.name}
-                  </Table.Cell>
+                  <Table.Cell>{item.name}</Table.Cell>
+                  <Table.Cell>{item.comments}</Table.Cell>
                   <Table.Cell>{item.productName}</Table.Cell>
                   <Table.Cell>{item.unit}</Table.Cell>
                   <Table.Cell>{item.quantity}</Table.Cell>
                   <Table.Cell className="text-green-500 font-bold">
-                    {item.credit > item.debit && item.credit}
+                    {formatMoney(item.credit > item.debit ? item.credit : "")}
                   </Table.Cell>
                   <Table.Cell className="text-red-500 font-bold">
-                    {item.debit > item.credit && item.debit}
+                    {formatMoney(item.debit > item.credit ? item.debit : "")}
                   </Table.Cell>
-                  <Table.Cell>{item.balance}</Table.Cell>
+                  <Table.Cell>{formatMoney(item.balance)}</Table.Cell>
                 </Table.Row>
               );
             })

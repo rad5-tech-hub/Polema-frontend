@@ -12,7 +12,8 @@ import {
   Select,
 } from "@radix-ui/themes";
 import axios from "axios";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 const root = import.meta.env.VITE_ROOT;
 
 const PharmacyPlaceOrder = () => {
@@ -157,7 +158,7 @@ const PharmacyPlaceOrder = () => {
                       className="mt-2 w-full"
                       placeholder="Select Raw Material"
                     />
-                    <Select.Content>
+                    <Select.Content position="popper">
                       <Select.Group>
                         {rawMaterials.map((item) => (
                           <Select.Item
@@ -225,7 +226,7 @@ const PharmacyPlaceOrder = () => {
           size={"3"}
           className="border-2 cursor-pointer !border-theme mt-3"
         >
-          Add Plan
+          <FontAwesomeIcon icon={faPlus} />
         </Button>
 
         <Flex justify={"end"}>

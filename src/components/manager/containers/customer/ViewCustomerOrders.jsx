@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { refractor } from "../../../date";
+import { refractor, formatMoney } from "../../../date";
 import {
   Spinner,
   Flex,
@@ -165,8 +165,22 @@ const ViewCustomerOrders = () => {
                 <Table.Cell>
                   {getMatchingProductByID(item.productId)}
                 </Table.Cell>
-                <Table.Cell>{item.quantity}</Table.Cell>
-                <Table.Cell>{item.price}</Table.Cell>
+                <Table.Cell>{formatMoney(item.quantity)}</Table.Cell>
+                <Table.Cell>
+                  {item.price === item.basePrice ? (
+                    <>
+                      <span className="text-">{formatMoney(item.price)}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-[.7rem] line-through text-red-500">
+                        {item.basePrice && formatMoney(item.basePrice)}
+                      </span>{" "}
+                      <br />
+                      <span>{formatMoney(item.price)}</span>
+                    </>
+                  )}
+                </Table.Cell>
                 <Table.Cell>{item.unit}</Table.Cell>
                 <div className=" right-[3px] mt-1">
                   <DropdownMenu.Root>

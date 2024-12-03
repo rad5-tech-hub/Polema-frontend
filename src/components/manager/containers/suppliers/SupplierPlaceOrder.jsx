@@ -130,7 +130,7 @@ const SupplierPlaceOrder = () => {
 
   return (
     <>
-      <Heading>Place Supplier Order</Heading>
+      <Heading>Received Order</Heading>
       <Separator className="my-3 w-full" />
       <form onSubmit={handleSubmit}>
         <Flex className="w-full mb-4" gap="5">

@@ -9,7 +9,7 @@ const root = import.meta.env.VITE_ROOT;
 
 const ViewGeneralOrder = () => {
   const [orders, setOrders] = React.useState([]);
-  const [shelf, setShelf] = React.useState([]);
+  const [failedSearch, setFailedSearch] = React.useState(false);
 
   // Function to fetch shelf details
   const fetchShelf = async () => {
@@ -52,17 +52,11 @@ const ViewGeneralOrder = () => {
       setOrders(response.data.Orders);
     } catch (error) {
       console.log(error);
+      setFailedSearch(true);
     }
   };
 
-  // Function to get shelf name by their ID
-  const matchShelfNameById = (id) => {
-    const shelfName = shelf.find((shelfItem) => shelfItem.id === id);
-    return shelfName.name;
-  };
-
   React.useEffect(() => {
-    fetchShelf();
     fetchGeneralOrder();
   }, []);
 
@@ -77,14 +71,14 @@ const ViewGeneralOrder = () => {
             <Table.ColumnHeaderCell>SHELF NAME</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>QUANTITY</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>EXPECTED DELIVERY</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>STATUS</Table.ColumnHeaderCell>
+            {/* <Table.ColumnHeaderCell>STATUS</Table.ColumnHeaderCell> */}
           </Table.Row>
         </Table.Header>
 
         <Table.Body>
           {orders.length === 0 ? (
             <div className="p-4">
-              <Spinner />
+              {failedSearch ? "No records found" : <Spinner />}
             </div>
           ) : (
             orders.map((item, index) => {
@@ -93,12 +87,11 @@ const ViewGeneralOrder = () => {
                   <Table.RowHeaderCell>
                     {refractor(item.createdAt)}
                   </Table.RowHeaderCell>
-                  <Table.Cell>{matchShelfNameById(item.productId)}</Table.Cell>
+                  <Table.Cell>{item.store.name}</Table.Cell>
                   <Table.Cell>{item.quantity}</Table.Cell>
                   <Table.Cell>
                     {refractor(item.expectedDeliveryDate)}
                   </Table.Cell>
-                  <Table.Cell>{item.status}</Table.Cell>
                 </Table.Row>
               );
             })
