@@ -14,8 +14,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
-import DeleteDialog from "./DeleteDialog";
-import EditDialog from "./EditDialog";
+import DeleteDialog from "./DeleteDialog"; // Import DeleteDialog
+import EditDialog from "./EditDialog"; // Import EditDialog
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -96,7 +96,7 @@ const AllProducts = () => {
             </Select.Root>
           </Flex>
 
-          <Table.Root size="3" variant="surface" className="mt-4">
+          <Table.Root size="3" variant="surface">
             <Table.Header>
               <Table.Row>
                 <Table.ColumnHeaderCell>Date</Table.ColumnHeaderCell>
@@ -125,7 +125,6 @@ const AllProducts = () => {
                 {products.map((product) => (
                   <Table.Row key={product.id}>
                     <Table.Cell>{refractor(product.createdAt)}</Table.Cell>
-                    <Table.Cell>{product.name}</Table.Cell>
                     <Table.Cell>{product.category}</Table.Cell>
                     <Table.Cell>
                       {product.price.map((p, index) => (
@@ -134,10 +133,11 @@ const AllProducts = () => {
                     </Table.Cell>
                     <Table.Cell>
                       {product.price.map((p, index) => (
-                        <div key={index}>₦{formatMoney(p.amount)}</div>
+                        <div key={index}>₦{p.amount}</div>
                       ))}
                     </Table.Cell>
 
+                    <Table.Cell>{product.name}</Table.Cell>
                     <Table.Cell>
                       <DropdownMenu.Root>
                         <DropdownMenu.Trigger>

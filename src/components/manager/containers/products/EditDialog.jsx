@@ -1,7 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { faBriefcase } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import * as Switch from "@radix-ui/react-switch";
 import {
@@ -16,17 +13,20 @@ import {
   Spinner,
 } from "@radix-ui/themes";
 import { PlusIcon } from "@radix-ui/react-icons";
-import UpdateURL from "../ChangeRoute";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import toast, { Toaster } from "react-hot-toast";
 
 const root = import.meta.env.VITE_ROOT;
 
 const EditDialog = ({ product, onClose }) => {
   const [isloading, setIsLoading] = useState(false);
-  const [pricePlan, setPricePlan] = useState(false);
+  const [pricePlan, setPricePlan] = useState(Array.isArray(product.pricePlan));
   const [basePrice, setBasePrice] = useState(product.price[0].amount);
   const [unit, setUnit] = useState(product.price[0].unit);
-  const [plans, setPlans] = useState([{ name: "", discount: "" }]);
+  const [plans, setPlans] = useState(
+    product.pricePlan || [{ category: "", amount: "" }]
+  );
 
   const [productName, setProductName] = useState(product.name);
   const [selectedCategory, setSelectedCategory] = useState("products");
@@ -36,6 +36,7 @@ const EditDialog = ({ product, onClose }) => {
 
   const handleSwitchChange = (checked) => {
     setPricePlan(checked);
+    if (!checked) setPlans([]); // Reset plans when switched off
   };
 
   const formatNumber = (num) =>
@@ -53,7 +54,7 @@ const EditDialog = ({ product, onClose }) => {
   };
 
   const handleAddPlan = () => {
-    setPlans([...plans, { name: "", discount: "" }]);
+    setPlans([...plans, { category: "", amount: "" }]);
   };
 
   const fetchDepartments = async () => {
@@ -89,8 +90,8 @@ const EditDialog = ({ product, onClose }) => {
     const plansArray = plans
       .filter((plan) => plan.name && plan.discount)
       .map((plan) => ({
-        category: plan.name,
-        amount: plan.discount,
+        category: plan.category,
+        amount: plan.amount,
       }));
 
     const submitObject = {
@@ -206,8 +207,6 @@ const EditDialog = ({ product, onClose }) => {
                 </Select.Content>
               </Select.Root>
             </div>
-          </div>
-        </div>
 
         {selectedCategory !== "raw-materials" && (
           <div className="input-field mt-3 flex justify-end">
@@ -286,7 +285,7 @@ const EditDialog = ({ product, onClose }) => {
           >
             {isloading ? "Saving..." : "Save Changes"}
           </Button>
-        </Flex>
+        </div>
       </form>
       <Toaster />
     </div>

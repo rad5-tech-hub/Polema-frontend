@@ -224,7 +224,7 @@ const App = () => {
                     element={<ViewLocalPurchaseOrder />}
                   />
                   <Route
-                    path="raise-ticket/l.p.o/:id/:rawId"
+                    path="raise-ticket/l.p.o/:quantity/:rawId"
                     element={<BlankLPO />}
                   />
 
