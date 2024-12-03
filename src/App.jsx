@@ -18,7 +18,7 @@ import {
   EditDialog,
   AllReceipts,
   ViewPharmacyStore,
-  LocalPurchaseOrder,
+  OfficialLPO,
   BlankLPO,
   AuthorityToGiveCash,
   AllWeigh,
@@ -244,6 +244,10 @@ const App = () => {
                   <Route
                     path="raise-ticket/authority-to-weigh"
                     element={<ViewAuthorityToWeigh />}
+                  />
+                  <Route
+                    path="raise-ticket/officialLPO/:id"
+                    element={<OfficialLPO />}
                   />
 
                   {/*  Routes for phamrcy store */}

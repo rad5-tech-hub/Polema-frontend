@@ -1,4 +1,5 @@
 import Onboarding from "./onboarding/Onboarding";
+import OfficialLPO from "./raise-tickets/OfficialLPO";
 import WelcomeComponent from "./WelcomeComponent";
 import BlankLPO from "./raise-tickets/BlankLPO";
 import EditDialog from "./products/EditDialog";
@@ -143,4 +144,5 @@ export {
   EditDialog,
   BlankLPO,
   Onboarding,
+  OfficialLPO,
 };

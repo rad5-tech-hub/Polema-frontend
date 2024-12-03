@@ -1,4 +1,5 @@
 import { faSquare, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
@@ -19,6 +20,7 @@ import axios from "axios";
 const root = import.meta.env.VITE_ROOT;
 
 const ViewLocalPurchaseOrder = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = React.useState([]);
   const [errorMessageFromSearch, setErrorMessageFromSearch] =
     React.useState(false);
@@ -138,7 +140,15 @@ const ViewLocalPurchaseOrder = () => {
                         </Button>
                       </DropdownMenu.Trigger>
                       <DropdownMenu.Content>
-                        <DropdownMenu.Item>View Approved LPO</DropdownMenu.Item>
+                        <DropdownMenu.Item
+                          onClick={() => {
+                            navigate(
+                              `/admin/raise-ticket/officialLPO/${order.id}`
+                            );
+                          }}
+                        >
+                          View Approved LPO
+                        </DropdownMenu.Item>
                       </DropdownMenu.Content>
                     </DropdownMenu.Root>
                   )}
