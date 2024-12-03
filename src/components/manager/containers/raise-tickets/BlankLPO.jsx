@@ -17,7 +17,7 @@ import toast, { Toaster } from "react-hot-toast";
 const root = import.meta.env.VITE_ROOT;
 
 const BlankLPO = () => {
-  const { id, rawId } = useParams();
+  const { quantity, rawId } = useParams();
 
   const [suppliers, setSuppliers] = React.useState([]);
   const [raw, setRaw] = React.useState([]);
@@ -31,7 +31,7 @@ const BlankLPO = () => {
   const [supplierId, setSupplierId] = React.useState("");
   const [rawMaterialId, setRawMaterialId] = React.useState("");
   const [unitPrice, setUnitPrice] = React.useState("");
-  const [quantityOrdered, setQuantityOrdered] = React.useState("");
+  const [quantityOrdered, setQuantityOrdered] = React.useState(quantity);
   const [expiration, setExpiration] = React.useState("");
   const [comment, setComment] = React.useState("");
   const [period, setPeriod] = React.useState("");
@@ -109,6 +109,11 @@ const BlankLPO = () => {
     }
   };
 
+  // Function to fetch product price
+  const fetchProductPrice = () => {
+    const product = raw.find((item) => item.id === rawId);
+    return product ? product : "";
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -142,7 +147,9 @@ const BlankLPO = () => {
       chequeVoucherNo: voucherNumber,
       supplierId: supplierId,
       rawMaterial: rawMaterialId,
-      unitPrice: selectedPrice,
+      unitPrice: selectedPrice
+        ? selectedPrice
+        : fetchProductPrice().price[0].amount,
       quantOrdered: quantityOrdered,
       expires: expiration,
       period: period,
@@ -304,7 +311,8 @@ const BlankLPO = () => {
               className="mt-2"
               required
               type="text"
-              value={selectedPrice}
+              // value={selectedPrice ? selectedPrice : ""}
+              defaultValue={selectedPrice ? selectedPrice : ""}
               disabled
             >
               <TextField.Slot>₦</TextField.Slot>
@@ -379,7 +387,7 @@ const BlankLPO = () => {
               }}
             >
               <Select.Trigger className="w-full mt-2" placeholder="Send to " />
-              <Select.Content>
+              <Select.Content position="popper">
                 {superAdmins.map((admin) => {
                   return (
                     <Select.Item
@@ -392,7 +400,11 @@ const BlankLPO = () => {
           </div>
         </Grid>
         <Flex justify={"end"}>
-          <Button variant="solid" className="mt-4 !bg-theme" size="3">
+          <Button
+            variant="solid"
+            className="mt-4 !bg-theme cursor-pointer"
+            size="3"
+          >
             {buttonLoading ? <LoaderIcon /> : "Send"}
           </Button>
         </Flex>

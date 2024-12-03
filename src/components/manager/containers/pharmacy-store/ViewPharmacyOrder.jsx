@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
+
 import { useNavigate } from "react-router-dom";
-import { refractor } from "../../../date";
+import { refractor, formatMoney } from "../../../date";
 import { faPills } from "@fortawesome/free-solid-svg-icons";
 import { DropdownMenu } from "@radix-ui/themes";
 import {
@@ -15,7 +16,7 @@ import { DropDownIcon } from "../../../icons";
 import { faSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
-import { toast } from "react-hot-toast"; // Make sure to import toast
+import { toast } from "react-hot-toast";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -95,7 +96,7 @@ const ViewPharmacyOrder = () => {
           <Table.ColumnHeaderCell>QUANTITY</Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell>UNIT</Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell>EXPECTED DELIVERY</Table.ColumnHeaderCell>
-          <Table.ColumnHeaderCell>STATUS</Table.ColumnHeaderCell>
+          {/* <Table.ColumnHeaderCell>STATUS</Table.ColumnHeaderCell> */}
           <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
         </Table.Header>
         <Table.Body>
@@ -116,12 +117,7 @@ const ViewPharmacyOrder = () => {
                 <Table.Cell>{order.quantity}</Table.Cell>
                 <Table.Cell>{order.unit}</Table.Cell>
                 <Table.Cell>{refractor(order.expectedDeliveryDate)}</Table.Cell>
-                <Table.Cell>
-                  <Flex align={"center"} gap={"1"}>
-                    <FontAwesomeIcon icon={faSquare} />
-                    CONFIRMED
-                  </Flex>
-                </Table.Cell>
+
                 <DropdownMenu.Root>
                   <DropdownMenu.Trigger className="mt-1">
                     <Button variant="surface" className="cursor-pointer">
@@ -132,7 +128,9 @@ const ViewPharmacyOrder = () => {
                     <DropdownMenu.Item
                       onClick={() => {
                         navigate(
-                          `/admin/raise-ticket/l.p.o/${order.id}/${order.rawMaterial}`
+                          `/admin/raise-ticket/l.p.o/${formatMoney(
+                            order.quantity
+                          )}/${order.rawMaterial}`
                         );
                       }}
                     >

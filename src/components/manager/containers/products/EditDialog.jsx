@@ -1,7 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { faBriefcase } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import * as Switch from "@radix-ui/react-switch";
 import {
@@ -16,17 +13,20 @@ import {
   Spinner,
 } from "@radix-ui/themes";
 import { PlusIcon } from "@radix-ui/react-icons";
-import UpdateURL from "../ChangeRoute";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import toast, { Toaster } from "react-hot-toast";
 
 const root = import.meta.env.VITE_ROOT;
 
 const EditDialog = ({ product, onClose }) => {
   const [isloading, setIsLoading] = useState(false);
-  const [pricePlan, setPricePlan] = useState(false);
+  const [pricePlan, setPricePlan] = useState(Array.isArray(product.pricePlan));
   const [basePrice, setBasePrice] = useState(product.price[0].amount);
   const [unit, setUnit] = useState(product.price[0].unit);
-  const [plans, setPlans] = useState([{ name: "", discount: "" }]);
+  const [plans, setPlans] = useState(
+    product.pricePlan || [{ category: "", amount: "" }]
+  );
 
   // State management for product name
   const [productName, setProductName] = useState(product.name);
@@ -43,6 +43,7 @@ const EditDialog = ({ product, onClose }) => {
 
   const handleSwitchChange = (checked) => {
     setPricePlan(checked);
+    if (!checked) setPlans([]); // Reset plans when switched off
   };
 
   // Function to format number with commas
@@ -69,7 +70,7 @@ const EditDialog = ({ product, onClose }) => {
 
   // Add new plan fields
   const handleAddPlan = () => {
-    setPlans([...plans, { name: "", discount: "" }]);
+    setPlans([...plans, { category: "", amount: "" }]);
   };
 
   // Fetch departments from db
@@ -113,10 +114,10 @@ const EditDialog = ({ product, onClose }) => {
 
     // Create the Plans object from the plans array
     const plansArray = plans
-      .filter((plan) => plan.name && plan.discount) // Filter out empty plans
+      .filter((plan) => plan.category && plan.amount) // Filter out empty plans
       .map((plan) => ({
-        category: plan.name,
-        amount: plan.discount,
+        category: plan.category,
+        amount: plan.amount,
       }));
 
     const submitObject = {
@@ -167,7 +168,7 @@ const EditDialog = ({ product, onClose }) => {
       setProductName("");
       setBasePrice("");
       setUnit("");
-      setPlans([{ name: "", discount: "" }]);
+      setPlans([{ category: "", amount: "" }]);
       setSelectedDept("");
       setSelectedCategory("products");
       setPricePlan(false);
@@ -189,7 +190,6 @@ const EditDialog = ({ product, onClose }) => {
   };
 
   // Function that fetch details of a product
-
   useEffect(() => {
     fetchDepartments();
   }, []);
@@ -197,7 +197,17 @@ const EditDialog = ({ product, onClose }) => {
   return (
     <div>
       <Flex justify={"between"} align={"center"}>
-        <Heading className="text-left py-4">Edit Product</Heading>
+        <Flex align={"center"} gap={"3"}>
+          <div
+            className="cursor-pointer"
+            onClick={() => {
+              onClose();
+            }}
+          >
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </div>
+          <Heading className="text-left py-4">Edit Product</Heading>
+        </Flex>
 
         <Select.Root
           defaultValue="products"
@@ -279,8 +289,6 @@ const EditDialog = ({ product, onClose }) => {
               />
             </div>
 
-            {/* Conditionally render Departments Dropdown */}
-
             <div className="w-full mt-3">
               <label className="text-[15px]  font-medium leading-[35px]">
                 Department
@@ -288,23 +296,12 @@ const EditDialog = ({ product, onClose }) => {
 
               <Select.Root
                 defaultValue={product.departmentId}
-                // value={selectedDept}
-
-                onValueChange={(val) => {
-                  setDeptId(val);
-                }}
+                onValueChange={(val) => setDeptId(val)}
               >
-                <Select.Trigger
-                  className="w-full"
-                  placeholder="Select Department"
-                />
-                {/* <Flex as="span" align="center" gap="2">
-                    <FontAwesomeIcon icon={faBriefcase} />
-                    {department.find((dept) => dept.id === selectedDept)
-                      ?.name || "Select Department"}
-                  </Flex>
-                </Select.Trigger> */}
-                <Select.Content position="popper">
+                <Select.Trigger>
+                  <Select.Value placeholder={getDepartment()} />
+                </Select.Trigger>
+                <Select.Content>
                   {department.map((dept) => {
                     return (
                       <Select.Item key={dept.id} value={dept.id}>
@@ -315,100 +312,55 @@ const EditDialog = ({ product, onClose }) => {
                 </Select.Content>
               </Select.Root>
             </div>
-          </div>
-        </div>
 
-        {selectedCategory !== "raw-materials" && (
-          <div className="input-field mt-3 flex justify-end">
-            <div>
+            <div className="mt-3 flex justify-between">
               <label
-                className="text-[15px] leading-none pr-[15px]"
-                htmlFor="pricePlan"
+                className="text-[15px] font-medium leading-[35px]"
+                htmlFor="switch"
               >
                 Price Plan
               </label>
-
               <Switch.Root
-                className={`${
-                  pricePlan ? "bg-green-500" : "bg-gray-500"
-                } w-[32px] h-[15px] bg-black-600 rounded-full relative shadow-[0_2px_10px] border-2 border-black shadow-black/25  data-[state=checked]:bg-green outline-none cursor-default`}
-                id="pricePlan"
+                id="switch"
                 checked={pricePlan}
                 onCheckedChange={handleSwitchChange}
-              >
-                <Switch.Thumb className="block w-[11px] h-[11px] bg-white rounded-full shadow-[0_2px_2px] shadow-black transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[19px]" />
-              </Switch.Root>
+              />
             </div>
+
+            {pricePlan && (
+              <div>
+                {plans.map((plan, index) => (
+                  <div key={index}>
+                    <TextField.Root
+                      placeholder="Category"
+                      value={plan.category}
+                      onChange={(e) =>
+                        handlePlanChange(index, "category", e.target.value)
+                      }
+                    />
+                    <TextField.Root
+                      placeholder="Amount"
+                      value={plan.amount}
+                      onChange={(e) =>
+                        handlePlanChange(index, "amount", e.target.value)
+                      }
+                    />
+                  </div>
+                ))}
+
+                <Button type="button" onClick={handleAddPlan} className="mt-2">
+                  Add Plan
+                </Button>
+              </div>
+            )}
           </div>
-        )}
-
-        {pricePlan && (
-          <>
-            <Heading className="py-4">Pricing Plan</Heading>
-            <Separator className="w-full mb-4" />
-
-            {plans.map((plan, index) => (
-              <Flex key={index} gap={"4"} className="mb-2">
-                <div className="w-full">
-                  <label htmlFor={`plan-name-${index}`}>
-                    Pricing Plan Name
-                  </label>
-                  <TextField.Root
-                    type="text"
-                    placeholder="Enter Plan Name"
-                    className="mt-1"
-                    value={plan.name}
-                    onChange={(e) =>
-                      handlePlanChange(index, "name", e.target.value)
-                    }
-                  />
-                </div>
-                <div className="w-full">
-                  <label htmlFor={`plan-discount-${index}`}>
-                    Plan Discount
-                  </label>
-                  <TextField.Root
-                    type="text" // Use text type to enable formatting
-                    placeholder="Enter Price Discount (in Naira)"
-                    className="mt-1"
-                    value={formatNumber(plan.discount)}
-                    onChange={(e) =>
-                      handlePlanChange(
-                        index,
-                        "discount",
-                        e.target.value.replace(/,/g, "")
-                      )
-                    }
-                  />
-                </div>
-              </Flex>
-            ))}
-
-            <Button
-              className="mt-3"
-              color="brown"
-              radius="medium"
-              onClick={handleAddPlan}
-              type="button"
-            >
-              <PlusIcon width={"20px"} height={"20px"} />
-              Edit Plan
-            </Button>
-          </>
-        )}
-
-        <Flex justify={"end"} align={"end"} width={"100%"}>
-          <Button
-            className="mt-4  bg-theme hover:bg-theme/85"
-            size={3}
-            type="submit"
-            disabled={isloading}
-          >
-            {isloading ? <Spinner /> : "Create"}
+        </div>
+        <div className="w-full mt-4">
+          <Button type="submit" disabled={isloading}>
+            {isloading ? <Spinner /> : "Save Changes"}
           </Button>
-        </Flex>
+        </div>
       </form>
-      <Toaster position="top-right" containerStyle={{ padding: "30px" }} />
     </div>
   );
 };
