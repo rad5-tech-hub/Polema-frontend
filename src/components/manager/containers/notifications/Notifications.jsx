@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-
+import { jwtDecode } from "jwt-decode";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
 import { refractor } from "../../../date";
@@ -29,6 +29,12 @@ import toast, { Toaster } from "react-hot-toast";
 const root = import.meta.env.VITE_ROOT;
 
 const Notifications = () => {
+  const getToken = () => {
+    const token = localStorage.getItem("token");
+
+    return jwtDecode(token);
+  };
+
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isSlidingOut, setIsSlidingOut] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(false);
@@ -581,6 +587,15 @@ const Notifications = () => {
                     )}
                   </Grid>
 
+                  {ticketDetails.status === "approved" &&
+                    selectedTicket.type === "cash" && (
+                      <div>
+                        <Button color="red" size={"2"}>
+                          {rejectLoading ? <Spinner /> : "Confirm"}
+                        </Button>
+                      </div>
+                    )}
+
                   {ticketDetails.status !== "approved" && (
                     <div className="buttons-div justify-center mt-px absolute bottom-0 flex">
                       <div className="flex gap-4">
@@ -730,8 +745,12 @@ const Notifications = () => {
                   notifications.map((notification) => (
                     <div
                       onClick={() => {
-                        setSelectedTicket(notification);
-                        setDetailsPageOpen(true);
+                        if (getToken().id === notification.adminId) {
+                          return;
+                        } else {
+                          setSelectedTicket(notification);
+                          setDetailsPageOpen(true);
+                        }
                       }}
                       key={notification.id}
                       className="mb-3 p-2 rounded hover:bg-gray-100 relative"
