@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { refractor, refractorToTime, formatMoney } from "../../../date";
+import { refractor, refractorToTime } from "../../../date";
 import { faPrint } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
@@ -77,7 +77,8 @@ const Invoice = () => {
           <div className="intro flex flex-col sm:flex-row justify-between items-center pb-6 border-b border-[#919191] no-print">
             <span className="text-sm sm:text-lg md:text-xl font-semibold text-center">
               Approved Invoice
-            </span>
+            </span>{" "}
+            wo
             <button
               onClick={handlePrint}
               className="mt-4 sm:mt-0 rounded-lg h-[40px] border-[1px] border-[#919191] px-4 sm:px-8 shadow-lg text-sm sm:text-base flex gap-2 items-center"
@@ -190,18 +191,6 @@ const Invoice = () => {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                    1
-                  </td>
-                  <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                    Balance brought forward
-                  </td>
-                  <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm"></td>
-                  <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm text-green-500">
-                    {formatMoney(invoice.balanceBeforeDebit)}
-                  </td>
-                </tr>
                 {tableData.map((row, index) => (
                   <tr key={index} className="text-center">
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
@@ -216,14 +205,8 @@ const Invoice = () => {
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                       {row?.order?.rate && row.order.rate}
                     </td>
-                    <td
-                      className={`border border-[#43434380] px-4 py-2 text-xs sm:text-sm ${
-                        row.debit && "text-red-500"
-                      }`}
-                    >
-                      {row.debit > row.credit
-                        ? formatMoney(row.debit)
-                        : formatMoney(row.credit)}
+                    <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
+                      {row.debit > row.credit ? row.debit : row.credit}
                     </td>
                   </tr>
                 ))}
@@ -234,11 +217,10 @@ const Invoice = () => {
                     colSpan="3"
                     className="text-right px-4 py-2 font-bold text-sm sm:text-base"
                   >
-                    TOTAL CREDIT BALANCE:
+                    TOTAL BALANCE:
                   </td>
                   <td className="border border-[#43434380] px-4 py-2 font-bold text-sm sm:text-base">
-                    {/* {totalCreditBalance.toLocaleString()} */}
-                    {formatMoney(invoice.currentBalance)}
+                    {totalCreditBalance.toLocaleString()}
                   </td>
                 </tr>
               </tfoot>

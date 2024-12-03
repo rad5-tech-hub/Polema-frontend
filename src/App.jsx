@@ -71,7 +71,7 @@ import {
   WaybillInvoice,
   ViewAuthorityToWeigh,
   ViewLocalPurchaseOrder,
-  EditDialog,
+  // EditDialog,
   CollectFromGeneralStore,
   ViewDepartmentStore,
   DepartmentLedger,

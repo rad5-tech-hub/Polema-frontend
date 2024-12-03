@@ -176,16 +176,16 @@ const EditDialog = ({ product, onClose }) => {
         onClose();
       }, 3000);
 
-    //   console.log(response);
-    // } catch (error) {
-    //   console.log(error);
-    //   setIsLoading(false);
-    //   {
-    //     error.response.data.error
-    //       ? toast.error(error.response.data.error)
-    //       : toast.error(error.response.data.message);
-    //   }
-    // }
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+      {
+        error.response.data.error
+          ? toast.error(error.response.data.error)
+          : toast.error(error.response.data.message);
+      }
+    }
   };
 
   // Function that fetch details of a product
