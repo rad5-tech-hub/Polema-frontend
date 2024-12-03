@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { refractor, formatMoney } from "../../../date";
-import { DeleteIcon, DropDownIcon } from "../../../icons";
+import { DropDownIcon } from "../../../icons";
 import {
   DropdownMenu,
   Button,
@@ -11,9 +10,8 @@ import {
   Table,
   Spinner,
 } from "@radix-ui/themes";
-import * as Switch from "@radix-ui/react-switch";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPen, faClose } from "@fortawesome/free-solid-svg-icons";
+import { faPen } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import DeleteDialog from "./DeleteDialog";
@@ -22,11 +20,11 @@ import EditDialog from "./EditDialog";
 const root = import.meta.env.VITE_ROOT;
 
 const AllProducts = () => {
-  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [productActive, setProductActive] = useState(true);
   const [selectedEditProduct, setSelectedEditProduct] = useState(null);
+  const [displayPricePlan, setDisplayPricePlan] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   const fetchProducts = async () => {
@@ -60,11 +58,21 @@ const AllProducts = () => {
     fetchProducts();
   }, [productActive]);
 
+  const handleEditClick = (product) => {
+    if (product.pricePlan) {
+      setDisplayPricePlan(true);
+    } else {
+      setDisplayPricePlan(false);
+    }
+    setSelectedEditProduct(product);
+  };
+
   return (
     <>
       {selectedEditProduct ? (
         <EditDialog
           product={selectedEditProduct}
+          displayPricePlan={displayPricePlan}
           onClose={() => {
             setSelectedEditProduct(null);
             fetchProducts();
@@ -139,20 +147,10 @@ const AllProducts = () => {
                         </DropdownMenu.Trigger>
                         <DropdownMenu.Content>
                           <DropdownMenu.Item
-                            onClick={() => setSelectedEditProduct(product)}
-                            // onClick={() => {
-                            //   navigate(
-                            //     `/admin/products/edit-product/${product.id}`
-                            //   );
-                            // }}
+                            onClick={() => handleEditClick(product)}
                           >
                             <FontAwesomeIcon icon={faPen} /> Edit
                           </DropdownMenu.Item>
-                          {/* <DropdownMenu.Item
-                            onClick={() => setSelectedProduct(product)}
-                          >
-                            <FontAwesomeIcon icon={faClose} /> Delete
-                          </DropdownMenu.Item> */}
                         </DropdownMenu.Content>
                       </DropdownMenu.Root>
                     </Table.Cell>
