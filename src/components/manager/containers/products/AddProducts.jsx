@@ -211,27 +211,6 @@ const AddProducts = () => {
             </Select.Group>
           </Select.Content>
         </Select.Root>
-
-        {/* <Select.Root
-          value={selectedCategory}
-          onValueChange={(value) => {
-            setSelectedCategory(value); // Update selected category
-            if (value === "Product For Sale") {
-              setSelectedDept(""); // Reset department when category is "Product For Sale"
-            }
-          }}
-        >
-          <Select.Trigger className="" placeholder="Type">
-            <Flex align="center">{selectedCategory || "Select Category"}</Flex>
-          </Select.Trigger>
-          <Select.Content position="popper">
-            {productsCategory.map((customer) => (
-              <Select.Item key={customer.type} value={customer.name}>
-                {customer.name}
-              </Select.Item>
-            ))}
-          </Select.Content>
-        </Select.Root> */}
       </Flex>
       <Separator className="w-full" />
       <form onSubmit={handleSubmit}>
