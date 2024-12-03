@@ -207,84 +207,87 @@ const EditDialog = ({ product, onClose }) => {
                 </Select.Content>
               </Select.Root>
             </div>
-
-        {selectedCategory !== "raw-materials" && (
-          <div className="input-field mt-3 flex justify-end">
-            <div>
-              <label htmlFor="pricePlan">Price Plan</label>
-              <Switch.Root
-                className={`${
-                  pricePlan ? "bg-green-500" : "bg-gray-500"
-                } w-[32px] h-[15px] rounded-full`}
-                id="pricePlan"
-                checked={pricePlan}
-                onCheckedChange={handleSwitchChange}
-              >
-                <Switch.Thumb className="block w-[11px] h-[11px] bg-white rounded-full" />
-              </Switch.Root>
-            </div>
           </div>
-        )}
-
-        {pricePlan && (
-          <>
-            <div className="text-center py-4">
-              <h3>Price Plans</h3>
-            </div>
-            {plans.map((plan, index) => (
-              <div className="mt-4" key={index}>
-                <div className="input-field">
-                  <label htmlFor={`plan-name-${index}`}>Plan Name</label>
-                  <TextField.Root
-                    id={`plan-name-${index}`}
-                    type="text"
-                    value={plan.name}
-                    onChange={(e) =>
-                      handlePlanChange(index, "name", e.target.value)
-                    }
-                  />
-                </div>
-                <div className="input-field">
-                  <label htmlFor={`plan-discount-${index}`}>Discount (%)</label>
-                  <TextField.Root
-                    id={`plan-discount-${index}`}
-                    type="text"
-                    value={plan.discount}
-                    onChange={(e) =>
-                      handlePlanChange(index, "discount", e.target.value)
-                    }
-                  />
-                </div>
+          {selectedCategory !== "raw-materials" && (
+            <div className="input-field mt-3 flex justify-end">
+              <div>
+                <label htmlFor="pricePlan">Price Plan</label>
+                <Switch.Root
+                  className={`${
+                    pricePlan ? "bg-green-500" : "bg-gray-500"
+                  } w-[32px] h-[15px] rounded-full`}
+                  id="pricePlan"
+                  checked={pricePlan}
+                  onCheckedChange={handleSwitchChange}
+                >
+                  <Switch.Thumb className="block w-[11px] h-[11px] bg-white rounded-full" />
+                </Switch.Root>
               </div>
-            ))}
-            <div className="flex justify-between mt-3">
-              <Button
-                variant="outline"
-                onClick={handleAddPlan}
-                icon={<PlusIcon />}
-              >
-                Add Plan
-              </Button>
             </div>
-          </>
-        )}
+          )}
 
-        <Flex justify={"between"} align={"center"} className="py-4">
-          <Button
-            onClick={onClose}
-            variant="outline"
-            icon={<FontAwesomeIcon icon={faBriefcase} />}
-          >
-            Close
-          </Button>
-          <Button
-            type="submit"
-            variant="solid"
-            disabled={isloading}
-            icon={isloading ? <Spinner /> : null}
-          >
-            {isloading ? "Saving..." : "Save Changes"}
-          </Button>
+          {pricePlan && (
+            <>
+              <div className="text-center py-4">
+                <h3>Price Plans</h3>
+              </div>
+              {plans.map((plan, index) => (
+                <div className="mt-4" key={index}>
+                  <div className="input-field">
+                    <label htmlFor={`plan-name-${index}`}>Plan Name</label>
+                    <TextField.Root
+                      id={`plan-name-${index}`}
+                      type="text"
+                      value={plan.name}
+                      onChange={(e) =>
+                        handlePlanChange(index, "name", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="input-field">
+                    <label htmlFor={`plan-discount-${index}`}>
+                      Discount (%)
+                    </label>
+                    <TextField.Root
+                      id={`plan-discount-${index}`}
+                      type="text"
+                      value={plan.discount}
+                      onChange={(e) =>
+                        handlePlanChange(index, "discount", e.target.value)
+                      }
+                    />
+                  </div>
+                </div>
+              ))}
+              <div className="flex justify-between mt-3">
+                <Button
+                  variant="outline"
+                  onClick={handleAddPlan}
+                  icon={<PlusIcon />}
+                >
+                  Add Plan
+                </Button>
+              </div>
+            </>
+          )}
+
+          <Flex justify={"between"} align={"center"} className="py-4">
+            <Button
+              onClick={onClose}
+              variant="outline"
+              icon={<FontAwesomeIcon icon={faBriefcase} />}
+            >
+              Close
+            </Button>
+            <Button
+              type="submit"
+              variant="solid"
+              disabled={isloading}
+              icon={isloading ? <Spinner /> : null}
+            >
+              {isloading ? "Saving..." : "Save Changes"}
+            </Button>
+          </Flex>
         </div>
       </form>
       <Toaster />
