@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { refractor } from "../../../date";
+import { refractor, formatMoney } from "../../../date";
 import toast, { Toaster } from "react-hot-toast";
 import { Spinner, Table, Heading, Select, Flex } from "@radix-ui/themes";
 import axios from "axios";
@@ -209,10 +209,15 @@ const ViewAccoountBook = () => {
                     {/* {details.debit > details.credit && "Raw Material Name"} */}
                   </Table.Cell>
                   <Table.Cell>
-                    {details.credit > details.debit && details.credit}
+                    {formatMoney(
+                      details.credit > details.debit ? details.credit : ""
+                    )}
                   </Table.Cell>
                   <Table.Cell>
-                    {details.debit > details.credit && details.debit}
+                    {formatMoney(
+                      details.debit > details.credit ? details.debit : ""
+                    )}
+                    {/*  */}
                   </Table.Cell>
                   <Table.Cell>{details.amount}</Table.Cell>
                 </Table.Row>

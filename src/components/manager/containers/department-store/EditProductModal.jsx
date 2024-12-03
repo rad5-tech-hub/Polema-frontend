@@ -22,7 +22,7 @@ const EditProductModal = ({ closeModal, product, runFetch }) => {
       const response = await axios.patch(
         `${root}/dept/edit-deptstore/${product.id}`,
         {
-          quantity: quantity,
+          // quantity: quantity,
           thresholdValue: thresholdVal,
         },
         {
@@ -64,11 +64,13 @@ const EditProductModal = ({ closeModal, product, runFetch }) => {
               <label htmlFor="quantityRemoved">Quantity</label>
               <input
                 type="text"
-                value={quantity}
+                // value={quantity}
+                value={product.quantity}
+                disabled
                 required
-                onChange={(e) => {
-                  setQuantity(e.target.value);
-                }}
+                // onChange={(e) => {
+                //   setQuantity(e.target.value);
+                // }}
                 placeholder={product?.quantity || "Enter Quantity"}
                 className="border h-[44px] px-4 lg:w-[273px] rounded-lg"
               />

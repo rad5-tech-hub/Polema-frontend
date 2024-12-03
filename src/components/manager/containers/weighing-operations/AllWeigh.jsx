@@ -42,12 +42,12 @@ const AllWeigh = () => {
           <Table.Row>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
 
+            <Table.ColumnHeaderCell>CUSTOMER NAME</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>QUANTITY</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>GROSS</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>TAR</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>EXTRA</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>NET</Table.ColumnHeaderCell>
 
-            <Table.ColumnHeaderCell>CUSTOMER NAME</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>VEHICLE NUMBER</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
@@ -62,11 +62,11 @@ const AllWeigh = () => {
                 <Table.Row>
                   <Table.Cell>{refractor(item.createdAt)}</Table.Cell>
 
+                  <Table.Cell>{`${item.customer.firstname} ${item.customer.lastname}`}</Table.Cell>
                   <Table.Cell>{item.transactions.quantity}</Table.Cell>
                   <Table.Cell>{item.gross}</Table.Cell>
                   <Table.Cell>{item.tar}</Table.Cell>
-                  <Table.Cell>{item.extra}</Table.Cell>
-                  <Table.Cell>{`${item.customer.firstname} ${item.customer.lastname}`}</Table.Cell>
+                  <Table.Cell>{item.net}</Table.Cell>
                   <Table.Cell>{item.vehicleNo}</Table.Cell>
                 </Table.Row>
               );

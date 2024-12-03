@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import {
   Heading,
   Card,
@@ -139,6 +141,18 @@ const DepartementStorePlaceOrder = () => {
         },
         duration: 10000,
       });
+
+      // Clear the form by resetting the 'plans' state
+      setPlans([
+        {
+          id: Date.now(),
+          departmentId: "",
+          productId: "",
+          quantity: "",
+          unit: "",
+          expectedDeliveryDate: "",
+        },
+      ]);
     } catch (error) {
       console.error("Failed to place order:", error);
       setBtnLoading(false);
@@ -254,7 +268,7 @@ const DepartementStorePlaceOrder = () => {
           </Card>
         ))}
         <Button className="mt-4" onClick={addPlan}>
-          Add Plan
+          <FontAwesomeIcon icon={faPlus} />
         </Button>
 
         <Flex className="mt-4" justify={"end"}>

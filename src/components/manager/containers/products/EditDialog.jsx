@@ -1,13 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  faBriefcase,
-  faSitemap,
-  faBuilding,
-  faStore,
-  faTags,
-  faCommentsDollar,
-} from "@fortawesome/free-solid-svg-icons";
+import { faBriefcase } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import * as Switch from "@radix-ui/react-switch";
@@ -28,15 +21,15 @@ import toast, { Toaster } from "react-hot-toast";
 
 const root = import.meta.env.VITE_ROOT;
 
-const EditDialog = () => {
+const EditDialog = ({ product, onClose }) => {
   const [isloading, setIsLoading] = useState(false);
   const [pricePlan, setPricePlan] = useState(false);
-  const [basePrice, setBasePrice] = useState("");
-  const [unit, setUnit] = useState("");
+  const [basePrice, setBasePrice] = useState(product.price[0].amount);
+  const [unit, setUnit] = useState(product.price[0].unit);
   const [plans, setPlans] = useState([{ name: "", discount: "" }]);
 
   // State management for product name
-  const [productName, setProductName] = useState("");
+  const [productName, setProductName] = useState(product.name);
 
   // State management for selected category
   const [selectedCategory, setSelectedCategory] = useState("products");
@@ -46,6 +39,7 @@ const EditDialog = () => {
 
   // State management for fetched departments
   const [department, setDepartment] = useState([]);
+  const [deptID, setDeptId] = useState("");
 
   const handleSwitchChange = (checked) => {
     setPricePlan(checked);
@@ -98,6 +92,13 @@ const EditDialog = () => {
     }
   };
 
+  // Function to get default department for products
+  const getDepartment = () => {
+    const defaultDeptId = product.departmentId;
+    const departments = department.find((dpt) => dpt.id === defaultDeptId);
+    return departments ? departments.name : "";
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -121,7 +122,7 @@ const EditDialog = () => {
     const submitObject = {
       name: e.target[0].value,
       category: selectedCategory === "products" ? "For Sale" : "For Purchase",
-      departmentId: selectedDept,
+      departmentId: product.departmentId ? product.departmentId : deptID,
       price: [
         {
           unit: unit,
@@ -134,7 +135,7 @@ const EditDialog = () => {
     const submitWithoutPlans = {
       name: productName,
       category: selectedCategory === "products" ? "For Sale" : "For Purchase",
-      departmentId: selectedDept,
+      departmentId: product.departmentId ? product.departmentId : deptID,
       price: [
         {
           unit: unit,
@@ -144,32 +145,36 @@ const EditDialog = () => {
     };
 
     console.log(pricePlan ? submitObject : submitWithoutPlans);
-    // try {
-    //   const response = await axios.post(
-    //     `${root}/admin/add-product`,
-    //     pricePlan ? submitObject : submitWithoutPlans,
-    //     {
-    //       headers: {
-    //         Authorization: `Bearer ${retrToken}`,
-    //       },
-    //     }
-    //   );
-    //   setIsLoading(false);
-    //   toast.success(response.data.message, {
-    //     duration: 6500,
-    //     style: {
-    //       padding: "30px",
-    //     },
-    //   });
+    try {
+      const response = await axios.patch(
+        `${root}/admin/edit-product/${product.id}`,
+        pricePlan ? submitObject : submitWithoutPlans,
+        {
+          headers: {
+            Authorization: `Bearer ${retrToken}`,
+          },
+        }
+      );
+      setIsLoading(false);
+      toast.success(response.data.message, {
+        duration: 6500,
+        style: {
+          padding: "30px",
+        },
+      });
 
-    //   // Reset form fields after successful submission
-    //   setProductName("");
-    //   setBasePrice("");
-    //   setUnit("");
-    //   setPlans([{ name: "", discount: "" }]);
-    //   setSelectedDept("");
-    //   setSelectedCategory("products");
-    //   setPricePlan(false);
+      // Reset form fields after successful submission
+      setProductName("");
+      setBasePrice("");
+      setUnit("");
+      setPlans([{ name: "", discount: "" }]);
+      setSelectedDept("");
+      setSelectedCategory("products");
+      setPricePlan(false);
+
+      setTimeout(() => {
+        onClose();
+      }, 3000);
 
     //   console.log(response);
     // } catch (error) {
@@ -182,6 +187,8 @@ const EditDialog = () => {
     //   }
     // }
   };
+
+  // Function that fetch details of a product
 
   useEffect(() => {
     fetchDepartments();
@@ -210,27 +217,6 @@ const EditDialog = () => {
             </Select.Group>
           </Select.Content>
         </Select.Root>
-
-        {/* <Select.Root
-          value={selectedCategory}
-          onValueChange={(value) => {
-            setSelectedCategory(value); // Update selected category
-            if (value === "Product For Sale") {
-              setSelectedDept(""); // Reset department when category is "Product For Sale"
-            }
-          }}
-        >
-          <Select.Trigger className="" placeholder="Type">
-            <Flex align="center">{selectedCategory || "Select Category"}</Flex>
-          </Select.Trigger>
-          <Select.Content position="popper">
-            {productsCategory.map((customer) => (
-              <Select.Item key={customer.type} value={customer.name}>
-                {customer.name}
-              </Select.Item>
-            ))}
-          </Select.Content>
-        </Select.Root> */}
       </Flex>
       <Separator className="w-full" />
       <form onSubmit={handleSubmit}>
@@ -265,9 +251,9 @@ const EditDialog = () => {
                 placeholder="Enter Base Price"
                 id="price"
                 required={true}
-                type="text" // Use text type to enable formatting
-                value={formatNumber(basePrice)} // Display formatted number
-                onChange={handleBasePriceChange} // Update raw value without commas
+                type="text"
+                value={formatNumber(basePrice)}
+                onChange={handleBasePriceChange}
               />
             </div>
           </div>
@@ -299,20 +285,25 @@ const EditDialog = () => {
               <label className="text-[15px]  font-medium leading-[35px]">
                 Department
               </label>
+
               <Select.Root
-                value={selectedDept}
-                onValueChange={(value) => setSelectedDept(value)} // Initial value
+                defaultValue={product.departmentId}
+                // value={selectedDept}
+
+                onValueChange={(val) => {
+                  setDeptId(val);
+                }}
               >
                 <Select.Trigger
                   className="w-full"
                   placeholder="Select Department"
-                >
-                  <Flex as="span" align="center" gap="2">
+                />
+                {/* <Flex as="span" align="center" gap="2">
                     <FontAwesomeIcon icon={faBriefcase} />
                     {department.find((dept) => dept.id === selectedDept)
                       ?.name || "Select Department"}
                   </Flex>
-                </Select.Trigger>
+                </Select.Trigger> */}
                 <Select.Content position="popper">
                   {department.map((dept) => {
                     return (

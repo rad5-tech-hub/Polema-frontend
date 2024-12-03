@@ -1,19 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { LoaderIcon } from "react-hot-toast";
 import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { Select } from "@radix-ui/themes";
 import axios from "axios";
+
 const root = import.meta.env.VITE_ROOT;
 
 const WaybillCreateInvoice = () => {
   const { id } = useParams();
   const [buttonLoading, setButtonLoading] = useState(false);
-  const [ledgerEntries, setLedgerEntries] = useState("");
+  const [ledgerEntries, setLedgerEntries] = useState(null); // Initialize as `null` for type safety.
   const [selectedTransport, setSelectedTransport] = useState("");
 
   // State management for the form details
-  const [driverLicense, setDriverLiscense] = useState("");
+  const [driverLicense, setDriverLicense] = useState("");
   const [superAdmins, setSuperAdmins] = useState([]);
   const [bagNumber, setBagNumber] = useState("");
   const [carriedByWho, setCarriedByWho] = useState("");
@@ -21,6 +22,7 @@ const WaybillCreateInvoice = () => {
   const [wayBillId, setWayBillId] = useState("");
   const [invoiceNo, setInvoiceNo] = useState("");
   const [address, setAddress] = useState("");
+
   // Function to fetch entry details
   const fetchEntryDetails = async () => {
     const token = localStorage.getItem("token");
@@ -36,15 +38,19 @@ const WaybillCreateInvoice = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setLedgerEntries(response.data.order);
+      if (response.data?.order) {
+        setLedgerEntries(response.data.order);
+      } else {
+        throw new Error("Invalid data format received.");
+      }
     } catch (error) {
-      console.log(error);
-      toast.error("An error occurred, try again.");
+      console.error("Error fetching entry details:", error);
+      toast.error("An error occurred while fetching details.");
     }
   };
 
   // Function to fetch super admins
-  const fetchSuperAdmmins = async () => {
+  const fetchSuperAdmins = async () => {
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -58,9 +64,14 @@ const WaybillCreateInvoice = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setSuperAdmins(response.data.staffList);
+      if (response.data?.staffList) {
+        setSuperAdmins(response.data.staffList);
+      } else {
+        throw new Error("Invalid data format received.");
+      }
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching super admins:", error);
+      toast.error("An error occurred while fetching admin list.");
     }
   };
 
@@ -99,7 +110,10 @@ const WaybillCreateInvoice = () => {
         }
       );
 
-      const wayBillId = response.data.waybill.id; // Extract wayBillId directly
+      const wayBillId = response.data?.waybill?.id;
+      if (!wayBillId) {
+        throw new Error("Waybill creation failed, no ID returned.");
+      }
 
       // SECOND REQUEST: Send Waybill
       await axios.post(
@@ -113,13 +127,13 @@ const WaybillCreateInvoice = () => {
       );
 
       // Reset form inputs (except disabled ones)
-      setDriverLiscense("");
+      setDriverLicense("");
       setBagNumber("");
       setSelectedTransport("");
       setAdminId("");
       setAddress("");
       setInvoiceNo("");
-      // Success message after both requests
+
       setButtonLoading(false);
       toast.success("Waybill created and sent successfully!", {
         style: {
@@ -130,7 +144,6 @@ const WaybillCreateInvoice = () => {
     } catch (error) {
       console.error("Error during request:", error);
       setButtonLoading(false);
-      // Show error toast
       toast.error("An error occurred, please try again later", {
         style: {
           padding: "20px",
@@ -139,9 +152,9 @@ const WaybillCreateInvoice = () => {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchEntryDetails();
-    fetchSuperAdmmins();
+    fetchSuperAdmins();
   }, []);
 
   return (
@@ -157,7 +170,7 @@ const WaybillCreateInvoice = () => {
               type="text"
               placeholder="Input"
               disabled
-              value={ledgerEntries && ledgerEntries.authToWeighTickets.driver}
+              value={ledgerEntries?.authToWeighTickets?.driver || ""}
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
@@ -165,9 +178,7 @@ const WaybillCreateInvoice = () => {
             <label>Address</label>
             <input
               value={address}
-              onChange={(e) => {
-                setAddress(e.target.value);
-              }}
+              onChange={(e) => setAddress(e.target.value)}
               type="text"
               placeholder="Enter Address"
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
@@ -193,9 +204,7 @@ const WaybillCreateInvoice = () => {
             <input
               placeholder="Input"
               disabled
-              value={
-                ledgerEntries && ledgerEntries.authToWeighTickets.vehicleNo
-              }
+              value={ledgerEntries?.authToWeighTickets?.vehicleNo || ""}
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
@@ -204,9 +213,7 @@ const WaybillCreateInvoice = () => {
             <input
               placeholder="Input Driver License"
               value={driverLicense}
-              onChange={(e) => {
-                setDriverLiscense(e.target.value);
-              }}
+              onChange={(e) => setDriverLicense(e.target.value)}
               required
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
@@ -215,9 +222,7 @@ const WaybillCreateInvoice = () => {
             <label>Invoice No</label>
             <input
               value={invoiceNo}
-              onChange={(e) => {
-                setInvoiceNo(e.target.value);
-              }}
+              onChange={(e) => setInvoiceNo(e.target.value)}
               placeholder="Input"
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
@@ -227,9 +232,7 @@ const WaybillCreateInvoice = () => {
             <input
               type="number"
               value={bagNumber}
-              onChange={(e) => {
-                setBagNumber(e.target.value);
-              }}
+              onChange={(e) => setBagNumber(e.target.value)}
               placeholder="Input the No."
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
@@ -238,30 +241,30 @@ const WaybillCreateInvoice = () => {
           <div>
             <label>Send TO:</label>
             <Select.Root
-              size={"3"}
+              size="3"
               disabled={superAdmins.length === 0}
-              onValueChange={(value) => {
-                setAdminId(value);
-              }}
+              onValueChange={(value) => setAdminId(value)}
             >
               <Select.Trigger
                 className="w-full mt-2"
                 placeholder="Select Admin"
               />
               <Select.Content position="popper">
-                {superAdmins.map((admin) => {
-                  return (
-                    <Select.Item
-                      value={admin.id}
-                    >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
-                  );
-                })}
+                {superAdmins.map((admin) => (
+                  <Select.Item
+                    key={admin.id}
+                    value={admin.id}
+                  >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
+                ))}
               </Select.Content>
             </Select.Root>
           </div>
         </div>
         <div className="btn flex justify-end max-sm:flex-col">
-          <button className="h-[40px] bg-theme hover:bg-theme/85 text-white px-8 rounded-lg shadow-lg my-12">
+          <button
+            type="submit"
+            className="h-[40px] bg-theme hover:bg-theme/85 text-white px-8 rounded-lg shadow-lg my-12"
+          >
             {buttonLoading ? <LoaderIcon /> : "Send to"}
           </button>
         </div>

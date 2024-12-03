@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { refractor } from "../../../date";
+import { refractor, formatMoney } from "../../../date";
 import axios from "axios";
 const root = import.meta.env.VITE_ROOT;
 import toast, { Toaster } from "react-hot-toast";
@@ -110,6 +110,7 @@ const ViewSupplierOrder = () => {
             <Table.ColumnHeaderCell>PRICE(₦)</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>QUANTITY</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>COMMENT</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -128,29 +129,31 @@ const ViewSupplierOrder = () => {
                     }`}
                   </Table.Cell>
                   <Table.Cell>{getProductNamebyId(item.productId)}</Table.Cell>
-                  <Table.Cell>{item.price}</Table.Cell>
-                  <Table.Cell>{item.quantity}</Table.Cell>
+                  <Table.Cell>{formatMoney(item.price)}</Table.Cell>
+                  <Table.Cell>{formatMoney(item.quantity)}</Table.Cell>
                   <Table.Cell>{item.comments}</Table.Cell>
-                  <DropdownMenu.Root>
-                    <DropdownMenu.Trigger className="mt-1 mr-1 absolute right-0">
-                      <Button variant="soft">
-                        <FontAwesomeIcon icon={faEllipsisV} />
-                      </Button>
-                    </DropdownMenu.Trigger>
-                    <DropdownMenu.Content>
-                      <DropdownMenu.Item
-                        onClick={() => {
-                          navigate(
-                            `/admin/supplier/supplier-ledger/${
-                              getSupplierNameById(item.supplierId).id
-                            }`
-                          );
-                        }}
-                      >
-                        View Ledger
-                      </DropdownMenu.Item>
-                    </DropdownMenu.Content>
-                  </DropdownMenu.Root>
+                  <Table.Cell>
+                    <DropdownMenu.Root>
+                      <DropdownMenu.Trigger className="  right-0">
+                        <Button variant="soft">
+                          <FontAwesomeIcon icon={faEllipsisV} />
+                        </Button>
+                      </DropdownMenu.Trigger>
+                      <DropdownMenu.Content>
+                        <DropdownMenu.Item
+                          onClick={() => {
+                            navigate(
+                              `/admin/supplier/supplier-ledger/${
+                                getSupplierNameById(item.supplierId).id
+                              }`
+                            );
+                          }}
+                        >
+                          View Ledger
+                        </DropdownMenu.Item>
+                      </DropdownMenu.Content>
+                    </DropdownMenu.Root>
+                  </Table.Cell>
                 </Table.Row>
               );
             })

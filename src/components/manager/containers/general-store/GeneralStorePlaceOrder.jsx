@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import {
   Heading,
   Text,
@@ -122,7 +124,12 @@ const GeneralStorePlaceOrder = () => {
       );
       console.log(response);
       setIsLoading(false);
-      toast.success(response.data.message);
+      toast.success(response.data.message, {
+        style: {
+          padding: "20px",
+        },
+        duration: 6500,
+      });
       resetForm();
     } catch (error) {
       console.log(error);
@@ -185,7 +192,7 @@ const GeneralStorePlaceOrder = () => {
                     className="w-full mt-2"
                     placeholder="Select Shelf Name"
                   />
-                  <Select.Content>
+                  <Select.Content position="popper">
                     <Select.Group>
                       {shelves.map((item) => (
                         <Select.Item key={item.id} value={item.id}>
@@ -247,7 +254,7 @@ const GeneralStorePlaceOrder = () => {
           type="button"
           onClick={handleAddPlan}
         >
-          Add Order
+          <FontAwesomeIcon icon={faPlus} />
         </Button>
 
         <Flex justify={"end"}>

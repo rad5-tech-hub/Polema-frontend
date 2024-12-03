@@ -1,4 +1,5 @@
 import React from "react";
+import { useParams } from "react-router-dom";
 import {
   Heading,
   Separator,
@@ -15,7 +16,9 @@ import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 const root = import.meta.env.VITE_ROOT;
 
-const LocalPurchaseOrder = () => {
+const BlankLPO = () => {
+  const { id, rawId } = useParams();
+
   const [suppliers, setSuppliers] = React.useState([]);
   const [raw, setRaw] = React.useState([]);
   const [buttonLoading, setButtonLoading] = React.useState(false);
@@ -268,6 +271,7 @@ const LocalPurchaseOrder = () => {
               Raw Materials Needed <span className="text-red-500">*</span>
             </Text>
             <Select.Root
+              defaultValue={rawId}
               disabled={raw.length === 0}
               required
               onValueChange={(value) => {
@@ -398,4 +402,4 @@ const LocalPurchaseOrder = () => {
   );
 };
 
-export default LocalPurchaseOrder;
+export default BlankLPO;

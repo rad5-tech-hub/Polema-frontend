@@ -6,6 +6,7 @@ import {
   Text,
   Button,
   Flex,
+  Grid,
   Card,
   Select,
   Spinner,
@@ -214,9 +215,34 @@ const CollectFromGeneralStore = () => {
             <TextField.Root
               placeholder="Enter Name"
               required
+              className="mt-2"
               value={toName}
               onChange={(e) => setToName(e.target.value)}
             />
+          </div>
+          <div className="w-full">
+            <Text>Send To</Text>
+            <Select.Root
+              onValueChange={(val) => {
+                setSuperAdminId(val);
+              }}
+              required
+            >
+              <Select.Trigger
+                className="w-full mt-2"
+                placeholder="Select Admin"
+              />
+              <Select.Content position="popper">
+                {superAdmins.map((admins) => {
+                  return (
+                    <Select.Item
+                      key={admins.id}
+                      value={admins.id}
+                    >{`${admins.firstname} ${admins.lastname}`}</Select.Item>
+                  );
+                })}
+              </Select.Content>
+            </Select.Root>
           </div>
         </Flex>
 
@@ -239,7 +265,7 @@ const CollectFromGeneralStore = () => {
                     placeholder="Select Store"
                     className="w-full mt-2"
                   />
-                  <Select.Content>
+                  <Select.Content position="popper">
                     {departments.map((dept) => (
                       <Select.Item key={dept.id} value={dept.id}>
                         {dept.name}
@@ -281,7 +307,7 @@ const CollectFromGeneralStore = () => {
 
         {/* Comments Field */}
         <div className="flex gap-4">
-          <div className="w-full">
+          <div className="w-[50%]">
             <Text>Specifications and comments</Text>
             <TextField.Root
               placeholder="Enter Comments"
@@ -289,30 +315,6 @@ const CollectFromGeneralStore = () => {
               value={comments}
               onChange={(e) => setComments(e.target.value)}
             />
-          </div>
-          <div className="w-full">
-            <Text>Send To</Text>
-            <Select.Root
-              onValueChange={(val) => {
-                setSuperAdminId(val);
-              }}
-              required
-            >
-              <Select.Trigger
-                className="w-full mt-2"
-                placeholder="Select Admin"
-              />
-              <Select.Content>
-                {superAdmins.map((admins) => {
-                  return (
-                    <Select.Item
-                      key={admins.id}
-                      value={admins.id}
-                    >{`${admins.firstname} ${admins.lastname}`}</Select.Item>
-                  );
-                })}
-              </Select.Content>
-            </Select.Root>
           </div>
         </div>
 
