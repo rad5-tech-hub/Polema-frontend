@@ -298,10 +298,12 @@ const EditDialog = ({ product, onClose }) => {
                 defaultValue={product.departmentId}
                 onValueChange={(val) => setDeptId(val)}
               >
-                <Select.Trigger>
-                  <Select.Value placeholder={getDepartment()} />
-                </Select.Trigger>
-                <Select.Content>
+                <Select.Trigger
+                  placeholder="Select Department"
+                  className="w-full mt-1"
+                />
+
+                <Select.Content position="popper">
                   {department.map((dept) => {
                     return (
                       <Select.Item key={dept.id} value={dept.id}>
@@ -320,11 +322,11 @@ const EditDialog = ({ product, onClose }) => {
               >
                 Price Plan
               </label>
-              <Switch.Root
+              {/* <Switch.Root
                 id="switch"
                 checked={pricePlan}
                 onCheckedChange={handleSwitchChange}
-              />
+              /> */}
             </div>
 
             {pricePlan && (
