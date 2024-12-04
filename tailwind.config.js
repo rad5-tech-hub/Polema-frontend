@@ -19,6 +19,7 @@ module.exports = {
       },
       colors: {
         theme: "#434343",
+        transparent: "transparent",
       },
     },
     screens: {

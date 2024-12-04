@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { refractor } from "../../../date";
+import { refractor, formatMoney } from "../../../date";
 import toast, { Toaster } from "react-hot-toast";
-import { Spinner, Table, Heading } from "@radix-ui/themes";
+import { Spinner, Table, Heading, Select, Flex } from "@radix-ui/themes";
 import axios from "axios";
 
 const root = import.meta.env.VITE_ROOT;
@@ -11,9 +11,13 @@ const ViewAccoountBook = () => {
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [customerActive, setCustomerActive] = useState(true);
+  const [department, setDepartments] = useState([]);
+  const [accountRecepient, setAccountRecepient] = useState("customers");
 
   // Fetch Details of account book
   const fetchAccountBookDetails = async () => {
+    setAccountBook([]);
     const retrToken = localStorage.getItem("token");
 
     if (!retrToken) {
@@ -21,15 +25,37 @@ const ViewAccoountBook = () => {
       return;
     }
 
+    // Function check accountRecepient
+    const changeURLByRecepient = (recepient) => {
+      switch (recepient) {
+        case "customers":
+          return "get-accountbook";
+          break;
+        case "suppliers":
+          return "get-supplier-accountbook";
+          break;
+        case "others":
+          return "get-other-accountbook";
+          break;
+
+        default:
+          break;
+      }
+    };
+
     try {
-      const response = await axios.get(`${root}/customer/get-accountbook`, {
-        headers: { Authorization: `Bearer ${retrToken}` },
-      });
+      const response = await axios.get(
+        `${root}/customer/${changeURLByRecepient(accountRecepient)}`,
+        {
+          headers: { Authorization: `Bearer ${retrToken}` },
+        }
+      );
       setAccountBook(response.data.acct);
       setLoading(false);
     } catch (error) {
       console.log(error);
       setLoading(false);
+      toast.error("An error occurred");
     }
   };
 
@@ -69,7 +95,6 @@ const ViewAccoountBook = () => {
         },
       });
 
-      console.log(response.data.products);
       response.data.length === 0
         ? setProducts([])
         : setProducts(response.data.products);
@@ -79,35 +104,65 @@ const ViewAccoountBook = () => {
     }
   };
 
-  // Matching customers based on their IDs
-  const getCustomerNameById = (id) => {
-    const customer = customers.find((customer) => customer.id === id);
+  // Fetch Departments from db
+  const fetchDepartments = async () => {
+    const retrToken = localStorage.getItem("token");
 
-    return customer ? `${customer.firstname} ${customer.lastname}` : "Unknown";
+    if (!retrToken) {
+      toast.error("An error occurred. Try logging in again");
+
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${root}/dept/view-department`, {
+        headers: {
+          Authorization: `Bearer ${retrToken}`,
+        },
+      });
+      setDepartments(response.data.departments);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  const getProductNameById = (id) => {
-    const product = products.find((product) => product.id === id);
-
-    return product ? `${product.name}` : "Unknown";
+  //  Matching department name by id
+  const matchDepartmentNameById = (id) => {
+    const departments = department.find((item) => item.id === id);
+    return departments ? departments.name : "";
   };
 
   useEffect(() => {
     fetchCustomers();
     fetchProducts();
+    fetchDepartments();
     fetchAccountBookDetails();
   }, []);
 
+  useEffect(() => {
+    fetchAccountBookDetails();
+  }, [accountRecepient]);
+
   return (
     <>
-      <Heading className="mb-4">Customer Account Book</Heading>
+      <Flex justify={"between"}>
+        <Heading className="mb-4">Account Book</Heading>
+      </Flex>
       <Table.Root variant="surface">
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>CUSTOMER NAME</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>NAME</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>BANK NAME</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>DEPARTMENT</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>PRODUCT</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>AMOUNT(₦)</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>RAW MATERIALS</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-green-500">
+              CREDIT(₦)
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-red-500">
+              DEBIT(₦)
+            </Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
 
@@ -119,17 +174,50 @@ const ViewAccoountBook = () => {
           <Table.Body>
             {accountBook.length === 0 ? (
               <Table.Row>
-                <Table.Cell colSpan="3">No records found</Table.Cell>
+                <Table.Cell colSpan="3">
+                  <Spinner />
+                </Table.Cell>
               </Table.Row>
             ) : (
               accountBook.map((details) => (
                 <Table.Row key={details.id}>
                   <Table.Cell>{refractor(details.createdAt)}</Table.Cell>
                   <Table.Cell>
-                    {getCustomerNameById(details.customerId)}
+                    {details.other === null
+                      ? details.credit > details.debit
+                        ? `${details.theCustomer.firstname} ${details.theCustomer.lastname}`
+                        : `${details.theSupplier.firstname} ${details.theSupplier.lastname}`
+                      : details.other}
+                  </Table.Cell>
+                  <Table.Cell>{details.bankName}</Table.Cell>
+                  <Table.Cell>
+                    {matchDepartmentNameById(details.departmentId)}
+                  </Table.Cell>{" "}
+                  <Table.Cell>
+                    {details.other == null
+                      ? details.credit < details.debit
+                        ? ""
+                        : details.theProduct.name
+                      : ""}
                   </Table.Cell>
                   <Table.Cell>
-                    {getProductNameById(details.productId)}
+                    {details.other == null
+                      ? details.credit < details.debit
+                        ? details.theProduct.name
+                        : ""
+                      : ""}
+                    {/* {details.debit > details.credit && "Raw Material Name"} */}
+                  </Table.Cell>
+                  <Table.Cell>
+                    {formatMoney(
+                      details.credit > details.debit ? details.credit : ""
+                    )}
+                  </Table.Cell>
+                  <Table.Cell>
+                    {formatMoney(
+                      details.debit > details.credit ? details.debit : ""
+                    )}
+                    {/*  */}
                   </Table.Cell>
                   <Table.Cell>{details.amount}</Table.Cell>
                 </Table.Row>

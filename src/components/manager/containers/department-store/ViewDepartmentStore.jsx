@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { refractor } from "../../../date";
+import EditProductModal from "./EditProductModal";
+import AddProductModal from "./AddProductModal";
+import DeleteProductModal from "./DeleteProductModal";
 import {
   Separator,
   Grid,
@@ -11,26 +14,26 @@ import {
   Flex,
   Select,
   Heading,
+  Spinner,
 } from "@radix-ui/themes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faArrowUp,
-  faArrowDown,
-  faEllipsisV,
-  faPills,
-} from "@fortawesome/free-solid-svg-icons";
+import { faEllipsisV, faSquare } from "@fortawesome/free-solid-svg-icons";
+
 import axios from "axios";
+
 const root = import.meta.env.VITE_ROOT;
 
 const ViewDepartmentStore = () => {
-  const [isProductActive, setIsProductActive] = React.useState(true);
-  const [store, setStore] = React.useState([]);
+  const [isProductActive, setIsProductActive] = useState(true);
+  const [failedSearch, setFailedSearch] = useState(false);
+  const [store, setStore] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [openModal, setOpenModal] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
-  // Function to fetch store details
+  // Fetch store data
   const fetchStore = async () => {
-    let retrToken = localStorage.getItem("token");
-
-    // Check if the token is available
+    const retrToken = localStorage.getItem("token");
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
       return;
@@ -42,109 +45,98 @@ const ViewDepartmentStore = () => {
           isProductActive ? "view-deptstore-prod" : "view-deptstore-raw"
         }`,
         {
-          headers: {
-            Authorization: `Bearer ${retrToken}`,
-          },
+          headers: { Authorization: `Bearer ${retrToken}` },
         }
       );
       setStore(response.data.stores);
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching store data:", error);
+      toast.error("Failed to fetch store data");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const detailsArray = [
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Paracetamol",
-      stockNumber: 350,
-      stockAvailable: false,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 40,
-      stockAvailable: false,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-    {
-      name: "Septodont",
-      stockNumber: 200,
-      stockAvailable: true,
-    },
-  ];
+  // Function to get the right status color based on status
+  const sqColor = (arg) => {
+    switch (arg) {
+      case "In Stock":
+        return "text-green-500";
+        break;
+      case "Out Stock":
+        return "text-red-500";
+        break;
+      case "Low Stock":
+        return "text-yellow-500";
+        break;
 
-  React.useEffect(() => {
+      default:
+        break;
+    }
+  };
+
+  useEffect(() => {
+    setLoading(true);
     fetchStore();
   }, [isProductActive]);
+
+  // Handle opening modals
+  const handleOpenModal = (type, product = null) => {
+    setSelectedProduct(product);
+    setOpenModal(type);
+  };
+
+  const closeModal = () => {
+    setOpenModal(null);
+    setSelectedProduct(null);
+  };
+
+  // Callback to delete product from store state and server
+  const handleDeleteProduct = async () => {
+    const retrToken = localStorage.getItem("token");
+    if (!retrToken) {
+      toast.error("An error occurred. Try logging in again");
+      return;
+    }
+
+    try {
+      await axios.delete(`${root}/deleteproduct/${selectedProduct.id}`, {
+        headers: { Authorization: `Bearer ${retrToken}` },
+      });
+
+      setStore((prevStore) =>
+        prevStore.filter((item) => item.id !== selectedProduct.id)
+      );
+      toast.success("Product deleted successfully");
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      toast.error("Failed to delete product");
+    } finally {
+      closeModal();
+    }
+  };
+
+  // Callback to update product in store state
+  const handleEditProduct = (updatedProduct) => {
+    setStore((prevStore) =>
+      prevStore.map((item) =>
+        item.id === updatedProduct.id ? updatedProduct : item
+      )
+    );
+  };
+
+  // Callback to add a new product to store state
+  const handleAddProduct = (newProduct) => {
+    setStore((prevStore) => [...prevStore, newProduct]);
+  };
+
   return (
     <div>
-      <Flex justify={"between"}>
+      <Flex justify={"between"} align="center">
         <Heading>View Store</Heading>
         <Select.Root
           defaultValue="products"
-          onValueChange={(value) => {
-            value === "products"
-              ? setIsProductActive(true)
-              : setIsProductActive(false);
-          }}
+          onValueChange={(value) => setIsProductActive(value === "products")}
         >
           <Select.Trigger />
           <Select.Content>
@@ -153,61 +145,43 @@ const ViewDepartmentStore = () => {
           </Select.Content>
         </Select.Root>
       </Flex>
-      <Separator className="my-2 w-full" />
 
-      <div>
-        <Grid columns={"6"} rows={"3"} gapX={"4"} gapY={"3"}>
-          {store.map((item, index) => {
-            return (
-              <div
-                className="p-5 shadow-xl max-w-[175px] max-h-[101px] rounded-lg relative"
-                key={index}
-              >
-                <div className="absolute top-2 right-2 ">
-                  <FontAwesomeIcon
-                    icon={faPills}
-                    width={"16px"}
-                    className="opacity-40"
-                    height={"16px"}
-                  />
-                </div>
-                <Blockquote>
-                  <p className="text-[0.6rem]">{item.product.name}</p>
-                  <p className="text-3xl  font-amsterdam">{item.quantity}</p>
-                  {item.status === "In Stock" ? (
-                    <p className="text-green-500  flex gap-1 items-center text-[.5rem]">
-                      <FontAwesomeIcon icon={faArrowUp} />
-                      Currently in Stock
-                    </p>
-                  ) : (
-                    <p className="text-red-500  flex gap-1 items-center text-[.5rem]">
-                      <FontAwesomeIcon icon={faArrowDown} />
-                      Currently out of Stock
-                    </p>
-                  )}
-                </Blockquote>
-              </div>
-            );
-          })}
-        </Grid>
-      </div>
+      <Separator className="my-3 w-full" />
 
-      {/* Table to show store details */}
       <Table.Root className="mt-6 mb-4" variant="surface">
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>PRODUCT NAME</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>
+              {isProductActive ? "PRODUCT" : "RAW MATERIAL"} NAME
+            </Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>DEPARTMENT</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>UNIT</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>QUANTITY</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>THRESHOLD VALUE</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>STATUS</Table.ColumnHeaderCell>
+
+            <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
-        <Table.Body>
-          {store.map((storeItem) => {
-            return (
-              <Table.Row className="relative">
+
+        {loading ? (
+          <Table.Body>
+            <Table.Row>
+              <Table.Cell colSpan={7}>
+                <Flex
+                  justify="center"
+                  align="center"
+                  style={{ height: "100px" }}
+                >
+                  {failedSearch ? "No records found" : <Spinner size="2" />}
+                </Flex>
+              </Table.Cell>
+            </Table.Row>
+          </Table.Body>
+        ) : (
+          <Table.Body>
+            {store.map((storeItem) => (
+              <Table.Row key={storeItem.id} className="relative">
                 <Table.RowHeaderCell>
                   {refractor(storeItem.createdAt)}
                 </Table.RowHeaderCell>
@@ -218,11 +192,18 @@ const ViewDepartmentStore = () => {
                   {storeItem.product.department.name}
                 </Table.RowHeaderCell>
                 <Table.RowHeaderCell>{storeItem.unit}</Table.RowHeaderCell>
+                <Table.RowHeaderCell>{storeItem.quantity}</Table.RowHeaderCell>
                 <Table.RowHeaderCell>
                   {storeItem.thresholdValue}
                 </Table.RowHeaderCell>
-                <Table.RowHeaderCell>{storeItem.status}</Table.RowHeaderCell>
-                <div className="absolute top-1  right-1 ">
+                <Table.RowHeaderCell>
+                  <FontAwesomeIcon
+                    icon={faSquare}
+                    className={`mr-1 ${sqColor(storeItem.status)}`}
+                  />
+                  {storeItem.status}
+                </Table.RowHeaderCell>
+                <div className="mt-2 mr-1 top-1 right-1">
                   <DropdownMenu.Root>
                     <DropdownMenu.Trigger>
                       <Button variant="surface">
@@ -231,18 +212,56 @@ const ViewDepartmentStore = () => {
                     </DropdownMenu.Trigger>
                     <DropdownMenu.Content>
                       <DropdownMenu.Group>
-                        <DropdownMenu.Item>Add</DropdownMenu.Item>
-                        <DropdownMenu.Item>Remove</DropdownMenu.Item>
-                        <DropdownMenu.Item>Edit</DropdownMenu.Item>
+                        <DropdownMenu.Item
+                          onClick={() => handleOpenModal("add", storeItem)}
+                        >
+                          Add
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Item
+                          onClick={() => handleOpenModal("edit", storeItem)}
+                        >
+                          Edit
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Item
+                          onClick={() => handleOpenModal("delete", storeItem)}
+                        >
+                          Remove
+                        </DropdownMenu.Item>
                       </DropdownMenu.Group>
                     </DropdownMenu.Content>
                   </DropdownMenu.Root>
                 </div>
               </Table.Row>
-            );
-          })}
-        </Table.Body>
+            ))}
+          </Table.Body>
+        )}
       </Table.Root>
+
+      {openModal === "add" && (
+        <AddProductModal
+          product={selectedProduct}
+          closeModal={closeModal}
+          runFetch={fetchStore}
+          onAddProduct={handleAddProduct}
+        />
+      )}
+      {openModal === "edit" && (
+        <EditProductModal
+          product={selectedProduct}
+          closeModal={closeModal}
+          runFetch={fetchStore}
+          onEditProduct={handleEditProduct}
+        />
+      )}
+      {openModal === "delete" && (
+        <DeleteProductModal
+          product={selectedProduct}
+          runFetch={fetchStore}
+          closeModal={closeModal}
+          onDeleteProduct={handleDeleteProduct}
+        />
+      )}
+
       <Toaster position="top-right" />
     </div>
   );

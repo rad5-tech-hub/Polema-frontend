@@ -8,20 +8,11 @@ import {
   Button,
   Heading,
   Separator,
-  CheckboxGroup,
-  Checkbox,
   TextField,
   Text,
   Spinner,
   Flex,
 } from "@radix-ui/themes";
-
-import {
-  EnvelopeClosedIcon,
-  LockClosedIcon,
-  PersonIcon,
-} from "@radix-ui/react-icons";
-import UpdateURL from "../ChangeRoute";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -212,7 +203,7 @@ const AddCustomer = () => {
 
           <Flex justify={"end"} align={"end"} width={"100%"}>
             <Button
-              className="mt-4 "
+              className="mt-4  bg-theme hover:bg-theme/85"
               size={3}
               type="submit"
               disabled={isLoading}

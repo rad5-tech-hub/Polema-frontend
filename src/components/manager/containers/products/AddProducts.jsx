@@ -6,9 +6,11 @@ import {
   faBuilding,
   faStore,
   faTags,
+  faCommentsDollar,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
+import { LoaderIcon } from "react-hot-toast";
 import * as Switch from "@radix-ui/react-switch";
 import {
   Card,
@@ -89,7 +91,7 @@ const AddProducts = () => {
 
     try {
       const response = await axios.get(`${root}/dept/get-department`);
-      console.log(response);
+
       setDepartment(response.data.departments);
     } catch (error) {
       console.log(error);
@@ -126,8 +128,8 @@ const AddProducts = () => {
           unit: unit,
           amount: Number(basePrice),
         },
-      ], // Submit raw base price without commas
-      pricePlan: plansArray, // Plans as an object
+      ],
+      pricePlan: plansArray,
     };
 
     const submitWithoutPlans = {
@@ -142,6 +144,7 @@ const AddProducts = () => {
       ],
     };
 
+    console.log(pricePlan ? submitObject : submitWithoutPlans);
     try {
       const response = await axios.post(
         `${root}/admin/add-product`,
@@ -396,6 +399,7 @@ const AddProducts = () => {
               color="brown"
               radius="medium"
               onClick={handleAddPlan}
+              type="button"
             >
               <PlusIcon width={"20px"} height={"20px"} />
               Add Plan
@@ -404,8 +408,13 @@ const AddProducts = () => {
         )}
 
         <Flex justify={"end"} align={"end"} width={"100%"}>
-          <Button className="mt-4" size={3} type="submit" disabled={isloading}>
-            {isloading ? <Spinner /> : "Create"}
+          <Button
+            className="mt-4  bg-theme hover:bg-theme/85"
+            size={3}
+            type="submit"
+            disabled={isloading}
+          >
+            {isloading ? <LoaderIcon /> : "Create"}
           </Button>
         </Flex>
       </form>

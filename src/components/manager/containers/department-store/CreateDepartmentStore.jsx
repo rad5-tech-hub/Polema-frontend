@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import toast, { LoaderIcon, Toaster } from "react-hot-toast";
 
 import {
   Heading,
@@ -14,6 +14,7 @@ import {
 } from "@radix-ui/themes";
 import axios from "axios";
 const root = import.meta.env.VITE_ROOT;
+const cloudinaryRoot = import.meta.env.VITE_CLOUD_ROOT;
 
 const CreateDepartmentStore = () => {
   const fileInputRef = useRef(null);
@@ -49,13 +50,10 @@ const CreateDepartmentStore = () => {
     formData.append("upload_preset", "ml_default");
 
     try {
-      const result = await axios.post(
-        "https://api.cloudinary.com/v1_1/da4yjuf39/image/upload",
-        formData
-      );
+      const result = await axios.post(`${root}/dept/upload`, formData);
       console.log("Image uploaded to Cloudinary:", result.data);
-      setImage(result.data.secure_url);
-      return result.data.secure_url; // Return the image URL from Cloudinary
+      setImage(result.data.imageUrl);
+      return result.data.imageUrl; // Return the image URL from Cloudinary
     } catch (error) {
       console.error("Error uploading image:", error);
     } finally {
@@ -76,7 +74,8 @@ const CreateDepartmentStore = () => {
   };
 
   // Function to fetch raw materials
-  const fetchRawMaterials = async () => {
+  const fetchRawMaterials = async (id) => {
+    setProducts([]);
     setProductDiabled(true);
     let retrToken = localStorage.getItem("token");
 
@@ -89,9 +88,7 @@ const CreateDepartmentStore = () => {
     try {
       const response = await axios.get(
         `${root}/dept/${
-          isProductActive
-            ? `get-dept-product/${deptId}`
-            : `get-dept-raw/${deptId}`
+          isProductActive ? `get-dept-product/${id}` : `get-dept-raw/${id}`
         }`,
         {
           headers: {
@@ -189,9 +186,6 @@ const CreateDepartmentStore = () => {
     fetchDept();
   }, []);
 
-  React.useEffect(() => {
-    fetchRawMaterials();
-  }, [isProductActive]);
   return (
     <>
       <Flex justify={"between"} align={"center"}>
@@ -255,7 +249,9 @@ const CreateDepartmentStore = () => {
             </Text>
             <Select.Root
               onValueChange={(value) => {
+                setProducts([]);
                 setDeptId(value);
+                fetchRawMaterials(value);
               }}
             >
               <Select.Trigger
@@ -276,6 +272,7 @@ const CreateDepartmentStore = () => {
               <span className="text-red-500">*</span>
             </Text>
             <Select.Root
+              disabled={products.length === 0}
               onValueChange={(value) => {
                 setProductId(value);
                 getMatchingProductNameById(value);
@@ -283,9 +280,7 @@ const CreateDepartmentStore = () => {
             >
               <Select.Trigger
                 className="w-full mt-2"
-                placeholder={`${
-                  isProductActive ? "Select Product" : "Select Raw Material"
-                }`}
+                placeholder={"Select a Department First"}
                 disabled={productDisabled}
               />
               <Select.Content>

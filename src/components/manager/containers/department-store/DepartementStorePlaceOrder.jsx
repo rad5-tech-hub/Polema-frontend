@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import {
   Heading,
   Card,
@@ -34,6 +36,7 @@ const DepartementStorePlaceOrder = () => {
     const retrToken = localStorage.getItem("token");
     if (!retrToken || !departmentId) return;
 
+    // API REQUEST
     try {
       const response = await axios.get(
         `${root}/dept/get-dept-raw/${departmentId}`,
@@ -43,7 +46,7 @@ const DepartementStorePlaceOrder = () => {
           },
         }
       );
-      setRawMaterials(response.data.products);
+      setRawMaterials(response?.data?.products || []);
     } catch (error) {
       console.log(error);
       setRawMaterials([]);
@@ -118,7 +121,6 @@ const DepartementStorePlaceOrder = () => {
       unit: plan.unit,
       expectedDeliveryDate: plan.expectedDeliveryDate,
     }));
-    console.log(orders);
 
     try {
       const response = await axios.post(
@@ -133,7 +135,24 @@ const DepartementStorePlaceOrder = () => {
         }
       );
       setBtnLoading(false);
-      toast.success("Order placed successfully");
+      toast.success("Order placed successfully", {
+        style: {
+          padding: "20px",
+        },
+        duration: 10000,
+      });
+
+      // Clear the form by resetting the 'plans' state
+      setPlans([
+        {
+          id: Date.now(),
+          departmentId: "",
+          productId: "",
+          quantity: "",
+          unit: "",
+          expectedDeliveryDate: "",
+        },
+      ]);
     } catch (error) {
       console.error("Failed to place order:", error);
       setBtnLoading(false);
@@ -168,7 +187,7 @@ const DepartementStorePlaceOrder = () => {
                     className="mt-2 w-full"
                     placeholder="Select Department"
                   />
-                  <Select.Content>
+                  <Select.Content position="popper">
                     {dept.map((item) => (
                       <Select.Item key={item.id} value={item.id}>
                         {item.name}
@@ -198,7 +217,7 @@ const DepartementStorePlaceOrder = () => {
                     className="mt-2 w-full"
                     placeholder="Select Raw Material"
                   />
-                  <Select.Content>
+                  <Select.Content position="popper">
                     {rawMaterials.map((material) => (
                       <Select.Item key={material.id} value={material.id}>
                         {material.name}
@@ -249,7 +268,7 @@ const DepartementStorePlaceOrder = () => {
           </Card>
         ))}
         <Button className="mt-4" onClick={addPlan}>
-          Add Plan
+          <FontAwesomeIcon icon={faPlus} />
         </Button>
 
         <Flex className="mt-4" justify={"end"}>
@@ -258,6 +277,7 @@ const DepartementStorePlaceOrder = () => {
           </Button>
         </Flex>
       </form>
+      <Toaster position="top-right" />
     </div>
   );
 };

@@ -53,11 +53,8 @@ const CreatePharmacyStore = () => {
     formData.append("upload_preset", "ml_default");
 
     try {
-      const result = await axios.post(
-        "https://api.cloudinary.com/v1_1/da4yjuf39/image/upload",
-        formData
-      );
-      setUploadedImage(result.data.secure_url);
+      const result = await axios.post(`${root}/dept/upload`, formData);
+      setUploadedImage(result.data.imageUrl);
       return result.data.secure_url;
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -97,11 +94,20 @@ const CreatePharmacyStore = () => {
           },
         }
       );
-      console.log(response);
 
       setProducts(response.data.products);
     } catch (error) {
-      toast.error(error.message);
+      // toast.error(error.message);
+      console.log(error);
+
+      if (error.status === 404) {
+        toast.error("No products in pharmacy", {
+          style: {
+            padding: "20px",
+          },
+          duration: 5500,
+        });
+      }
     }
   };
 
@@ -174,7 +180,7 @@ const CreatePharmacyStore = () => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      console.log(response);
+
       setPharmId(response.data.department[0].id);
       setCompleteRequest(true);
     } catch (error) {
@@ -267,7 +273,7 @@ const CreatePharmacyStore = () => {
                 }
                 className="w-full"
               />
-              <Select.Content>
+              <Select.Content position="popper">
                 {products.map((product) => (
                   <Select.Item key={product.id} value={product.id}>
                     {product.name}
@@ -280,7 +286,9 @@ const CreatePharmacyStore = () => {
           {!rawMaterialsActive && (
             <>
               <div className="w-full">
-                <Text className="mb-4">Product ID</Text>
+                <Text className="mb-4">
+                  Product ID <span className="text-red-500">*</span>
+                </Text>
                 <TextField.Root
                   value={productID}
                   onChange={(e) => setProductID(e.target.value)}
@@ -289,7 +297,9 @@ const CreatePharmacyStore = () => {
                 />
               </div>
               <div className="w-full">
-                <Text className="mb-4">Category</Text>
+                <Text className="mb-4">
+                  Category<span className="text-red-500">*</span>
+                </Text>
                 <TextField.Root
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
@@ -301,7 +311,9 @@ const CreatePharmacyStore = () => {
           )}
 
           <div className="w-full">
-            <Text className="mb-4">Unit</Text>
+            <Text className="mb-4">
+              Unit<span className="text-red-500">*</span>
+            </Text>
             <TextField.Root
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
@@ -310,7 +322,9 @@ const CreatePharmacyStore = () => {
             />
           </div>
           <div className="w-full">
-            <Text className="mb-4">Threshold Value</Text>
+            <Text className="mb-4">
+              Threshold Value<span className="text-red-500">*</span>
+            </Text>
             <TextField.Root
               value={thresholdValue}
               onChange={(e) => setThresholdVal(e.target.value)}

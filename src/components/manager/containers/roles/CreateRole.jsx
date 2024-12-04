@@ -52,7 +52,7 @@ const CreateRole = ({ child, setChild }) => {
 
   // Fetch token from local storage
   const fetchToken = async () => {
-    const retrToken = await localStorage.getItem("token");
+    const retrToken = localStorage.getItem("token");
 
     setToken(retrToken);
   };
@@ -102,17 +102,12 @@ const CreateRole = ({ child, setChild }) => {
           }
         );
 
-        console.log(response);
-        toast.success("Role created successfully", {
-          duration: 6500,
+        toast.success("Role created successully", {
           style: {
-            padding: "25px",
+            padding: "20px",
           },
+          duration: 10000,
         });
-
-        setTimeout(() => {
-          navigate("/admin/admins/view-roles");
-        }, 1500);
       } catch (error) {
         if (error.response) {
           console.log(error.response.data);
@@ -164,9 +159,6 @@ const CreateRole = ({ child, setChild }) => {
       setPermissionBox(response.data.navParentsWithPermissions);
       console.log(response);
 
-      {
-        response.status === 200 && toast.success("Loaded Successfully.");
-      }
       setPermissionsLoading(false);
     } catch (err) {
       toast.error(err.message, {
@@ -203,6 +195,7 @@ const CreateRole = ({ child, setChild }) => {
                   placeholder="Enter Role"
                   className=""
                   type="text"
+                  required
                   id="role"
                   size={"3"}
                 ></TextField.Root>
@@ -267,7 +260,7 @@ const CreateRole = ({ child, setChild }) => {
 
               <Flex justify={"end"} align={"end"} width={"100%"}>
                 <Button
-                  className="mt-4 "
+                  className="mt-4  bg-theme hover:bg-theme/85"
                   size={3}
                   type="submit"
                   disabled={isLoading}

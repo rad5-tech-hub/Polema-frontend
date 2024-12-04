@@ -26,6 +26,7 @@ const CashManagement = () => {
   const [comment, setComment] = useState("");
   const [amount, setAmount] = useState("");
 
+  // Fetch Admins
   const fetchAdmins = async () => {
     const retrToken = localStorage.getItem("token");
     if (!retrToken) {
@@ -37,13 +38,18 @@ const CashManagement = () => {
       const response = await axios.get(`${root}/admin/all-admin`, {
         headers: { Authorization: `Bearer ${retrToken}` },
       });
+      if (response.data.staffList.length === 0) {
+        toast.error("No admins found.");
+      }
       setAdmins(response.data.staffList);
       setDropdownBlur(false);
     } catch (error) {
       console.error(error);
+      toast.error("Failed to fetch admins. Please try again.");
     }
   };
 
+  // Format Amount
   const formatAmount = (value) => {
     const cleanedValue = value.replace(/,/g, "");
     if (cleanedValue === "") return "";
@@ -52,71 +58,84 @@ const CashManagement = () => {
       : amount;
   };
 
+  // Parse Input Amount to a Number
+  const parseNumber = (input) => {
+    const cleanedInput = input.replace(/,/g, "");
+    return parseFloat(cleanedInput) || "";
+  };
+
+  // Handle Submit
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setButtonLoading(true);
-    const retrToken = localStorage.getItem("token");
-    if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
-      setButtonLoading(false);
-      return;
-    }
+    if (confirm("Are you sure you want to continue?")) {
+      e.preventDefault();
+      setButtonLoading(true);
+      const retrToken = localStorage.getItem("token");
+      if (!retrToken) {
+        toast.error("An error occurred. Try logging in again");
+        setButtonLoading(false);
+        return;
+      }
 
-    const body = {
-      name,
-      comment,
-      approvedByAdminId: adminId,
-      [isCashCollection ? "credit" : "debit"]: cashAmount,
-    };
+      // Validate form fields
+      if (!name || !cashAmount || !adminId || !comment) {
+        toast.error("Please fill all required fields.");
+        setButtonLoading(false);
+        return;
+      }
 
-    try {
-      const response = await axios.post(
-        `${root}/admin/create-cashier-book`,
-        body,
-        {
-          headers: { Authorization: `Bearer ${retrToken}` },
-        }
-      );
-      toast.success(response.data.message, {
-        style: { padding: "30px" },
-        duration: 5500,
-      });
+      const body = {
+        name,
+        comment,
+        approvedByAdminId: adminId,
+        [isCashCollection ? "credit" : "debit"]: cashAmount,
+      };
 
-      // Clear form fields
-      setAdminId("");
-      setCashAmount("");
-      setName("");
-      setComment("");
-      setAmount("");
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to submit");
-    } finally {
-      setButtonLoading(false);
+      try {
+        const response = await axios.post(
+          `${root}/admin/create-cashier-book`,
+          body,
+          {
+            headers: { Authorization: `Bearer ${retrToken}` },
+          }
+        );
+        toast.success(response.data.message, {
+          style: { padding: "30px" },
+          duration: 5500,
+        });
+
+        // Clear form fields
+        setAdminId("");
+        setCashAmount("");
+        setName("");
+        setComment("");
+        setAmount("");
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to submit. Please try again.");
+      } finally {
+        setButtonLoading(false);
+      }
+    } else {
+      alert("Form not submmitted.");
     }
   };
 
-  // Function to clean number input
-  function parseNumber(input) {
-    const cleanedInput = input.replace(/,/g, "");
-    return parseFloat(cleanedInput);
-  }
-
+  // Fetch admins on component mount
   useEffect(() => {
     fetchAdmins();
   }, []);
 
   return (
-    <>
+    <div>
       <Flex justify={"between"}>
-        <Heading> Cash Management</Heading>
+        <Heading>Cash Management</Heading>
         <Select.Root
           defaultValue="Cash Collection"
           onValueChange={(value) =>
             setIsCashCollection(value === "Cash Collection")
           }
         >
-          <Select.Trigger />
+          <Select.Trigger placeholder="Transaction Type" />
           <Select.Content>
             <Select.Item value="Cash Disbursement">
               Cash Disbursement
@@ -129,7 +148,7 @@ const CashManagement = () => {
 
       <form onSubmit={handleSubmit}>
         <Grid columns={"2"} rows={"2"} gap={"5"}>
-          <div className="w-full">
+          <div>
             <Text>{isCashCollection ? "Received From" : "Given To"}</Text>
             <TextField.Root
               placeholder="Input Name"
@@ -139,7 +158,7 @@ const CashManagement = () => {
               onChange={(e) => setName(e.target.value)}
             />
           </div>
-          <div className="w-full">
+          <div>
             <Text>Amount</Text>
             <TextField.Root
               placeholder="Enter Amount"
@@ -154,7 +173,7 @@ const CashManagement = () => {
               <TextField.Slot>₦</TextField.Slot>
             </TextField.Root>
           </div>
-          <div className="w-full">
+          <div>
             <Text>Approved by:</Text>
             <Select.Root
               value={adminId}
@@ -166,7 +185,7 @@ const CashManagement = () => {
                 className="w-full mt-2"
                 placeholder="Select Admin"
               />
-              <Select.Content>
+              <Select.Content position="popper">
                 {admins.map((admin) => (
                   <Select.Item key={admin.id} value={admin.id}>
                     {admin.firstname} {admin.lastname}
@@ -175,7 +194,7 @@ const CashManagement = () => {
               </Select.Content>
             </Select.Root>
           </div>
-          <div className="w-full">
+          <div>
             <Text>Comment/Description</Text>
             <TextField.Root
               placeholder="Add your comment"
@@ -192,9 +211,10 @@ const CashManagement = () => {
             {buttonLoading ? <Spinner /> : "Submit"}
           </Button>
         </Flex>
-        <Toaster position="top-right" />
       </form>
-    </>
+
+      <Toaster position="top-right" />
+    </div>
   );
 };
 

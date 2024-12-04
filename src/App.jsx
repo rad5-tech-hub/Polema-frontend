@@ -4,31 +4,46 @@ import Login from "./pages/Login";
 import Charts from "./components/Charts";
 import Manager from "./components/manager";
 import DashBoardManager from "./components/manager/DashboardManager";
+import NewPassword from "./pages/NewPassword";
 
 import {
   AddAdmin,
+  ViewSupplierOrder,
   WelcomeComponent,
   CashManagement,
   PharmacyPlaceOrder,
   CashManagementLedger,
+  InvoiceAuthorityToWeigh,
   AuthorityToLoad,
+  EditDialog,
+  AllReceipts,
   ViewPharmacyStore,
-  LocalPurchaseOrder,
+  OfficialLPO,
+  BlankLPO,
+  AuthorityToGiveCash,
+  AllWeigh,
+  EditRole,
   ViewPharmacyOrder,
-  ViewShelf,
   GeneralStorePlaceOrder,
+  SupplierLedger,
   AddProducts,
   CreateDepartmentStore,
+  GeneralSupplierLedger,
   AddCustomer,
+  IndividualCustomerLedger,
   CreateShelf,
   CustomerPlaceOrder,
+  ShelfContent,
   CustomerLedger,
+  AllWayBill,
   AuthorityToWeigh,
   AllProducts,
   CreatePharmacyStore,
+  IndividualDepartmentLedger,
   CreateRole,
   ViewAccoountBook,
   AccountBook,
+  ViewGeneralOrder,
   AddSuppliers,
   AllDepartments,
   AddDepartment,
@@ -38,14 +53,34 @@ import {
   SupplierPlaceOrder,
   AllCustomers,
   AllSuppliers,
+  NewWeigh,
+  ViewCustomerOrders,
   DepartementStorePlaceOrder,
   DepartmentStoreViewOrders,
+  AllDispatchNote,
+  AllGatePass,
+  AllInvoice,
+  CreateDispatchNote,
+  CreateGatepass,
+  CreateInvoice,
+  GatepassReceipt,
+  Invoice,
+  OfficialReceipt,
+  Onboarding,
+  WaybillCreateInvoice,
+  WaybillInvoice,
+  ViewAuthorityToWeigh,
+  ViewLocalPurchaseOrder,
+  CollectFromGeneralStore,
   ViewDepartmentStore,
+  DepartmentLedger,
 } from "./components/manager/containers";
 
-import PrivateRoute from "./components/PrivateRoute"; // Assume this is adjusted for React Router v6
+import PrivateRoute from "./components/PrivateRoute";
 import "@radix-ui/themes/styles.css";
 import "./index.css";
+import ConfirmEmail from "./pages/ConfirmEmail";
+import OfficialReceiptInvoice from "./components/manager/containers/receipts/OfficeReceiptInvoice";
 
 const App = () => {
   return (
@@ -54,9 +89,22 @@ const App = () => {
         {/* Public Routes */}
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
+        {/* confirm email */}
+        <Route path="/confirm-email" element={<ConfirmEmail />} />
+        {/* Create new password */}
+        <Route path="/create-new-password" element={<NewPassword />} />
 
         {/* Protected Routes */}
-        <Route path="/admin" element={<DashBoardManager />} />
+        <Route
+          path="/admin"
+          element={
+            <PrivateRoute>
+              <DashBoardManager>
+                <Onboarding />
+              </DashBoardManager>
+            </PrivateRoute>
+          }
+        />
 
         {/* Dashboard Layout - Wrap all private routes */}
         <Route
@@ -82,6 +130,22 @@ const App = () => {
                     path="customers/place-order"
                     element={<CustomerPlaceOrder />}
                   />
+                  <Route
+                    path="customers/order"
+                    element={<ViewCustomerOrders />}
+                  />
+
+                  {/* Authority to weigh route */}
+                  <Route
+                    path="customers/authority-to-weigh/:customerId/:orderId"
+                    element={<AuthorityToWeigh />}
+                  />
+
+                  {/* Customer Ledger Route */}
+                  <Route
+                    path="customers/customer-ledger/:id"
+                    element={<IndividualCustomerLedger />}
+                  />
 
                   {/* Account Book Routes */}
                   <Route path="account-book/add" element={<AccountBook />} />
@@ -103,6 +167,19 @@ const App = () => {
                     path="suppliers/place-supplier-order"
                     element={<SupplierPlaceOrder />}
                   />
+                  <Route
+                    path="suppliers/view-order"
+                    element={<ViewSupplierOrder />}
+                  />
+                  <Route
+                    path="suppliers/supplier-ledger"
+                    element={<GeneralSupplierLedger />}
+                  />
+                  {/* Individual Supplier Ledger */}
+                  <Route
+                    path="supplier/supplier-ledger/:id"
+                    element={<SupplierLedger />}
+                  />
 
                   {/* Product Routes */}
                   <Route
@@ -112,6 +189,10 @@ const App = () => {
                   <Route
                     path="products/view-products"
                     element={<AllProducts />}
+                  />
+                  <Route
+                    path="products/edit-product/:id"
+                    element={<EditDialog />}
                   />
 
                   {/* Admin Routes */}
@@ -123,6 +204,7 @@ const App = () => {
                     path="admins/suspended-admins"
                     element={<AllSuspended />}
                   />
+                  <Route path="admins/edit-role/:id" element={<EditRole />} />
 
                   {/* Department Routes */}
                   <Route
@@ -138,15 +220,34 @@ const App = () => {
                   {/*Raise Tickets Routes*/}
                   <Route
                     path="raise-ticket/l.p.o"
-                    element={<LocalPurchaseOrder />}
+                    element={<ViewLocalPurchaseOrder />}
                   />
                   <Route
-                    path="raise-ticket/authority-to-weigh"
-                    element={<AuthorityToWeigh />}
+                    path="raise-ticket/l.p.o/:quantity/:rawId"
+                    element={<BlankLPO />}
                   />
+
                   <Route
                     path="raise-ticket/authority-to-load"
                     element={<AuthorityToLoad />}
+                  />
+
+                  <Route
+                    path="raise-ticket/cash-authority"
+                    element={<AuthorityToGiveCash />}
+                  />
+
+                  <Route
+                    path="raise-ticket/store-authority"
+                    element={<CollectFromGeneralStore />}
+                  />
+                  <Route
+                    path="raise-ticket/authority-to-weigh"
+                    element={<ViewAuthorityToWeigh />}
+                  />
+                  <Route
+                    path="raise-ticket/officialLPO/:id"
+                    element={<OfficialLPO />}
                   />
 
                   {/*  Routes for phamrcy store */}
@@ -176,11 +277,15 @@ const App = () => {
                   />
                   <Route
                     path="/general-store/view-shelf"
-                    element={<ViewShelf />}
+                    element={<ShelfContent />}
                   />
                   <Route
                     path="/general-store/raise-general-order"
                     element={<GeneralStorePlaceOrder />}
+                  />
+                  <Route
+                    path="/general-store/view-general-order"
+                    element={<ViewGeneralOrder />}
                   />
 
                   {/* Test Routes for department store */}
@@ -201,7 +306,14 @@ const App = () => {
                     element={<ViewDepartmentStore />}
                   />
 
-                  {/* Test Routes for cash management */}
+                  {/* Weighing operations routes     */}
+                  <Route
+                    path="/weighing-operations/new-weigh/:id"
+                    element={<NewWeigh />}
+                  />
+                  <Route path="/weighing-operations/" element={<AllWeigh />} />
+
+                  {/* Routes for cashier */}
                   <Route
                     path="/cash-management/cash-management"
                     element={<CashManagement />}
@@ -209,6 +321,71 @@ const App = () => {
                   <Route
                     path="/cash-management/cash-ledger"
                     element={<CashManagementLedger />}
+                  />
+
+                  {/* Department Ledger */}
+                  <Route
+                    path="/department-ledger"
+                    element={<DepartmentLedger />}
+                  />
+                  <Route
+                    path="/department-ledger/:ledgerName/:id"
+                    element={<IndividualDepartmentLedger />}
+                  />
+
+                  {/* Receipts Route */}
+                  <Route
+                    path="/receipts/gate-pass-note"
+                    element={<AllGatePass />}
+                  />
+                  <Route
+                    path="/receipts/vehicle-dispatch-note"
+                    element={<CreateDispatchNote />}
+                  />
+                  <Route path="/receipts/invoice" element={<AllInvoice />} />
+                  <Route path="/receipts/invoice/:id" element={<Invoice />} />
+                  <Route path="/receipts/waybill" element={<AllWayBill />} />
+                  <Route
+                    path="/receipts/official-receipt"
+                    element={<AllReceipts />}
+                  />
+
+                  <Route
+                    path="/receipt/create-gatepass/:id"
+                    element={<CreateGatepass />}
+                  />
+
+                  <Route
+                    path="/receipt/create-invoice/:id"
+                    element={<CreateInvoice />}
+                  />
+                  <Route
+                    path="/receipt/view-gatepass/:id"
+                    element={<GatepassReceipt />}
+                  />
+                  {/* <Route path="/receipt/invoices" element={<Invoice />} /> */}
+                  <Route
+                    path="/receipt/generate-receipt/:id"
+                    element={<OfficialReceiptInvoice />}
+                  />
+                  <Route
+                    path="/receipt/official-receipt/:id"
+                    element={<OfficialReceipt />}
+                  />
+
+                  <Route
+                    path="/receipt/create-waybill-invoice/:id"
+                    element={<WaybillCreateInvoice />}
+                  />
+                  <Route
+                    path="/receipt/waybill-invoice"
+                    element={<WaybillInvoice />}
+                  />
+
+                  {/* Invoice for Authority to weigh */}
+                  <Route
+                    path="/tickets/view-auth-to-weigh/:id"
+                    element={<InvoiceAuthorityToWeigh />}
                   />
                 </Routes>
               </DashBoardManager>

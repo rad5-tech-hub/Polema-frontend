@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import {
   Heading,
   Text,
@@ -11,7 +13,7 @@ import {
 } from "@radix-ui/themes";
 import { LoaderIcon } from "react-hot-toast";
 import axios from "axios";
-import { toast } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -25,7 +27,7 @@ const GeneralStorePlaceOrder = () => {
   // State to track all the plans (cards)
   const [plans, setPlans] = useState([
     {
-      name: "",
+      productId: "",
       quantity: "",
       unit: "",
       expectedDeliveryDate: "",
@@ -37,7 +39,8 @@ const GeneralStorePlaceOrder = () => {
     setPlans([
       ...plans,
       {
-        name: "",
+        id: Date.now(), // Unique id for the new plan
+        productId: "",
         quantity: "",
         unit: "",
         expectedDeliveryDate: "",
@@ -47,14 +50,44 @@ const GeneralStorePlaceOrder = () => {
 
   // Function to handle removing a plan by id
   const handleRemovePlan = (id) => {
-    setPlans(plans.filter((plan) => plan.id !== id));
+    setPlans(plans.filter((plan) => plan.id !== id)); // Correct removal by id
   };
 
   // Function to handle input changes for each plan
   const handleInputChange = (id, field, value) => {
-    setPlans(
-      plans.map((plan) => (plan.id === id ? { ...plan, [field]: value } : plan))
-    );
+    if (field === "productId") {
+      // When productId changes, find the corresponding unit from the shelves array
+      const selectedShelf = shelves.find((shelf) => shelf.id === value);
+      const unit = selectedShelf ? selectedShelf.unit : "";
+
+      // Update the plan with the selected productId and the corresponding unit
+      setPlans(
+        plans.map((plan) =>
+          plan.id === id ? { ...plan, [field]: value, unit: unit } : plan
+        )
+      );
+    } else {
+      // For other fields, just update the plan normally
+      setPlans(
+        plans.map((plan) =>
+          plan.id === id ? { ...plan, [field]: value } : plan
+        )
+      );
+    }
+  };
+
+  // Function to reset form
+  const resetForm = () => {
+    setPlans([
+      {
+        id: Date.now(),
+        productId: "",
+        quantity: "",
+        unit: "",
+        expectedDeliveryDate: "",
+        comments: "", // Reset comment
+      },
+    ]);
   };
 
   // Function to handle form submission
@@ -66,6 +99,12 @@ const GeneralStorePlaceOrder = () => {
     };
 
     const retrToken = localStorage.getItem("token");
+    toast.loading("Submitting Order...", {
+      style: {
+        padding: "30px",
+      },
+      duration: 1500,
+    });
 
     // Check if the token is available
     if (!retrToken) {
@@ -85,9 +124,17 @@ const GeneralStorePlaceOrder = () => {
       );
       console.log(response);
       setIsLoading(false);
+      toast.success(response.data.message, {
+        style: {
+          padding: "20px",
+        },
+        duration: 6500,
+      });
+      resetForm();
     } catch (error) {
       console.log(error);
       setIsLoading(false);
+      toast.error("An error occurred");
     }
   };
 
@@ -127,7 +174,7 @@ const GeneralStorePlaceOrder = () => {
             <Flex justify={"end"}>
               <Text
                 className="text-red-500 cursor-pointer"
-                onClick={() => handleRemovePlan(plan.id)}
+                onClick={() => handleRemovePlan(plan.id)} // Correct removal by id
               >
                 - Remove
               </Text>
@@ -137,7 +184,7 @@ const GeneralStorePlaceOrder = () => {
                 <Text className="mb-4">Shelf Name</Text>
                 <Select.Root
                   onValueChange={(value) =>
-                    handleInputChange(plan.id, "name", value)
+                    handleInputChange(plan.id, "productId", value)
                   }
                   required={true}
                 >
@@ -145,7 +192,7 @@ const GeneralStorePlaceOrder = () => {
                     className="w-full mt-2"
                     placeholder="Select Shelf Name"
                   />
-                  <Select.Content>
+                  <Select.Content position="popper">
                     <Select.Group>
                       {shelves.map((item) => (
                         <Select.Item key={item.id} value={item.id}>
@@ -161,6 +208,7 @@ const GeneralStorePlaceOrder = () => {
                 <TextField.Root
                   className="mt-2"
                   placeholder="Enter Quantity"
+                  type="number"
                   value={plan.quantity}
                   required={true}
                   onChange={(e) =>
@@ -173,13 +221,10 @@ const GeneralStorePlaceOrder = () => {
               <div className="w-full">
                 <Text className="mb-4">Unit</Text>
                 <TextField.Root
-                  className="mt-2"
-                  required={true}
-                  placeholder="Enter Unit"
+                  className="mt-2 cursor-not-allowed"
+                  placeholder="Unit"
+                  disabled={true}
                   value={plan.unit}
-                  onChange={(e) =>
-                    handleInputChange(plan.id, "unit", e.target.value)
-                  }
                 />
               </div>
               <div className="w-full">
@@ -209,7 +254,7 @@ const GeneralStorePlaceOrder = () => {
           type="button"
           onClick={handleAddPlan}
         >
-          Add Plan
+          <FontAwesomeIcon icon={faPlus} />
         </Button>
 
         <Flex justify={"end"}>
@@ -222,6 +267,7 @@ const GeneralStorePlaceOrder = () => {
           </Button>
         </Flex>
       </form>
+      <Toaster position="top-right" />
     </>
   );
 };

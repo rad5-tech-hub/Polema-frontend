@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { refractor } from "../../../date";
 import {
   Table,
   Select,
   Heading,
+  DropdownMenu,
   Separator,
   Spinner,
   Button,
@@ -12,14 +14,20 @@ import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowLeft,
+  faEllipsisV,
+  faArrowRight,
+} from "@fortawesome/free-solid-svg-icons";
 const root = import.meta.env.VITE_ROOT;
 
 const CashManagementLedger = () => {
+  const navigate = useNavigate();
   const [ledger, setLedger] = useState([]);
   const [admins, setAdmins] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1); // Current page number
-  const itemsPerPage = 10; // Limit items per page to 10
+  const [currentPage, setCurrentPage] = useState(1);
+  const [failedSearch, setFailedSearch] = useState(false);
+  const itemsPerPage = 17;
 
   const fetchCashManagementLedger = async () => {
     const retrToken = localStorage.getItem("token");
@@ -32,7 +40,12 @@ const CashManagementLedger = () => {
       const response = await axios.get(`${root}/admin/cashier-ledger`, {
         headers: { Authorization: `Bearer ${retrToken}` },
       });
-      setLedger(response.data.entries);
+
+      {
+        response.data.entries.length === 0
+          ? setFailedSearch(true)
+          : setLedger(response.data.entries);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -98,12 +111,13 @@ const CashManagementLedger = () => {
             <Table.ColumnHeaderCell>CREDIT</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>DEBIT</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>BALANCE</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
           {currentPageData.length === 0 ? (
             <div className="p-4">
-              <Spinner />
+              {failedSearch ? "No records Found" : <Spinner />}
             </div>
           ) : (
             currentPageData.map((entry, index) => (
@@ -112,8 +126,12 @@ const CashManagementLedger = () => {
                   {refractor(entry.createdAt)}
                 </Table.RowHeaderCell>
                 <Table.RowHeaderCell>{entry.comment}</Table.RowHeaderCell>
-                <Table.RowHeaderCell>{entry.name}</Table.RowHeaderCell>
-                <Table.RowHeaderCell>{entry.name}</Table.RowHeaderCell>
+                <Table.RowHeaderCell>
+                  {entry.credit > entry.debit && entry.name}
+                </Table.RowHeaderCell>
+                <Table.RowHeaderCell>
+                  {entry.debit > entry.credit && entry.name}
+                </Table.RowHeaderCell>
                 <Table.RowHeaderCell>
                   {matchAdminNameById(entry.approvedByAdminId)}
                 </Table.RowHeaderCell>
@@ -124,6 +142,28 @@ const CashManagementLedger = () => {
                   {entry.debit}
                 </Table.RowHeaderCell>
                 <Table.RowHeaderCell>{entry.balance}</Table.RowHeaderCell>
+                <Table.RowHeaderCell>
+                  {entry.credit > entry.debit && (
+                    <DropdownMenu.Root>
+                      <DropdownMenu.Trigger>
+                        <Button variant="soft">
+                          <FontAwesomeIcon icon={faEllipsisV} />
+                        </Button>
+                      </DropdownMenu.Trigger>
+                      <DropdownMenu.Content>
+                        <DropdownMenu.Item
+                          onClick={() => {
+                            navigate(
+                              `/admin/receipt/generate-receipt/${entry.id}`
+                            );
+                          }}
+                        >
+                          Generate Receipt
+                        </DropdownMenu.Item>
+                      </DropdownMenu.Content>
+                    </DropdownMenu.Root>
+                  )}
+                </Table.RowHeaderCell>
               </Table.Row>
             ))
           )}

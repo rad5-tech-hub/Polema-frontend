@@ -33,7 +33,7 @@ const DashBoardManager = ({ children }) => {
 
   // Function to trim string length
   function trimString(str, length) {
-    if (str.length > 10) {
+    if (str.length > 12) {
       return str.slice(0, length) + "...";
     }
     return str;
@@ -124,12 +124,12 @@ const DashBoardManager = ({ children }) => {
   }, []);
 
   return (
-    <Theme>
+    <Theme className="bg-gray-50">
       <div className="dark:bg-boxdark-2 dark:text-bodydark ">
         <div className="flex h-screen overflow-hidden ">
           <aside
             ref={sidebar}
-            className={`absolute left-0 font-space top-0 z-[9999] 
+            className={`absolute left-0 font-space top-0 z-[100] 
               bg-[#434343]
               sidebar-container flex border-r-[1px] border-white !text-white shadow-2xl h-screen max-w-[18.0rem] flex-col overflow-y-hidden duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 ${
                 sidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -173,31 +173,49 @@ const DashBoardManager = ({ children }) => {
                       <Spinner />
                     </div>
                   ) : (
-                    <ul className="mb-6 flex flex-col gap-1.5">
+                    <ul className="mb-6 flex flex-col gap-1.5 max-w-[2000px]">
                       {navigation.map((nav, index) => {
                         return (
                           <div>
                             <p
-                              className="flex gap-3 items-center px-4 cursor-pointer"
-                              onClick={() => handleToggle(index)}
+                              className={`flex gap-3 items-center justify-between px-4 w-full cursor-pointer ${
+                                window.location.pathname ===
+                                `${route}/${nav.navParentSlug}`
+                                  ? "bg-[#f4f4f4] rounded-lg shadow-2xl !text-black min-w-[50px]"
+                                  : ""
+                              }`}
+                              onClick={() => {
+                                if (nav.permissions.length === 0) {
+                                  navigate(`${route}/${nav.navParentSlug}`);
+                                } else {
+                                  handleToggle(index);
+                                }
+                              }}
                             >
-                              <DynamicIcon
-                                iconName={_.camelCase(nav.navParentIcon)}
-                              />
-                              <p className="p-2" title={nav.navParentName}>
-                                {trimString(nav.navParentName, 12)}
-                              </p>
-                              {openDropdowns[index] ? (
-                                <CaretUpIcon />
-                              ) : (
-                                <CaretDownIcon />
-                              )}
+                              <div className="flex items-center">
+                                <DynamicIcon
+                                  iconName={_.camelCase(nav.navParentIcon)}
+                                />
+                                <p className="p-2" title={nav.navParentName}>
+                                  {trimString(nav.navParentName, 12)}
+                                </p>
+                              </div>
+                              {/* Show dropdown icons only if permissions exist */}
+                              {nav.permissions.length > 0 &&
+                                (openDropdowns[index] ? (
+                                  <CaretUpIcon />
+                                ) : (
+                                  <CaretDownIcon />
+                                ))}
                             </p>
-                            {openDropdowns[index] && (
-                              <ul className="ml-[20px] px-4 text-current">
-                                {nav.permissions.map((item) => {
-                                  return (
+
+                            {/* Dropdown list appears only if permissions exist and dropdown is open */}
+                            {openDropdowns[index] &&
+                              nav.permissions.length > 0 && (
+                                <ul className="ml-[20px] px-4 text-current">
+                                  {nav.permissions.map((item) => (
                                     <li
+                                      key={item.slug}
                                       className={`p-2 cursor-pointer mb-1 ${
                                         window.location.pathname ===
                                         `${route}/${nav.navParentSlug}/${item.slug}`
@@ -210,18 +228,19 @@ const DashBoardManager = ({ children }) => {
                                         )
                                       }
                                     >
-                                      <Flex gap={"2"} align={"center"}>
+                                      <Flex gap="2" align="center">
                                         <CircleIcon />
-                                        <span title={item.name}>
-                                          {" "}
+                                        <span
+                                          className="text-[15px]"
+                                          title={item.name}
+                                        >
                                           {trimString(item.name, 14)}
                                         </span>
                                       </Flex>
                                     </li>
-                                  );
-                                })}
-                              </ul>
-                            )}
+                                  ))}
+                                </ul>
+                              )}
                           </div>
                         );
                       })}
@@ -233,16 +252,10 @@ const DashBoardManager = ({ children }) => {
           </aside>
 
           <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
-            <Header
-              sidebarOpen={sidebarOpen}
-              setSidebarOpen={setSidebarOpen}
-              user={"user"}
-              role={"role"}
-              text={"text"}
-              image={"image"}
-            />
+            <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+
             <main>
-              <div className="mx-auto max-w-screen-xl z-[1] p-4 md:p-6 xl:p-10">
+              <div className="mx-auto max-w-screen-xl z-[-50] p-4 md:p-6 xl:p-10">
                 {children}
               </div>
             </main>

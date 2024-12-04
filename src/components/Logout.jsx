@@ -71,7 +71,7 @@ const Logout = () => {
     localStorage.removeItem("dropdownStates");
     navigate("/");
     toast.success("Logged out successfully!", {
-      duration: 5000,
+      duration: 10000,
       style: {
         padding: "20px",
       },
@@ -82,7 +82,7 @@ const Logout = () => {
     <>
       <div onClick={() => setConfirmDialog(true)}>
         <Card className="cursor-pointer" title="Logout">
-          <ExitIcon />
+          <ExitIcon color="red" />
         </Card>
       </div>
       {confirmDialog && (
