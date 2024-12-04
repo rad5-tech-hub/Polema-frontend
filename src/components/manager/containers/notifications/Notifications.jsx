@@ -258,6 +258,21 @@ const Notifications = () => {
       }
     };
 
+    // Function to confirm cash ticket
+    const confirmCash = async () => {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        toast.error("An error occurred  while trying to log in.");
+      }
+
+      try {
+        const response = await axios.post(`${root}/admin/receive-cash-ticket`);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
     React.useEffect(() => {
       fetchTicketDetails();
     }, []);
@@ -605,10 +620,12 @@ const Notifications = () => {
                     )}
                   </Grid>
 
-                  {ticketDetails.status === "approved" &&
-                    selectedTicket.type === "cash" && (
-                      <div>
-                        <Button color="red" size={"2"}>
+                  {ticketDetails?.status === "approved" &&
+                    selectedTicket?.type === "cash" &&
+                    ticketDetails?.approvedBySuperAdminId !==
+                      getToken()?.id && (
+                      <div className="buttons-div justify-center mt-px absolute bottom-0 flex">
+                        <Button color="green" size={"2"} onClick={confirmCash}>
                           {rejectLoading ? <Spinner /> : "Confirm"}
                         </Button>
                       </div>

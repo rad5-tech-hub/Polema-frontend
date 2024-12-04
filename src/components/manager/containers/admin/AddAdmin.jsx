@@ -89,7 +89,7 @@ const AddAdmin = ({ child, setChild }) => {
       lastname: lastName,
       email: email,
       phoneNumber: phone,
-      department: [deptId],
+      ...(deptId && { department: [deptId] }),
       roleId,
       // password: password,
       // confirmPassword: confirmPassword,
@@ -183,22 +183,23 @@ const AddAdmin = ({ child, setChild }) => {
                 size={"3"}
               ></TextField.Root>
             </div>
-            <div className="input-field mt-3">
+
+            <div className="mt-3 input-field">
               <label
                 className="text-[15px]  font-medium leading-[35px]   "
-                htmlFor="email"
+                htmlFor="password"
               >
-                Email
+                Last Name
               </label>
               <TextField.Root
-                placeholder="Enter email"
-                className=""
-                value={email}
-                id="email"
+                placeholder="Enter Last Name"
+                value={lastName}
                 onChange={(e) => {
-                  setEmail(e.target.value);
+                  setLastName(e.target.value);
                 }}
+                className=""
                 type="text"
+                id="lastname"
                 size={"3"}
               ></TextField.Root>
             </div>
@@ -221,22 +222,22 @@ const AddAdmin = ({ child, setChild }) => {
                 size={"3"}
               ></TextField.Root>
             </div>
-            <div className="mt-3 input-field">
+            <div className="input-field mt-3">
               <label
                 className="text-[15px]  font-medium leading-[35px]   "
-                htmlFor="password"
+                htmlFor="email"
               >
-                Last Name
+                Email
               </label>
               <TextField.Root
-                placeholder="Enter Last Name"
-                value={lastName}
-                onChange={(e) => {
-                  setLastName(e.target.value);
-                }}
+                placeholder="Enter email"
                 className=""
+                value={email}
+                id="email"
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                }}
                 type="text"
-                id="lastname"
                 size={"3"}
               ></TextField.Root>
             </div>
@@ -257,7 +258,7 @@ const AddAdmin = ({ child, setChild }) => {
                   className="w-full mt-2"
                   placeholder="Select Role"
                 />
-                <Select.Content>
+                <Select.Content position="popper">
                   {rolesArray.map((item) => {
                     return (
                       <Select.Item value={item.id}>{item.name}</Select.Item>
@@ -354,7 +355,7 @@ const AddAdmin = ({ child, setChild }) => {
                   className="w-full mt-2"
                   placeholder="Select Department"
                 />
-                <Select.Content>
+                <Select.Content position="popper">
                   {departments.map((item) => {
                     return (
                       <Select.Item value={item.id}>{item.name}</Select.Item>
