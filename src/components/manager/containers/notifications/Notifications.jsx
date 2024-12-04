@@ -271,7 +271,7 @@ const Notifications = () => {
       try {
         const response = await axios.post(
           `${root}/admin/recieve-cash-ticket/${ticketDetails.id}`,
-          {},
+          { ticketDetails },
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -734,6 +734,9 @@ const Notifications = () => {
 
   useEffect(() => {
     document.addEventListener("click", closeNotifications, true);
+    document.addEventListener("click", () => {
+      setDetailsPageOpen(false);
+    });
     fetchNotifications();
     fetchGeneralStore();
     return () => {
