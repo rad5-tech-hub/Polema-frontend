@@ -206,7 +206,7 @@ const AllAdmins = () => {
     const [number, setNumber] = useState(adminForEdit.phoneNumber);
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [role, setRole] = useState("");
+    const [role, setRole] = useState(adminForEdit.roleId);
     const [rolesArray, setRolesArray] = useState([]);
     const [value, setValue] = useState(""); // This will store the role's name
     const [id, setID] = useState(""); // This will store the role's ID
@@ -404,7 +404,7 @@ const AllAdmins = () => {
                 >
                   Assign Role
                 </label>
-                <Select.Root>
+                <Select.Root defaultValue={role}>
                   <Select.Trigger
                     className="w-full mt-2"
                     placeholder="Assign Role"

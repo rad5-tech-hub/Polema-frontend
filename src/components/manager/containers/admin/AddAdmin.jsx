@@ -91,8 +91,8 @@ const AddAdmin = ({ child, setChild }) => {
       phoneNumber: phone,
       department: [deptId],
       roleId,
-      password: password,
-      confirmPassword: confirmPassword,
+      // password: password,
+      // confirmPassword: confirmPassword,
     };
 
     try {
@@ -283,7 +283,7 @@ const AddAdmin = ({ child, setChild }) => {
               ></TextField.Root>
             </div>
 
-            <div className="mt-3 input-field">
+            {/* <div className="mt-3 input-field">
               <label
                 className="text-[15px]  font-medium leading-[35px]   "
                 htmlFor="passwordConfirm"
@@ -337,6 +337,7 @@ const AddAdmin = ({ child, setChild }) => {
                 </span>
               </TextField.Root>
             </div>
+             */}
             <div className="mt-3 input-field">
               <label
                 className="text-[15px]  font-medium leading-[35px]   "

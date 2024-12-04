@@ -26,7 +26,7 @@ const AuthorityToGiveCash = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [authorityType, setAuthorityType] = useState("credit");
   const [othersDescription, setOthersDescription] = useState("");
-  const [othersAmount, setOthersAmount] = useState("");
+  const [originalAmount,setOriginalAmount] = useState("")
   const [othersLoading, setOthersLoading] = useState(false);
   const [superAdmins, setSuperAdmins] = useState([]);
   const [adminId, setAdminId] = useState("");
@@ -139,7 +139,7 @@ const AuthorityToGiveCash = () => {
     };
 
     const body = {
-      amount,
+      amount:originalAmount,
       customerId: selectedCustomer,
       comments,
       productId: selectedProduct,
@@ -380,6 +380,7 @@ const AuthorityToGiveCash = () => {
                   value={amount}
                   onChange={(e) => {
                     const formattedAmount = formatWithCommas(e.target.value);
+                    setOriginalAmount(e.target.values)
                     setAmount(formattedAmount);
                   }}
                   placeholder="Enter Amount in Naira (₦)"

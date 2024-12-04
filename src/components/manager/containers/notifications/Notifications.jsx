@@ -48,6 +48,24 @@ const Notifications = () => {
   // Component for individual notification info
   const [storeDetails, setStoreDetails] = useState([]);
 
+  // Function to confirm cash ticket
+  // const confirmCashTicket = async(id)=>{
+
+  //   const token = localStorage.getItem("token");
+
+  //   if(!token){
+  //     toast.error("An error occurred ,try logging in again.");
+  //     return
+  //   }
+
+  //   try {
+  //     const
+  //   } catch (error) {
+  //     console.log(error);
+
+  //   }
+  // }
+
   // Function to fetch general store
   const fetchGeneralStore = async () => {
     const token = localStorage.getItem("token");
@@ -528,11 +546,11 @@ const Notifications = () => {
                           </Text>
                           {ticketDetails.creditOrDebit === "credit" ? (
                             <p className="text-[.7rem] text-green-500">
-                              Gave Cash
+                              Give Cash
                             </p>
                           ) : (
                             <p className="text-[.7rem] text-red-500">
-                              Collected Cas
+                              Collected Cash
                             </p>
                           )}
                         </div>

@@ -614,6 +614,10 @@ video {
   inset: 0px;
 }
 
+.bottom-0 {
+  bottom: 0px;
+}
+
 .bottom-20 {
   bottom: 5rem;
 }
@@ -736,10 +740,6 @@ video {
 
 .top-\[50\%\] {
   top: 50%;
-}
-
-.bottom-0 {
-  bottom: 0px;
 }
 
 .z-0 {
@@ -924,10 +924,6 @@ video {
 
 .mt-\[25px\] {
   margin-top: 25px;
-}
-
-.mt-\[35px\] {
-  margin-top: 35px;
 }
 
 .mt-px {

@@ -25,8 +25,9 @@ const CashManagementLedger = () => {
   const navigate = useNavigate();
   const [ledger, setLedger] = useState([]);
   const [admins, setAdmins] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1); // Current page number
-  const itemsPerPage = 17; // Limit items per page to 17
+  const [currentPage, setCurrentPage] = useState(1);
+  const [failedSearch, setFailedSearch] = useState(false);
+  const itemsPerPage = 17;
 
   const fetchCashManagementLedger = async () => {
     const retrToken = localStorage.getItem("token");
@@ -39,7 +40,12 @@ const CashManagementLedger = () => {
       const response = await axios.get(`${root}/admin/cashier-ledger`, {
         headers: { Authorization: `Bearer ${retrToken}` },
       });
-      setLedger(response.data.entries);
+
+      {
+        response.data.entries.length === 0
+          ? setFailedSearch(true)
+          : setLedger(response.data.entries);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -111,7 +117,7 @@ const CashManagementLedger = () => {
         <Table.Body>
           {currentPageData.length === 0 ? (
             <div className="p-4">
-              <Spinner />
+              {failedSearch ? "No records Found" : <Spinner />}
             </div>
           ) : (
             currentPageData.map((entry, index) => (
