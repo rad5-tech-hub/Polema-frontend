@@ -116,7 +116,7 @@ const CashManagement = () => {
         setButtonLoading(false);
       }
     } else {
-      alert("Form not submmitted.");
+      e.preventDefault();
     }
   };
 

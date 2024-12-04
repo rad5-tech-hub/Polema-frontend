@@ -271,14 +271,16 @@ const Notifications = () => {
       try {
         const response = await axios.post(
           `${root}/admin/recieve-cash-ticket/${ticketDetails.id}`,
-          { ticketDetails },
+          {},
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
         );
-        toast.success("Ticket Confimed", {});
+        toast.success("Ticket Confimed", {
+          duration: 6500,
+        });
         setConfirmLoading(false);
       } catch (error) {
         console.log(error);
@@ -734,9 +736,7 @@ const Notifications = () => {
 
   useEffect(() => {
     document.addEventListener("click", closeNotifications, true);
-    document.addEventListener("click", () => {
-      setDetailsPageOpen(false);
-    });
+
     fetchNotifications();
     fetchGeneralStore();
     return () => {
