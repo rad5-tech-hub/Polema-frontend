@@ -96,6 +96,7 @@ const Notifications = () => {
     const [ticketDetails, setTicketDetails] = useState();
     const [rejectLoading, setRejectLoading] = useState(false);
     const [approveLoading, setApproveLoading] = useState(false);
+    const [confirmLoading, setConfirmLoading] = useState(false);
 
     const getAppropriateEndpoint = () => {
       switch (selectedTicket.type) {
@@ -260,6 +261,7 @@ const Notifications = () => {
 
     // Function to confirm cash ticket
     const confirmCash = async () => {
+      setConfirmLoading(true);
       const token = localStorage.getItem("token");
 
       if (!token) {
@@ -267,9 +269,20 @@ const Notifications = () => {
       }
 
       try {
-        const response = await axios.post(`${root}/admin/receive-cash-ticket`);
+        const response = await axios.post(
+          `${root}/admin/recieve-cash-ticket/${ticketDetails.id}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        toast.success("Ticket Confimed", {});
+        setConfirmLoading(false);
       } catch (error) {
         console.log(error);
+        setConfirmLoading(false);
       }
     };
 
@@ -625,8 +638,13 @@ const Notifications = () => {
                     ticketDetails?.approvedBySuperAdminId !==
                       getToken()?.id && (
                       <div className="buttons-div justify-center mt-px absolute bottom-0 flex">
-                        <Button color="green" size={"2"} onClick={confirmCash}>
-                          {rejectLoading ? <Spinner /> : "Confirm"}
+                        <Button
+                          color="green"
+                          size={"2"}
+                          onClick={confirmCash}
+                          disabled={confirmLoading}
+                        >
+                          {confirmLoading ? <Spinner /> : "Confirm"}
                         </Button>
                       </div>
                     )}
