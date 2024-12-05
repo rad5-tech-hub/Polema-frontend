@@ -1,21 +1,22 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Flex, Spinner, Text } from "@radix-ui/themes";
-import { TokensIcon } from "@radix-ui/react-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { CircleIcon } from "@radix-ui/react-icons";
 import { useNavigate } from "react-router-dom";
 
-import {
-  ClipboardCopyIcon,
-  CaretUpIcon,
-  CaretDownIcon,
-} from "@radix-ui/react-icons";
+import { CaretUpIcon, CaretDownIcon } from "@radix-ui/react-icons";
 import { NavLink } from "react-router-dom";
 
 import Header from "./Header";
 import { Theme } from "@radix-ui/themes";
-import { Notifications, Settings } from "../icons";
-import Charts from "../Charts";
+import {
+  faChartPie,
+  faChartLine,
+  faTachometerAlt,
+  faTable,
+  faThLarge,
+} from "@fortawesome/free-solid-svg-icons";
 import DynamicIcon from "../DynamicIcon";
 import toast from "react-hot-toast";
 import _ from "lodash";
@@ -174,6 +175,26 @@ const DashBoardManager = ({ children }) => {
                     </div>
                   ) : (
                     <ul className="mb-6 flex flex-col gap-1.5 max-w-[2000px]">
+                      <div>
+                        <p
+                          className={`flex gap-3 items-center justify-between px-4 w-full cursor-pointer ${
+                            window.location.pathname === "/admin"
+                              ? "bg-[#f4f4f4] rounded-lg shadow-2xl !text-black min-w-[50px]"
+                              : ""
+                          }`}
+                          onClick={() => {
+                            navigate("/admin");
+                          }}
+                        >
+                          <div className="flex gap-3 items-center">
+                            <FontAwesomeIcon icon={faChartLine} />
+                            <span className="p-2">Dashboard</span>
+                          </div>
+                          <div style={{ opacity: 0 }}>
+                            <CaretUpIcon />
+                          </div>
+                        </p>
+                      </div>
                       {navigation.map((nav, index) => {
                         return (
                           <div>

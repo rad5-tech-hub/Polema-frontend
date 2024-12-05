@@ -14,6 +14,7 @@ const ViewAccoountBook = () => {
   const [customerActive, setCustomerActive] = useState(true);
   const [department, setDepartments] = useState([]);
   const [accountRecepient, setAccountRecepient] = useState("customers");
+  const [failedSearch, setFailedSearch] = useState(false);
 
   // Fetch Details of account book
   const fetchAccountBookDetails = async () => {
@@ -50,12 +51,22 @@ const ViewAccoountBook = () => {
           headers: { Authorization: `Bearer ${retrToken}` },
         }
       );
-      setAccountBook(response.data.acct);
-      setLoading(false);
+      // setAccountBook(response.data.acct);
+      {
+        response.data.acct.length === 0
+          ? setFailedSearch(true)
+          : setAccountBook(response.data.acct);
+      }
     } catch (error) {
       console.log(error);
       setLoading(false);
-      toast.error("An error occurred");
+      toast.error("An error occurred,try again later", {
+        style: {
+          padding: "20px",
+        },
+        duration: 5000,
+      });
+      setFailedSearch(true);
     }
   };
 
@@ -166,65 +177,59 @@ const ViewAccoountBook = () => {
           </Table.Row>
         </Table.Header>
 
-        {loading ? (
-          <div className="p-4">
-            <Spinner />
-          </div>
-        ) : (
-          <Table.Body>
-            {accountBook.length === 0 ? (
-              <Table.Row>
-                <Table.Cell colSpan="3">
-                  <Spinner />
+        <Table.Body>
+          {accountBook.length === 0 ? (
+            <Table.Row>
+              <Table.Cell colSpan="3">
+                {failedSearch ? "No Records Found" : <Spinner />}
+              </Table.Cell>
+            </Table.Row>
+          ) : (
+            accountBook.map((details) => (
+              <Table.Row key={details.id}>
+                <Table.Cell>{refractor(details.createdAt)}</Table.Cell>
+                <Table.Cell>
+                  {details.other === null
+                    ? details.credit > details.debit
+                      ? `${details.theCustomer.firstname} ${details.theCustomer.lastname}`
+                      : `${details.theSupplier.firstname} ${details.theSupplier.lastname}`
+                    : details.other}
                 </Table.Cell>
+                <Table.Cell>{details.bankName}</Table.Cell>
+                <Table.Cell>
+                  {matchDepartmentNameById(details.departmentId)}
+                </Table.Cell>{" "}
+                <Table.Cell>
+                  {details.other == null
+                    ? details.credit < details.debit
+                      ? ""
+                      : details.theProduct.name
+                    : ""}
+                </Table.Cell>
+                <Table.Cell>
+                  {details.other == null
+                    ? details.credit < details.debit
+                      ? details.theProduct.name
+                      : ""
+                    : ""}
+                  {/* {details.debit > details.credit && "Raw Material Name"} */}
+                </Table.Cell>
+                <Table.Cell>
+                  {formatMoney(
+                    details.credit > details.debit ? details.credit : ""
+                  )}
+                </Table.Cell>
+                <Table.Cell>
+                  {formatMoney(
+                    details.debit > details.credit ? details.debit : ""
+                  )}
+                  {/*  */}
+                </Table.Cell>
+                <Table.Cell>{details.amount}</Table.Cell>
               </Table.Row>
-            ) : (
-              accountBook.map((details) => (
-                <Table.Row key={details.id}>
-                  <Table.Cell>{refractor(details.createdAt)}</Table.Cell>
-                  <Table.Cell>
-                    {details.other === null
-                      ? details.credit > details.debit
-                        ? `${details.theCustomer.firstname} ${details.theCustomer.lastname}`
-                        : `${details.theSupplier.firstname} ${details.theSupplier.lastname}`
-                      : details.other}
-                  </Table.Cell>
-                  <Table.Cell>{details.bankName}</Table.Cell>
-                  <Table.Cell>
-                    {matchDepartmentNameById(details.departmentId)}
-                  </Table.Cell>{" "}
-                  <Table.Cell>
-                    {details.other == null
-                      ? details.credit < details.debit
-                        ? ""
-                        : details.theProduct.name
-                      : ""}
-                  </Table.Cell>
-                  <Table.Cell>
-                    {details.other == null
-                      ? details.credit < details.debit
-                        ? details.theProduct.name
-                        : ""
-                      : ""}
-                    {/* {details.debit > details.credit && "Raw Material Name"} */}
-                  </Table.Cell>
-                  <Table.Cell>
-                    {formatMoney(
-                      details.credit > details.debit ? details.credit : ""
-                    )}
-                  </Table.Cell>
-                  <Table.Cell>
-                    {formatMoney(
-                      details.debit > details.credit ? details.debit : ""
-                    )}
-                    {/*  */}
-                  </Table.Cell>
-                  <Table.Cell>{details.amount}</Table.Cell>
-                </Table.Row>
-              ))
-            )}
-          </Table.Body>
-        )}
+            ))
+          )}
+        </Table.Body>
       </Table.Root>
       <Toaster position="top-right" />
     </>
