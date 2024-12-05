@@ -40,6 +40,12 @@ const PharmacyPlaceOrder = () => {
         headers: { Authorization: `Bearer ${retrToken}` },
       });
       setRawMaterials(response.data.parsedStores);
+
+      {
+        response.data.stores.length === 0
+          ? setRawMaterials([])
+          : setRawMaterials(response.data.parsedStores);
+      }
     } catch (error) {
       console.log(error);
     }
