@@ -82,7 +82,7 @@ const LoginContent = () => {
           <div style={{ textAlign: "center", color: "#f1f1f1" }}>
             <Heading mb="6">POLEMA</Heading>
           </div>
-          <Card className="p-10 h-[60vh] bg-[#F1F1F1D4] relative">
+          <Card className="p-10 bg-[#F1F1F1D4] relative">
             <form
               onSubmit={handleLoginForm}
               className="flex flex-col justify-between h-full"
@@ -129,7 +129,7 @@ const LoginContent = () => {
                 </TextField.Root>
 
                 <p
-                  className="text-right mt-2 text-[.7rem] cursor-pointer underline"
+                  className="text-right mt-[10px] text-[.7rem] cursor-pointer underline"
                   onClick={() => {
                     navigate(`/confirm-email`);
                   }}
@@ -141,7 +141,7 @@ const LoginContent = () => {
               <div className="btn w-full">
                 <Button
                   type="submit"
-                  className="w-[100%] bg-theme hover:bg-theme/85 h-[40px]"
+                  className="w-[100%] mt-16 bg-theme hover:bg-theme/85 h-[40px]"
                   disabled={loading}
                 >
                   {loading ? (
@@ -161,3 +161,4 @@ const LoginContent = () => {
 };
 
 export default LoginContent;
+
