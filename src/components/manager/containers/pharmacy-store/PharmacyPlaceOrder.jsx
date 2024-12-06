@@ -36,15 +36,28 @@ const PharmacyPlaceOrder = () => {
     }
 
     try {
-      const response = await axios.get(`${root}/dept/view-pharmstore-raw`, {
+      const response = await axios.get(`${root}/dept/get-pharm-dept`, {
         headers: { Authorization: `Bearer ${retrToken}` },
       });
-      setRawMaterials(response.data.parsedStores);
+
+      const deptId = response.data.department[0].id;
+
+      //SECOND REQUEST
+      // setRawMaterials(response.data.parsedStores);
+
+      const secondRequest = await axios.get(
+        `${root}/dept/get-dept-raw/${deptId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${retrToken}`,
+          },
+        }
+      );
 
       {
-        response.data.stores.length === 0
+        secondRequest.data.products.length === 0
           ? setRawMaterials([])
-          : setRawMaterials(response.data.parsedStores);
+          : setRawMaterials(secondRequest.data.products);
       }
     } catch (error) {
       console.log(error);
@@ -167,12 +180,12 @@ const PharmacyPlaceOrder = () => {
                     <Select.Content position="popper">
                       <Select.Group>
                         {rawMaterials.map((item) => (
-                          <Select.Item
-                            key={item.productId}
-                            value={item.productId}
-                          >
-                            {item.product.name}
+                          <Select.Item value={item.id} id={item.id}>
+                            {item.name}
                           </Select.Item>
+                          // <Select.Item key{item.id} value={item.id}>
+                          //   {item.name}
+                          // </Select.Item>
                         ))}
                       </Select.Group>
                     </Select.Content>

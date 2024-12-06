@@ -19,6 +19,7 @@ const root = import.meta.env.VITE_ROOT;
 const ShelfContent = () => {
   const [shelf, setShelf] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [failedSearch, setFailedSearch] = useState(false);
   const [activeModal, setActiveModal] = useState(null); // Tracks the active modal
   const [selectedItem, setSelectedItem] = useState(null); // Tracks the selected item
 
@@ -34,8 +35,11 @@ const ShelfContent = () => {
       const response = await axios.get(`${root}/dept/view-gen-store`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setShelf(response.data.stores);
-      setLoading(false);
+      const store = response?.data?.stores || response?.data?.parsedStores;
+
+      {
+        store.length === 0 ? setFailedSearch(true) : setShelf(store);
+      }
     } catch (error) {
       console.error(error);
     }
@@ -85,7 +89,7 @@ const ShelfContent = () => {
           {shelf.length === 0 ? (
             <>
               <div className="p-4">
-                <Spinner />
+                {failedSearch ? "No records found." : <Spinner />}
               </div>
             </>
           ) : (

@@ -40,6 +40,7 @@ const LoginContent = () => {
       });
       navigate("/admin");
     } catch (error) {
+      
       // Handle error
       if (error.response) {
         toast.error(error.response.data.error, {

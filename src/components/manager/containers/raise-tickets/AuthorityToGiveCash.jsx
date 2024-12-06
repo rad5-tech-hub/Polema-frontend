@@ -139,7 +139,7 @@ const AuthorityToGiveCash = () => {
     };
 
     const body = {
-      amount: originalAmount,
+      amount: Number(originalAmount),
       customerId: selectedCustomer,
       comments,
       productId: selectedProduct,
@@ -200,7 +200,7 @@ const AuthorityToGiveCash = () => {
     };
 
     const body = {
-      amount: staffAmount,
+      amount: Number(staffAmount),
       item: itemName,
       creditOrDebit: authorityType,
       comments,
