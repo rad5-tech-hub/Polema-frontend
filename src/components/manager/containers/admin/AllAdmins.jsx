@@ -194,7 +194,6 @@ const AllAdmins = () => {
   const handleEditClick = (admin) => {
     setEditDialogOpen(true);
     setAdminForEdit(admin);
-    console.log(admin);
   };
 
   const EditDialog = () => {
