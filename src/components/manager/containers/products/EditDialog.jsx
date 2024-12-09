@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { faBriefcase } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
@@ -59,6 +58,11 @@ const EditDialog = ({ product, onClose }) => {
 
   const handleAddPlan = () => {
     setPlans([...plans, { name: "", discount: "" }]);
+  };
+
+  const handleRemovePlan = (index) => {
+    const updatedPlans = plans.filter((_, i) => i !== index);
+    setPlans(updatedPlans);
   };
 
   const fetchDepartments = async () => {
@@ -145,7 +149,6 @@ const EditDialog = ({ product, onClose }) => {
         },
       });
 
-      // Reset form values
       setProductName("");
       setBasePrice("");
       setUnit("");
@@ -303,68 +306,83 @@ const EditDialog = ({ product, onClose }) => {
         {pricePlan && (
           <div>
             {plans.map((plan, index) => (
-              <div
-                key={index}
-                className="input-field mt-3 grid grid-cols-2 items-center justify-center gap-4"
-              >
-                <div className="plan-field">
-                  <label
-                    className="text-[15px] font-medium leading-[35px]"
-                    htmlFor={`plan-name-${index}`}
-                  >
-                    Plan Name
-                  </label>
-                  <TextField.Root
-                    id={`plan-name-${index}`}
-                    type="text"
-                    value={plan.name}
-                    onChange={(e) =>
-                      handlePlanChange(index, "name", e.target.value)
-                    }
-                    required={true}
-                    placeholder="Plan Name"
-                  />
-                </div>
+              <div className="flex flex-col mt-4">
+                <div
+                  key={index}
+                  className="input-field grid grid-cols-2 items-center justify-center gap-4 mt-2"
+                >
+                  <div className="plan-field">
+                    <label
+                      className="text-[15px] font-medium leading-[35px]"
+                      htmlFor={`plan-name-${index}`}
+                    >
+                      Plan Name
+                    </label>
+                    <TextField.Root
+                      id={`plan-name-${index}`}
+                      type="text"
+                      value={plan.name}
+                      className="mt-5"
+                      onChange={(e) =>
+                        handlePlanChange(index, "name", e.target.value)
+                      }
+                      required={true}
+                      placeholder="Plan Name"
+                    />
+                  </div>
 
-                <div className="plan-field">
-                  <label
-                    className="text-[15px] font-medium leading-[35px]"
-                    htmlFor={`plan-discount-${index}`}
-                  >
-                    Discount
-                  </label>
-                  <TextField.Root
-                    id={`plan-discount-${index}`}
-                    type="text"
-                    value={plan.discount}
-                    onChange={(e) =>
-                      handlePlanChange(index, "discount", e.target.value)
-                    }
-                    required={true}
-                    placeholder="Plan Discount"
-                  />
+                  <div className="plan-field">
+                    <label
+                      className="text-[15px] font-medium leading-[35px] flex justify-between"
+                      htmlFor={`plan-discount-${index}`}
+                    >
+                      Discount{" "}
+                      <Button
+                        type="button"
+                        className="bg-red-500 text-white h-[40px] px-8 text-[20px] mb-4"
+                        onClick={() => handleRemovePlan(index)}
+                      >
+                        -
+                      </Button>
+                    </label>
+                    <TextField.Root
+                      id={`plan-discount-${index}`}
+                      type="text"
+                      value={plan.discount}
+                      onChange={(e) =>
+                        handlePlanChange(index, "discount", e.target.value)
+                      }
+                      required={true}
+                      placeholder="Plan Discount"
+                    />
+                  </div>
                 </div>
               </div>
             ))}
-            <Button
-              type="button"
-              onClick={handleAddPlan}
-              className="mt-4 bg-theme hover:bg-theme/75"
-            >
-              +
-            </Button>
+            <div className="flex justify-end gap-4 mt-4">
+              <Button
+                type="button"
+                onClick={handleAddPlan}
+                className="bg-theme hover:bg-theme/75 px-8 h-[40px]"
+              >
+                +
+              </Button>
+            </div>
           </div>
         )}
-
-        <div className="w-full mt-8 flex justify-end">
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="bg-theme  hover:bg-theme/75"
-          >
-            {isLoading ? <Spinner /> : "Edit Product"}
-          </Button>
-        </div>
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="w-[50%] h-[40px] mx-auto mt-6 bg-theme hover:bg-theme/75 text-white text-md font-medium flex items-center justify-center"
+        >
+          {isLoading ? (
+            <>
+              <Spinner className="w-5 h-5 inline-block mr-3" /> Processing...
+            </>
+          ) : (
+            "Update Product"
+          )}
+        </Button>
       </form>
       <Toaster />
     </div>
