@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import * as Dialog from "@radix-ui/react-dialog";
+
 import { refractor } from "../../../date";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
-import { DeleteIcon, DropDownIcon, Suspend } from "../../../icons";
+import { DropDownIcon, Suspend } from "../../../icons";
 
 import {
   DropdownMenu,
@@ -14,18 +14,11 @@ import {
   Separator,
   Select,
   TextField,
-  Card,
+  Grid,
 } from "@radix-ui/themes";
 import { upperFirst } from "lodash";
-import {
-  MagnifyingGlassIcon,
-  PersonIcon,
-  EyeClosedIcon,
-  EyeNoneIcon,
-  EyeOpenIcon,
-} from "@radix-ui/react-icons";
+import { EyeClosedIcon, EyeOpenIcon } from "@radix-ui/react-icons";
 
-import UpdateURL from "../ChangeRoute";
 import toast, { LoaderIcon, Toaster } from "react-hot-toast";
 import axios from "axios";
 import { faPen } from "@fortawesome/free-solid-svg-icons";
@@ -194,7 +187,6 @@ const AllAdmins = () => {
   const handleEditClick = (admin) => {
     setEditDialogOpen(true);
     setAdminForEdit(admin);
-    console.log(admin);
   };
 
   const EditDialog = () => {
@@ -202,24 +194,48 @@ const AllAdmins = () => {
     const [firstname, setFirstname] = useState(adminForEdit.firstname);
     const [lastname, setLastName] = useState(adminForEdit.lastname);
     const [email, setEmail] = useState(adminForEdit.email);
-    const [address, setAddress] = useState("");
+    const [address, setAddress] = useState(adminForEdit.address || "");
     const [number, setNumber] = useState(adminForEdit.phoneNumber);
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [role, setRole] = useState("");
+    const [role, setRole] = useState(adminForEdit.roleId);
     const [rolesArray, setRolesArray] = useState([]);
-    const [value, setValue] = useState(""); // This will store the role's name
-    const [id, setID] = useState(""); // This will store the role's ID
+    const [adminDepartments, setAdminDepartments] = useState(
+      JSON.parse(adminForEdit.department)
+    );
+    const [departments, setDepartments] = useState([]);
+
+    const [roleID, setRoleId] = useState("");
 
     // State to toggle password visibility
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const handleValueChange = (value) => {
-      setValue(value);
-      const selectedRole = rolesArray.find((role) => role.id === value);
-      if (selectedRole) {
-        setID(selectedRole.id); // Update ID with the role's ID
+    // Function to fetch departments
+    const fetchDept = async () => {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        toast.error("An error occurred ,try logging in again", {
+          duration: 7000,
+          style: {
+            padding: "20px",
+          },
+        });
+        return;
+      }
+
+      try {
+        const response = await axios.get(`${root}/dept/view-department`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const departments = response.data?.departments || [];
+
+        setDepartments(departments);
+      } catch (e) {
+        console.log(e);
       }
     };
 
@@ -259,9 +275,10 @@ const AllAdmins = () => {
         firstname: firstname,
         lastname: lastname,
         phoneNumber: number,
-        password: password,
-        confirmPassword: confirmPassword,
-        roleId: e.target[6].value, // Add the roleId to the body
+        ...(password && { password: password }),
+        email,
+        ...(confirmPassword && { confirmPassword: confirmPassword }),
+        roleId: roleID,
       };
 
       console.log(body);
@@ -298,6 +315,7 @@ const AllAdmins = () => {
 
     useEffect(() => {
       fetchRoles();
+      fetchDept();
     }, []);
 
     return (
@@ -305,150 +323,210 @@ const AllAdmins = () => {
         <Heading>Edit Admin</Heading>
         <Separator className="w-full my-3" />
         <form onSubmit={handleSubmit}>
-          <div className="flex w-full justify-between gap-8">
-            <div className="left w-[50%]">
-              <div className="input-field mt-3">
-                <label
-                  className="text-[15px] font-medium leading-[35px]"
-                  htmlFor="firstname"
-                >
-                  First Name
-                </label>
-                <TextField.Root
-                  placeholder="Enter First Name"
-                  defaultValue={firstname}
-                  onChange={(e) => setFirstname(e.target.value)}
-                  size={"3"}
-                />
-              </div>
-
-              <div className="input-field mt-3">
-                <label
-                  className="text-[15px] font-medium leading-[35px]"
-                  htmlFor="email"
-                >
-                  Email
-                </label>
-                <TextField.Root
-                  placeholder="Enter email"
-                  onChange={(e) => setEmail(e.target.value)}
-                  defaultValue={email}
-                  size={"3"}
-                />
-              </div>
-
-              <div className="input-field mt-3">
-                <label
-                  className="text-[15px] font-medium leading-[35px]"
-                  htmlFor="number"
-                >
-                  Phone Number
-                </label>
-                <TextField.Root
-                  placeholder="Enter phone number"
-                  onChange={(e) => setNumber(e.target.value)}
-                  type="number"
-                  defaultValue={number}
-                  size={"3"}
-                />
-              </div>
-
-              <div className="mt-3 input-field">
-                <label
-                  className="text-[15px] font-medium leading-[35px]"
-                  htmlFor="password"
-                >
-                  Password
-                </label>
-                <TextField.Root
-                  placeholder="Enter Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  type={showPassword ? "text" : "password"}
-                  size={"3"}
-                >
-                  <TextField.Slot
-                    className="cursor-pointer"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOpenIcon height={"16"} width={"16"} />
-                    ) : (
-                      <EyeClosedIcon height={"16"} width={"16"} />
-                    )}
-                  </TextField.Slot>
-                </TextField.Root>
-              </div>
+          <Grid columns={"2"} gap={"4"}>
+            <div className="input-field mt-3">
+              <label
+                className="text-[15px] font-medium leading-[35px]"
+                htmlFor="firstname"
+              >
+                First Name
+              </label>
+              <TextField.Root
+                placeholder="Enter First Name"
+                defaultValue={firstname}
+                onChange={(e) => setFirstname(e.target.value)}
+                size={"3"}
+              />
+            </div>
+            <div className="mt-3 input-field">
+              <label
+                className="text-[15px] font-medium leading-[35px]"
+                htmlFor="lastname"
+              >
+                Last Name
+              </label>
+              <TextField.Root
+                placeholder="Enter Last Name"
+                onChange={(e) => setLastName(e.target.value)}
+                defaultValue={lastname}
+                size={"3"}
+              />
+            </div>
+            <div className="mt-3 input-field">
+              <label className="text-[15px] font-medium leading-[35px]">
+                Address
+              </label>
+              <TextField.Root
+                placeholder="Enter Address"
+                onChange={(e) => setAddress(e.target.value)}
+                defaultValue={address}
+                size={"3"}
+              />
             </div>
 
-            <div className="right w-[50%]">
-              <div className="mt-3 input-field">
-                <label
-                  className="text-[15px] font-medium leading-[35px]"
-                  htmlFor="lastname"
-                >
-                  Last Name
-                </label>
-                <TextField.Root
-                  placeholder="Enter Last Name"
-                  onChange={(e) => setLastName(e.target.value)}
-                  defaultValue={lastname}
-                  size={"3"}
-                />
-              </div>
+            <div className="input-field mt-3">
+              <label
+                className="text-[15px] font-medium leading-[35px]"
+                htmlFor="email"
+              >
+                Email
+              </label>
+              <TextField.Root
+                placeholder="Enter email"
+                onChange={(e) => setEmail(e.target.value)}
+                defaultValue={email}
+                size={"3"}
+              />
+            </div>
 
-              <div className="mt-3 input-field">
-                <label
-                  className="text-[15px] font-medium leading-[35px]"
-                  htmlFor="role"
-                >
-                  Assign Role
-                </label>
-                <Select.Root>
-                  <Select.Trigger
-                    className="w-full mt-2"
-                    placeholder="Assign Role"
-                  />
-                  <Select.Content position="popper">
-                    {rolesArray.map((customer) => {
-                      return (
-                        <Select.Item key={customer.id} value={customer.id}>
-                          {customer.name}
-                        </Select.Item>
-                      );
-                    })}
-                  </Select.Content>
-                </Select.Root>
-              </div>
+            <div className="input-field mt-3">
+              <label
+                className="text-[15px] font-medium leading-[35px]"
+                htmlFor="number"
+              >
+                Phone Number
+              </label>
+              <TextField.Root
+                placeholder="Enter phone number"
+                onChange={(e) => setNumber(e.target.value)}
+                type="number"
+                defaultValue={number}
+                size={"3"}
+              />
+            </div>
 
+            <div className="mt-3 input-field">
+              <label
+                className="text-[15px] font-medium leading-[35px]"
+                htmlFor="role"
+              >
+                Assign Role
+              </label>
+              <Select.Root
+                size={"3"}
+                defaultValue={role}
+                onValueChange={(val) => {
+                  setRoleId(val);
+                }}
+              >
+                <Select.Trigger className="w-full" placeholder="Assign Role" />
+                <Select.Content position="popper">
+                  {rolesArray.map((customer) => {
+                    return (
+                      <Select.Item key={customer.id} value={customer.id}>
+                        {customer.name}
+                      </Select.Item>
+                    );
+                  })}
+                </Select.Content>
+              </Select.Root>
+            </div>
+            <div className="mt-3 input-field">
+              <label
+                className="text-[15px] font-medium leading-[35px]"
+                htmlFor="password"
+              >
+                Password
+              </label>
+              <TextField.Root
+                placeholder="Enter Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                type={showPassword ? "text" : "password"}
+                size={"3"}
+              >
+                <TextField.Slot
+                  className="cursor-pointer"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOpenIcon height={"16"} width={"16"} />
+                  ) : (
+                    <EyeClosedIcon height={"16"} width={"16"} />
+                  )}
+                </TextField.Slot>
+              </TextField.Root>
+            </div>
+
+            <div className="mt-3 input-field">
+              <label
+                className="text-[15px] font-medium leading-[35px]"
+                htmlFor="passwordConfirm"
+              >
+                Confirm Password
+              </label>
+              <TextField.Root
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                type={showConfirmPassword ? "text" : "password"}
+                size={"3"}
+              >
+                <TextField.Slot
+                  className="cursor-pointer"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOpenIcon height={"16"} width={"16"} />
+                  ) : (
+                    <EyeClosedIcon height={"16"} width={"16"} />
+                  )}
+                </TextField.Slot>
+              </TextField.Root>
+            </div>
+            {/* Sections for various departments */}
+            {adminDepartments === null ? (
               <div className="mt-3 input-field">
                 <label
                   className="text-[15px] font-medium leading-[35px]"
                   htmlFor="passwordConfirm"
                 >
-                  Confirm Password
+                  Department
                 </label>
-                <TextField.Root
-                  placeholder="Confirm Password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  type={showConfirmPassword ? "text" : "password"}
-                  size={"3"}
-                >
-                  <TextField.Slot
-                    className="cursor-pointer"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOpenIcon height={"16"} width={"16"} />
-                    ) : (
-                      <EyeClosedIcon height={"16"} width={"16"} />
-                    )}
-                  </TextField.Slot>
-                </TextField.Root>
+                <Select.Root size={"3"}>
+                  <Select.Trigger
+                    placeholder="View Department Ledger"
+                    className="w-full "
+                  />
+                  <Select.Content position="popper">
+                    {departments.map((item) => {
+                      return (
+                        <Select.Item value={item.id}>{item.name}</Select.Item>
+                      );
+                    })}
+                  </Select.Content>
+                </Select.Root>
               </div>
-            </div>
-          </div>
+            ) : (
+              adminDepartments.map((item, index) => {
+                return (
+                  <div className="mt-3 input-field">
+                    <label
+                      className="text-[15px] font-medium leading-[35px]"
+                      htmlFor="passwordConfirm"
+                    >
+                      Department {index + 1}
+                    </label>
+                    <Select.Root size={"3"} defaultValue={item}>
+                      <Select.Trigger
+                        placeholder="View Department Ledger"
+                        className="w-full "
+                      />
+                      <Select.Content position="popper">
+                        {departments.map((deptItem) => {
+                          return (
+                            <Select.Item value={deptItem.id}>
+                              {deptItem.name}
+                            </Select.Item>
+                          );
+                        })}
+                      </Select.Content>
+                    </Select.Root>
+                  </div>
+                );
+              })
+            )}
+          </Grid>
 
           <Flex
             justify={"end"}

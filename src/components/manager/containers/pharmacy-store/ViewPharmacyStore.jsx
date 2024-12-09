@@ -38,6 +38,7 @@ const ViewPharmacyStore = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalAction, setModalAction] = useState(null);
+  const [failedSearch, setFailedSearch] = useState(false);
   const itemsPerPage = 10;
 
   const fetchStore = async () => {
@@ -61,7 +62,13 @@ const ViewPharmacyStore = () => {
           },
         }
       );
-      setFetchedProducts(response.data.parsedStores);
+      const store = isRawMaterials
+        ? response?.data?.store || response?.data?.parsedStores
+        : response?.data?.parsedStores || response?.data?.parsedStores;
+
+      {
+        store.length === 0 ? setFailedSearch(true) : setFetchedProducts(store);
+      }
     } catch (error) {
       console.error(error);
       toast.error("Failed to fetch products");
@@ -172,12 +179,16 @@ const ViewPharmacyStore = () => {
             <Table.ColumnHeaderCell className="text-[#919191]">
               {isRawMaterials ? "RAW MATERIALS" : "PRODUCTS"} NAME
             </Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-[#919191]">
-              {isRawMaterials ? "RAW MATERIALS" : "PRODUCTS"} ID
-            </Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-[#919191]">
-              CATEGORY
-            </Table.ColumnHeaderCell>
+            {!isRawMaterials && (
+              <>
+                <Table.ColumnHeaderCell className="text-[#919191]">
+                  {isRawMaterials ? "RAW MATERIALS" : "PRODUCTS"} ID
+                </Table.ColumnHeaderCell>
+                <Table.ColumnHeaderCell className="text-[#919191]">
+                  CATEGORY
+                </Table.ColumnHeaderCell>
+              </>
+            )}
             <Table.ColumnHeaderCell className="text-[#919191]">
               UNIT
             </Table.ColumnHeaderCell>
@@ -199,7 +210,7 @@ const ViewPharmacyStore = () => {
             <Table.Row>
               <Table.Cell colSpan={7}>
                 <div className="flex justify-center items-center">
-                  <LoaderIcon />
+                  {failedSearch ? "No records found." : <LoaderIcon />}
                 </div>
               </Table.Cell>
             </Table.Row>
@@ -218,8 +229,12 @@ const ViewPharmacyStore = () => {
                 <Table.Row key={item.productTag}>
                   <Table.Cell>{refractor(item.createdAt)}</Table.Cell>
                   <Table.Cell>{item.product.name}</Table.Cell>
-                  <Table.Cell>{item.productTag}</Table.Cell>
-                  <Table.Cell>{item.category}</Table.Cell>
+                  {!isRawMaterials && (
+                    <>
+                      <Table.Cell>{item.productTag}</Table.Cell>
+                      <Table.Cell>{item.category}</Table.Cell>
+                    </>
+                  )}
                   <Table.Cell>{item.unit}</Table.Cell>
                   <Table.Cell>{item.quantity}</Table.Cell>
                   <Table.Cell>{item.thresholdValue}</Table.Cell>

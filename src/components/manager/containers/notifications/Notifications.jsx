@@ -48,6 +48,24 @@ const Notifications = () => {
   // Component for individual notification info
   const [storeDetails, setStoreDetails] = useState([]);
 
+  // Function to confirm cash ticket
+  // const confirmCashTicket = async(id)=>{
+
+  //   const token = localStorage.getItem("token");
+
+  //   if(!token){
+  //     toast.error("An error occurred ,try logging in again.");
+  //     return
+  //   }
+
+  //   try {
+  //     const
+  //   } catch (error) {
+  //     console.log(error);
+
+  //   }
+  // }
+
   // Function to fetch general store
   const fetchGeneralStore = async () => {
     const token = localStorage.getItem("token");
@@ -78,6 +96,7 @@ const Notifications = () => {
     const [ticketDetails, setTicketDetails] = useState();
     const [rejectLoading, setRejectLoading] = useState(false);
     const [approveLoading, setApproveLoading] = useState(false);
+    const [confirmLoading, setConfirmLoading] = useState(false);
 
     const getAppropriateEndpoint = () => {
       switch (selectedTicket.type) {
@@ -237,6 +256,35 @@ const Notifications = () => {
         toast.success("Ticket Disapproved");
       } catch (error) {
         console.log(error);
+      }
+    };
+
+    // Function to confirm cash ticket
+    const confirmCash = async () => {
+      setConfirmLoading(true);
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        toast.error("An error occurred  while trying to log in.");
+      }
+
+      try {
+        const response = await axios.post(
+          `${root}/admin/recieve-cash-ticket/${ticketDetails.id}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        toast.success("Ticket Confimed", {
+          duration: 6500,
+        });
+        setConfirmLoading(false);
+      } catch (error) {
+        console.log(error);
+        setConfirmLoading(false);
       }
     };
 
@@ -528,11 +576,11 @@ const Notifications = () => {
                           </Text>
                           {ticketDetails.creditOrDebit === "credit" ? (
                             <p className="text-[.7rem] text-green-500">
-                              Gave Cash
+                              Give Cash
                             </p>
                           ) : (
                             <p className="text-[.7rem] text-red-500">
-                              Collected Cas
+                              Collected Cash
                             </p>
                           )}
                         </div>
@@ -587,11 +635,18 @@ const Notifications = () => {
                     )}
                   </Grid>
 
-                  {ticketDetails.status === "approved" &&
-                    selectedTicket.type === "cash" && (
-                      <div>
-                        <Button color="red" size={"2"}>
-                          {rejectLoading ? <Spinner /> : "Confirm"}
+                  {ticketDetails?.status === "approved" &&
+                    selectedTicket?.type === "cash" &&
+                    ticketDetails?.approvedBySuperAdminId !==
+                      getToken()?.id && (
+                      <div className="buttons-div justify-center mt-px absolute bottom-0 flex">
+                        <Button
+                          color="green"
+                          size={"2"}
+                          onClick={confirmCash}
+                          disabled={confirmLoading}
+                        >
+                          {confirmLoading ? <Spinner /> : "Confirm"}
                         </Button>
                       </div>
                     )}
@@ -681,6 +736,7 @@ const Notifications = () => {
 
   useEffect(() => {
     document.addEventListener("click", closeNotifications, true);
+
     fetchNotifications();
     fetchGeneralStore();
     return () => {

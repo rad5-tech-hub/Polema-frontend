@@ -30,7 +30,10 @@ const DepartmentStoreViewOrders = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setDeptOrders(response.data.Orders);
+      const store = response?.data?.store || response.data.Orders;
+      {
+        store.length === 0 ? setFailedSearch(true) : setDeptOrders(store);
+      }
     } catch (error) {
       console.log(error);
 

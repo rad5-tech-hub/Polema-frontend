@@ -14,6 +14,7 @@ const root = import.meta.env.VITE_ROOT;
 const AllInvoice = () => {
   const navigate = useNavigate();
   const [invoices, setInvoices] = useState([]);
+  const [failedSearch, setFailedSearch] = useState(false);
   // Function to view invoice details
 
   const fetchDetails = async () => {
@@ -32,7 +33,11 @@ const AllInvoice = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setInvoices(response.data.invoices);
+      {
+        response.data.invoices.length === 0
+          ? setFailedSearch(true)
+          : setInvoices(response.data.invoices);
+      }
     } catch (e) {
       console.log(e);
     }
@@ -80,7 +85,7 @@ const AllInvoice = () => {
         <Table.Body>
           {invoices.length === 0 ? (
             <div className="p-4">
-              <Spinner />
+              {failedSearch ? "No records found" : <Spinner />}
             </div>
           ) : (
             invoices.map((invoice, index) => {

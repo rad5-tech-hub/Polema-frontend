@@ -10,6 +10,7 @@ import {
   Table,
   Spinner,
 } from "@radix-ui/themes";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
@@ -96,7 +97,7 @@ const AllProducts = () => {
             </Select.Root>
           </Flex>
 
-          <Table.Root size="3" variant="surface">
+          <Table.Root size="3" variant="surface" className="mt-5">
             <Table.Header>
               <Table.Row>
                 <Table.ColumnHeaderCell>Date</Table.ColumnHeaderCell>
@@ -113,7 +114,7 @@ const AllProducts = () => {
                 <Spinner />
               </div>
             ) : products.length === 0 ? (
-              <Table.Body>
+              <Table.Body className>
                 <Table.Row>
                   <Table.Cell colSpan={6} className="text-center">
                     No Products Found
@@ -125,19 +126,19 @@ const AllProducts = () => {
                 {products.map((product) => (
                   <Table.Row key={product.id}>
                     <Table.Cell>{refractor(product.createdAt)}</Table.Cell>
+                    <Table.Cell>{product.name}</Table.Cell>
                     <Table.Cell>{product.category}</Table.Cell>
                     <Table.Cell>
                       {product.price.map((p, index) => (
                         <div key={index}>{p.unit}</div>
                       ))}
                     </Table.Cell>
+
                     <Table.Cell>
                       {product.price.map((p, index) => (
                         <div key={index}>₦{p.amount}</div>
                       ))}
                     </Table.Cell>
-
-                    <Table.Cell>{product.name}</Table.Cell>
                     <Table.Cell>
                       <DropdownMenu.Root>
                         <DropdownMenu.Trigger>

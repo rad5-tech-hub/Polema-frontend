@@ -14,6 +14,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisV, faFilter } from "@fortawesome/free-solid-svg-icons";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+
 import FilterModal from "./FilterModal";
 
 const root = import.meta.env.VITE_ROOT;
@@ -21,6 +22,7 @@ const root = import.meta.env.VITE_ROOT;
 const ViewCustomerOrders = () => {
   const navigate = useNavigate();
   const [store, setStore] = useState([]);
+  const [failedSearch, setFailedSearch] = useState(false);
   const [customerData, setCustomerData] = useState([]);
   const [product, setProducts] = useState([]);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -92,9 +94,15 @@ const ViewCustomerOrders = () => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      setStore(response.data);
+
+      {
+        response.data.orders.length === 0
+          ? setFailedSearch(true)
+          : setStore(response.data.orders);
+      }
     } catch (error) {
       console.log(error);
+      error.status === 404 && setFailedSearch(true);
     }
   };
 
@@ -146,7 +154,7 @@ const ViewCustomerOrders = () => {
         <Table.Body>
           {store.length === 0 ? (
             <div className="p-4">
-              <Spinner />
+              {failedSearch ? "No Records Found" : <Spinner />}
             </div>
           ) : (
             store.map((item, index) => (

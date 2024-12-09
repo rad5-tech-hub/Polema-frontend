@@ -97,7 +97,7 @@ const DepartmentLedger = () => {
               size={"3"}
               className="search-input mx-auto"
               value={searchInput}
-              disabled={departments.length === 0}
+              // disabled={departments.length === 0}
               onChange={handleSearchInput}
             >
               <TextField.Slot>
