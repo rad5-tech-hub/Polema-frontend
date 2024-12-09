@@ -44,8 +44,15 @@ const NewPasswordContent = () => {
       );
 
       // Handle success, navigate to login or show success message
-      toast.success("Password successfully updated!");
-      navigate("/login"); // Example redirection
+      toast.success("Password successfully updated!", {
+        style: {
+          padding: "20px",
+        },
+        duration: 5000,
+      });
+      setTimeout(() => {
+        navigate("/login");
+      }, 6000);
     } catch (error) {
       console.log(error);
       toast.error("Failed to update password, please try again.");

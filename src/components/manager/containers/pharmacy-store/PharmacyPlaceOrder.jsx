@@ -14,6 +14,7 @@ import {
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
+
 const root = import.meta.env.VITE_ROOT;
 
 const PharmacyPlaceOrder = () => {
@@ -36,10 +37,22 @@ const PharmacyPlaceOrder = () => {
     }
 
     try {
-      const response = await axios.get(`${root}/dept/view-pharmstore-raw`, {
+      const response = await axios.get(`${root}/dept/get-pharm-dept`, {
         headers: { Authorization: `Bearer ${retrToken}` },
       });
-      setRawMaterials(response.data.parsedStores);
+
+      const deptId = response.data.department[0].id;
+
+      const secondRequest = await axios.get(
+        `${root}/dept/get-dept-raw/${deptId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${retrToken}`,
+          },
+        }
+      );
+
+      setRawMaterials(secondRequest.data.products || []);
     } catch (error) {
       console.log(error);
     }
@@ -59,14 +72,14 @@ const PharmacyPlaceOrder = () => {
 
   const handleRawMaterialChange = (index, selectedMaterialId) => {
     const selectedMaterial = rawMaterials.find(
-      (item) => item.productId === selectedMaterialId
+      (item) => item.id === selectedMaterialId
     );
     const updatedPlans = plans.map((plan, i) =>
       i === index
         ? {
             ...plan,
             rawMaterial: selectedMaterialId,
-            unit: selectedMaterial ? selectedMaterial.unit : "",
+            unit: selectedMaterial ? selectedMaterial.price[0].unit : "",
           }
         : plan
     );
@@ -161,11 +174,8 @@ const PharmacyPlaceOrder = () => {
                     <Select.Content position="popper">
                       <Select.Group>
                         {rawMaterials.map((item) => (
-                          <Select.Item
-                            key={item.productId}
-                            value={item.productId}
-                          >
-                            {item.product.name}
+                          <Select.Item key={item.id} value={item.id}>
+                            {item.name}
                           </Select.Item>
                         ))}
                       </Select.Group>

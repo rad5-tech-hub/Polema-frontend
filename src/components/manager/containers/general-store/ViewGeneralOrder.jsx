@@ -48,8 +48,11 @@ const ViewGeneralOrder = () => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
+      const store = response?.data?.stores || response?.data.Orders;
 
-      setOrders(response.data.Orders);
+      {
+        store.length === 0 ? setFailedSearch(true) : setOrders(store);
+      }
     } catch (error) {
       console.log(error);
       setFailedSearch(true);

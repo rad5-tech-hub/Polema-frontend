@@ -66,53 +66,57 @@ const CashManagement = () => {
 
   // Handle Submit
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setButtonLoading(true);
-    const retrToken = localStorage.getItem("token");
-    if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
-      setButtonLoading(false);
-      return;
-    }
+    if (confirm("Are you sure you want to continue?")) {
+      e.preventDefault();
+      setButtonLoading(true);
+      const retrToken = localStorage.getItem("token");
+      if (!retrToken) {
+        toast.error("An error occurred. Try logging in again");
+        setButtonLoading(false);
+        return;
+      }
 
-    // Validate form fields
-    if (!name || !cashAmount || !adminId || !comment) {
-      toast.error("Please fill all required fields.");
-      setButtonLoading(false);
-      return;
-    }
+      // Validate form fields
+      if (!name || !cashAmount || !adminId || !comment) {
+        toast.error("Please fill all required fields.");
+        setButtonLoading(false);
+        return;
+      }
 
-    const body = {
-      name,
-      comment,
-      approvedByAdminId: adminId,
-      [isCashCollection ? "credit" : "debit"]: cashAmount,
-    };
+      const body = {
+        name,
+        comment,
+        approvedByAdminId: adminId,
+        [isCashCollection ? "credit" : "debit"]: cashAmount,
+      };
 
-    try {
-      const response = await axios.post(
-        `${root}/admin/create-cashier-book`,
-        body,
-        {
-          headers: { Authorization: `Bearer ${retrToken}` },
-        }
-      );
-      toast.success(response.data.message, {
-        style: { padding: "30px" },
-        duration: 5500,
-      });
+      try {
+        const response = await axios.post(
+          `${root}/admin/create-cashier-book`,
+          body,
+          {
+            headers: { Authorization: `Bearer ${retrToken}` },
+          }
+        );
+        toast.success(response.data.message, {
+          style: { padding: "30px" },
+          duration: 5500,
+        });
 
-      // Clear form fields
-      setAdminId("");
-      setCashAmount("");
-      setName("");
-      setComment("");
-      setAmount("");
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to submit. Please try again.");
-    } finally {
-      setButtonLoading(false);
+        // Clear form fields
+        setAdminId("");
+        setCashAmount("");
+        setName("");
+        setComment("");
+        setAmount("");
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to submit. Please try again.");
+      } finally {
+        setButtonLoading(false);
+      }
+    } else {
+      e.preventDefault();
     }
   };
 

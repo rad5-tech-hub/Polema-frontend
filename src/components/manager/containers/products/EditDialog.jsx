@@ -314,27 +314,31 @@ const EditDialog = ({ product, onClose }) => {
                 </Select.Content>
               </Select.Root>
             </div>
-
-            <div className="mt-3 flex justify-between">
-              <label
-                className="text-[15px] font-medium leading-[35px]"
-                htmlFor="switch"
-              >
-                Price Plan
-              </label>
-              {/* <Switch.Root
+          </div>
+        </div>
+        <div>
+          <div className="mt-3 flex justify-between">
+            <label
+              className="text-[15px] font-medium leading-[35px]"
+              htmlFor="switch"
+            >
+              Price Plan
+            </label>
+            {/* <Switch.Root
                 id="switch"
                 checked={pricePlan}
                 onCheckedChange={handleSwitchChange}
               /> */}
-            </div>
+          </div>
 
-            {pricePlan && (
-              <div>
+          {pricePlan && (
+            <>
+              <div className="flex w-full">
                 {plans.map((plan, index) => (
                   <div key={index}>
                     <TextField.Root
                       placeholder="Category"
+                      className="w-full"
                       value={plan.category}
                       onChange={(e) =>
                         handlePlanChange(index, "category", e.target.value)
@@ -343,19 +347,19 @@ const EditDialog = ({ product, onClose }) => {
                     <TextField.Root
                       placeholder="Amount"
                       value={plan.amount}
+                      className="w-full"
                       onChange={(e) =>
                         handlePlanChange(index, "amount", e.target.value)
                       }
                     />
                   </div>
                 ))}
-
-                <Button type="button" onClick={handleAddPlan} className="mt-2">
-                  Add Plan
-                </Button>
               </div>
-            )}
-          </div>
+              <Button type="button" onClick={handleAddPlan} className="mt-2">
+                Add Plan
+              </Button>
+            </>
+          )}
         </div>
         <div className="w-full mt-4">
           <Button type="submit" disabled={isloading}>
