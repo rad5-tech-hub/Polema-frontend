@@ -72,9 +72,9 @@ import ViewPharmacyStore from "./pharmacy-store/ViewPharmacyStore";
 import NewPassword from "../../../pages/NewPassword";
 import OfficialReceiptInvoice from "./receipts/OfficeReceiptInvoice";
 // import EditDialog from "./products/EditDialog";
-import OfficialLPO from "./raise-tickets/OfficialLPO";
+// import OfficialLPO from "./raise-tickets/OfficialLPO";
 export {
-  OfficialLPO,
+  // OfficialLPO,
   OfficialReceiptInvoice,
   NewPassword,
   // EditDialog,
