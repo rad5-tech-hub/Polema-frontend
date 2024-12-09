@@ -91,7 +91,10 @@ const AddAdmin = () => {
       phoneNumber: phone,
       // address,
       roleId,
-      department: [deptId, ...additionalDepartments],
+      ...(deptId &&
+        additionalDepartments.length !== 0 && {
+          department: [deptId, ...additionalDepartments],
+        }),
     };
 
     try {
@@ -102,7 +105,12 @@ const AddAdmin = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      toast.success(response.data.message);
+      toast.success(response.data.message, {
+        duration: 10000,
+        style: {
+          padding: "20px",
+        },
+      });
       setIsLoading(false);
 
       // Reset form
