@@ -17,7 +17,7 @@ import {
   AuthorityToLoad,
   AllReceipts,
   ViewPharmacyStore,
-  LocalPurchaseOrder,
+  OfficialLPO,
   BlankLPO,
   AuthorityToGiveCash,
   AllWeigh,
@@ -247,7 +247,7 @@ const App = () => {
                     element={<ViewAuthorityToWeigh />}
                   />
                   <Route
-                    path="raise-ticket/officialLPO"
+                    path="raise-ticket/officialLPO/:id"
                     element={<OfficialLPO />}
                   />
 

@@ -698,6 +698,10 @@ video {
   top: 50%;
 }
 
+.bottom-0 {
+  bottom: 0px;
+}
+
 .z-0 {
   z-index: 0;
 }
@@ -888,6 +892,10 @@ video {
 
 .mt-\[25px\] {
   margin-top: 25px;
+}
+
+.mt-px {
+  margin-top: 1px;
 }
 
 .block {

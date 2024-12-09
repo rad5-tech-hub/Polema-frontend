@@ -184,7 +184,12 @@ const CollectFromGeneralStore = () => {
       );
 
       // Success toast
-      toast.success("Form submitted and authentication sent successfully!");
+      toast.success("Form submitted and authentication sent successfully!", {
+        duration: 10000,
+        style: {
+          padding: "20px",
+        },
+      });
       // Optionally clear form here
       clearForm();
     } catch (e) {
