@@ -28,7 +28,7 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
         </div>
 
         {/* Welcome Message */}
-        <div className="hidden xs:block">
+        <div className="hidden sm:block">
           <h1 className="text-[2.0rem] z-0">Welcome {getAdminName()}</h1>
         </div>
 

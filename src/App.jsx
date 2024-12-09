@@ -15,7 +15,6 @@ import {
   CashManagementLedger,
   InvoiceAuthorityToWeigh,
   AuthorityToLoad,
-  EditDialog,
   AllReceipts,
   ViewPharmacyStore,
   OfficialLPO,
@@ -71,6 +70,7 @@ import {
   WaybillInvoice,
   ViewAuthorityToWeigh,
   ViewLocalPurchaseOrder,
+  // EditDialog,
   CollectFromGeneralStore,
   ViewDepartmentStore,
   DepartmentLedger,
@@ -81,6 +81,7 @@ import "@radix-ui/themes/styles.css";
 import "./index.css";
 import ConfirmEmail from "./pages/ConfirmEmail";
 import OfficialReceiptInvoice from "./components/manager/containers/receipts/OfficeReceiptInvoice";
+import OfficialLPO from "./components/manager/containers/raise-tickets/OfficialLPO";
 
 const App = () => {
   return (
@@ -190,10 +191,10 @@ const App = () => {
                     path="products/view-products"
                     element={<AllProducts />}
                   />
-                  <Route
+                  {/* <Route
                     path="products/edit-product/:id"
                     element={<EditDialog />}
-                  />
+                  /> */}
 
                   {/* Admin Routes */}
                   <Route path="admins/create-role" element={<CreateRole />} />

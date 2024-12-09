@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { faBriefcase } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import * as Switch from "@radix-ui/react-switch";
 import {
@@ -13,49 +15,35 @@ import {
   Spinner,
 } from "@radix-ui/themes";
 import { PlusIcon } from "@radix-ui/react-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import toast, { Toaster } from "react-hot-toast";
 
 const root = import.meta.env.VITE_ROOT;
 
 const EditDialog = ({ product, onClose }) => {
-  const [isloading, setIsLoading] = useState(false);
-  const [pricePlan, setPricePlan] = useState(Array.isArray(product.pricePlan));
-  const [basePrice, setBasePrice] = useState(product.price[0].amount);
-  const [unit, setUnit] = useState(product.price[0].unit);
-  const [plans, setPlans] = useState(
-    product.pricePlan || [{ category: "", amount: "" }]
-  );
+  const [isLoading, setIsLoading] = useState(false);
+  const [pricePlan, setPricePlan] = useState(false);
+  const [basePrice, setBasePrice] = useState(product.price[0].amount || "");
+  const [unit, setUnit] = useState(product.price[0].unit || "");
+  const [plans, setPlans] = useState([{ name: "", discount: "" }]);
 
-  // State management for product name
   const [productName, setProductName] = useState(product.name);
-
-  // State management for selected category
   const [selectedCategory, setSelectedCategory] = useState("products");
-
-  // State management for selected department
   const [selectedDept, setSelectedDept] = useState("");
-
-  // State management for fetched departments
   const [department, setDepartment] = useState([]);
-  const [deptID, setDeptId] = useState("");
+  const [deptID, setDeptId] = useState(product.departmentId || "");
 
   const handleSwitchChange = (checked) => {
     setPricePlan(checked);
-    if (!checked) setPlans([]); // Reset plans when switched off
   };
 
-  // Function to format number with commas
   const formatNumber = (num) => {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
-  // Handle base price input change
   const handleBasePriceChange = (e) => {
-    const inputValue = e.target.value.replace(/,/g, ""); // Remove commas from the input value
+    const inputValue = e.target.value.replace(/,/g, "");
     if (!isNaN(inputValue)) {
-      setBasePrice(inputValue); // Update state with raw number (without commas)
+      setBasePrice(inputValue);
     }
   };
 
@@ -68,16 +56,18 @@ const EditDialog = ({ product, onClose }) => {
     setPlans(updatedPlans);
   };
 
-  // Add new plan fields
   const handleAddPlan = () => {
-    setPlans([...plans, { category: "", amount: "" }]);
+    setPlans([...plans, { name: "", discount: "" }]);
   };
 
-  // Fetch departments from db
+  const handleRemovePlan = (index) => {
+    const updatedPlans = plans.filter((_, i) => i !== index);
+    setPlans(updatedPlans);
+  };
+
   const fetchDepartments = async () => {
     let retrToken = localStorage.getItem("token");
 
-    // Check if the token is available
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
       return;
@@ -85,15 +75,13 @@ const EditDialog = ({ product, onClose }) => {
 
     try {
       const response = await axios.get(`${root}/dept/get-department`);
-
       setDepartment(response.data.departments);
     } catch (error) {
       console.log(error);
-      toast.error();
+      toast.error("Failed to fetch departments");
     }
   };
 
-  // Function to get default department for products
   const getDepartment = () => {
     const defaultDeptId = product.departmentId;
     const departments = department.find((dpt) => dpt.id === defaultDeptId);
@@ -106,22 +94,20 @@ const EditDialog = ({ product, onClose }) => {
     setIsLoading(true);
     const retrToken = localStorage.getItem("token");
 
-    // Check if the token is available
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
       return;
     }
 
-    // Create the Plans object from the plans array
     const plansArray = plans
-      .filter((plan) => plan.category && plan.amount) // Filter out empty plans
+      .filter((plan) => plan.name && plan.discount)
       .map((plan) => ({
-        category: plan.category,
-        amount: plan.amount,
+        category: plan.name,
+        amount: plan.discount,
       }));
 
     const submitObject = {
-      name: e.target[0].value,
+      name: productName,
       category: selectedCategory === "products" ? "For Sale" : "For Purchase",
       departmentId: product.departmentId ? product.departmentId : deptID,
       price: [
@@ -145,7 +131,6 @@ const EditDialog = ({ product, onClose }) => {
       ],
     };
 
-    console.log(pricePlan ? submitObject : submitWithoutPlans);
     try {
       const response = await axios.patch(
         `${root}/admin/edit-product/${product.id}`,
@@ -164,11 +149,10 @@ const EditDialog = ({ product, onClose }) => {
         },
       });
 
-      // Reset form fields after successful submission
       setProductName("");
       setBasePrice("");
       setUnit("");
-      setPlans([{ category: "", amount: "" }]);
+      setPlans([{ name: "", discount: "" }]);
       setSelectedDept("");
       setSelectedCategory("products");
       setPricePlan(false);
@@ -176,20 +160,17 @@ const EditDialog = ({ product, onClose }) => {
       setTimeout(() => {
         onClose();
       }, 3000);
-
-      console.log(response);
     } catch (error) {
       console.log(error);
       setIsLoading(false);
-      {
-        error.response.data.error
-          ? toast.error(error.response.data.error)
-          : toast.error(error.response.data.message);
-      }
+      toast.error(
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          "Something went wrong"
+      );
     }
   };
 
-  // Function that fetch details of a product
   useEffect(() => {
     fetchDepartments();
   }, []);
@@ -197,26 +178,13 @@ const EditDialog = ({ product, onClose }) => {
   return (
     <div>
       <Flex justify={"between"} align={"center"}>
-        <Flex align={"center"} gap={"3"}>
-          <div
-            className="cursor-pointer"
-            onClick={() => {
-              onClose();
-            }}
-          >
-            <FontAwesomeIcon icon={faArrowLeft} />
-          </div>
-          <Heading className="text-left py-4">Edit Product</Heading>
-        </Flex>
+        <Heading className="text-left py-4">Edit Product</Heading>
 
         <Select.Root
           defaultValue="products"
           value={selectedCategory}
           onValueChange={(value) => {
             setSelectedCategory(value);
-            if (value === "products") {
-              setSelectedCategory("products");
-            }
           }}
         >
           <Select.Trigger placeholder="Select" />
@@ -282,91 +250,141 @@ const EditDialog = ({ product, onClose }) => {
                 type="text"
                 required={true}
                 value={unit}
-                onChange={(e) => {
-                  setUnit(e.target.value);
-                }}
+                onChange={(e) => setUnit(e.target.value)}
                 size={"3"}
               />
             </div>
 
             <div className="w-full mt-3">
-              <label className="text-[15px]  font-medium leading-[35px]">
+              <label className="text-[15px] font-medium leading-[35px]">
                 Department
               </label>
 
               <Select.Root
-                defaultValue={product.departmentId}
+                value={deptID}
                 onValueChange={(val) => setDeptId(val)}
               >
                 <Select.Trigger
+                  className="w-full"
                   placeholder="Select Department"
-                  className="w-full mt-1"
                 />
-
                 <Select.Content position="popper">
-                  {department.map((dept) => {
-                    return (
-                      <Select.Item key={dept.id} value={dept.id}>
-                        {dept.name}
-                      </Select.Item>
-                    );
-                  })}
+                  {department.map((dept) => (
+                    <Select.Item key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </Select.Item>
+                  ))}
                 </Select.Content>
               </Select.Root>
             </div>
           </div>
         </div>
-        <div>
-          <div className="mt-3 flex justify-between">
-            <label
-              className="text-[15px] font-medium leading-[35px]"
-              htmlFor="switch"
-            >
-              Price Plan
-            </label>
-            {/* <Switch.Root
-                id="switch"
+
+        {selectedCategory !== "raw-materials" && (
+          <div className="input-field mt-3 flex justify-end">
+            <div>
+              <label
+                className="text-[15px] leading-none pr-[15px]"
+                htmlFor="pricePlan"
+              >
+                Price Plan
+              </label>
+
+              <Switch.Root
+                className={`${
+                  pricePlan ? "bg-green-500" : "bg-gray-500"
+                } w-[32px] h-[15px] bg-black-600 rounded-full relative shadow-[0_2px_10px] border-2 border-black shadow-black/25  data-[state=checked]:bg-green outline-none cursor-default`}
+                id="pricePlan"
                 checked={pricePlan}
                 onCheckedChange={handleSwitchChange}
-              /> */}
+              >
+                <Switch.Thumb className="block w-[11px] h-[11px] bg-white rounded-full shadow-[0_2px_2px] shadow-black transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[19px]" />
+              </Switch.Root>
+            </div>
           </div>
-
-          {pricePlan && (
-            <>
-              <div className="flex w-full">
-                {plans.map((plan, index) => (
-                  <div key={index}>
+        )}
+        {pricePlan && (
+          <div>
+            {plans.map((plan, index) => (
+              <div className="flex flex-col mt-4">
+                <div
+                  key={index}
+                  className="input-field grid grid-cols-2 items-center justify-center gap-4 mt-2"
+                >
+                  <div className="plan-field">
+                    <label
+                      className="text-[15px] font-medium leading-[35px]"
+                      htmlFor={`plan-name-${index}`}
+                    >
+                      Plan Name
+                    </label>
                     <TextField.Root
-                      placeholder="Category"
-                      className="w-full"
-                      value={plan.category}
+                      id={`plan-name-${index}`}
+                      type="text"
+                      value={plan.name}
+                      className="mt-5"
                       onChange={(e) =>
-                        handlePlanChange(index, "category", e.target.value)
+                        handlePlanChange(index, "name", e.target.value)
                       }
-                    />
-                    <TextField.Root
-                      placeholder="Amount"
-                      value={plan.amount}
-                      className="w-full"
-                      onChange={(e) =>
-                        handlePlanChange(index, "amount", e.target.value)
-                      }
+                      required={true}
+                      placeholder="Plan Name"
                     />
                   </div>
-                ))}
+
+                  <div className="plan-field">
+                    <label
+                      className="text-[15px] font-medium leading-[35px] flex justify-between"
+                      htmlFor={`plan-discount-${index}`}
+                    >
+                      Discount{" "}
+                      <Button
+                        type="button"
+                        className="bg-red-500 text-white h-[40px] px-8 text-[20px] mb-4"
+                        onClick={() => handleRemovePlan(index)}
+                      >
+                        -
+                      </Button>
+                    </label>
+                    <TextField.Root
+                      id={`plan-discount-${index}`}
+                      type="text"
+                      value={plan.discount}
+                      onChange={(e) =>
+                        handlePlanChange(index, "discount", e.target.value)
+                      }
+                      required={true}
+                      placeholder="Plan Discount"
+                    />
+                  </div>
+                </div>
               </div>
-              <Button type="button" onClick={handleAddPlan} className="mt-2">
-                Add Plan
+            ))}
+            <div className="flex justify-end gap-4 mt-4">
+              <Button
+                type="button"
+                onClick={handleAddPlan}
+                className="bg-theme hover:bg-theme/75 px-8 h-[40px]"
+              >
+                +
               </Button>
+            </div>
+          </div>
+        )}
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="w-[50%] h-[40px] mx-auto mt-6 bg-theme hover:bg-theme/75 text-white text-md font-medium flex items-center justify-center"
+        >
+          {isLoading ? (
+            <>
+              <Spinner className="w-5 h-5 inline-block mr-3" /> Processing...
             </>
+          ) : (
+            "Update Product"
           )}
-        </div>
-        <div className="w-full mt-4">
-          <Button type="submit" disabled={isloading}>
-            {isloading ? <Spinner /> : "Save Changes"}
-          </Button>
-        </div>
+        </Button>
       </form>
+      <Toaster />
     </div>
   );
 };
