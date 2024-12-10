@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { faBriefcase } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import * as Switch from "@radix-ui/react-switch";
@@ -7,14 +7,13 @@ import {
   Card,
   Button,
   Heading,
-  DropdownMenu,
   Separator,
   TextField,
   Select,
   Flex,
   Spinner,
 } from "@radix-ui/themes";
-import { PlusIcon } from "@radix-ui/react-icons";
+
 import toast, { Toaster } from "react-hot-toast";
 
 const root = import.meta.env.VITE_ROOT;
@@ -178,7 +177,17 @@ const EditDialog = ({ product, onClose }) => {
   return (
     <div>
       <Flex justify={"between"} align={"center"}>
-        <Heading className="text-left py-4">Edit Product</Heading>
+        <div className="flex items-center gap-3">
+          <div
+            className="cursor-pointer"
+            onClick={() => {
+              onClose();
+            }}
+          >
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </div>
+          <Heading className="text-left py-4">Edit Product</Heading>
+        </div>
 
         <Select.Root
           defaultValue="products"
