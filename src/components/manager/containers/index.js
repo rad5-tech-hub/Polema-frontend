@@ -71,9 +71,13 @@ import ViewDepartmentStore from "./department-store/ViewDepartmentStore";
 import ViewPharmacyStore from "./pharmacy-store/ViewPharmacyStore";
 import NewPassword from "../../../pages/NewPassword";
 import OfficialReceiptInvoice from "./receipts/OfficeReceiptInvoice";
+// import EditDialog from "./products/EditDialog";
+// import OfficialLPO from "./raise-tickets/OfficialLPO";
 export {
+  // OfficialLPO,
   OfficialReceiptInvoice,
   NewPassword,
+  // EditDialog,
   AllDispatchNote,
   AddAdmin,
   ViewPharmacyStore,
@@ -141,7 +145,7 @@ export {
   WaybillInvoice,
   InvoiceAuthorityToWeigh,
   ConfirmEmail,
-  EditDialog,
+  // EditDialog,
   BlankLPO,
   Onboarding,
   OfficialLPO,

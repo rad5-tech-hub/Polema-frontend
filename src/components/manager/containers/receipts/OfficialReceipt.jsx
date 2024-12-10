@@ -62,53 +62,7 @@ const OfficialReceipt = () => {
 
   const handlePrint = () => {
     if (receiptRef.current) {
-      const printContents = receiptRef.current.innerHTML;
-      const printWindow = window.open("", "_blank");
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Official Receipt</title>
-            <style>
-              @media print {
-                body {
-                  margin: 0;
-                  font-family: Arial, sans-serif;
-                }
-                .container {
-                  padding: 20px;
-                  background-color: white !important;
-                }
-                .intro, .details {
-                  width: 100%;
-                  display: flex;
-                  flex-direction: column;
-                  gap: 10px;
-                }
-                .text-center {
-                  text-align: center !important;
-                }
-                img {
-                  max-width: 100%;
-                  height: auto;
-                }
-                .print-hidden {
-                  display: none !important;
-                }
-                @page {
-                  margin: 1cm;
-                }
-              }
-            </style>
-          </head>
-          <body>
-            <div class="container">${printContents}</div>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.focus();
-      printWindow.print();
-      printWindow.close();
+      window.print();
     }
   };
 
@@ -151,13 +105,13 @@ const OfficialReceipt = () => {
               </p>
 
               {/* Logo and Addresses */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center max-sm:mt-8">
+              <div className="flex items-center justify-center">
                 <img
                   src={polemaLogo}
                   alt="Polema-logo"
                   className="w-[100px] sm:w-[150px]"
                 />
-                <div className="text-sm sm:text-base flex flex-col sm:flex-row justify-between sm:gap-12 w-full mt-4 sm:mt-0">
+                <div className="text-sm sm:text-base flex items-center gap-4 px-4">
                   <div className="sm:w-1/2">
                     <b>FACTORY/OFFICE:</b>
                     <br /> Osisioma Industry Layout,
@@ -177,7 +131,7 @@ const OfficialReceipt = () => {
               </div>
 
               {/* Receipt Title */}
-              <h4 className="font-bold text-[20px] sm:text-[32px] text-[#919191] mt-12 border-b-2 border-[#D2D2D2] mx-auto w-fit">
+              <h4 className="font-bold text-[20px] sm:text-[32px] text-[#919191] mt-4 border-b-2 border-[#D2D2D2] mx-auto w-fit">
                 OFFICIAL RECEIPT
               </h4>
 

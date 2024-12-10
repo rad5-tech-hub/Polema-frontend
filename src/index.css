@@ -69,3 +69,7 @@
 .notifications-panel.translate-x-full {
   transform: translateX(150%); /* Slide out of view */
 }
+
+.hamburger-icon {
+  display: none;
+}

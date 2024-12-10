@@ -288,6 +288,7 @@ const AllDepartments = () => {
                 <Table.ColumnHeaderCell className="text-[#919191]">
                   DATE
                 </Table.ColumnHeaderCell>
+                <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
               </Table.Row>
             </Table.Header>
 
@@ -330,7 +331,8 @@ const AllDepartments = () => {
                       <Table.RowHeaderCell>
                         {refractor(dept.createdAt)}
                       </Table.RowHeaderCell>
-                      <div className="absolute right-4 top-2">
+
+                      <Table.RowHeaderCell>
                         <DropdownMenu.Root>
                           <DropdownMenu.Trigger>
                             <Button
@@ -356,7 +358,7 @@ const AllDepartments = () => {
                             </DropdownMenu.Item>
                           </DropdownMenu.Content>
                         </DropdownMenu.Root>
-                      </div>
+                      </Table.RowHeaderCell>
                     </Table.Row>
                   ))
                 )}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { refractor } from "../../../date";
-import { DeleteIcon, DropDownIcon } from "../../../icons";
+import { refractor, formatMoney } from "../../../date";
+import { DropDownIcon } from "../../../icons";
 import {
   DropdownMenu,
   Button,
@@ -12,7 +12,7 @@ import {
 } from "@radix-ui/themes";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPen, faClose } from "@fortawesome/free-solid-svg-icons";
+import { faPen } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import DeleteDialog from "./DeleteDialog"; // Import DeleteDialog
@@ -25,6 +25,7 @@ const AllProducts = () => {
   const [loading, setLoading] = useState(true);
   const [productActive, setProductActive] = useState(true);
   const [selectedEditProduct, setSelectedEditProduct] = useState(null);
+  const [displayPricePlan, setDisplayPricePlan] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   const fetchProducts = async () => {
@@ -58,11 +59,21 @@ const AllProducts = () => {
     fetchProducts();
   }, [productActive]);
 
+  const handleEditClick = (product) => {
+    if (product.pricePlan) {
+      setDisplayPricePlan(true);
+    } else {
+      setDisplayPricePlan(false);
+    }
+    setSelectedEditProduct(product);
+  };
+
   return (
     <>
       {selectedEditProduct ? (
         <EditDialog
           product={selectedEditProduct}
+          displayPricePlan={displayPricePlan}
           onClose={() => {
             setSelectedEditProduct(null);
             fetchProducts();
@@ -137,7 +148,7 @@ const AllProducts = () => {
                         </DropdownMenu.Trigger>
                         <DropdownMenu.Content>
                           <DropdownMenu.Item
-                            onClick={() => setSelectedEditProduct(product)}
+                            onClick={() => handleEditClick(product)}
                           >
                             <FontAwesomeIcon icon={faPen} /> Edit
                           </DropdownMenu.Item>
