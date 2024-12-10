@@ -89,7 +89,7 @@ const AddAdmin = () => {
       lastname: lastName,
       email: email,
       phoneNumber: phone,
-      // address,
+      address,
       roleId,
       ...(deptId &&
         additionalDepartments.length !== 0 && {
