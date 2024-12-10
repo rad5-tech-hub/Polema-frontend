@@ -1,16 +1,65 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { faPrint } from "@fortawesome/free-solid-svg-icons";
+import { useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import axios from "axios";
+const root = import.meta.env.VITE_ROOT;
 import polemaLogo from "../../../../static/image/polema-logo.png";
 
 const ReceiptDispatchNote = () => {
+  const { id } = useParams();
+
+  console.log("ID from URL: ", id); // Check if ID is available from URL
+
+  const [dispatchNote, setDispatchNote] = useState({
+    driversName: "",
+    vehicleNo: "",
+    escortName: "",
+    destination: "",
+    approvedBy: "",
+    createdAt: "",
+  });
+
   const handlePrint = () => {
     window.print();
   };
 
+  useEffect(() => {
+    if (!id) {
+      console.error("ID is not available!");
+      return;
+    }
+
+    console.log(
+      `Fetching data from: https://polema.bookbank.com.ng/customer/view-vehicle/${id}`
+    );
+
+    // Fetch data from API
+    axios
+      .get(`https://polema.bookbank.com.ng/customer/view-vehicle/${id}`)
+      .then((response) => {
+        console.log("API Response:", response); // Log the full response
+        const data = response.data.vehicle; // Access the 'vehicle' object inside the response
+        if (data) {
+          setDispatchNote({
+            driversName: data.driversName || "Not Available",
+            vehicleNo: data.vehicleNo || "Not Available",
+            escortName: data.escortName || "Not Available",
+            destination: data.destination || "Not Available",
+            approvedBy: data.approvedBy || "Not Available",
+            createdAt: data.createdAt || "",
+          });
+        } else {
+          console.error("No vehicle data found for the given ID");
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  }, [id]); // Ensure useEffect reruns when `id` changes
+
   return (
     <div className="bg-gray-50 p-4 sm:p-8">
-      {/* Header Section */}
       <div className="intro flex justify-between items-center pb-6 border-b border-[#919191]">
         <span className="text-sm sm:text-[20px] font-semibold text-[#434343]">
           Approved Vehicle Dispatch Pass Note
@@ -24,10 +73,8 @@ const ReceiptDispatchNote = () => {
         </button>
       </div>
 
-      {/* Main Gatepass Content */}
       <div className="mt-8 bg-white p-4 sm:p-16">
         <div className="heading relative h-fit">
-          {/* Header Title */}
           <div className="flex flex-col gap-4 sm:gap-28 text-center">
             <h1 className="text-[24px] sm:text-[48px] font-bold text-[#434343]">
               POLEMA INDUSTRIES LIMITED
@@ -38,7 +85,6 @@ const ReceiptDispatchNote = () => {
             </h3>
           </div>
 
-          {/* Logo */}
           <div className="logo absolute top-4 sm:top-8">
             <img
               src={polemaLogo}
@@ -47,7 +93,6 @@ const ReceiptDispatchNote = () => {
             />
           </div>
 
-          {/* RC Information */}
           <div className="rc flex flex-col absolute right-[5%] sm:right-[15%] top-[5%] sm:top-[10%] gap-4 sm:gap-24">
             <p className="w-fit">
               <i>RC 131127</i>
@@ -59,17 +104,18 @@ const ReceiptDispatchNote = () => {
             </b>
           </div>
 
-          {/* Details Section */}
           <div className="details mt-8 sm:mt-12 flex flex-col gap-4 sm:gap-[25px]">
-            {/* Single Detail Template */}
             {[
-              ["Date", "06-12-24"],
-              ["Driver's Name", "Ugwuanyi Chibuikem Christian"],
-              ["Escort's Name", "Chukwuemeka Dennison Igwe"],
-              ["Vehicle No", "HTE 713 YIS"],
-              ["Destination", "Chinedu Godman"],
-              ["Time of Departure", "03:13PM"],
-              ["Authorized By", "Transport Manager"],
+              ["Date", new Date(dispatchNote.createdAt).toLocaleDateString()],
+              ["Driver's Name", dispatchNote.driversName || "Not Available"],
+              ["Escort's Name", dispatchNote.escortName || "Not Available"],
+              ["Vehicle No", dispatchNote.vehicleNo || "Not Available"],
+              ["Destination", dispatchNote.destination || "Not Available"],
+              [
+                "Time of Departure",
+                new Date(dispatchNote.createdAt).toLocaleTimeString(),
+              ],
+              ["Authorized By", dispatchNote.approvedBy || "Not Available"],
             ].map(([label, value], idx) => (
               <div
                 key={idx}
@@ -87,7 +133,7 @@ const ReceiptDispatchNote = () => {
                   {label}:
                 </label>
                 <p
-                  className={`border-b border-black border-dotted flex-grow text-sm sm:text-base ${
+                  className={`border-b pl-6 border-black border-dotted flex-grow text-sm sm:text-base ${
                     label === "Date" ? "w-auto text-right" : ""
                   }`}
                 >
@@ -96,7 +142,6 @@ const ReceiptDispatchNote = () => {
               </div>
             ))}
 
-            {/* Admin Officer's Signature */}
             <div className="owner-of-goods w-full flex justify-between gap-2 sm:gap-4  mt-12 sm:mt-24">
               <div className="flex flex-col gap-4">
                 <p className="border-b border-black border-dotted w-[150px] sm:w-[230px]"></p>
@@ -104,10 +149,11 @@ const ReceiptDispatchNote = () => {
                   DRIVER’S SIGNATURE
                 </label>
               </div>
+
               <div className="flex flex-col gap-4">
                 <p className="border-b border-black border-dotted w-[150px] sm:w-[230px]"></p>
                 <label className="w-fit text-sm sm:text-base ml-4">
-                  CASHIER’S SIGNATURE
+                  APPROVING OFFICER’S SIGNATURE
                 </label>
               </div>
             </div>

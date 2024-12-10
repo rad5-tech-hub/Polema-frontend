@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-const root = import.meta.env.VITE_ROOT;
 import { Select } from "@radix-ui/themes";
 import toast, { Toaster, LoaderIcon } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+
+const root = import.meta.env.VITE_ROOT;
 
 const CreateDispatchNote = () => {
   const [buttonLoading, setButtonLoading] = useState(false);
@@ -15,14 +17,15 @@ const CreateDispatchNote = () => {
   const [vehicleNumber, setVehicleNumber] = useState("");
   const [destination, setDestination] = useState("");
 
-  // Function to fetch super admins
+  const navigate = useNavigate();
+
+  // Fetch super admins
   const fetchSuperAdmins = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
       toast.error("An error occurred, try logging in again", {
         duration: 10000,
       });
-
       return;
     }
 
@@ -34,19 +37,21 @@ const CreateDispatchNote = () => {
       });
       setSuperAdmins(response.data.staffList);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setButtonLoading(true);
     const token = localStorage.getItem("token");
 
     if (!token) {
-      toast.error("An error occurred ,try logging in again");
+      toast.error("An error occurred, try logging in again");
       return;
     }
+
     const body = {
       escortName,
       destination,
@@ -67,32 +72,33 @@ const CreateDispatchNote = () => {
       );
 
       const dispatchId = firstRequest.data.vehicle.id;
+
       // SECOND REQUEST
-      const secondRequest = await axios.post(
+      await axios.post(
         `${root}/customer/send-vehicle/${dispatchId}`,
-        {
-          adminId,
-        },
+        { adminId },
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
+
       setButtonLoading(false);
       toast.success("Dispatch note generated and sent to the admin", {
-        style: {
-          padding: "25px",
-        },
+        style: { padding: "25px" },
         duration: 10000,
       });
+
+      // Navigate to receipt page under the `/admin` route
+      navigate(`/admin/receipt/receipt-dispatchnote/${dispatchId}`);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       setButtonLoading(false);
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchSuperAdmins();
   }, []);
 
@@ -108,73 +114,59 @@ const CreateDispatchNote = () => {
             <input
               required
               value={driverName}
-              onChange={(e) => {
-                setDriverName(e.target.value);
-              }}
+              onChange={(e) => setDriverName(e.target.value)}
               type="text"
               placeholder="Enter Driver Name"
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
-          <div className="Escorts-name">
+          <div className="escorts-name">
             <label>Escort's Name</label>
             <input
               value={escortName}
-              onChange={(e) => {
-                setEscortName(e.target.value);
-              }}
+              onChange={(e) => setEscortName(e.target.value)}
               type="text"
               placeholder="Enter Escort Name"
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
-
           <div className="vehicle-no">
             <label>Vehicle No</label>
             <input
               value={vehicleNumber}
-              onChange={(e) => {
-                setVehicleNumber(e.target.value);
-              }}
+              onChange={(e) => setVehicleNumber(e.target.value)}
               placeholder="Enter Vehicle Number"
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
-
-          <div className="Destination">
+          <div className="destination">
             <label>Destination</label>
             <input
               type="text"
               value={destination}
-              onChange={(e) => {
-                setDestination(e.target.value);
-              }}
+              onChange={(e) => setDestination(e.target.value)}
               placeholder="Enter Destination"
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
-          <div className="Destination">
+          <div className="send-to">
             <label>Send To:</label>
             <Select.Root
               size={"3"}
               required
               disabled={superAdmins.length === 0}
-              onValueChange={(val) => {
-                setAdminId(val);
-              }}
+              onValueChange={(val) => setAdminId(val)}
             >
               <Select.Trigger
                 className="w-full mt-3"
                 placeholder="Select Admin"
               />
               <Select.Content position="popper">
-                {superAdmins.map((admin) => {
-                  return (
-                    <Select.Item
-                      value={admin.id}
-                    >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
-                  );
-                })}
+                {superAdmins.map((admin) => (
+                  <Select.Item key={admin.id} value={admin.id}>
+                    {`${admin.firstname} ${admin.lastname}`}
+                  </Select.Item>
+                ))}
               </Select.Content>
             </Select.Root>
           </div>

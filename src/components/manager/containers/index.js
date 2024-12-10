@@ -22,7 +22,6 @@ import CreateInvoice from "./receipts/CreateInvoice";
 import GatepassReceipt from "./receipts/GatepassReceipt";
 import Invoice from "./receipts/Invoice";
 import OfficialReceipt from "./receipts/OfficialReceipt";
-import ReceiptDispatchNote from "./receipts/ReceiptDispatchNote";
 import WaybillCreateInvoice from "./receipts/WaybillCreateInvoice";
 import WaybillInvoice from "./receipts/WaybillInvoice";
 import AllWayBill from "./receipts/AllWayBill";
@@ -71,10 +70,12 @@ import ViewDepartmentStore from "./department-store/ViewDepartmentStore";
 import ViewPharmacyStore from "./pharmacy-store/ViewPharmacyStore";
 import NewPassword from "../../../pages/NewPassword";
 import OfficialReceiptInvoice from "./receipts/OfficeReceiptInvoice";
+import ReceiptDispatchNote from "./receipts/ReceiptDispatchNote";
 // import EditDialog from "./products/EditDialog";
 // import OfficialLPO from "./raise-tickets/OfficialLPO";
 export {
   // OfficialLPO,
+  ReceiptDispatchNote,
   OfficialReceiptInvoice,
   NewPassword,
   // EditDialog,
@@ -139,7 +140,6 @@ export {
   Invoice,
   AllReceipts,
   OfficialReceipt,
-  ReceiptDispatchNote,
   AllWayBill,
   WaybillCreateInvoice,
   WaybillInvoice,
