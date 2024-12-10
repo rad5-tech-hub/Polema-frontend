@@ -119,7 +119,7 @@ const AddAdmin = () => {
       setEmail("");
       setPhone("");
       setAddress("");
-      setRoleId("");
+      // setRoleId("");
       setDeptID("");
       setAdditionalDepartments([]);
     } catch (error) {
