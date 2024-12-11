@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 
 import { refractor } from "../../../date";
-import { faClose } from "@fortawesome/free-solid-svg-icons";
+import {
+  faClose,
+  faArrowCircleLeft,
+  faArrowLeft,
+} from "@fortawesome/free-solid-svg-icons";
 import { DropDownIcon, Suspend } from "../../../icons";
 
 import {
@@ -205,6 +209,12 @@ const AllAdmins = () => {
     );
     const [departments, setDepartments] = useState([]);
 
+    // State to manage all department IDs
+    const [detID, setDeptID] = useState([]);
+    const [additionalDeptID, setAdditionalDeptID] = useState([
+      ...adminDepartments,
+    ]);
+
     const [roleID, setRoleId] = useState("");
 
     // State to toggle password visibility
@@ -239,6 +249,13 @@ const AllAdmins = () => {
       }
     };
 
+    const deptChange = (i, v) => {
+      //where i is index and v is value
+      const updatedDepartments = [...additionalDeptID];
+
+      updatedDepartments[i] = v;
+      setAdditionalDeptID(updatedDepartments);
+    };
     const fetchRoles = async () => {
       const retrToken = localStorage.getItem("token");
 
@@ -260,7 +277,7 @@ const AllAdmins = () => {
 
     const handleSubmit = async (e) => {
       e.preventDefault();
-      setIsLoading(true);
+      // setIsLoading(true);
 
       const retrToken = localStorage.getItem("token");
 
@@ -278,39 +295,40 @@ const AllAdmins = () => {
         ...(password && { password: password }),
         email,
         ...(confirmPassword && { confirmPassword: confirmPassword }),
-        roleId: roleID,
+        roleId: roleID || role,
       };
 
+      // try {
+      //   const response = await axios.patch(
+      //     `${root}/admin/update-staff/${adminForEdit.id}`,
+      //     body,
+      //     {
+      //       headers: {
+      //         Authorization: `Bearer ${retrToken}`,
+      //       },
+      //     }
+      //   );
+      //   console.log(response);
+      //   setIsLoading(false);
+      //   toast.success(response.data.message, {
+      //     duration: 6500,
+      //     style: {
+      //       padding: "30px",
+      //     },
+      //   });
+      //   fetchStaffData();
+      //   setTimeout(() => {
+      //     setEditDialogOpen(false);
+      //   }, 1500);
+      // } catch (error) {
+      //   console.log(error);
+      //   setIsLoading(false);
+
+      //   toast.error(error.response.data.error);
+      // }
       console.log(body);
 
-      try {
-        const response = await axios.patch(
-          `${root}/admin/update-staff/${adminForEdit.id}`,
-          body,
-          {
-            headers: {
-              Authorization: `Bearer ${retrToken}`,
-            },
-          }
-        );
-        console.log(response);
-        setIsLoading(false);
-        toast.success(response.data.message, {
-          duration: 6500,
-          style: {
-            padding: "30px",
-          },
-        });
-        fetchStaffData();
-        setTimeout(() => {
-          setEditDialogOpen(false);
-        }, 1500);
-      } catch (error) {
-        console.log(error);
-        setIsLoading(false);
-
-        toast.error(error.response.data.error);
-      }
+      console.log(...additionalDeptID);
     };
 
     useEffect(() => {
@@ -320,7 +338,15 @@ const AllAdmins = () => {
 
     return (
       <>
-        <Heading>Edit Admin</Heading>
+        <div className="flex items-center gap-3">
+          <div
+            onClick={() => setEditDialogOpen(false)}
+            className="cursor-pointer"
+          >
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </div>
+          <Heading>Edit Admin</Heading>
+        </div>
         <Separator className="w-full my-3" />
         <form onSubmit={handleSubmit}>
           <Grid columns={"2"} gap={"4"}>
@@ -507,7 +533,13 @@ const AllAdmins = () => {
                     >
                       Department {index + 1}
                     </label>
-                    <Select.Root size={"3"} defaultValue={item}>
+                    <Select.Root
+                      size={"3"}
+                      defaultValue={item}
+                      onValueChange={(val) => {
+                        deptChange(index, val);
+                      }}
+                    >
                       <Select.Trigger
                         placeholder="View Department Ledger"
                         className="w-full "

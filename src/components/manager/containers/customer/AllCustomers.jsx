@@ -278,7 +278,15 @@ const AllCustomers = () => {
                     </Table.RowHeaderCell>
                     <Table.Cell>{customer.email}</Table.Cell>
                     <Table.Cell>{customer.address}</Table.Cell>
-                    <Table.Cell>{customer.phoneNumber}</Table.Cell>
+                    <Table.Cell>
+                      {customer.phoneNumber.map((item) => {
+                        return (
+                          <>
+                            <span>{item}</span> <br />
+                          </>
+                        );
+                      })}
+                    </Table.Cell>
                     <Table.Cell>
                       <div className=" right-4 top-2">
                         <DropdownMenu.Root>
