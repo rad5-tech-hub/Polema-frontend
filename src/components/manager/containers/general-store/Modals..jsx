@@ -141,7 +141,7 @@ const EditModal = ({ isOpen, onClose, item, runFetch }) => {
         {
           name: shelfName,
           unit,
-          // thresholdValue: threshold,
+          thresholdValue: threshold,
         },
         {
           headers: {
@@ -192,7 +192,7 @@ const EditModal = ({ isOpen, onClose, item, runFetch }) => {
                 placeholder={item?.unit || ""}
               />
             </div>
-            {/* <div className="flex mt-2 items-center w-full">
+            <div className="flex mt-2 items-center w-full">
               <Text className="w-full">Threshold Value</Text>
               <TextField.Root
                 type="text"
@@ -203,7 +203,7 @@ const EditModal = ({ isOpen, onClose, item, runFetch }) => {
                 className="w-full p-2 mb-4"
                 placeholder={item?.thresholdValue || ""}
               />
-            </div> */}
+            </div>
 
             <div className="btns flex gap-4 absolute bottom-8 right-8">
               <button

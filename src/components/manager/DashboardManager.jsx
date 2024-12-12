@@ -243,11 +243,17 @@ const DashBoardManager = ({ children }) => {
                                           ? "bg-[#f4f4f4] rounded-lg shadow-2xl !text-black min-w-[50px]"
                                           : ""
                                       }`}
-                                      onClick={() =>
+                                      // onClick={() =>
+                                      //   navigate(
+                                      //     `${route}/${nav.navParentSlug}/${item.slug}`
+                                      //   )
+                                      // }
+                                      onClick={() => {
+                                        setSidebarOpen(!sidebarOpen);
                                         navigate(
                                           `${route}/${nav.navParentSlug}/${item.slug}`
-                                        )
-                                      }
+                                        );
+                                      }}
                                     >
                                       <Flex gap="2" align="center">
                                         <CircleIcon />
