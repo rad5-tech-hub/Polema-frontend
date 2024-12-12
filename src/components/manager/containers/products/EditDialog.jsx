@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { faBriefcase } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import * as Switch from "@radix-ui/react-switch";
@@ -7,25 +7,38 @@ import {
   Card,
   Button,
   Heading,
-  DropdownMenu,
   Separator,
   TextField,
   Select,
   Flex,
   Spinner,
 } from "@radix-ui/themes";
-import { PlusIcon } from "@radix-ui/react-icons";
+
 import toast, { Toaster } from "react-hot-toast";
 
 const root = import.meta.env.VITE_ROOT;
 
 const EditDialog = ({ product, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [pricePlan, setPricePlan] = useState(false);
+  const [pricePlan, setPricePlan] = useState(
+    typeof product.pricePlan === "string"
+      ? Array.isArray(JSON.parse(product.pricePlan))
+        ? true
+        : false
+      : false
+  );
   const [basePrice, setBasePrice] = useState(product.price[0].amount || "");
   const [unit, setUnit] = useState(product.price[0].unit || "");
-  const [plans, setPlans] = useState([{ name: "", discount: "" }]);
+  // const [plans, setPlans] = useState([{ name: "", discount: "" }]);
 
+  const [plans, setPlans] = useState(
+    pricePlan
+      ? JSON.parse(product.pricePlan).map((plan) => ({
+          name: plan.category || "",
+          discount: plan.amount || "",
+        }))
+      : [{ name: "", discount: "" }]
+  );
   const [productName, setProductName] = useState(product.name);
   const [selectedCategory, setSelectedCategory] = useState("products");
   const [selectedDept, setSelectedDept] = useState("");
@@ -34,6 +47,7 @@ const EditDialog = ({ product, onClose }) => {
 
   const handleSwitchChange = (checked) => {
     setPricePlan(checked);
+    console.log(plans);
   };
 
   const formatNumber = (num) => {
@@ -178,7 +192,17 @@ const EditDialog = ({ product, onClose }) => {
   return (
     <div>
       <Flex justify={"between"} align={"center"}>
-        <Heading className="text-left py-4">Edit Product</Heading>
+        <div className="flex items-center gap-3">
+          <div
+            className="cursor-pointer"
+            onClick={() => {
+              onClose();
+            }}
+          >
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </div>
+          <Heading className="text-left py-4">Edit Product</Heading>
+        </div>
 
         <Select.Root
           defaultValue="products"
@@ -304,71 +328,73 @@ const EditDialog = ({ product, onClose }) => {
           </div>
         )}
         {pricePlan && (
-          <div>
-            {plans.map((plan, index) => (
-              <div className="flex flex-col mt-4">
-                <div
-                  key={index}
-                  className="input-field grid grid-cols-2 items-center justify-center gap-4 mt-2"
-                >
-                  <div className="plan-field">
-                    <label
-                      className="text-[15px] font-medium leading-[35px]"
-                      htmlFor={`plan-name-${index}`}
-                    >
-                      Plan Name
-                    </label>
-                    <TextField.Root
-                      id={`plan-name-${index}`}
-                      type="text"
-                      value={plan.name}
-                      className="mt-5"
-                      onChange={(e) =>
-                        handlePlanChange(index, "name", e.target.value)
-                      }
-                      required={true}
-                      placeholder="Plan Name"
-                    />
-                  </div>
-
-                  <div className="plan-field">
-                    <label
-                      className="text-[15px] font-medium leading-[35px] flex justify-between"
-                      htmlFor={`plan-discount-${index}`}
-                    >
-                      Discount{" "}
-                      <Button
-                        type="button"
-                        className="bg-red-500 text-white h-[40px] px-8 text-[20px] mb-4"
-                        onClick={() => handleRemovePlan(index)}
+          <>
+            <div>
+              {plans.map((plan, index) => (
+                <div className="flex flex-col mt-4">
+                  <div
+                    key={index}
+                    className="input-field grid grid-cols-2 items-center justify-center gap-4 mt-2"
+                  >
+                    <div className="plan-field">
+                      <label
+                        className="text-[15px] font-medium leading-[35px]"
+                        htmlFor={`plan-name-${index}`}
                       >
-                        -
-                      </Button>
-                    </label>
-                    <TextField.Root
-                      id={`plan-discount-${index}`}
-                      type="text"
-                      value={plan.discount}
-                      onChange={(e) =>
-                        handlePlanChange(index, "discount", e.target.value)
-                      }
-                      required={true}
-                      placeholder="Plan Discount"
-                    />
+                        Plan Name
+                      </label>
+                      <TextField.Root
+                        id={`plan-name-${index}`}
+                        type="text"
+                        value={plan.name}
+                        className="mt-5"
+                        onChange={(e) =>
+                          handlePlanChange(index, "name", e.target.value)
+                        }
+                        required={true}
+                        placeholder="Plan Name"
+                      />
+                    </div>
+
+                    <div className="plan-field">
+                      <label
+                        className="text-[15px] font-medium leading-[35px] flex justify-between"
+                        htmlFor={`plan-discount-${index}`}
+                      >
+                        Discount{" "}
+                        <Button
+                          type="button"
+                          className="bg-red-500 text-white h-[40px] px-8 text-[20px] mb-4"
+                          onClick={() => handleRemovePlan(index)}
+                        >
+                          -
+                        </Button>
+                      </label>
+                      <TextField.Root
+                        id={`plan-discount-${index}`}
+                        type="text"
+                        value={plan.discount}
+                        onChange={(e) =>
+                          handlePlanChange(index, "discount", e.target.value)
+                        }
+                        required={true}
+                        placeholder="Plan Discount"
+                      />
+                    </div>
                   </div>
                 </div>
+              ))}
+              <div className="flex justify-end gap-4 mt-4">
+                <Button
+                  type="button"
+                  onClick={handleAddPlan}
+                  className="bg-theme hover:bg-theme/75 px-8 h-[40px]"
+                >
+                  +
+                </Button>
               </div>
-            ))}
-            <div className="flex justify-end gap-4 mt-4">
-              <Button
-                type="button"
-                onClick={handleAddPlan}
-                className="bg-theme hover:bg-theme/75 px-8 h-[40px]"
-              >
-                +
-              </Button>
             </div>
-          </div>
+          </>
         )}
         <Button
           type="submit"

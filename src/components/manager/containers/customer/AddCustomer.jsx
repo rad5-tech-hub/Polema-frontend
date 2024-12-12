@@ -4,34 +4,47 @@ import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import {
   Card,
-  Select,
   Button,
   Heading,
   Separator,
   TextField,
-  Text,
   Spinner,
   Flex,
 } from "@radix-ui/themes";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faClose, faPlus } from "@fortawesome/free-solid-svg-icons";
 
 const root = import.meta.env.VITE_ROOT;
 
 const AddCustomer = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [imageURL, setImageURL] = useState(" ");
-  // State management for the form content
+  const [imageURL, setImageURL] = useState("");
   const [firstname, setFirstName] = useState("");
   const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
-  const [number, setNumber] = useState("");
+  const [phoneNumbers, setPhoneNumbers] = useState([""]); // Array to manage phone numbers
+
+  const handleAddPhoneNumber = () => {
+    setPhoneNumbers([...phoneNumbers, ""]);
+  };
+
+  const handleRemovePhoneNumber = (index) => {
+    const updatedNumbers = phoneNumbers.filter((_, i) => i !== index);
+    setPhoneNumbers(updatedNumbers);
+  };
+
+  const handlePhoneNumberChange = (value, index) => {
+    const updatedNumbers = phoneNumbers.map((num, i) =>
+      i === index ? value : num
+    );
+    setPhoneNumbers(updatedNumbers);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const retrToken = localStorage.getItem("token");
-
-    // Check if the token is available
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
       return;
@@ -42,17 +55,16 @@ const AddCustomer = () => {
       setLastname("");
       setEmail("");
       setAddress("");
-      setNumber("");
+      setPhoneNumbers([""]);
     };
 
-    // Dynamically build submitobject to exclude email if it's empty
     const submitobject = {
-      firstname: firstname,
-      lastname: lastname,
+      firstname,
+      lastname,
       ...(email && { email }),
-      phoneNumber: number,
-      profilePic: imageURL,
-      address: address,
+      phoneNumber: phoneNumbers,
+      ...(imageURL && { profilePic: imageURL }),
+      address,
     };
 
     setIsLoading(true);
@@ -62,29 +74,17 @@ const AddCustomer = () => {
         `${root}/customer/reg-customer`,
         submitobject,
         {
-          headers: {
-            Authorization: `Bearer ${retrToken}`,
-          },
+          headers: { Authorization: `Bearer ${retrToken}` },
         }
       );
-
       setIsLoading(false);
-
-      toast.success(response.data.message, {
-        duration: 6500,
-        style: {
-          padding: "30px",
-        },
-      });
+      toast.success(response.data.message, { duration: 6500 });
       resetForm();
     } catch (error) {
-      console.log(error);
+      console.error(error);
       setIsLoading(false);
       toast.error(error.response?.data?.error || error.message, {
         duration: 6500,
-        style: {
-          padding: "30px",
-        },
       });
     }
   };
@@ -98,112 +98,84 @@ const AddCustomer = () => {
           <div className="flex w-full justify-between gap-8">
             <div className="left w-[50%]">
               <div className="input-field mt-3">
-                <label
-                  className="text-[15px]  font-medium leading-[35px]   "
-                  htmlFor="fullname"
-                >
+                <label className="text-[15px] font-medium leading-[35px]">
                   First Name
                 </label>
                 <TextField.Root
                   placeholder="Enter First Name"
-                  className=""
-                  type="text"
-                  id="firstname"
-                  size={"3"}
                   value={firstname}
-                  onChange={(e) => {
-                    setFirstName(e.target.value);
-                  }}
-                ></TextField.Root>
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
               </div>
-
               <div className="input-field mt-3">
-                <label
-                  className="text-[15px]  font-medium leading-[35px]   "
-                  htmlFor="email"
-                >
+                <label className="text-[15px] font-medium leading-[35px]">
                   Email
                 </label>
                 <TextField.Root
                   placeholder="Enter email"
-                  className=""
-                  id="email"
-                  type="text"
-                  size={"3"}
                   value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                  }}
-                ></TextField.Root>
+                  onChange={(e) => setEmail(e.target.value)}
+                />
               </div>
-
               <div className="input-field mt-3">
-                <label
-                  className="text-[15px]  font-medium leading-[35px]   "
-                  htmlFor="number"
-                >
-                  Phone Number
+                <label className="text-[15px] font-medium leading-[35px]">
+                  Phone Number(s)
                 </label>
-                <TextField.Root
-                  placeholder="Enter phone number"
-                  className=""
-                  value={number}
-                  onChange={(e) => {
-                    setNumber(e.target.value);
-                  }}
-                  id="number"
-                  type="number"
-                  size={"3"}
-                ></TextField.Root>
+                {phoneNumbers.map((number, index) => (
+                  <div
+                    className="flex items-center gap-2 w-full relative mt-2"
+                    key={index}
+                  >
+                    <TextField.Root
+                      placeholder="Enter phone number"
+                      value={number}
+                      onChange={(e) =>
+                        handlePhoneNumberChange(e.target.value, index)
+                      }
+                      className="w-full"
+                    />
+                    <Button type="button" onClick={handleAddPhoneNumber}>
+                      <FontAwesomeIcon icon={faPlus} />
+                    </Button>
+                    {phoneNumbers.length > 1 && (
+                      <Button
+                        type="button"
+                        onClick={() => handleRemovePhoneNumber(index)}
+                        className="bg-red-500 hover:bg-red-700"
+                      >
+                        <FontAwesomeIcon icon={faClose} />
+                      </Button>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
-
             <div className="right w-[50%]">
               <div className="mt-3 input-field">
-                <label
-                  className="text-[15px]  font-medium leading-[35px]   "
-                  htmlFor="password"
-                >
+                <label className="text-[15px] font-medium leading-[35px]">
                   Enter Last Name
                 </label>
                 <TextField.Root
                   placeholder="Enter Last Name"
-                  className=""
                   value={lastname}
-                  onChange={(e) => {
-                    setLastname(e.target.value);
-                  }}
-                  type="text"
-                  id="lastname"
-                  size={"3"}
-                ></TextField.Root>
+                  onChange={(e) => setLastname(e.target.value)}
+                />
               </div>
-
               <div className="mt-3 input-field">
-                <label
-                  className="text-[15px]  font-medium leading-[35px]   "
-                  htmlFor="address"
-                >
+                <label className="text-[15px] font-medium leading-[35px]">
                   Enter Address
                 </label>
                 <TextField.Root
-                  value={address}
-                  onChange={(e) => {
-                    setAddress(e.target.value);
-                  }}
                   placeholder="Enter Address"
-                  className=""
-                  type="text"
-                  id="address"
-                  size={"3"}
-                ></TextField.Root>
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                />
               </div>
             </div>
           </div>
-
           <Flex justify={"end"} align={"end"} width={"100%"}>
             <Button
-              className="mt-4  bg-theme hover:bg-theme/85"
+              className="mt-4 bg-theme hover:bg-theme/85"
               size={3}
               type="submit"
               disabled={isLoading}

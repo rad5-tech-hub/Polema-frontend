@@ -76,7 +76,7 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-[101]">
-      <div className="fixed top-[50%] left-[50%] min-h-[85vh] w-[90vw] max-w-[450px] transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-md shadow-lg">
+      <div className="fixed top-[50%] left-[50%]  h-fit w-[90vw] max-w-[450px] transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-md shadow-lg">
         <Heading as="h1" className="text-2xl font-semibold mb-4 text-black">
           Edit Customer
         </Heading>
@@ -137,7 +137,7 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
           />
         </form>
 
-        <div className="mt-6 flex justify-end">
+        <div className="mt-6 flex justify-end ">
           <button
             onClick={onClose}
             className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-md mr-2"
@@ -278,7 +278,15 @@ const AllCustomers = () => {
                     </Table.RowHeaderCell>
                     <Table.Cell>{customer.email}</Table.Cell>
                     <Table.Cell>{customer.address}</Table.Cell>
-                    <Table.Cell>{customer.phoneNumber}</Table.Cell>
+                    <Table.Cell>
+                      {customer.phoneNumber.map((item) => {
+                        return (
+                          <>
+                            <span>{item}</span> <br />
+                          </>
+                        );
+                      })}
+                    </Table.Cell>
                     <Table.Cell>
                       <div className=" right-4 top-2">
                         <DropdownMenu.Root>

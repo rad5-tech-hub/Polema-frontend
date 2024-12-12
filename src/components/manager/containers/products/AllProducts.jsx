@@ -104,7 +104,7 @@ const AllProducts = () => {
                 <Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell>Category</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell>Unit</Table.ColumnHeaderCell>
-                <Table.ColumnHeaderCell>Price</Table.ColumnHeaderCell>
+                <Table.ColumnHeaderCell>Price(₦)</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
               </Table.Row>
             </Table.Header>
@@ -136,7 +136,7 @@ const AllProducts = () => {
 
                     <Table.Cell>
                       {product.price.map((p, index) => (
-                        <div key={index}>₦{p.amount}</div>
+                        <div key={index}>{formatMoney(p.amount)}</div>
                       ))}
                     </Table.Cell>
                     <Table.Cell>
