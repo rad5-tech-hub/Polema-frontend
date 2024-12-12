@@ -110,7 +110,7 @@ const AllDispatchNote = () => {
               <th className="text-left px-4 py-2 w-1/4 whitespace-normal">
                 DESTINATION
               </th>
-              <th className="text-left px-4 py-2 w-1/12">ACTIONS</th>
+              {/* <th className="text-left px-4 py-2 w-1/12">ACTIONS</th> */}
             </tr>
           </thead>
           <tbody>
@@ -125,32 +125,34 @@ const AllDispatchNote = () => {
                 <td className="px-4 py-2">{note.driversName}</td>
                 <td className="px-4 py-2">{note.escortName}</td>
                 <td className="px-4 py-2">{note.vehicleNo}</td>
-                <td className="px-4 py-2 break-words">{note.destination}</td>
-                <td className="relative px-4 py-2">
-                  {/* Three-dot menu button */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent event bubbling
-                      setActiveDropdown((prev) =>
-                        prev === note.id ? null : note.id
-                      );
-                    }}
-                    className="text-gray-500 hover:text-black focus:outline-none"
-                  >
-                    <i className="fas fa-ellipsis-v"></i>
-                  </button>
+                <td className="px-4 py-2 break-words flex justify-between">
+                  {note.destination}
+                  <div className="relative px-4 py-2">
+                    {/* Three-dot menu button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent event bubbling
+                        setActiveDropdown((prev) =>
+                          prev === note.id ? null : note.id
+                        );
+                      }}
+                      className="text-gray-500 hover:text-black focus:outline-none"
+                    >
+                      <i className="fas fa-ellipsis-v"></i>
+                    </button>
 
-                  {/* Dropdown Popover */}
-                  {activeDropdown === note.id && (
-                    <div className="absolute top-full right-0 mt-2 bg-white border border-gray-300 shadow-lg rounded-lg z-50 w-24 px-4 py-2 dropdown-container flex justify-center items-center">
-                      <button
-                        onClick={() => handleViewDispatch(note.id)}
-                        className="px-4 py-2 text-[15px] hover:bg-theme/75 hover:text-white text-gray-600 flex justify-center items-center rounded-lg"
-                      >
-                        View
-                      </button>
-                    </div>
-                  )}
+                    {/* Dropdown Popover */}
+                    {activeDropdown === note.id && (
+                      <div className="absolute top-full right-0 mt-2 bg-white border border-gray-300 shadow-lg rounded-lg z-50 w-24 px-4 py-2 dropdown-container flex justify-center items-center">
+                        <button
+                          onClick={() => handleViewDispatch(note.id)}
+                          className="px-4 py-2 text-[15px] hover:bg-theme/75 hover:text-white text-gray-600 flex justify-center items-center rounded-lg"
+                        >
+                          View
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}

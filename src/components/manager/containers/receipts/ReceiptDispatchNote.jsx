@@ -6,6 +6,7 @@ import axios from "axios";
 const root = import.meta.env.VITE_ROOT;
 import polemaLogo from "../../../../static/image/polema-logo.png";
 
+// Tailwind CSS loader using animation classes
 const ReceiptDispatchNote = () => {
   const { id } = useParams();
 
@@ -19,6 +20,8 @@ const ReceiptDispatchNote = () => {
     approvedBy: "",
     createdAt: "",
   });
+
+  const [loading, setLoading] = useState(true); // State for loading
 
   const handlePrint = () => {
     window.print();
@@ -49,14 +52,26 @@ const ReceiptDispatchNote = () => {
             approvedBy: data.approvedBy || "Not Available",
             createdAt: data.createdAt || "",
           });
+          setLoading(false); // Data is fetched, hide loader
         } else {
           console.error("No vehicle data found for the given ID");
+          setLoading(false); // Even on error, hide loader
         }
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
+        setLoading(false); // Hide loader in case of error
       });
   }, [id]); // Ensure useEffect reruns when `id` changes
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="w-16 h-16 border-t-4 border-theme border-solid rounded-full animate-spin"></div>{" "}
+        {/* Tailwind CSS loader */}
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-50 p-4 sm:p-8">
