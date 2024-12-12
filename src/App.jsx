@@ -347,6 +347,10 @@ const App = () => {
                     path="/receipt/receipt-dispatchnote/:id"
                     element={<ReceiptDispatchNote />}
                   />
+                  <Route
+                    path="/receipts/all-dispatchnote"
+                    element={<AllDispatchNote />}
+                  />
                   <Route path="/receipts/invoice" element={<AllInvoice />} />
                   <Route path="/receipts/invoice/:id" element={<Invoice />} />
                   <Route path="/receipts/waybill" element={<AllWayBill />} />

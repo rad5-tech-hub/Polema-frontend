@@ -104,9 +104,16 @@ const CreateDispatchNote = () => {
 
   return (
     <div className="p-6 relative mb-16">
-      <div className="invoice py-2">
+      <div className="invoice py-2 flex justify-between">
         <b className="text-[#434343]">Vehicle Dispatch Note</b>
+        <button
+          className="bg-theme px-4 py-2 text-white rounded-lg hover:bg-theme/75"
+          onClick={() => navigate("/admin/receipts/all-dispatchnote")}
+        >
+          View All
+        </button>
       </div>
+
       <form className="my-8" onSubmit={handleSubmit}>
         <div className="my-8 grid grid-cols-2 max-sm:grid-cols-1 gap-8 border-t-[1px] border-[#9191914] py-8">
           <div className="drivers-name">
