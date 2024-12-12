@@ -57,7 +57,7 @@ const CreateShelf = () => {
         style: {
           padding: "30px",
         },
-        duration: 5500,
+        duration: 10000,
       });
     } catch (error) {
       console.log(error);

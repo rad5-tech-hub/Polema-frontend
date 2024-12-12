@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { faEllipsisV, faSquare } from "@fortawesome/free-solid-svg-icons";
+import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import {
   Button,
+  TextField,
   Table,
   Flex,
   Spinner,
@@ -22,6 +24,7 @@ const ShelfContent = () => {
   const [failedSearch, setFailedSearch] = useState(false);
   const [activeModal, setActiveModal] = useState(null); // Tracks the active modal
   const [selectedItem, setSelectedItem] = useState(null); // Tracks the selected item
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
 
   const fetchShelf = async () => {
     setLoading(true);
@@ -72,9 +75,41 @@ const ShelfContent = () => {
     fetchShelf();
   }, []);
 
+  const highlightText = (text, query) => {
+    if (!query) return text;
+
+    const parts = text.split(new RegExp(`(${query})`, "gi"));
+    return parts.map((part, index) =>
+      part.toLowerCase() === query.toLowerCase() ? (
+        <span key={index} style={{ backgroundColor: "yellow" }}>
+          {part}
+        </span>
+      ) : (
+        part
+      )
+    );
+  };
+
+  // Filtered shelf data based on the search query
+  const filteredShelf = shelf.filter((item) =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <>
       <Heading>Shelf Content</Heading>
+      {/* Search Input */}
+      <TextField.Root
+        placeholder="Search Store"
+        className="w-[55%] my-4"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+      >
+        <TextField.Slot>
+          <MagnifyingGlassIcon height="16" width="16" />
+        </TextField.Slot>
+      </TextField.Root>
+
       <Table.Root variant="surface" className="mt-4">
         <Table.Header>
           <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
@@ -86,19 +121,17 @@ const ShelfContent = () => {
           <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
         </Table.Header>
         <Table.Body>
-          {shelf.length === 0 ? (
-            <>
-              <div className="p-4">
-                {failedSearch ? "No records found." : <Spinner />}
-              </div>
-            </>
+          {filteredShelf.length === 0 ? (
+            <div className="p-4">
+              {failedSearch || searchQuery ? "No records found." : <Spinner />}
+            </div>
           ) : (
-            shelf.map((item) => (
+            filteredShelf.map((item) => (
               <Table.Row key={item.id} className="relative !overflow-visible">
                 <Table.RowHeaderCell>
                   {refractor(item.createdAt)}
                 </Table.RowHeaderCell>
-                <Table.Cell>{item.name}</Table.Cell>
+                <Table.Cell>{highlightText(item.name, searchQuery)}</Table.Cell>
                 <Table.Cell>{item.unit}</Table.Cell>
                 <Table.Cell>{item.quantity}</Table.Cell>
                 <Table.Cell>{item.thresholdValue}</Table.Cell>
