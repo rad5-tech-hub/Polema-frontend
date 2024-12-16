@@ -20,6 +20,7 @@ import CreateGatepass from "./receipts/CreateGatepass";
 import AllReceipts from "./receipts/AllReceipts";
 import CreateInvoice from "./receipts/CreateInvoice";
 import GatepassReceipt from "./receipts/GatepassReceipt";
+import EditAdmin from "./admin/EditAdmin";
 import Invoice from "./receipts/Invoice";
 import OfficialReceipt from "./receipts/OfficialReceipt";
 import WaybillCreateInvoice from "./receipts/WaybillCreateInvoice";
@@ -145,7 +146,7 @@ export {
   WaybillInvoice,
   InvoiceAuthorityToWeigh,
   ConfirmEmail,
-  // EditDialog,
+  EditAdmin,
   BlankLPO,
   Onboarding,
   OfficialLPO,

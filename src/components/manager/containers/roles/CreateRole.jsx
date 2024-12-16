@@ -17,9 +17,6 @@ import {
   Spinner,
   Grid,
 } from "@radix-ui/themes";
-import { useSelector } from "react-redux";
-
-import UpdateURL from "../ChangeRoute";
 
 const CreateRole = ({ child, setChild }) => {
   // Root URL for making requests
@@ -157,7 +154,6 @@ const CreateRole = ({ child, setChild }) => {
       const response = await axios.get(`${root}/admin/get-all-nav`, {});
 
       setPermissionBox(response.data.navParentsWithPermissions);
-      console.log(response);
 
       setPermissionsLoading(false);
     } catch (err) {

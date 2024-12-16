@@ -17,6 +17,7 @@ import {
   AuthorityToLoad,
   AllReceipts,
   ViewPharmacyStore,
+  EditAdmin,
   OfficialLPO,
   BlankLPO,
   AuthorityToGiveCash,
@@ -201,6 +202,7 @@ const App = () => {
                   <Route path="admins/create-admin" element={<AddAdmin />} />
                   <Route path="admins/view-admins" element={<AllAdmins />} />
                   <Route path="admins/view-roles" element={<AllRoles />} />
+                  <Route path="admins/edit-admin/:id" element={<EditAdmin />} />
                   <Route
                     path="admins/suspended-admins"
                     element={<AllSuspended />}
