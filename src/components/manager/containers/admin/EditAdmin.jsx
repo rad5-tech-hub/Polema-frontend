@@ -40,6 +40,7 @@ const EditAdmin = () => {
   const [address, setAddress] = useState("");
   const [deptId, setDeptID] = useState("");
   const [adminDepartments, setAdminDepartments] = useState([]);
+  const [allDepartments, setAllDepartments] = useState([]);
 
   // Fetch departments
   const fetchDept = async () => {
@@ -114,16 +115,27 @@ const EditAdmin = () => {
 
   // Function to update state on loading
   const updateFormDetails = () => {
-    setFirstName(getAdminsDetailsFromID(id).firstname);
-    setLastName(getAdminsDetailsFromID(id).lastname);
-    setPhone(getAdminsDetailsFromID(id).phoneNumber);
-    setEmail(getAdminsDetailsFromID(id).email);
-    setRoleId(getAdminsDetailsFromID(id).roleId);
-    setAddress(getAdminsDetailsFromID(id).address);
-    typeof getAdminsDetailsFromID(id).department === "string" &&
-    typeof getAdminsDetailsFromID(id).department !== null
-      ? setAdminDepartments(JSON.parse(getAdminsDetailsFromID(id).department))
-      : setAdminDepartments(getAdminsDetailsFromID(id).department);
+    const adminDetails = getAdminsDetailsFromID(id);
+
+    setFirstName(adminDetails.firstname);
+    setLastName(adminDetails.lastname);
+    setPhone(adminDetails.phoneNumber);
+    setEmail(adminDetails.email);
+    setRoleId(adminDetails.roleId);
+    setAddress(adminDetails.address);
+
+    if (typeof adminDetails.department === "string") {
+      try {
+        setAdminDepartments(JSON.parse(adminDetails.department));
+      } catch (error) {
+        console.error("Failed to parse department JSON:", error);
+        setAdminDepartments([]);
+      }
+    } else {
+      setAdminDepartments(
+        Array.isArray(adminDetails.department) ? adminDetails.department : []
+      );
+    }
   };
 
   useEffect(() => {
@@ -140,7 +152,7 @@ const EditAdmin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    // setIsLoading(true);
 
     const token = localStorage.getItem("token");
     if (!token) {
@@ -162,6 +174,7 @@ const EditAdmin = () => {
     };
 
     console.log(submitObject);
+    console.log(allDepartments);
 
     // try {
     //   const response = await axios.post(
@@ -196,13 +209,33 @@ const EditAdmin = () => {
   };
 
   const handleAddDepartment = () => {
-    setAdditionalDepartments([...additionalDepartments, ""]);
+    // console.log(additionalDepartments);
+
+    additionalDepartments.length === 0
+      ? setAdditionalDepartments([""])
+      : setAdditionalDepartments([...additionalDepartments, ""]);
   };
 
   const handleDepartmentChange = (index, value) => {
     const updatedDepartments = [...additionalDepartments];
     updatedDepartments[index] = value;
-    setAdditionalDepartments(updatedDepartments);
+    // setAdditionalDepartments(updatedDepartments);
+  };
+
+  const handleDepartments = (idx, val) => {
+    const allDepartments = [
+      ...(deptId && deptId),
+      ...(adminDepartments.length !== 0 ? adminDepartments : []),
+      ...additionalDepartments,
+    ];
+    console.log(deptId + "deptId");
+    console.log(adminDepartments + "admin departments");
+    console.log(additionalDepartments + "additional Departments");
+
+    console.log(allDepartments);
+
+    allDepartments[idx] = val;
+    setAllDepartments(allDepartments);
   };
 
   return (
@@ -328,28 +361,6 @@ const EditAdmin = () => {
               />
             </div>
 
-            <div className="input-field mt-3">
-              <label
-                className="text-[15px] font-medium leading-[35px]"
-                htmlFor="dept"
-              >
-                Department
-              </label>
-              <Select.Root onValueChange={setDeptID}>
-                <Select.Trigger
-                  className="w-full mt-2"
-                  placeholder="Select Department"
-                />
-                <Select.Content position="popper">
-                  {departments.map((dept) => (
-                    <Select.Item key={dept.id} value={dept.id}>
-                      {dept.name}
-                    </Select.Item>
-                  ))}
-                </Select.Content>
-              </Select.Root>
-            </div>
-
             {Array.isArray(adminDepartments) &&
               adminDepartments.map((_, index) => (
                 <div key={`dept-${index}`} className="input-field mt-3">
@@ -357,12 +368,14 @@ const EditAdmin = () => {
                     className="text-[15px] font-medium leading-[35px]"
                     htmlFor={`dept-${index}`}
                   >
-                    Department {index + 2}
+                    Department {index + 1}
                   </label>
                   <Select.Root
                     onValueChange={(value) =>
-                      handleDepartmentChange(index, value)
+                      // handleDepartmentChange(index, value)
+                      handleDepartments(Number(index), value)
                     }
+                    defaultValue={_}
                   >
                     <Select.Trigger
                       className="mt-2 w-full"
@@ -387,12 +400,20 @@ const EditAdmin = () => {
                   className="text-[15px] font-medium leading-[35px]"
                   htmlFor="dept"
                 >
-                  Department {adminDepartments.length + index + 2}
+                  {!Array.isArray(adminDepartments)
+                    ? `Department ${index + 1}`
+                    : `Department ${adminDepartments.length + index + 1}`}
                 </label>
                 <Select.Root
-                  onValueChange={(value) =>
-                    handleDepartmentChange(index, value)
-                  }
+                  onValueChange={(value) => {
+                    if (!Array.isArray(adminDepartments)) {
+                      handleDepartments(Number(index), value);
+                      // console.log(value + "NOt an array");
+                    } else {
+                      handleDepartments(Number(index), value);
+                      // console.log(value + " an array");
+                    }
+                  }}
                 >
                   <Select.Trigger
                     className="w-full mt-2"
