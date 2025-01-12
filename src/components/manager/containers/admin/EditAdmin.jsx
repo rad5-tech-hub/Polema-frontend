@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+
 import { PlusIcon } from "@radix-ui/react-icons";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
@@ -40,7 +41,6 @@ const EditAdmin = () => {
   const [address, setAddress] = useState("");
   const [deptId, setDeptID] = useState("");
   const [adminDepartments, setAdminDepartments] = useState([]);
-  const [allDepartments, setAllDepartments] = useState([]);
 
   // Fetch departments
   const fetchDept = async () => {
@@ -152,7 +152,7 @@ const EditAdmin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // setIsLoading(true);
+    setIsLoading(true);
 
     const token = localStorage.getItem("token");
     if (!token) {
@@ -167,75 +167,82 @@ const EditAdmin = () => {
       phoneNumber: phone,
       address,
       roleId,
-      ...(deptId &&
-        additionalDepartments.length !== 0 && {
-          department: [deptId, ...additionalDepartments],
-        }),
+      department: [...adminDepartments, ...additionalDepartments],
     };
 
-    console.log(submitObject);
-    console.log(allDepartments);
+    try {
+      const response = await axios.patch(
+        `${root}/admin/update-staff/${id}`,
+        submitObject,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      toast.success(response.data.message, {
+        duration: 10000,
+        style: {
+          padding: "20px",
+        },
+      });
+      setIsLoading(false);
 
-    // try {
-    //   const response = await axios.post(
-    //     `${root}/admin/reg-staff`,
-    //     submitObject,
-    //     {
-    //       headers: { Authorization: `Bearer ${token}` },
-    //     }
-    //   );
-    //   toast.success(response.data.message, {
-    //     duration: 10000,
-    //     style: {
-    //       padding: "20px",
-    //     },
-    //   });
-    //   setIsLoading(false);
-
-    //   // Reset form
-    //   setFirstName("");
-    //   setLastName("");
-    //   setEmail("");
-    //   setPhone("");
-    //   setAddress("");
-    //   // setRoleId("");
-    //   setDeptID("");
-    //   setAdditionalDepartments([]);
-    // } catch (error) {
-    //   console.log(error);
-    //   setIsLoading(false);
-    //   toast.error("An error occurred.");
-    // }
+      // Reset form
+      // setFirstName("");
+      // setLastName("");
+      // setEmail("");
+      // setPhone("");
+      // setAddress("");
+      // // setRoleId("");
+      // setDeptID("");
+      // setAdditionalDepartments([]);
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+      toast.error("An error occurred.", {
+        duration: 10000,
+        style: {
+          padding: "20px",
+        },
+      });
+    }
   };
 
+  //   // console.log(additionalDepartments);
+
+  // // Handle adding a new department input
+  // const handleAddDepartment = () => {
+  //   setAdditionalDepartments((prev) => [
+  //     ...prev,
+  //     { id: Date.now(), value: "" }, // Unique identifier
+  //   ]);
+  // };
+
+  // // Handle removing a department input
+  // const handleRemoveDepartment = (id) => {
+  //   setAdditionalDepartments((prev) => prev.filter((dept) => dept.id !== id));
+  // };
+
+  // const handleDepartments = (index, value) => {
+  //   setAdditionalDepartments((prev) =>
+  //     prev.map((dept, i) => (i === index ? { ...dept, value } : dept))
+  //   );
+  // };
+
+  // Handle adding a new department input
   const handleAddDepartment = () => {
-    // console.log(additionalDepartments);
-
-    additionalDepartments.length === 0
-      ? setAdditionalDepartments([""])
-      : setAdditionalDepartments([...additionalDepartments, ""]);
+    setAdditionalDepartments((prev) => [...prev, ""]);
   };
 
-  const handleDepartmentChange = (index, value) => {
-    const updatedDepartments = [...additionalDepartments];
-    updatedDepartments[index] = value;
-    // setAdditionalDepartments(updatedDepartments);
+  // Handle updating a department value
+  const handleUpdateDepartment = (index, value) => {
+    setAdditionalDepartments((prev) =>
+      prev.map((dept, i) => (i === index ? value : dept))
+    );
   };
 
-  const handleDepartments = (idx, val) => {
-    const allDepartments = [
-      ...(deptId && deptId),
-      ...(adminDepartments.length !== 0 ? adminDepartments : []),
-      ...additionalDepartments,
-    ];
-    console.log(deptId + "deptId");
-    console.log(adminDepartments + "admin departments");
-    console.log(additionalDepartments + "additional Departments");
-
-    console.log(allDepartments);
-
-    allDepartments[idx] = val;
-    setAllDepartments(allDepartments);
+  // Handle removing a department
+  const handleRemoveDepartment = (index) => {
+    setAdditionalDepartments((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -393,43 +400,49 @@ const EditAdmin = () => {
                   </Select.Root>
                 </div>
               ))}
-
-            {additionalDepartments.map((_, index) => (
-              <div key={index} className="input-field mt-3">
-                <label
-                  className="text-[15px] font-medium leading-[35px]"
-                  htmlFor="dept"
-                >
-                  {!Array.isArray(adminDepartments)
-                    ? `Department ${index + 1}`
-                    : `Department ${adminDepartments.length + index + 1}`}
-                </label>
-                <Select.Root
-                  onValueChange={(value) => {
-                    if (!Array.isArray(adminDepartments)) {
-                      handleDepartments(Number(index), value);
-                      // console.log(value + "NOt an array");
-                    } else {
-                      handleDepartments(Number(index), value);
-                      // console.log(value + " an array");
-                    }
-                  }}
-                >
-                  <Select.Trigger
-                    className="w-full mt-2"
-                    placeholder="Select Additional Department"
-                  />
-                  <Select.Content position="popper">
-                    {departments.map((dept) => (
-                      <Select.Item key={dept.id} value={dept.id}>
-                        {dept.name}
-                      </Select.Item>
-                    ))}
-                  </Select.Content>
-                </Select.Root>
-              </div>
-            ))}
           </Grid>
+          {additionalDepartments.length !== 0 && (
+            <Card className="mt-4">
+              <Grid columns={"2"} gap={"3"}>
+                {additionalDepartments.map((value, index) => (
+                  <div key={index} className="input-field mt-2">
+                    <div className="flex justify-between items-center">
+                      <label
+                        className="text-[15px] font-medium leading-[35px]"
+                        htmlFor={`dept-${index}`}
+                      >
+                        New Department {index + 1}
+                      </label>
+                      <p
+                        className="text-red-500 text-sm cursor-pointer underline"
+                        onClick={() => handleRemoveDepartment(index)}
+                      >
+                        -Remove
+                      </p>
+                    </div>
+                    <Select.Root
+                      value={value}
+                      onValueChange={(selectedValue) =>
+                        handleUpdateDepartment(index, selectedValue)
+                      }
+                    >
+                      <Select.Trigger
+                        className="w-full mt-2"
+                        placeholder="Select Additional Department"
+                      />
+                      <Select.Content position="popper">
+                        {departments.map((dept) => (
+                          <Select.Item key={dept.id} value={dept.id}>
+                            {dept.name}
+                          </Select.Item>
+                        ))}
+                      </Select.Content>
+                    </Select.Root>
+                  </div>
+                ))}
+              </Grid>
+            </Card>
+          )}
 
           <Button type="button" onClick={handleAddDepartment} className="mt-10">
             <Flex align={"center"} gap={"1"}>
