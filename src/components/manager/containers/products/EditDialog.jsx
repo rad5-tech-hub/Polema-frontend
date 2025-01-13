@@ -76,7 +76,6 @@ const EditDialog = ({ product, onClose }) => {
 
   const handleSwitchChange = (checked) => {
     setPricePlan(checked);
-    // console.log(plans);
   };
 
   const formatNumber = (num) => {
