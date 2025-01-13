@@ -11,6 +11,7 @@ import {
   ViewSupplierOrder,
   WelcomeComponent,
   CashManagement,
+  EditProducts,
   PharmacyPlaceOrder,
   CashManagementLedger,
   InvoiceAuthorityToWeigh,
@@ -192,10 +193,10 @@ const App = () => {
                     path="products/view-products"
                     element={<AllProducts />}
                   />
-                  {/* <Route
+                  <Route
                     path="products/edit-product/:id"
-                    element={<EditDialog />}
-                  /> */}
+                    element={<EditProducts />}
+                  />
 
                   {/* Admin Routes */}
                   <Route path="admins/create-role" element={<CreateRole />} />

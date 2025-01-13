@@ -142,7 +142,7 @@ const AllProducts = () => {
                     <Table.Cell>
                       <DropdownMenu.Root>
                         <DropdownMenu.Trigger>
-                          <Button variant="surface">
+                          <Button variant="surface" className="cursor-pointer">
                             <DropDownIcon />
                           </Button>
                         </DropdownMenu.Trigger>

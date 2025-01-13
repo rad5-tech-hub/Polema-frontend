@@ -3,6 +3,7 @@ import OfficialLPO from "./raise-tickets/OfficialLPO";
 import WelcomeComponent from "./WelcomeComponent";
 import BlankLPO from "./raise-tickets/BlankLPO";
 import EditDialog from "./products/EditDialog";
+import EditProducts from "./products/EditProducts";
 import AuthorityToGiveCash from "./raise-tickets/AuthorityToGiveCash";
 import AllWeigh from "./weighing-operations/AllWeigh";
 import ViewAuthorityToWeigh from "./raise-tickets/ViewAuthorityToWeigh";
@@ -150,4 +151,5 @@ export {
   BlankLPO,
   Onboarding,
   OfficialLPO,
+  EditProducts,
 };

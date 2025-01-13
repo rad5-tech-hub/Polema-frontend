@@ -20,25 +20,54 @@ const root = import.meta.env.VITE_ROOT;
 
 const EditDialog = ({ product, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
+  // const [pricePlan, setPricePlan] = useState(
+  //   typeof product.pricePlan === "string"
+  //     ? Array.isArray(JSON.parse(product.pricePlan))
+  //       ? true
+  //       : false
+  //     : false
+  // );
+
   const [pricePlan, setPricePlan] = useState(
-    typeof product.pricePlan === "string"
-      ? Array.isArray(JSON.parse(product.pricePlan))
-        ? true
-        : false
-      : false
+    // typeof product.pricePlan === "string" ? false : true
+    Array.isArray(product.pricePlan)
   );
   const [basePrice, setBasePrice] = useState(product.price[0].amount || "");
   const [unit, setUnit] = useState(product.price[0].unit || "");
   // const [plans, setPlans] = useState([{ name: "", discount: "" }]);
 
-  const [plans, setPlans] = useState(
-    pricePlan
-      ? JSON.parse(product.pricePlan).map((plan) => ({
-          name: plan.category || "",
-          discount: plan.amount || "",
-        }))
-      : [{ name: "", discount: "" }]
-  );
+  // console.log(typeof product.pricePlan);
+
+  // const [plans, setPlans] = useState(
+  //   pricePlan
+  //     ? JSON.parse(product.pricePlan).map((plan) => ({
+  //         name: plan.category || "",
+  //         discount: plan.amount || "",
+  //       }))
+  //     : [{ name: "", discount: "" }]
+  // );
+
+  const [plans, setPlans] = useState(() => {
+    try {
+      if (pricePlan && product?.pricePlan) {
+        // const parsedPlans = JSON.parse(product.pricePlan);
+        // console.log(parsedPlans);
+
+        if (Array.isArray(product.pricePlan)) {
+          return product.pricePlan.map((plan) => ({
+            name: plan.category || "",
+            discount: plan.amount || "",
+          }));
+        } else {
+          return [];
+        }
+      }
+    } catch (error) {
+      console.error("Error parsing pricePlan:", error);
+    }
+    return [{ name: "", discount: "" }];
+  });
+
   const [productName, setProductName] = useState(product.name);
   const [selectedCategory, setSelectedCategory] = useState("products");
   const [selectedDept, setSelectedDept] = useState("");
@@ -47,7 +76,7 @@ const EditDialog = ({ product, onClose }) => {
 
   const handleSwitchChange = (checked) => {
     setPricePlan(checked);
-    console.log(plans);
+    // console.log(plans);
   };
 
   const formatNumber = (num) => {
@@ -86,7 +115,6 @@ const EditDialog = ({ product, onClose }) => {
       toast.error("An error occurred. Try logging in again");
       return;
     }
-
     try {
       const response = await axios.get(`${root}/dept/get-department`);
       setDepartment(response.data.departments);

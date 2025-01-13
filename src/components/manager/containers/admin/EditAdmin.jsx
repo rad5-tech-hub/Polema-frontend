@@ -207,27 +207,6 @@ const EditAdmin = () => {
     }
   };
 
-  //   // console.log(additionalDepartments);
-
-  // // Handle adding a new department input
-  // const handleAddDepartment = () => {
-  //   setAdditionalDepartments((prev) => [
-  //     ...prev,
-  //     { id: Date.now(), value: "" }, // Unique identifier
-  //   ]);
-  // };
-
-  // // Handle removing a department input
-  // const handleRemoveDepartment = (id) => {
-  //   setAdditionalDepartments((prev) => prev.filter((dept) => dept.id !== id));
-  // };
-
-  // const handleDepartments = (index, value) => {
-  //   setAdditionalDepartments((prev) =>
-  //     prev.map((dept, i) => (i === index ? { ...dept, value } : dept))
-  //   );
-  // };
-
   // Handle adding a new department input
   const handleAddDepartment = () => {
     setAdditionalDepartments((prev) => [...prev, ""]);
