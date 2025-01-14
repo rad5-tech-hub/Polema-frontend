@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { refractor } from "../../../date";
 import {
@@ -21,7 +21,7 @@ import {
   Grid,
 } from "@radix-ui/themes";
 import { upperFirst } from "lodash";
-import { EyeClosedIcon, EyeOpenIcon } from "@radix-ui/react-icons";
+import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 
 import toast, { LoaderIcon, Toaster } from "react-hot-toast";
 import axios from "axios";
@@ -598,6 +598,38 @@ const AllAdmins = () => {
     fetchStaffData();
   }, []);
 
+  // --------------------
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Function to highlight matching text
+  const highlightText = (text, search) => {
+    if (!search) return text;
+    const regex = new RegExp(`(${search})`, "gi");
+    return text.replace(
+      regex,
+      (match) => `<span class="bg-yellow-200">${match}</span>`
+    );
+  };
+
+  // Filter and highlight staff list by name
+  const filteredStaff = useMemo(() => {
+    const searchLower = searchTerm.toLowerCase();
+
+    return staffList
+      .filter((staff) =>
+        `${staff.firstname.toLowerCase()} ${staff.lastname.toLowerCase()}`.includes(
+          searchLower
+        )
+      )
+      .map((staff) => ({
+        ...staff,
+        highlightedName: highlightText(
+          `${staff.firstname} ${staff.lastname}`,
+          searchLower
+        ),
+      }));
+  }, [searchTerm, staffList]);
+
   return (
     <>
       {editDialogOpen ? (
@@ -605,89 +637,84 @@ const AllAdmins = () => {
       ) : (
         <div>
           <Heading>Admins</Heading>
+          <TextField.Root
+            placeholder="Search admins"
+            className="my-4 w-[60%]"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          >
+            <TextField.Slot>
+              <MagnifyingGlassIcon height="16" width="16" />
+            </TextField.Slot>
+          </TextField.Root>
+
           <Table.Root variant="surface" size={"3"} className="mt-4">
             <Table.Header>
               <Table.Row>
+                <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell>NAME</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell>EMAIL</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell>ROLE</Table.ColumnHeaderCell>
-                <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
               </Table.Row>
             </Table.Header>
+
             {loading ? (
               <Spinner size={"2"} className="my-4 ml-4" />
-            ) : (
+            ) : filteredStaff.length === 0 ? (
               <Table.Body>
-                {staffList.length === 0 ? (
-                  <Table.Cell colSpan={3} className="text-center">
+                <Table.Row>
+                  <Table.Cell colSpan={5} className="text-center">
                     No Admins Yet
                   </Table.Cell>
-                ) : (
-                  staffList.map((staff, index) => (
-                    <>
-                      <Table.Row key={index} className="relative">
-                        <Table.RowHeaderCell
-                          className={`${staff.active ? "" : "text-red-400"}`}
-                        >{`${upperFirst(staff.firstname)} ${
-                          staff.lastname
-                        }`}</Table.RowHeaderCell>
-                        <Table.Cell
-                          className={`${staff.active ? "" : "text-red-400"}`}
-                        >
-                          {staff.email}
-                        </Table.Cell>
-                        <Table.Cell
-                          className={`${staff.active ? "" : "text-red-400"}`}
-                        >
-                          {getRoleNameById(staff.roleId)}
-                        </Table.Cell>
-                        <Table.Cell
-                          className={`${staff.active ? "" : "text-red-400"}`}
-                        >
-                          {refractor(staff.createdAt)}
-                        </Table.Cell>
-                        <div className="mt-2 right-4 top-2">
-                          <DropdownMenu.Root>
-                            <DropdownMenu.Trigger>
-                              <Button
-                                variant="surface"
-                                className="cursor-pointer"
-                              >
-                                <DropDownIcon />
-                                {/* <DropdownMenu.TriggerIcon /> */}
-                              </Button>
-                            </DropdownMenu.Trigger>
-                            <DropdownMenu.Content>
-                              <DropdownMenu.Item
-                                shortcut={<FontAwesomeIcon icon={faPen} />}
-                                onClick={() => {
-                                  navigate(
-                                    `/admin/admins/edit-admin/${staff.id}`
-                                  );
-                                }}
-                              >
-                                Edit
-                              </DropdownMenu.Item>
-                              {}
-                              <DropdownMenu.Item
-                                color="red"
-                                shortcut={<Suspend />}
-                                onClick={() => handleSuspendClick(staff)}
-                                // onClick={() => setSuspendDialogOpen(true)}
-                              >
-                                Suspend
-                              </DropdownMenu.Item>
-                            </DropdownMenu.Content>
-                          </DropdownMenu.Root>
-                        </div>
-                      </Table.Row>
-                    </>
-                  ))
-                )}
+                </Table.Row>
+              </Table.Body>
+            ) : (
+              <Table.Body>
+                {filteredStaff.map((staff, index) => (
+                  <Table.Row key={index} className="relative">
+                    <Table.Cell>{refractor(staff.createdAt)}</Table.Cell>
+                    <Table.RowHeaderCell>
+                      <span
+                        dangerouslySetInnerHTML={{
+                          __html: staff.highlightedName,
+                        }}
+                      />
+                    </Table.RowHeaderCell>
+                    <Table.Cell>{staff.email}</Table.Cell>
+                    <Table.Cell>{getRoleNameById(staff.roleId)}</Table.Cell>
+                    <Table.Cell>
+                      <DropdownMenu.Root>
+                        <DropdownMenu.Trigger>
+                          <Button variant="surface" className="cursor-pointer">
+                            <DropDownIcon />
+                          </Button>
+                        </DropdownMenu.Trigger>
+                        <DropdownMenu.Content>
+                          <DropdownMenu.Item
+                            shortcut={<FontAwesomeIcon icon={faPen} />}
+                            onClick={() => {
+                              navigate(`/admin/admins/edit-admin/${staff.id}`);
+                            }}
+                          >
+                            Edit
+                          </DropdownMenu.Item>
+                          <DropdownMenu.Item
+                            color="red"
+                            shortcut={<Suspend />}
+                            onClick={() => handleSuspendClick(staff)}
+                          >
+                            Suspend
+                          </DropdownMenu.Item>
+                        </DropdownMenu.Content>
+                      </DropdownMenu.Root>
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
               </Table.Body>
             )}
           </Table.Root>
+
           {/* Suspend Dialog */}
           {selectedStaff && (
             <SuspendDialog
