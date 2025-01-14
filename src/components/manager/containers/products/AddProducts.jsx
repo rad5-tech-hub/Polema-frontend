@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import _ from "lodash";
 import { useNavigate } from "react-router-dom";
 import {
   faBriefcase,
@@ -191,7 +192,9 @@ const AddProducts = () => {
   return (
     <div>
       <Flex justify={"between"} align={"center"}>
-        <Heading className="text-left py-4">Create Product</Heading>
+        <Heading className="text-left py-4">
+          Create {_.upperFirst(selectedCategory)}
+        </Heading>
 
         <Select.Root
           defaultValue="products"
@@ -221,7 +224,7 @@ const AddProducts = () => {
                 className="text-[15px] font-medium leading-[35px]"
                 htmlFor="product-name"
               >
-                Product Name
+                {_.upperFirst(selectedCategory)} Name
               </label>
               <TextField.Root
                 placeholder="Enter Product name"

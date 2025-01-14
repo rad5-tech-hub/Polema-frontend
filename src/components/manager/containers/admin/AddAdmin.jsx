@@ -89,7 +89,7 @@ const AddAdmin = () => {
       lastname: lastName,
       email: email,
       phoneNumber: phone,
-      address,
+      ...(address && { address: address }),
       roleId,
       department:
         deptId && additionalDepartments.length !== 0
@@ -248,7 +248,7 @@ const AddAdmin = () => {
                 className="text-[15px] font-medium leading-[35px]"
                 htmlFor="dept"
               >
-                Department
+                Select department to view Ledger
               </label>
               <Select.Root onValueChange={setDeptID}>
                 <Select.Trigger
@@ -271,7 +271,7 @@ const AddAdmin = () => {
                   className="text-[15px] font-medium leading-[35px]"
                   htmlFor="dept"
                 >
-                  Department {index + 2}
+                  Select department to view Ledger ({index + 2})
                 </label>
                 <Select.Root
                   onValueChange={(value) =>

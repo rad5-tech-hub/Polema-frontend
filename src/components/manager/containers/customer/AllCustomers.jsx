@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { refractor } from "../../../date";
 import { Table, Spinner, TextField, Flex, Text } from "@radix-ui/themes";
 import axios from "axios";
@@ -232,6 +232,37 @@ const AllCustomers = () => {
     }
   };
 
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Highlight function: Wrap matching text in <span>
+  const highlightText = (text, search) => {
+    if (!search) return text; // Return unaltered text if no search term
+    const regex = new RegExp(`(${search})`, "gi");
+    return text.replace(
+      regex,
+      (match) => `<span class="bg-yellow-200">${match}</span>`
+    );
+  };
+
+  // Filter and highlight customers based on the search term
+  const filteredCustomers = useMemo(() => {
+    const searchLower = searchTerm.toLowerCase();
+
+    // Step 1: Filter customers
+    const filtered = customerData.filter((customer) =>
+      `${customer.firstname} ${customer.lastname}`
+        .toLowerCase()
+        .includes(searchLower)
+    );
+
+    // Step 2: Apply highlighting
+    return filtered.map((customer) => {
+      const fullName = `${customer.firstname} ${customer.lastname}`;
+      const highlightedName = highlightText(fullName, searchLower);
+      return { ...customer, highlightedName };
+    });
+  }, [searchTerm, customerData]);
+
   useEffect(() => {
     fetchCustomers();
   }, []);
@@ -239,6 +270,17 @@ const AllCustomers = () => {
   return (
     <>
       <Heading className="mb-4">Customers</Heading>
+      <TextField.Root
+        placeholder="Search customers by name"
+        className="mb-4 w-[60%]"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      >
+        <TextField.Slot>
+          <MagnifyingGlassIcon height="16" width="16" />
+        </TextField.Slot>
+      </TextField.Root>
+
       <Table.Root size={"3"} variant="surface">
         <Table.Header>
           <Table.Row>
@@ -258,59 +300,55 @@ const AllCustomers = () => {
           </div>
         ) : (
           <Table.Body>
-            {customerData.length === 0 ? (
+            {filteredCustomers.length === 0 ? (
               <Table.Cell colSpan={6} className="text-center">
-                No Customers Yet
+                No Customers Found
               </Table.Cell>
             ) : (
-              customerData.map((customer) => (
-                <>
-                  <Table.Row
-                    key={customer.id}
-                    className="relative cursor-pointer"
-                  >
-                    {" "}
-                    {/* Ensure unique key */}
-                    <Table.Cell>{refractor(customer.createdAt)}</Table.Cell>
-                    <Table.Cell>{customer.customerTag}</Table.Cell>
-                    <Table.RowHeaderCell>
-                      {customer.firstname} {customer.lastname}
-                    </Table.RowHeaderCell>
-                    <Table.Cell>{customer.email}</Table.Cell>
-                    <Table.Cell>{customer.address}</Table.Cell>
-                    <Table.Cell>
-                      {customer.phoneNumber.map((item) => {
-                        return (
-                          <>
-                            <span>{item}</span> <br />
-                          </>
-                        );
-                      })}
-                    </Table.Cell>
-                    <Table.Cell>
-                      <div className=" right-4 top-2">
-                        <DropdownMenu.Root>
-                          <DropdownMenu.Trigger>
-                            <Button
-                              variant="surface"
-                              className="cursor-pointer"
-                            >
-                              <FontAwesomeIcon icon={faEllipsisV} />
-                            </Button>
-                          </DropdownMenu.Trigger>
-                          <DropdownMenu.Content variant="solid">
-                            <DropdownMenu.Item
-                              shortcut={<FontAwesomeIcon icon={faPen} />}
-                              onClick={() => handleEditClcik(customer)}
-                            >
-                              Edit
-                            </DropdownMenu.Item>
-                          </DropdownMenu.Content>
-                        </DropdownMenu.Root>
-                      </div>
-                    </Table.Cell>
-                  </Table.Row>
-                </>
+              filteredCustomers.map((customer) => (
+                <Table.Row
+                  key={customer.id}
+                  className="relative cursor-pointer"
+                >
+                  <Table.Cell>{refractor(customer.createdAt)}</Table.Cell>
+                  <Table.Cell>{customer.customerTag}</Table.Cell>
+                  <Table.RowHeaderCell>
+                    {/* Render highlighted name */}
+                    <span
+                      dangerouslySetInnerHTML={{
+                        __html: customer.highlightedName,
+                      }}
+                    />
+                  </Table.RowHeaderCell>
+                  <Table.Cell>{customer.email}</Table.Cell>
+                  <Table.Cell>{customer.address}</Table.Cell>
+                  <Table.Cell>
+                    {customer.phoneNumber.map((item, index) => (
+                      <span key={index}>
+                        {item} <br />
+                      </span>
+                    ))}
+                  </Table.Cell>
+                  <Table.Cell>
+                    <div className="right-4 top-2">
+                      <DropdownMenu.Root>
+                        <DropdownMenu.Trigger>
+                          <Button variant="surface" className="cursor-pointer">
+                            <FontAwesomeIcon icon={faEllipsisV} />
+                          </Button>
+                        </DropdownMenu.Trigger>
+                        <DropdownMenu.Content variant="solid">
+                          <DropdownMenu.Item
+                            shortcut={<FontAwesomeIcon icon={faPen} />}
+                            onClick={() => handleEditClick(customer)}
+                          >
+                            Edit
+                          </DropdownMenu.Item>
+                        </DropdownMenu.Content>
+                      </DropdownMenu.Root>
+                    </div>
+                  </Table.Cell>
+                </Table.Row>
               ))
             )}
           </Table.Body>
