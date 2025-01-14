@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import _ from "lodash";
 import { useNavigate } from "react-router-dom";
+import * as Dialog from "@radix-ui/react-dialog";
 import {
   faBriefcase,
   faSitemap,
@@ -36,6 +37,7 @@ const AddProducts = () => {
   const [basePrice, setBasePrice] = useState("");
   const [unit, setUnit] = useState("");
   const [plans, setPlans] = useState([{ name: "", discount: "" }]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // State management for product name
   const [productName, setProductName] = useState("");
@@ -121,7 +123,7 @@ const AddProducts = () => {
       }));
 
     const submitObject = {
-      name: e.target[0].value,
+      name: productName,
       category: selectedCategory === "products" ? "For Sale" : "For Purchase",
       departmentId: selectedDept,
       price: [
@@ -164,6 +166,11 @@ const AddProducts = () => {
         },
       });
 
+      ///Close dialog box if request is successful
+      setTimeout(() => {
+        setIsDialogOpen(false);
+      }, 1500);
+
       // Reset form fields after successful submission
       setProductName("");
       setBasePrice("");
@@ -189,8 +196,52 @@ const AddProducts = () => {
     fetchDepartments();
   }, []);
 
+  // ---------------Confrimation Dialog---------------
+  const ConfirmationDialog = () => {
+    return (
+      <>
+        <Dialog.Root open={isDialogOpen}>
+          <Dialog.Portal>
+            <Dialog.Overlay className="bg-black/70 data-[state=open]:animate-overlayShow fixed inset-0" />
+            <Dialog.Content className=" fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none">
+              <Dialog.Title className="m-0 text-[17px] font-medium text-black">
+                Are you sure you want to add as{" "}
+                <span className="underline">
+                  {_.upperCase(selectedCategory)}
+                </span>{" "}
+                ?
+              </Dialog.Title>
+              <div className="flex justify-end mt-4">
+                <div className="flex ">
+                  <Dialog.Close asChild>
+                    <button
+                      onClick={() => {
+                        setIsDialogOpen(false);
+                      }}
+                      className="bg-red-500 hover:bg-red-800 focus:shadow-red7 text-white inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
+                    >
+                      No
+                    </button>
+                  </Dialog.Close>
+                  <button
+                    disabled={isloading}
+                    onClick={handleSubmit}
+                    className="ml-4 bg-blue-500 text-white hover:bg-blue-600 focus:shadow-red7 inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
+                  >
+                    {isloading ? <LoaderIcon /> : "Yes"}
+                  </button>
+                </div>
+              </div>
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
+      </>
+    );
+  };
+
   return (
     <div>
+      <ConfirmationDialog />
       <Flex justify={"between"} align={"center"}>
         <Heading className="text-left py-4">
           Create {_.upperFirst(selectedCategory)}
@@ -216,7 +267,12 @@ const AddProducts = () => {
         </Select.Root>
       </Flex>
       <Separator className="w-full" />
-      <form onSubmit={handleSubmit}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          setIsDialogOpen(true);
+        }}
+      >
         <div className="flex w-full justify-between gap-8">
           <div className="left w-[50%]">
             <div className="input-field mt-3">
@@ -394,9 +450,8 @@ const AddProducts = () => {
             className="mt-4  bg-theme hover:bg-theme/85"
             size={3}
             type="submit"
-            disabled={isloading}
           >
-            {isloading ? <LoaderIcon /> : "Create"}
+            Create
           </Button>
         </Flex>
       </form>

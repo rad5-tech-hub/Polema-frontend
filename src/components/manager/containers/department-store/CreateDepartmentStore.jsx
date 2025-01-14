@@ -139,6 +139,11 @@ const CreateDepartmentStore = () => {
     }
     setButtonLoading(true);
 
+    const resetForm = () => {
+      setThresholdVal(""), setSelcetedUnit("");
+      setImage(null);
+    };
+
     const body = {
       thresholdValue: threshHoldVal,
       productId: productId,
@@ -164,6 +169,7 @@ const CreateDepartmentStore = () => {
         },
         duration: 5000,
       });
+      resetForm();
     } catch (error) {
       console.log(error);
       setButtonLoading(false);
