@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import {
   Table,
@@ -6,8 +6,10 @@ import {
   Heading,
   Separator,
   Button,
+  TextField,
   DropdownMenu,
 } from "@radix-ui/themes";
+import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { DropDownIcon } from "../../../icons";
 import { refractor } from "../../../date";
 import toast, { Toaster } from "react-hot-toast";
@@ -57,10 +59,51 @@ const AllSuppliers = () => {
     fetchSuppliers();
   }, []);
 
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Function to highlight matching text
+  const highlightText = (text, search) => {
+    if (!search) return text;
+    const regex = new RegExp(`(${search})`, "gi");
+    return text.replace(
+      regex,
+      (match) => `<span class="bg-yellow-300">${match}</span>`
+    );
+  };
+
+  // Filter and highlight suppliers based on the search term
+  const filteredSuppliers = useMemo(() => {
+    const searchLower = searchTerm.toLowerCase();
+
+    // Filter suppliers by name (case-insensitive)
+    const filtered = suppliers.filter((supplier) =>
+      `${supplier.firstname} ${supplier.lastname}`
+        .toLowerCase()
+        .includes(searchLower)
+    );
+
+    // Apply highlighting to matching names
+    return filtered.map((supplier) => {
+      const fullName = `${supplier.firstname} ${supplier.lastname}`;
+      const highlightedName = highlightText(fullName, searchLower);
+      return { ...supplier, highlightedName };
+    });
+  }, [searchTerm, suppliers]);
+
   return (
     <>
       <div>
         <Heading className="mb-3">All Suppliers</Heading>
+        <TextField.Root
+          placeholder="Search suppliers"
+          className="mb-4 w-[60%]"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        >
+          <TextField.Slot>
+            <MagnifyingGlassIcon height="16" width="16" />
+          </TextField.Slot>
+        </TextField.Root>
         <Separator className="my-4 w-full" />
         <Table.Root size="3" variant="surface">
           <Table.Header>
@@ -78,18 +121,24 @@ const AllSuppliers = () => {
             <Spinner className="m-4" />
           ) : (
             <Table.Body>
-              {paginatedSuppliers.length === 0 ? (
+              {filteredSuppliers.length === 0 ? (
                 <Table.Row>
                   <Table.Cell colSpan={6} className="text-center">
-                    No Suppliers Yet
+                    No Suppliers Found
                   </Table.Cell>
                 </Table.Row>
               ) : (
-                paginatedSuppliers.map((supplier) => (
+                filteredSuppliers.map((supplier) => (
                   <Table.Row key={supplier.id}>
                     <Table.Cell>{refractor(supplier.createdAt)}</Table.Cell>
                     <Table.Cell>{supplier.supplierTag}</Table.Cell>
-                    <Table.Cell>{`${supplier.firstname} ${supplier.lastname}`}</Table.Cell>
+                    <Table.Cell>
+                      <span
+                        dangerouslySetInnerHTML={{
+                          __html: supplier.highlightedName,
+                        }}
+                      />
+                    </Table.Cell>
                     <Table.Cell>{supplier.email}</Table.Cell>
                     <Table.Cell>{supplier.address}</Table.Cell>
                     <Table.Cell>{supplier.phoneNumber}</Table.Cell>
@@ -102,7 +151,7 @@ const AllSuppliers = () => {
                         </DropdownMenu.Trigger>
                         <DropdownMenu.Content variant="solid">
                           <DropdownMenu.Item
-                            onClick={() => setViewStaff(supplier)}
+                            onClick={() => console.log("Edit Supplier")}
                           >
                             Edit
                           </DropdownMenu.Item>
@@ -115,34 +164,7 @@ const AllSuppliers = () => {
             </Table.Body>
           )}
         </Table.Root>
-
-        {/* Pagination Controls */}
-        <div className="flex justify-center  items-center mt-4">
-          <div className="flex gap-2 items-center">
-            <Button disabled={currentPage === 1} onClick={goToPreviousPage}>
-              Previous
-            </Button>
-            <span>
-              Page {currentPage} of {totalPages}
-            </span>
-            <Button
-              disabled={currentPage === totalPages}
-              onClick={goToNextPage}
-            >
-              Next
-            </Button>
-          </div>
-        </div>
       </div>
-
-      {viewStaff && (
-        <EditSuppliers
-          isOpen={!!viewStaff}
-          onClose={() => setViewStaff(null)}
-          fetchSuppliers={fetchSuppliers}
-          id={viewStaff}
-        />
-      )}
       <Toaster position="top-right" />
     </>
   );

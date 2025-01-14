@@ -271,7 +271,7 @@ const AllCustomers = () => {
     <>
       <Heading className="mb-4">Customers</Heading>
       <TextField.Root
-        placeholder="Search customers by name"
+        placeholder="Search customers"
         className="mb-4 w-[60%]"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
