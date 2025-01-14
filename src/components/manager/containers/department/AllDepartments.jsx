@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { refractor } from "../../../date";
 import axios from "axios";
 import { Heading, Table, Spinner } from "@radix-ui/themes";
@@ -157,7 +157,6 @@ const AllDepartments = () => {
       response.data.departments.length
         ? setDepartments(response.data.departments)
         : setDepartments([]);
-      console.log(response.data);
     } catch (error) {
       console.log(error);
       setLoading(false);
@@ -168,6 +167,30 @@ const AllDepartments = () => {
   useEffect(() => {
     fetchDept();
   }, []);
+
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Function to highlight matching text
+  const highlightText = (text, search) => {
+    if (!search) return text;
+    const regex = new RegExp(`(${search})`, "gi");
+    return text.replace(
+      regex,
+      (match) => `<span class="bg-yellow-200">${match}</span>`
+    );
+  };
+
+  // Filter and highlight departments by name
+  const filteredDepartments = useMemo(() => {
+    const searchLower = searchTerm.toLowerCase();
+
+    return departments
+      .filter((dept) => dept.name.toLowerCase().includes(searchLower))
+      .map((dept) => ({
+        ...dept,
+        highlightedName: highlightText(dept.name, searchLower),
+      }));
+  }, [searchTerm, departments]);
 
   // Edit Dialog Component
   const EditDialog = () => {
@@ -263,16 +286,18 @@ const AllDepartments = () => {
         <EditDialog />
       ) : (
         <div>
-          {/* <TextField.Root
+          <Heading>All Departments</Heading>
+          <TextField.Root
             placeholder="Search department.."
-            className="w-[55%] mb-5"
+            className="w-[55%] my-4"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           >
             <TextField.Slot>
               <MagnifyingGlassIcon height={"16"} width={"16"} />
             </TextField.Slot>
-          </TextField.Root> */}
+          </TextField.Root>
 
-          <Heading>All Departments</Heading>
           <Table.Root className="mt-4">
             <Table.Header>
               <Table.Row>
@@ -298,16 +323,22 @@ const AllDepartments = () => {
               </div>
             ) : (
               <Table.Body>
-                {departments.length === 0 ? (
+                {filteredDepartments.length === 0 ? (
                   <Table.Row className="relative">
-                    <Table.Cell colSpan={4} className="text-center">
+                    <Table.Cell colSpan={5} className="text-center">
                       No Departments Yet
                     </Table.Cell>
                   </Table.Row>
                 ) : (
-                  departments.map((dept) => (
+                  filteredDepartments.map((dept) => (
                     <Table.Row key={dept.id} className="relative">
-                      <Table.RowHeaderCell>{dept.name}</Table.RowHeaderCell>
+                      <Table.RowHeaderCell>
+                        <span
+                          dangerouslySetInnerHTML={{
+                            __html: dept.highlightedName,
+                          }}
+                        />
+                      </Table.RowHeaderCell>
                       <Table.RowHeaderCell>
                         {dept.products.length === 0
                           ? "No Product Assigned yet"
@@ -365,10 +396,12 @@ const AllDepartments = () => {
               </Table.Body>
             )}
           </Table.Root>
+
+          {/* Delete Dialog */}
           {selectedDepartment && (
             <DeleteDialog
-              isOpen={isDeleteOpen} // Use the new delete state
-              onClose={closeDeleteDialog} // Pass the close function
+              isOpen={isDeleteOpen}
+              onClose={closeDeleteDialog}
               id={selectedDepartment.id}
               runfetch={fetchDept}
             />
