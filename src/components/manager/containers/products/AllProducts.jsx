@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { refractor, formatMoney } from "../../../date";
 import { DropDownIcon } from "../../../icons";
 import {
@@ -8,12 +8,14 @@ import {
   Select,
   Flex,
   Table,
+  TextField,
   Spinner,
 } from "@radix-ui/themes";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
+import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import toast, { Toaster } from "react-hot-toast";
 import DeleteDialog from "./DeleteDialog"; // Import DeleteDialog
 import EditDialog from "./EditDialog"; // Import EditDialog
@@ -68,6 +70,30 @@ const AllProducts = () => {
     setSelectedEditProduct(product);
   };
 
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Function to highlight matching text
+  const highlightText = (text, search) => {
+    if (!search) return text;
+    const regex = new RegExp(`(${search})`, "gi");
+    return text.replace(
+      regex,
+      (match) => `<span class="bg-yellow-200">${match}</span>`
+    );
+  };
+
+  // Filter and highlight products only by name
+  const filteredProducts = useMemo(() => {
+    const searchLower = searchTerm.toLowerCase();
+
+    return products
+      .filter((product) => product.name.toLowerCase().includes(searchLower))
+      .map((product) => ({
+        ...product,
+        highlightedName: highlightText(product.name, searchLower),
+      }));
+  }, [searchTerm, products]);
+
   return (
     <>
       {selectedEditProduct ? (
@@ -97,6 +123,19 @@ const AllProducts = () => {
             </Select.Root>
           </Flex>
 
+          <TextField.Root
+            placeholder={`Search ${
+              productActive ? "Products" : "Raw Materials"
+            }`}
+            className="my-4 w-[60%]"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          >
+            <TextField.Slot>
+              <MagnifyingGlassIcon height="16" width="16" />
+            </TextField.Slot>
+          </TextField.Root>
+
           <Table.Root size="3" variant="surface" className="mt-5">
             <Table.Header>
               <Table.Row>
@@ -113,27 +152,32 @@ const AllProducts = () => {
               <div className="p-4">
                 <Spinner />
               </div>
-            ) : products.length === 0 ? (
-              <Table.Body className>
+            ) : filteredProducts.length === 0 ? (
+              <Table.Body>
                 <Table.Row>
                   <Table.Cell colSpan={6} className="text-center">
-                    No Products Found
+                    No {productActive ? "Products" : "Raw Materials"} Found
                   </Table.Cell>
                 </Table.Row>
               </Table.Body>
             ) : (
               <Table.Body>
-                {products.map((product) => (
+                {filteredProducts.map((product) => (
                   <Table.Row key={product.id}>
                     <Table.Cell>{refractor(product.createdAt)}</Table.Cell>
-                    <Table.Cell>{product.name}</Table.Cell>
+                    <Table.Cell>
+                      <span
+                        dangerouslySetInnerHTML={{
+                          __html: product.highlightedName,
+                        }}
+                      />
+                    </Table.Cell>
                     <Table.Cell>{product.category}</Table.Cell>
                     <Table.Cell>
                       {product.price.map((p, index) => (
                         <div key={index}>{p.unit}</div>
                       ))}
                     </Table.Cell>
-
                     <Table.Cell>
                       {product.price.map((p, index) => (
                         <div key={index}>{formatMoney(p.amount)}</div>
@@ -148,7 +192,7 @@ const AllProducts = () => {
                         </DropdownMenu.Trigger>
                         <DropdownMenu.Content>
                           <DropdownMenu.Item
-                            onClick={() => handleEditClick(product)}
+                            onClick={() => console.log("Edit Product")}
                           >
                             <FontAwesomeIcon icon={faPen} /> Edit
                           </DropdownMenu.Item>
@@ -161,6 +205,7 @@ const AllProducts = () => {
             )}
           </Table.Root>
 
+          {/* Additional Dialog for Delete or Edit */}
           {selectedProduct && (
             <DeleteDialog
               isOpen={!!selectedProduct}

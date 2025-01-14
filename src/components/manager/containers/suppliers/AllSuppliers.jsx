@@ -31,7 +31,7 @@ const AllSuppliers = () => {
     goToNextPage,
     goToPreviousPage,
     goToPage,
-  } = usePagination(suppliers, 15);
+  } = usePagination(suppliers, 1);
 
   const fetchSuppliers = async () => {
     const retrToken = localStorage.getItem("token");
@@ -67,7 +67,7 @@ const AllSuppliers = () => {
     const regex = new RegExp(`(${search})`, "gi");
     return text.replace(
       regex,
-      (match) => `<span class="bg-yellow-300">${match}</span>`
+      (match) => `<span class="bg-yellow-300 text-white">${match}</span>`
     );
   };
 
@@ -164,6 +164,22 @@ const AllSuppliers = () => {
             </Table.Body>
           )}
         </Table.Root>
+        {/* <div className="flex justify-center  items-center mt-4">
+          <div className="flex gap-2 items-center">
+            <Button disabled={currentPage === 1} onClick={goToPreviousPage}>
+              Previous
+            </Button>
+            <span>
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              disabled={currentPage === totalPages}
+              onClick={goToNextPage}
+            >
+              Next
+            </Button>
+          </div>
+        </div> */}
       </div>
       <Toaster position="top-right" />
     </>
