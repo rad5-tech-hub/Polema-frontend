@@ -1198,6 +1198,14 @@ video {
   width: 100%;
 }
 
+.w-\[80\%s\] {
+  width: 80%s;
+}
+
+.w-\[80\%\] {
+  width: 80%;
+}
+
 .min-w-\[50px\] {
   min-width: 50px;
 }
@@ -1838,6 +1846,10 @@ video {
 
 .p-\[25px\] {
   padding: 25px;
+}
+
+.p-0 {
+  padding: 0px;
 }
 
 .px-16 {
