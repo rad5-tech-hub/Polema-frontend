@@ -38,6 +38,7 @@ const AddProducts = () => {
   const [unit, setUnit] = useState("");
   const [plans, setPlans] = useState([{ name: "", discount: "" }]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [intialDialogOpen, setInitialDialogOpen] = useState(true);
 
   // State management for product name
   const [productName, setProductName] = useState("");
@@ -196,7 +197,7 @@ const AddProducts = () => {
     fetchDepartments();
   }, []);
 
-  // ---------------Confrimation Dialog---------------
+  // ---------------Confirmation Dialog---------------
   const ConfirmationDialog = () => {
     return (
       <>
@@ -239,8 +240,50 @@ const AddProducts = () => {
     );
   };
 
+  // -------------------Initial Dialog---------
+  const InitialDialog = () => {
+    return (
+      <>
+        <Dialog.Root open={intialDialogOpen}>
+          <Dialog.Portal>
+            <Dialog.Overlay className="bg-black/70 data-[state=open]:animate-overlayShow fixed inset-0" />
+            <Dialog.Content className=" fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none">
+              <Dialog.Title className="m-0 text-[20px] font-medium text-black">
+                What do you want to create?
+              </Dialog.Title>
+
+              <div className="flex w-full justify-between mt-4">
+                <Dialog.Close asChild>
+                  <button
+                    onClick={() => {
+                      setInitialDialogOpen(false);
+                      setSelectedCategory("products");
+                    }}
+                    className="bg-green-500 hover:bg-green-800 focus:shadow-red7 text-white inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
+                  >
+                    Products
+                  </button>
+                </Dialog.Close>
+                <button
+                  onClick={() => {
+                    setInitialDialogOpen(false);
+                    setSelectedCategory("raw-materials");
+                  }}
+                  className="ml-4 bg-blue-500 text-white hover:bg-blue-600 focus:shadow-red7 inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
+                >
+                  Raw Materials
+                </button>
+              </div>
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
+      </>
+    );
+  };
+
   return (
     <div>
+      <InitialDialog />
       <ConfirmationDialog />
       <Flex justify={"between"} align={"center"}>
         <Heading className="text-left py-4">
