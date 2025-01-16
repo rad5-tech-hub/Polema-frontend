@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import DetailsDialog from "./DetailsDialog";
 import { jwtDecode } from "jwt-decode";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
@@ -25,6 +26,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
+import { faExpand } from "@fortawesome/free-solid-svg-icons";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -97,6 +99,9 @@ const Notifications = () => {
     const [rejectLoading, setRejectLoading] = useState(false);
     const [approveLoading, setApproveLoading] = useState(false);
     const [confirmLoading, setConfirmLoading] = useState(false);
+
+    // --------------------State management for opening and closing the dialog------------------
+    const [dialogOpen, setDialogOpen] = useState(false);
 
     const getAppropriateEndpoint = () => {
       switch (selectedTicket.type) {
@@ -673,6 +678,21 @@ const Notifications = () => {
                       </div>
                     </div>
                   )}
+                </div>
+                <DetailsDialog
+                  isOpen={dialogOpen}
+                  ticketDetails={ticketDetails}
+                  selectedTicket={selectedTicket}
+                />
+                <div className="flex mt-4 justify-end">
+                  <div
+                    className="hover:bg-slate-400/30 cursor-pointer p-2 rounded-md"
+                    onClick={(e) => {
+                      setDialogOpen(!dialogOpen);
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faExpand} />
+                  </div>
                 </div>
               </>
             )}
