@@ -192,7 +192,7 @@ const AllProducts = () => {
                         </DropdownMenu.Trigger>
                         <DropdownMenu.Content>
                           <DropdownMenu.Item
-                            onClick={() => console.log("Edit Product")}
+                            onClick={() => handleEditClick(product)}
                           >
                             <FontAwesomeIcon icon={faPen} /> Edit
                           </DropdownMenu.Item>
