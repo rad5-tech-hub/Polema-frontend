@@ -1,10 +1,53 @@
-import React from "react";
+import React, { useState } from "react";
+import { jwtDecode } from "jwt-decode";
+import { Button } from "@radix-ui/themes";
 import Image from "../../../../static/image/polema-logo.png";
 import * as Dialog from "@radix-ui/react-dialog";
 import _ from "lodash";
 import { Text } from "@radix-ui/themes";
 
 const DetailsDialog = ({ isOpen, selectedTicket, ticketDetails }) => {
+  // State management for component UI
+  const [rejectLoading, setRejectLoading] = useState(false);
+  const [approveLoading, setApproveLoading] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+
+  // Function to confirm cash ticket
+  const confirmCash = async () => {
+    setConfirmLoading(true);
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("An error occurred  while trying to log in.");
+    }
+
+    try {
+      const response = await axios.post(
+        `${root}/admin/recieve-cash-ticket/${ticketDetails.id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      toast.success("Ticket Confimed", {
+        duration: 6500,
+      });
+      setConfirmLoading(false);
+    } catch (error) {
+      console.log(error);
+      setConfirmLoading(false);
+    }
+  };
+
+  // Function to get token
+  const getToken = () => {
+    const token = localStorage.getItem("token");
+
+    return jwtDecode(token);
+  };
+
   return (
     <>
       <Dialog.Root open={isOpen}>
@@ -16,11 +59,12 @@ const DetailsDialog = ({ isOpen, selectedTicket, ticketDetails }) => {
                 <img src={Image} width={"20px"} />
               </div>
               <Dialog.Title>
-                <h1>POLEMA INDUSTRIES LIMITED</h1>
+                <h1 className="text-md font-bold font-amsterdam">
+                  POLEMA INDUSTRIES LIMITED
+                </h1>
                 {_.upperFirst(selectedTicket.type)} Ticket Details
               </Dialog.Title>
             </div>
-
             {/* Vehicle Details */}
             {selectedTicket.type === "vehicle" && (
               <>
@@ -59,7 +103,6 @@ const DetailsDialog = ({ isOpen, selectedTicket, ticketDetails }) => {
                 </div>
               </>
             )}
-
             {/* Cash Ticket Details */}
             {selectedTicket.type === "cash" && (
               <>
@@ -103,7 +146,6 @@ const DetailsDialog = ({ isOpen, selectedTicket, ticketDetails }) => {
                 )}
               </>
             )}
-
             {/* Store Ticket Details */}
             {selectedTicket.type === "store" && (
               <>
@@ -135,7 +177,6 @@ const DetailsDialog = ({ isOpen, selectedTicket, ticketDetails }) => {
                 </div>
               </>
             )}
-
             {/* LPO TICKET DETAILS */}
             {selectedTicket.type === "lpo" && (
               <>
@@ -179,7 +220,6 @@ const DetailsDialog = ({ isOpen, selectedTicket, ticketDetails }) => {
                 </div>
               </>
             )}
-
             {/* Weigh Ticket Details */}
             {selectedTicket.type === "weigh" && (
               <>
@@ -213,7 +253,6 @@ const DetailsDialog = ({ isOpen, selectedTicket, ticketDetails }) => {
                 </div>
               </>
             )}
-
             {/* Invoice Ticket Details */}
             {selectedTicket.type === "invoice" && (
               <>
@@ -271,7 +310,6 @@ const DetailsDialog = ({ isOpen, selectedTicket, ticketDetails }) => {
                 </div>
               </>
             )}
-
             {/* Gatepass Ticket Details    */}
             {selectedTicket.type === "gatepass" && (
               <>
@@ -305,17 +343,16 @@ const DetailsDialog = ({ isOpen, selectedTicket, ticketDetails }) => {
                 </div>
               </>
             )}
-
-            {/* <div className="flex w-full justify-between mt-4">
+            <div className="flex w-full justify-between mt-4">
               <Dialog.Close asChild>
                 <button className="bg-green-500 hover:bg-green-800 focus:shadow-red7 text-white inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none">
-                  Products
+                  Approve
                 </button>
               </Dialog.Close>
-              <button className="ml-4 bg-blue-500 text-white hover:bg-blue-600 focus:shadow-red7 inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none">
-                Raw Materials
+              <button className="ml-4 bg-red-500 text-white hover:bg-red-600 focus:shadow-red7 inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none">
+                Disapprove
               </button>
-            </div> */}
+            </div>
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>
