@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
+import Image from "../../../../static/image/polema-logo.png";
 import DetailsDialog from "./DetailsDialog";
 import { jwtDecode } from "jwt-decode";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
 import { refractor } from "../../../date";
+import * as Dialog from "@radix-ui/react-dialog";
 import { BellIcon } from "@radix-ui/react-icons";
 import {
   Card,
@@ -299,405 +301,425 @@ const Notifications = () => {
 
     return (
       <>
-        <div className="absolute bg-white h-full z-[11] rounded-md top-0 left-0 p-6 right-[-70px] w-[25rem]">
-          <div
-            className="absolute right-[17px] top-[10px] cursor-pointer"
-            onClick={() => {
-              setDetailsPageOpen(false);
-            }}
-          >
-            <FontAwesomeIcon icon={faClose} />
-          </div>
-          <h1> {_.upperFirst(selectedTicket.type)} Ticket Details</h1>
-          <Separator className="my-2 w-full" />
-          <div className="details-container h-[75%]">
-            {typeof ticketDetails !== "object" ? (
-              <div className="p-4">
-                <Spinner />
-              </div>
-            ) : (
-              <>
-                <div className="h-full relative">
-                  <Grid columns={"3"}>
-                    {/* Ticket Type Specific Details */}
-                    {selectedTicket.type === "gatepass" && (
-                      <>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            ESCORT NAME
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.escortName}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            CUSTOMER
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {`${ticketDetails.transaction.corder.firstname} ${ticketDetails.transaction.corder.lastname}`}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            DESTINATION
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.destination}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            PRODUCT NAME
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.transaction.porders.name}
-                          </p>
-                        </div>
-                      </>
-                    )}
-
-                    {/* Vehicle details */}
-                    {selectedTicket.type === "vehicle" && (
-                      <>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            DRIVER NAME
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.driversName}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            VEHICLE NUMBER
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.vehicleNo}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            DESTINATION
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.destination}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            ESCORT NAME
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.escortName}
-                          </p>
-                        </div>
-                      </>
-                    )}
-
-                    {/* Invoice Details */}
-                    {selectedTicket.type === "invoice" && (
-                      <>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            CUSTOMER
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {`${ticketDetails?.customer?.firstname} ${ticketDetails?.customer?.lastname}`}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            PRODUCT
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.product.name}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            BANK NAME
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.bankName}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            QUANTITY ORDERED
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.quantityOrdered}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            VEHICLE NO
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.vehicleNo}
-                          </p>
-                        </div>
-
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            LEDGER ENTRIES
-                          </Text>
-                          {/* Ledger Entries */}
-                          {Array.isArray(ticketDetails.ledgerEntries) ? (
-                            ticketDetails.ledgerEntries.map((entry) => {
-                              return (
+        <Dialog.Root open={detailsPageOpen}>
+          <Dialog.Portal>
+            <Dialog.Overlay className="bg-black/70 data-[state=open]:animate-overlayShow fixed inset-0" />
+            <Dialog.Content className=" fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[700px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none">
+              <div className=" bg-white h-full z-[11] rounded-md top-0 left-0 p-6 right-[-70px] w-[25rem]">
+                <div
+                  className="absolute right-[17px] top-[10px] cursor-pointer"
+                  onClick={() => {
+                    setDetailsPageOpen(false);
+                  }}
+                >
+                  <FontAwesomeIcon icon={faClose} />
+                </div>
+                <div className="flex items-center gap-4">
+                  <img src={Image} width={"30px"} />
+                  <Dialog.Title className="font-space font-medium">
+                    {" "}
+                    {_.upperFirst(selectedTicket.type)} Ticket Details
+                  </Dialog.Title>
+                </div>
+                {/* <Separator className="my-2 w-full" /> */}
+                <div className="details-container h-[75%]">
+                  {typeof ticketDetails !== "object" ? (
+                    <div className="p-4">
+                      <Spinner />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="h-full relative">
+                        <Grid columns={"3"}>
+                          {/* Ticket Type Specific Details */}
+                          {selectedTicket.type === "gatepass" && (
+                            <>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  ESCORT NAME
+                                </Text>
                                 <p className="text-[.7rem]">
-                                  {entry.quantity} {entry.unit} of{" "}
-                                  {entry.productName}
+                                  {ticketDetails.escortName}
                                 </p>
-                              );
-                            })
-                          ) : (
-                            <div>No entries</div>
+                              </div>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  CUSTOMER
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {`${ticketDetails.transaction.corder.firstname} ${ticketDetails.transaction.corder.lastname}`}
+                                </p>
+                              </div>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  DESTINATION
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {ticketDetails.destination}
+                                </p>
+                              </div>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  PRODUCT NAME
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {ticketDetails.transaction.porders.name}
+                                </p>
+                              </div>
+                            </>
                           )}
-                        </div>
-                      </>
-                    )}
 
-                    {/* Weigh Ticket Example */}
-                    {selectedTicket.type === "weigh" && (
-                      <>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            DRIVER
-                          </Text>
-                          <p className="text-[.7rem]">{ticketDetails.driver}</p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            CUSTOMER NAME
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {`${ticketDetails.transactions?.corder.firstname} ${ticketDetails.transactions?.corder.lastname}`}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            QUANTITY
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.transactions.quantity}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            VEHICLE NO
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.vehicleNo}
-                          </p>
-                        </div>
-                      </>
-                    )}
-
-                    {/* LPO DETAILS */}
-                    {selectedTicket.type === "lpo" && (
-                      <>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            SUPPLIER
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {`${ticketDetails?.supplier?.firstname} ${ticketDetails?.supplier?.lastname}`}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            PRODUCT
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.product.name}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            QUANTITY ORDERED
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.quantOrdered}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            UNIT PRICE
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.unitPrice}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            DELIVERED TO
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.deliveredTo}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            COMMENT
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.comments}
-                          </p>
-                        </div>
-                      </>
-                    )}
-
-                    {/* Cash Example */}
-                    {selectedTicket.type === "cash" && (
-                      <>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            PRODUCT
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.product.name}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            AMOUNT
-                          </Text>
-                          <p className="text-[.7rem]">{ticketDetails.amount}</p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            COMMENTS
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.comments}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            TYPE
-                          </Text>
-                          {ticketDetails.creditOrDebit === "credit" ? (
-                            <p className="text-[.7rem] text-green-500">
-                              Give Cash
-                            </p>
-                          ) : (
-                            <p className="text-[.7rem] text-red-500">
-                              Collected Cash
-                            </p>
+                          {/* Vehicle details */}
+                          {selectedTicket.type === "vehicle" && (
+                            <>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  DRIVER NAME
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {ticketDetails.driversName}
+                                </p>
+                              </div>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  VEHICLE NUMBER
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {ticketDetails.vehicleNo}
+                                </p>
+                              </div>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  DESTINATION
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {ticketDetails.destination}
+                                </p>
+                              </div>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  ESCORT NAME
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {ticketDetails.escortName}
+                                </p>
+                              </div>
+                            </>
                           )}
-                        </div>
-                        {ticketDetails?.customer && (
-                          <div>
-                            <Text className="text-[.56rem] font-black tracking-wide">
-                              NAME
-                            </Text>
-                            <p className="text-[.7rem]">
-                              {`${ticketDetails.customer.firstname} ${ticketDetails.customer.lastname}`}
-                            </p>
+
+                          {/* Invoice Details */}
+                          {selectedTicket.type === "invoice" && (
+                            <>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  CUSTOMER
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {`${ticketDetails?.customer?.firstname} ${ticketDetails?.customer?.lastname}`}
+                                </p>
+                              </div>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  PRODUCT
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {ticketDetails.product.name}
+                                </p>
+                              </div>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  BANK NAME
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {ticketDetails.bankName}
+                                </p>
+                              </div>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  QUANTITY ORDERED
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {ticketDetails.quantityOrdered}
+                                </p>
+                              </div>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  VEHICLE NO
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {ticketDetails.vehicleNo}
+                                </p>
+                              </div>
+
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  LEDGER ENTRIES
+                                </Text>
+                                {/* Ledger Entries */}
+                                {Array.isArray(ticketDetails.ledgerEntries) ? (
+                                  ticketDetails.ledgerEntries.map((entry) => {
+                                    return (
+                                      <p className="text-[.7rem]">
+                                        {entry.quantity} {entry.unit} of{" "}
+                                        {entry.productName}
+                                      </p>
+                                    );
+                                  })
+                                ) : (
+                                  <div>No entries</div>
+                                )}
+                              </div>
+                            </>
+                          )}
+
+                          {/* Weigh Ticket Example */}
+                          {selectedTicket.type === "weigh" && (
+                            <>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  DRIVER
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {ticketDetails.driver}
+                                </p>
+                              </div>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  CUSTOMER NAME
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {`${ticketDetails.transactions?.corder.firstname} ${ticketDetails.transactions?.corder.lastname}`}
+                                </p>
+                              </div>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  QUANTITY
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {ticketDetails.transactions.quantity}
+                                </p>
+                              </div>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  VEHICLE NO
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {ticketDetails.vehicleNo}
+                                </p>
+                              </div>
+                            </>
+                          )}
+
+                          {/* LPO DETAILS */}
+                          {selectedTicket.type === "lpo" && (
+                            <>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  SUPPLIER
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {`${ticketDetails?.supplier?.firstname} ${ticketDetails?.supplier?.lastname}`}
+                                </p>
+                              </div>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  PRODUCT
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {ticketDetails.product.name}
+                                </p>
+                              </div>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  QUANTITY ORDERED
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {ticketDetails.quantOrdered}
+                                </p>
+                              </div>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  UNIT PRICE
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {ticketDetails.unitPrice}
+                                </p>
+                              </div>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  DELIVERED TO
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {ticketDetails.deliveredTo}
+                                </p>
+                              </div>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  COMMENT
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {ticketDetails.comments}
+                                </p>
+                              </div>
+                            </>
+                          )}
+
+                          {/* Cash Example */}
+                          {selectedTicket.type === "cash" && (
+                            <>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  PRODUCT
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {ticketDetails.product.name}
+                                </p>
+                              </div>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  AMOUNT
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {ticketDetails.amount}
+                                </p>
+                              </div>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  COMMENTS
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {ticketDetails.comments}
+                                </p>
+                              </div>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  TYPE
+                                </Text>
+                                {ticketDetails.creditOrDebit === "credit" ? (
+                                  <p className="text-[.7rem] text-green-500">
+                                    Give Cash
+                                  </p>
+                                ) : (
+                                  <p className="text-[.7rem] text-red-500">
+                                    Collected Cash
+                                  </p>
+                                )}
+                              </div>
+                              {ticketDetails?.customer && (
+                                <div>
+                                  <Text className="text-[.56rem] font-black tracking-wide">
+                                    NAME
+                                  </Text>
+                                  <p className="text-[.7rem]">
+                                    {`${ticketDetails.customer.firstname} ${ticketDetails.customer.lastname}`}
+                                  </p>
+                                </div>
+                              )}
+                            </>
+                          )}
+
+                          {/* Store Details */}
+                          {selectedTicket.type === "store" && (
+                            <>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  RECEIVED BY
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {ticketDetails.recievedBy}
+                                </p>
+                              </div>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  COMMENTS
+                                </Text>
+                                <p className="text-[.7rem]">
+                                  {ticketDetails.comments}
+                                </p>
+                              </div>
+                              <div>
+                                <Text className="text-[.56rem] font-black tracking-wide">
+                                  ITEMS
+                                </Text>
+                                {ticketDetails.items &&
+                                  Object.entries(ticketDetails.items).map(
+                                    ([goodsName, quantity]) => (
+                                      <p
+                                        key={goodsName}
+                                        className="text-[.7rem]"
+                                      >
+                                        {fetchStoreNameByID(goodsName).name}:{" "}
+                                        {quantity}{" "}
+                                        {fetchStoreNameByID(goodsName).unit}
+                                      </p>
+                                    )
+                                  )}
+                              </div>
+                            </>
+                          )}
+                        </Grid>
+
+                        {ticketDetails?.status === "approved" &&
+                          selectedTicket?.type === "cash" &&
+                          ticketDetails?.approvedBySuperAdminId !==
+                            getToken()?.id && (
+                            <div className="buttons-div justify-center mt-px absolute bottom-0 flex">
+                              <Button
+                                color="green"
+                                size={"2"}
+                                onClick={confirmCash}
+                                disabled={confirmLoading}
+                              >
+                                {confirmLoading ? <Spinner /> : "Confirm"}
+                              </Button>
+                            </div>
+                          )}
+
+                        {ticketDetails.status !== "approved" && (
+                          <div className="buttons-div justify-center mt-px absolute bottom-0 flex">
+                            <div className="flex gap-4">
+                              <Button
+                                color="red"
+                                size={"2"}
+                                disabled={rejectLoading}
+                                onClick={rejectTicket}
+                              >
+                                {rejectLoading ? <Spinner /> : "Disapprove"}
+                              </Button>
+                              <Button
+                                color="green"
+                                size={"2"}
+                                onClick={approveTicket}
+                                disabled={approveLoading}
+                              >
+                                {approveLoading ? <Spinner /> : "Approve"}
+                              </Button>
+                            </div>
                           </div>
                         )}
-                      </>
-                    )}
-
-                    {/* Store Details */}
-                    {selectedTicket.type === "store" && (
-                      <>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            RECEIVED BY
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.recievedBy}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            COMMENTS
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.comments}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            ITEMS
-                          </Text>
-                          {ticketDetails.items &&
-                            Object.entries(ticketDetails.items).map(
-                              ([goodsName, quantity]) => (
-                                <p key={goodsName} className="text-[.7rem]">
-                                  {fetchStoreNameByID(goodsName).name}:{" "}
-                                  {quantity}{" "}
-                                  {fetchStoreNameByID(goodsName).unit}
-                                </p>
-                              )
-                            )}
-                        </div>
-                      </>
-                    )}
-                  </Grid>
-
-                  {ticketDetails?.status === "approved" &&
-                    selectedTicket?.type === "cash" &&
-                    ticketDetails?.approvedBySuperAdminId !==
-                      getToken()?.id && (
-                      <div className="buttons-div justify-center mt-px absolute bottom-0 flex">
-                        <Button
-                          color="green"
-                          size={"2"}
-                          onClick={confirmCash}
-                          disabled={confirmLoading}
-                        >
-                          {confirmLoading ? <Spinner /> : "Confirm"}
-                        </Button>
                       </div>
-                    )}
-
-                  {ticketDetails.status !== "approved" && (
-                    <div className="buttons-div justify-center mt-px absolute bottom-0 flex">
-                      <div className="flex gap-4">
-                        <Button
-                          color="red"
-                          size={"2"}
-                          disabled={rejectLoading}
-                          onClick={rejectTicket}
+                      <DetailsDialog
+                        isOpen={dialogOpen}
+                        ticketDetails={ticketDetails}
+                        selectedTicket={selectedTicket}
+                      />
+                      {/* <div className="flex mt-4 justify-end">
+                        <div
+                          className="hover:bg-slate-400/30 cursor-pointer p-2 rounded-md"
+                          onClick={(e) => {
+                            setDialogOpen(!dialogOpen);
+                          }}
                         >
-                          {rejectLoading ? <Spinner /> : "Disapprove"}
-                        </Button>
-                        <Button
-                          color="green"
-                          size={"2"}
-                          onClick={approveTicket}
-                          disabled={approveLoading}
-                        >
-                          {approveLoading ? <Spinner /> : "Approve"}
-                        </Button>
-                      </div>
-                    </div>
+                          <FontAwesomeIcon icon={faExpand} />
+                        </div>
+                      </div> */}
+                    </>
                   )}
                 </div>
-                <DetailsDialog
-                  isOpen={dialogOpen}
-                  ticketDetails={ticketDetails}
-                  selectedTicket={selectedTicket}
-                />
-                <div className="flex mt-4 justify-end">
-                  <div
-                    className="hover:bg-slate-400/30 cursor-pointer p-2 rounded-md"
-                    onClick={(e) => {
-                      setDialogOpen(!dialogOpen);
-                    }}
-                  >
-                    <FontAwesomeIcon icon={faExpand} />
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
+              </div>
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
         <Toaster position="top-right" />
       </>
     );
@@ -866,7 +888,7 @@ const Notifications = () => {
                     <div
                       key={notification.id}
                       onClick={() => {
-                        setSelectedTicket(notification);
+                        // setSelectedTicket(notification);
                         setDetailsPageOpen(true);
                       }}
                       className="mb-3 p-2 rounded hover:bg-gray-100 cursor-pointer"
