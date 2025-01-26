@@ -1,4 +1,5 @@
 import React from "react";
+import { Progress } from "antd";
 import {
   BarChart,
   Bar,
@@ -219,18 +220,15 @@ const Onboarding = () => {
         <div className="percent-boxes !w-[25%]">
           <Card className="p-4 mb-4">
             <div className="raw-box">
-              <span className="font-medium">% of Raw Materials in stock</span>
-              <div className="h-[200px] border-[15px] flex justify-center items-center border-[#785aaa] w-[200px] rounded-[999px]">
-                <span className="font-bold text-4xl">85%</span>
-              </div>
+              <p className="font-medium">% of Raw Materials in stock</p>
+              <br />
+              <Progress type="circle" percent={75} />
             </div>
           </Card>
           <Card className="p-4">
             <div className="raw-box">
               <span className="font-medium">% of Products in stock</span>
-              <div className="h-[200px] border-[15px] flex justify-center items-center border-[#785aaa] w-[200px] rounded-[999px]">
-                <span className="font-bold text-4xl">65%</span>
-              </div>
+              <Progress type="circle" percent={49} strokeColor={"#78a"} />
             </div>
           </Card>
         </div>

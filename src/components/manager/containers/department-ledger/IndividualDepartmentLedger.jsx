@@ -27,7 +27,9 @@ const IndividualDepartmentLedger = () => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      setLedger(response.data);
+      Array.isArray(response.data)
+        ? setLedger(response.data)
+        : setFailedSearch(true);
     } catch (error) {
       console.log(error);
       {
