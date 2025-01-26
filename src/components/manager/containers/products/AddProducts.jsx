@@ -160,12 +160,14 @@ const AddProducts = () => {
         }
       );
       setIsLoading(false);
-      toast.success(response.data.message, {
-        duration: 6500,
-        style: {
-          padding: "30px",
-        },
-      });
+      setTimeout(() => {
+        toast.success(response.data.message, {
+          duration: 6500,
+          style: {
+            padding: "30px",
+          },
+        });
+      }, 2000);
 
       ///Close dialog box if request is successful
       setTimeout(() => {
@@ -181,7 +183,10 @@ const AddProducts = () => {
       setSelectedCategory("products");
       setPricePlan(false);
 
-      console.log(response);
+      setTimeout(() => {
+        1;
+        setInitialDialogOpen(true);
+      }, 3000);
     } catch (error) {
       console.log(error);
       setIsLoading(false);
