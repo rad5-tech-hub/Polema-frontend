@@ -1,8 +1,9 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { TokensIcon } from "@radix-ui/react-icons";
+import { Select as AntSelect } from "antd";
 import {
   TextField,
+  Select,
   Heading,
   Flex,
   Text,
@@ -84,7 +85,7 @@ const DepartmentLedger = () => {
       <div className="min-h-[70vh] justify-center items-center flex">
         <div className="flex flex-col justify-center items-center gap-3">
           <Text size={"4"} className="font-amsterdam">
-            Please click the search button below to view a department's ledger
+            Select department below to view the department's ledger
           </Text>
           <p>
             <FontAwesomeIcon icon={faArrowDown} size="lg" />
@@ -92,7 +93,7 @@ const DepartmentLedger = () => {
 
           {/* Search Input */}
           <div className="relative w-full max-w-md">
-            <TextField.Root
+            {/* <TextField.Root
               placeholder="Enter Department Name"
               size={"3"}
               className="search-input mx-auto"
@@ -103,10 +104,10 @@ const DepartmentLedger = () => {
               <TextField.Slot>
                 <FontAwesomeIcon icon={faSearch} />
               </TextField.Slot>
-            </TextField.Root>
+            </TextField.Root> */}
 
             {/* Dropdown for search results */}
-            {searchInput && filteredDepartments.length > 0 && (
+            {/* {searchInput && filteredDepartments.length > 0 && (
               <ul className="absolute z-10 bg-white border border-gray-200 rounded mt-1 max-h-48 overflow-y-auto w-full">
                 {filteredDepartments.map((department) => (
                   <li
@@ -124,14 +125,62 @@ const DepartmentLedger = () => {
                   </li>
                 ))}
               </ul>
-            )}
+            )} */}
 
-            {/* No results */}
-            {searchInput && filteredDepartments.length === 0 && (
-              <p className="absolute z-10 bg-white border border-gray-200 rounded mt-1 w-full p-2 text-gray-500">
-                No results found
-              </p>
-            )}
+            {/* <Select.Root>
+              <Select.Trigger
+                placeholder="Select Department"
+                className="w-full"
+              />
+              <Select.Content position="popper">
+                <Select.Group>
+                  {departments.map((dept, idx) => {
+                    return (
+                      <Select.Item
+                        key={idx}
+                        value={dept.name}
+                        onClick={() => {
+                          navigate(
+                            `/admin/department-ledger/${department.name}/${department.id}`
+                          );
+                        }}
+                      >
+                        {dept.name}
+                      </Select.Item>
+                    );
+                  })}
+                </Select.Group>
+              </Select.Content>
+            </Select.Root> */}
+
+            <AntSelect
+              // defaultValue="Option1"
+              placeholder="Select Department"
+              size="large"
+              style={{ width: "100%" }}
+              dropdownRender={(menu) => (
+                <div>
+                  {departments.map((option) => (
+                    <li
+                      key={option.name}
+                      // className="hover:bg-black"
+                      onClick={() => {
+                        navigate(
+                          `/admin/department-ledger/${option.name}/${option.id}`
+                        );
+                      }}
+                      style={{
+                        padding: "8px 12px",
+                        cursor: "pointer",
+                        background: "#fff",
+                      }}
+                    >
+                      {option.name}
+                    </li>
+                  ))}
+                </div>
+              )}
+            />
           </div>
         </div>
       </div>

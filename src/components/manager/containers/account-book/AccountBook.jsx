@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 
 import { useNavigate } from "react-router-dom";
-import UpdateURL from "../ChangeRoute";
+import { Select as AntSelect } from "antd";
+const { Option } = AntSelect;
 import {
   Select,
   Separator,
@@ -293,7 +294,7 @@ const AccountBook = () => {
                   {accountRecipient === "suppliers" && "Supplier Name"}
                   <span className="text-red-500">*</span>
                 </Text>
-                <Select.Root
+                {/* <Select.Root
                   value={selectedCustomerId}
                   required
                   onValueChange={setSelectedCustomerId}
@@ -314,7 +315,30 @@ const AccountBook = () => {
                       </Select.Item>
                     ))}
                   </Select.Content>
-                </Select.Root>
+                </Select.Root> */}
+                <AntSelect
+                  showSearch
+                  className="mt-2"
+                  placeholder={
+                    accountRecipient === "customers"
+                      ? "Select Customers"
+                      : "Select Suppliers"
+                  }
+                  style={{ width: "100%" }}
+                  onChange={(value) => {
+                    setSelectedCustomerId(value);
+                  }}
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    option.children.toLowerCase().includes(input.toLowerCase())
+                  }
+                >
+                  {customers.map((customer) => (
+                    <Option key={customer.id} value={customer.id}>
+                      {`${customer.firstname} ${customer.lastname}`}
+                    </Option>
+                  ))}
+                </AntSelect>
               </div>
               <div className="w-full">
                 <Text className="mb-4">
