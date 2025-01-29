@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { jwtDecode } from "jwt-decode";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
-import { refractor } from "../../../date";
+import { refractor, refractorToTime } from "../../../date";
 import { BellIcon } from "@radix-ui/react-icons";
 import {
   Card,
@@ -235,7 +235,8 @@ const Notifications = () => {
                           </Text>
                           <br />
                           <Text className="text-[.5rem] text-gray-500">
-                            {refractor(notification.createdAt)}
+                            {refractor(notification.createdAt)},
+                            {refractorToTime(notification.createdAt)}
                           </Text>
                         </div>
                       </Flex>
@@ -268,7 +269,8 @@ const Notifications = () => {
                             </Text>
                             <br />
                             <Text className="text-[.5rem] text-gray-500">
-                              {refractor(notification.createdAt)}
+                              {refractor(notification.createdAt)},
+                              {refractorToTime(notification.createdAt)}
                             </Text>
                           </div>
 

@@ -437,7 +437,7 @@ const EditDialog = ({ product, onClose }) => {
           )}
         </Button>
       </form>
-      <Toaster />
+      <Toaster position="top-right" />
     </div>
   );
 };

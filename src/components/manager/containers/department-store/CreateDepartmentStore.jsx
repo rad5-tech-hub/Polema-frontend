@@ -265,7 +265,7 @@ const CreateDepartmentStore = () => {
                 className="w-full mt-2"
                 placeholder="Select Departmemt"
               />
-              <Select.Content>
+              <Select.Content position="popper">
                 {dept.map((item) => {
                   return <Select.Item value={item.id}>{item.name}</Select.Item>;
                 })}
@@ -286,10 +286,14 @@ const CreateDepartmentStore = () => {
             >
               <Select.Trigger
                 className="w-full mt-2"
-                placeholder={"Select a Department First"}
                 disabled={productDisabled}
+                placeholder={
+                  deptId.length > 0
+                    ? `Select ${isProductActive ? "Product" : "Raw Material"}`
+                    : "Select Department First"
+                }
               />
-              <Select.Content>
+              <Select.Content position="popper">
                 {products.map((item) => {
                   return <Select.Item value={item.id}>{item.name}</Select.Item>;
                 })}

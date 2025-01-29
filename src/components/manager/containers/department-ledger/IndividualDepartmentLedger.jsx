@@ -69,10 +69,10 @@ const IndividualDepartmentLedger = () => {
             <Table.ColumnHeaderCell>UNITS</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>QUANTITY</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell className="text-green-500">
-              CREDIT(N)
+              CREDIT(₦)
             </Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell className="text-red-500">
-              DEBIT(N)
+              DEBIT(₦)
             </Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>BALANCE</Table.ColumnHeaderCell>
           </Table.Row>

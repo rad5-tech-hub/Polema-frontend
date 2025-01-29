@@ -62,33 +62,30 @@ const AllSuppliers = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   // Function to highlight matching text
-  const highlightText = (text, search) => {
-    if (!search) return text;
-    const regex = new RegExp(`(${search})`, "gi");
-    return text.replace(
-      regex,
-      (match) => `<span class="bg-yellow-300 text-white">${match}</span>`
+  const filterCustomers = (customers, searchTerm) => {
+    if (!searchTerm.trim()) {
+      return customers; // Return all customers if searchTerm is empty
+    }
+
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+
+    return customers.filter((customer) =>
+      // Check each relevant field for a match
+      [
+        customer.customerTag, // ID
+        customer.firstname, //First Name
+        customer.lastnmae, //Last Name
+        customer.email, // Email
+        customer.address, // Address
+        ...customer.phoneNumber, // Phone (spread for array fields)
+      ].some((field) =>
+        String(field).toLowerCase().includes(lowerCaseSearchTerm)
+      )
     );
   };
 
-  // Filter and highlight suppliers based on the search term
-  const filteredSuppliers = useMemo(() => {
-    const searchLower = searchTerm.toLowerCase();
-
-    // Filter suppliers by name (case-insensitive)
-    const filtered = suppliers.filter((supplier) =>
-      `${supplier.firstname} ${supplier.lastname}`
-        .toLowerCase()
-        .includes(searchLower)
-    );
-
-    // Apply highlighting to matching names
-    return filtered.map((supplier) => {
-      const fullName = `${supplier.firstname} ${supplier.lastname}`;
-      const highlightedName = highlightText(fullName, searchLower);
-      return { ...supplier, highlightedName };
-    });
-  }, [searchTerm, suppliers]);
+  // Use this function to derive the filtered customer data
+  const filteredCustomers = filterCustomers(suppliers, searchTerm);
 
   return (
     <>
@@ -121,23 +118,19 @@ const AllSuppliers = () => {
             <Spinner className="m-4" />
           ) : (
             <Table.Body>
-              {filteredSuppliers.length === 0 ? (
+              {filteredCustomers.length === 0 ? (
                 <Table.Row>
                   <Table.Cell colSpan={6} className="text-center">
                     No Suppliers Found
                   </Table.Cell>
                 </Table.Row>
               ) : (
-                filteredSuppliers.map((supplier) => (
+                filteredCustomers.map((supplier) => (
                   <Table.Row key={supplier.id}>
                     <Table.Cell>{refractor(supplier.createdAt)}</Table.Cell>
                     <Table.Cell>{supplier.supplierTag}</Table.Cell>
                     <Table.Cell>
-                      <span
-                        dangerouslySetInnerHTML={{
-                          __html: supplier.highlightedName,
-                        }}
-                      />
+                      {supplier.firstname} {supplier.lastname}
                     </Table.Cell>
                     <Table.Cell>{supplier.email}</Table.Cell>
                     <Table.Cell>{supplier.address}</Table.Cell>
@@ -151,7 +144,9 @@ const AllSuppliers = () => {
                         </DropdownMenu.Trigger>
                         <DropdownMenu.Content variant="solid">
                           <DropdownMenu.Item
-                            onClick={() => console.log("Edit Supplier")}
+                            onClick={() => {
+                              setViewStaff(supplier);
+                            }}
                           >
                             Edit
                           </DropdownMenu.Item>
@@ -180,6 +175,14 @@ const AllSuppliers = () => {
             </Button>
           </div>
         </div> */}
+        {viewStaff && (
+          <EditSuppliers
+            isOpen={!!viewStaff}
+            onClose={() => setViewStaff(null)}
+            fetchSuppliers={fetchSuppliers}
+            id={viewStaff}
+          />
+        )}
       </div>
       <Toaster position="top-right" />
     </>

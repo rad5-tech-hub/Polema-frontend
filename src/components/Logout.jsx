@@ -59,7 +59,7 @@ const LogoutDialog = ({ isOpen, onClose, handleLogout }) => {
   );
 };
 
-const Logout = () => {
+const Logout = ({ openDialog }) => {
   const navigate = useNavigate();
 
   // State management for logout confirmation dialog

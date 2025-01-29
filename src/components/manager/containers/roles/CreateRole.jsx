@@ -24,9 +24,6 @@ const CreateRole = ({ child, setChild }) => {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const navigate = useNavigate();
-  const [token, setToken] = useState("");
-
   // Default loader until permissions fetch
   const [permissionsLoading, setPermissionsLoading] = useState(true);
 
@@ -44,20 +41,6 @@ const CreateRole = ({ child, setChild }) => {
       setSelectedCheckboxes((prevSelected) =>
         prevSelected.filter((checkboxId) => checkboxId !== id)
       );
-    }
-  };
-
-  // Fetch token from local storage
-  const fetchToken = async () => {
-    const retrToken = localStorage.getItem("token");
-
-    setToken(retrToken);
-  };
-
-  const handleAll = (e) => {
-    const { id, checked } = e.target;
-    if (checked) {
-      console.log(id);
     }
   };
 
@@ -167,8 +150,6 @@ const CreateRole = ({ child, setChild }) => {
     }
   };
 
-  // Fetch Permission and token on page load
-
   useEffect(() => {
     fetchPermissions();
   }, []);
@@ -218,13 +199,13 @@ const CreateRole = ({ child, setChild }) => {
                           <Text className="font-medium">
                             {box.navParentName}
                           </Text>
+
                           <Flex gap={"2"} align={"center"}>
-                            {/* <input type="checkbox" id="usersAll" onChange={handleAll} /> */}
-                            {/* <label htmlFor="usersAll">Select All</label> */}
+                            <input type="checkbox" name="" id="" />
                           </Flex>
                         </Flex>
                         <Separator className="w-full mt-3" />
-                        {/* <Flex className="mt-4 w-full justify-between"> */}
+
                         <Grid
                           className="mt-4"
                           columns={"2"}

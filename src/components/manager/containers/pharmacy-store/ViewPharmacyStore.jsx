@@ -156,7 +156,7 @@ const ViewPharmacyStore = () => {
                   className="shadow-xl p-3 rounded-[11px] relative"
                   key={item.productTag}
                 >
-                  <p>{item.product.name}</p>
+                  <p className="w-[70%]">{item.product.name}</p>
                   <p className="text-[2em]">{item.quantity}</p>
                   <p className={`${statusColor} text-[.6rem]`}>{item.status}</p>
                   <FontAwesomeIcon

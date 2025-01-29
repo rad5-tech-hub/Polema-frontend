@@ -439,6 +439,7 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                     {/* LPO DETAILS */}
                     {selectedTicket.type === "lpo" && (
                       <>
+                        {/* {console.log(ticketDetails)} */}
                         <div>
                           <Text className="text-[.56rem] font-black tracking-wide">
                             SUPPLIER

@@ -97,7 +97,7 @@ const ShelfContent = () => {
 
   return (
     <>
-      <Heading>Shelf Content</Heading>
+      <Heading>View Shelf</Heading>
       {/* Search Input */}
       <TextField.Root
         placeholder="Search Store"

@@ -1,7 +1,10 @@
 import React from "react";
-import { faBars } from "@fortawesome/free-solid-svg-icons";
+import Profile from "./Profile";
+
+import { faBars, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Logout from "../Logout";
+import { Card } from "@radix-ui/themes";
 import Notifications from "./containers/notifications/Notifications";
 
 const Header = ({ sidebarOpen, setSidebarOpen }) => {
@@ -37,7 +40,8 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
           <Notifications />
 
           {/* Logout Button */}
-          <Logout />
+          {/* <Logout /> */}
+          <Profile />
         </div>
       </div>
     </header>

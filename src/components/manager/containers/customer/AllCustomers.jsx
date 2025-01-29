@@ -233,35 +233,30 @@ const AllCustomers = () => {
   };
 
   const [searchTerm, setSearchTerm] = useState("");
+  const filterCustomers = (customers, searchTerm) => {
+    if (!searchTerm.trim()) {
+      return customers; // Return all customers if searchTerm is empty
+    }
 
-  // Highlight function: Wrap matching text in <span>
-  const highlightText = (text, search) => {
-    if (!search) return text; // Return unaltered text if no search term
-    const regex = new RegExp(`(${search})`, "gi");
-    return text.replace(
-      regex,
-      (match) => `<span class="bg-yellow-200">${match}</span>`
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+
+    return customers.filter((customer) =>
+      // Check each relevant field for a match
+      [
+        customer.customerTag, // ID
+        customer.firstname, //First Name
+        customer.lastnmae, //Last Name
+        customer.email, // Email
+        customer.address, // Address
+        ...customer.phoneNumber, // Phone (spread for array fields)
+      ].some((field) =>
+        String(field).toLowerCase().includes(lowerCaseSearchTerm)
+      )
     );
   };
 
-  // Filter and highlight customers based on the search term
-  const filteredCustomers = useMemo(() => {
-    const searchLower = searchTerm.toLowerCase();
-
-    // Step 1: Filter customers
-    const filtered = customerData.filter((customer) =>
-      `${customer.firstname} ${customer.lastname}`
-        .toLowerCase()
-        .includes(searchLower)
-    );
-
-    // Step 2: Apply highlighting
-    return filtered.map((customer) => {
-      const fullName = `${customer.firstname} ${customer.lastname}`;
-      const highlightedName = highlightText(fullName, searchLower);
-      return { ...customer, highlightedName };
-    });
-  }, [searchTerm, customerData]);
+  // Use this function to derive the filtered customer data
+  const filteredCustomers = filterCustomers(customerData, searchTerm);
 
   useEffect(() => {
     fetchCustomers();
@@ -314,11 +309,7 @@ const AllCustomers = () => {
                   <Table.Cell>{customer.customerTag}</Table.Cell>
                   <Table.RowHeaderCell>
                     {/* Render highlighted name */}
-                    <span
-                      dangerouslySetInnerHTML={{
-                        __html: customer.highlightedName,
-                      }}
-                    />
+                    {customer.firstname} {customer.lastname}
                   </Table.RowHeaderCell>
                   <Table.Cell>{customer.email}</Table.Cell>
                   <Table.Cell>{customer.address}</Table.Cell>
@@ -340,7 +331,7 @@ const AllCustomers = () => {
                         <DropdownMenu.Content variant="solid">
                           <DropdownMenu.Item
                             shortcut={<FontAwesomeIcon icon={faPen} />}
-                            onClick={() => handleEditClick(customer)}
+                            onClick={() => handleEditClcik(customer)}
                           >
                             Edit
                           </DropdownMenu.Item>

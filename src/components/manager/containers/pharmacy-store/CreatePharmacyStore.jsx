@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { Select as AntSelect } from "antd";
 import toast, { LoaderIcon, Toaster } from "react-hot-toast";
 import {
   Heading,
@@ -149,14 +150,15 @@ const CreatePharmacyStore = () => {
           },
         }
       );
-
-      setButtonLoading(false);
+      //localhost:5173/src/components/manager/containers/products/EditProducts.jsx?t=1738027508364
+      http: setButtonLoading(false);
       toast.success(response.data.message, { duration: 5000 });
 
       // Reset form fields
       setProductID("");
       setCategory("");
       setUnit("");
+      setSelectedProductId("");
       setThresholdVal("");
       setUploadedImage("");
       setImage(null);
@@ -259,28 +261,28 @@ const CreatePharmacyStore = () => {
 
         <Grid columns={"2"} gap={"4"} className="mt-6">
           <div className="w-full">
-            <Text className="mb-4">
+            <Text className="">
               {rawMaterialsActive ? "Raw Material" : " Product"}
             </Text>
-            <Select.Root
-              value={selectedProductId}
-              required={true}
-              onValueChange={setSelectedProductId}
+
+            <AntSelect
+              className="mt-2"
+              placeholder="Select Products"
+              style={{ width: "100%" }}
+              optionFilterProp="children"
+              {...(selectedProductId.length > 0 && {
+                value: selectedProductId,
+              })}
+              onChange={(value) => {
+                setSelectedProductId(value);
+              }}
             >
-              <Select.Trigger
-                placeholder={
-                  rawMaterialsActive ? "Select Raw Material" : "Select Product"
-                }
-                className="w-full"
-              />
-              <Select.Content position="popper">
-                {products.map((product) => (
-                  <Select.Item key={product.id} value={product.id}>
-                    {product.name}
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select.Root>
+              {products.map((product) => (
+                <Option key={product.id} value={product.id}>
+                  {product.name}
+                </Option>
+              ))}
+            </AntSelect>
           </div>
 
           {!rawMaterialsActive && (
@@ -305,6 +307,7 @@ const CreatePharmacyStore = () => {
                   onChange={(e) => setCategory(e.target.value)}
                   placeholder="Enter product category"
                   required
+                  // className="mt-4"
                 />
               </div>
             </>

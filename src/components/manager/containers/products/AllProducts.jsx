@@ -142,6 +142,8 @@ const AllProducts = () => {
                 <Table.ColumnHeaderCell>Date</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell>Category</Table.ColumnHeaderCell>
+                <Table.ColumnHeaderCell>Department</Table.ColumnHeaderCell>
+
                 <Table.ColumnHeaderCell>Unit</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell>Price(₦)</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
@@ -173,6 +175,7 @@ const AllProducts = () => {
                       />
                     </Table.Cell>
                     <Table.Cell>{product.category}</Table.Cell>
+                    <Table.Cell>{product.department.name}</Table.Cell>
                     <Table.Cell>
                       {product.price.map((p, index) => (
                         <div key={index}>{p.unit}</div>

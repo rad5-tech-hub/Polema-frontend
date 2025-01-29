@@ -2,14 +2,7 @@ import React, { useEffect, useState } from "react";
 import _ from "lodash";
 import { useNavigate } from "react-router-dom";
 import * as Dialog from "@radix-ui/react-dialog";
-import {
-  faBriefcase,
-  faSitemap,
-  faBuilding,
-  faStore,
-  faTags,
-  faCommentsDollar,
-} from "@fortawesome/free-solid-svg-icons";
+import { faBriefcase, faClose } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import { LoaderIcon } from "react-hot-toast";
@@ -253,10 +246,17 @@ const AddProducts = () => {
           <Dialog.Portal>
             <Dialog.Overlay className="bg-black/70 data-[state=open]:animate-overlayShow fixed inset-0" />
             <Dialog.Content className=" fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none">
+              <div
+                className="absolute right-[5px] top-[5px] cursor-pointer"
+                onClick={() => {
+                  setInitialDialogOpen(false);
+                }}
+              >
+                <FontAwesomeIcon icon={faClose} />
+              </div>
               <Dialog.Title className="m-0 text-[20px] font-medium text-black">
                 What do you want to create?
               </Dialog.Title>
-
               <div className="flex w-full justify-between mt-4">
                 <Dialog.Close asChild>
                   <button

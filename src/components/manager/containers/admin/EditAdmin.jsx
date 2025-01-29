@@ -165,7 +165,8 @@ const EditAdmin = () => {
       lastname: lastName,
       email: email,
       phoneNumber: phone,
-      address,
+      ...(address && { address }),
+
       roleId,
       department: [...adminDepartments, ...additionalDepartments],
     };
@@ -179,7 +180,7 @@ const EditAdmin = () => {
         }
       );
       toast.success(response.data.message, {
-        duration: 10000,
+        duration: 6000,
         style: {
           padding: "20px",
         },
@@ -195,6 +196,9 @@ const EditAdmin = () => {
       // // setRoleId("");
       // setDeptID("");
       // setAdditionalDepartments([]);
+      setTimeout(() => {
+        navigate("/admin/admins/view-admins");
+      }, 8000);
     } catch (error) {
       console.log(error);
       setIsLoading(false);
@@ -437,7 +441,7 @@ const EditAdmin = () => {
               type="submit"
               // disabled={isLoading}
             >
-              {isLoading ? <LoaderIcon /> : "Create Admin"}
+              {isLoading ? <LoaderIcon /> : "Save"}
             </Button>
           </Flex>
         </form>
