@@ -918,6 +918,10 @@ video {
   margin-top: 1px;
 }
 
+.ml-2 {
+  margin-left: 0.5rem;
+}
+
 .block {
   display: block;
 }
@@ -1228,6 +1232,10 @@ video {
 
 .w-full {
   width: 100%;
+}
+
+.w-\[65\%\] {
+  width: 65%;
 }
 
 .min-w-\[50px\] {

@@ -1,253 +1,215 @@
 import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { jwtDecode } from "jwt-decode";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   Card,
-  Select,
   Button,
   Heading,
   Separator,
-  CheckboxGroup,
-  Checkbox,
-  TextField,
-  Text,
   Flex,
   Spinner,
   Grid,
+  TextField,
 } from "@radix-ui/themes";
 
-const CreateRole = ({ child, setChild }) => {
-  // Root URL for making requests
+const CreateRole = () => {
   const root = import.meta.env.VITE_ROOT;
-
   const [isLoading, setIsLoading] = useState(false);
-
-  // Default loader until permissions fetch
   const [permissionsLoading, setPermissionsLoading] = useState(true);
-
-  // State management for permission fetch
   const [permissionBox, setPermissionBox] = useState([]);
-
-  // Array for all selected permissions/roles
-  const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
-
-  const handleCheckboxChange = (event) => {
-    const { id, checked } = event.target;
-    if (checked) {
-      setSelectedCheckboxes((prevSelected) => [...prevSelected, id]);
-    } else {
-      setSelectedCheckboxes((prevSelected) =>
-        prevSelected.filter((checkboxId) => checkboxId !== id)
-      );
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const submitobject = {
-      name: e.target[0].value,
-      permissionsId: selectedCheckboxes,
-    };
-
-    console.log(submitobject);
-    if (submitobject.name === "") {
-      toast.error("Assign a name to the role");
-    } else if (submitobject.permissionsId.length === 0) {
-      toast.error("Assign tasks to the role");
-    } else {
-      setIsLoading(true);
-
-      // Get the token
-      const retrToken = localStorage.getItem("token");
-
-      // Check if the token is available
-      if (!retrToken) {
-        toast.error("An error occurred. Try logging in again");
-        setIsLoading(false); // Ensure loading state is reset
-        return;
-      }
-
-      try {
-        // Make the API request with await
-        const response = await axios.post(
-          `${root}/admin/create-role`,
-          submitobject,
-          {
-            headers: {
-              Authorization: `Bearer ${retrToken}`,
-            },
-          }
-        );
-
-        toast.success("Role created successully", {
-          style: {
-            padding: "20px",
-          },
-          duration: 10000,
-        });
-      } catch (error) {
-        if (error.response) {
-          console.log(error.response.data);
-          toast.error(error.response.data.message || "Failed to create role", {
-            duration: 6500,
-            style: {
-              padding: "25px",
-            },
-          });
-        } else if (error.request) {
-          console.log(error.request);
-          toast.error("No response received from the server", {
-            duration: 6500,
-            style: {
-              padding: "25px",
-            },
-          });
-        } else {
-          console.log("Error", error.message);
-          toast.error("Request error occurred", {
-            duration: 6500,
-            style: {
-              padding: "25px",
-            },
-          });
-        }
-      } finally {
-        // Reset loading state
-        setIsLoading(false);
-      }
-    }
-  };
-
-  // function to fetch the permission boxes from database
-  const fetchPermissions = async () => {
-    // Get the token
-    const retrToken = localStorage.getItem("token");
-
-    // Check if the token is available
-    if (!retrToken) {
-      toast.error("An error occured.Try logging in again");
-      return;
-    }
-
-    try {
-      // Make the API request
-      const response = await axios.get(`${root}/admin/get-all-nav`, {});
-
-      setPermissionBox(response.data.navParentsWithPermissions);
-
-      setPermissionsLoading(false);
-    } catch (err) {
-      toast.error(err.message, {
-        duration: 6500,
-        style: {
-          padding: "25px",
-        },
-      });
-      setPermissionsLoading(false);
-    }
-  };
+  const [selectedCheckboxes, setSelectedCheckboxes] = useState({});
+  const [roleName, setRoleName] = useState("");
+  const [selectAll, setSelectAll] = useState(false);
 
   useEffect(() => {
+    const fetchPermissions = async () => {
+      const retrToken = localStorage.getItem("token");
+      if (!retrToken) {
+        toast.error("An error occurred. Try logging in again.");
+        return;
+      }
+      try {
+        const response = await axios.get(`${root}/admin/get-all-nav`);
+        const fetchedPermissions = response.data.navParentsWithPermissions;
+
+        const initialState = fetchedPermissions.reduce((acc, box) => {
+          acc[box.navParentName] = [];
+          return acc;
+        }, {});
+
+        setPermissionBox(fetchedPermissions);
+        setSelectedCheckboxes(initialState);
+        setPermissionsLoading(false);
+      } catch (err) {
+        toast.error(err.message);
+        setPermissionsLoading(false);
+      }
+    };
     fetchPermissions();
   }, []);
+
+  const handleCheckboxChange = (boxName, permissionId) => {
+    setSelectedCheckboxes((prevSelected) => {
+      const updatedPermissions = prevSelected[boxName].includes(permissionId)
+        ? prevSelected[boxName].filter((id) => id !== permissionId)
+        : [...prevSelected[boxName], permissionId];
+
+      return {
+        ...prevSelected,
+        [boxName]: updatedPermissions,
+      };
+    });
+  };
+
+  const handleSelectAll = (boxName, permissions) => {
+    setSelectedCheckboxes((prevSelected) => ({
+      ...prevSelected,
+      [boxName]:
+        prevSelected[boxName].length === permissions.length
+          ? []
+          : permissions.map((p) => p.id),
+    }));
+  };
+
+  const handleGlobalSelectAll = () => {
+    setSelectAll((prev) => !prev);
+    setSelectedCheckboxes((prevSelected) => {
+      if (!selectAll) {
+        const allSelectedState = permissionBox.reduce((acc, box) => {
+          acc[box.navParentName] = box.permissions.map((p) => p.id);
+          return acc;
+        }, {});
+        return allSelectedState;
+      } else {
+        return permissionBox.reduce((acc, box) => {
+          acc[box.navParentName] = [];
+          return acc;
+        }, {});
+      }
+    });
+  };
+
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("An error occurred , try logging in again");
+      return;
+    }
+    try {
+      const payload = {
+        name: roleName,
+        permissionsId: Object.values(selectedCheckboxes).flat(),
+      };
+      await axios.post(`${root}/admin/create-role`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      toast.success("Role created successfully", {
+        style: {
+          padding: "30px",
+        },
+        duration: 6500, // 6.5 seconds
+      });
+    } catch (err) {
+      toast.error("Error creating role");
+    }
+    setIsLoading(false);
+  };
+
   return (
     <div className="!font-space">
       <Card className="w-full">
-        <Heading className=" py-4">Create Role</Heading>
-
-        <form onSubmit={handleSubmit}>
-          <div className="flex w-full justify-between gap-8">
-            <div className="left w-[50%]">
-              <div className="input-field mt-3">
-                <label
-                  className="text-[15px]  font-medium leading-[35px]   "
-                  htmlFor="role"
-                >
-                  Role
-                </label>
-                <TextField.Root
-                  placeholder="Enter Role"
-                  className=""
-                  type="text"
-                  required
-                  id="role"
-                  size={"3"}
-                ></TextField.Root>
-              </div>
-            </div>
+        <Heading className="py-4">Create Role</Heading>
+        <label htmlFor="">Role Name</label>
+        <TextField.Root
+          placeholder="Enter Role Name"
+          className="w-[65%]"
+          value={roleName}
+          onChange={(e) => {
+            setRoleName(e.target.value);
+          }}
+        ></TextField.Root>
+        {permissionsLoading ? (
+          <div className="w-full mt-8 flex justify-center">
+            <Spinner />
           </div>
-
-          {/* Permissions Div */}
-          {permissionsLoading ? (
-            <div className="w-full  mt-8 flex justify-center">
-              <Spinner />
-            </div>
-          ) : (
-            <div>
-              <Separator className="w-full mt-4" />
-              <div className="permission-box mt-5">
-                {/* Users & Role */}
-
-                <Grid columns={"2"} gap={"7"}>
-                  {permissionBox.map((box, index) => {
-                    return (
-                      <Card className="w-full" id="users" key={index}>
-                        <Flex justify={"between"} align={"center"}>
-                          <Text className="font-medium">
-                            {box.navParentName}
-                          </Text>
-
-                          <Flex gap={"2"} align={"center"}>
-                            <input type="checkbox" name="" id="" />
-                          </Flex>
+        ) : (
+          <div>
+            <Separator className="w-full mt-4" />
+            <Flex justify="end" align="center" className="mb-4">
+              <input
+                type="checkbox"
+                checked={selectAll}
+                onChange={handleGlobalSelectAll}
+              />
+              <span className="ml-2">Select All Roles</span>
+            </Flex>
+            <div className="permission-box mt-5">
+              <Grid columns="2" gap="7">
+                {permissionBox.map((box, index) => {
+                  const allSelected =
+                    selectedCheckboxes[box.navParentName]?.length ===
+                    box.permissions.length;
+                  return (
+                    <Card className="w-full" key={index}>
+                      <Flex justify="between" align="center">
+                        <span className="font-medium">{box.navParentName}</span>
+                        <Flex gap="2" align="center">
+                          <input
+                            type="checkbox"
+                            checked={allSelected}
+                            onChange={() =>
+                              handleSelectAll(
+                                box.navParentName,
+                                box.permissions
+                              )
+                            }
+                          />
+                          Select All
                         </Flex>
-                        <Separator className="w-full mt-3" />
-
-                        <Grid
-                          className="mt-4"
-                          columns={"2"}
-                          rows={"3"}
-                          gap={"1"}
-                          height={"auto"}
-                        >
-                          {box.permissions.map((item) => {
-                            return (
-                              <Flex gap={"2"} align={"center"} className="mt-3">
-                                <input
-                                  type="checkbox"
-                                  name=""
-                                  id={item.id}
-                                  onChange={handleCheckboxChange}
-                                />
-                                <label htmlFor={item.id}>{item.name}</label>
-                              </Flex>
-                            );
-                          })}
-                          {/* </div> */}
-                        </Grid>
-                        {/* </Flex> */}
-                      </Card>
-                    );
-                  })}
-                </Grid>
-              </div>
-
-              <Flex justify={"end"} align={"end"} width={"100%"}>
-                <Button
-                  className="mt-4  bg-theme hover:bg-theme/85"
-                  size={3}
-                  type="submit"
-                  disabled={isLoading}
-                >
-                  {isLoading ? <Spinner size={"2"} /> : "Create Role"}
-                </Button>
-              </Flex>
+                      </Flex>
+                      <Separator className="w-full mt-3" />
+                      <Grid className="mt-4" columns="2" rows="3" gap="1">
+                        {box.permissions.map((item) => (
+                          <Flex
+                            key={item.id}
+                            gap="2"
+                            align="center"
+                            className="mt-3"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedCheckboxes[
+                                box.navParentName
+                              ]?.includes(item.id)}
+                              onChange={() =>
+                                handleCheckboxChange(box.navParentName, item.id)
+                              }
+                            />
+                            <label>{item.name}</label>
+                          </Flex>
+                        ))}
+                      </Grid>
+                    </Card>
+                  );
+                })}
+              </Grid>
             </div>
-          )}
-        </form>
+            <Flex justify="end" width="100%">
+              <Button
+                className="mt-4 bg-theme hover:bg-theme/85"
+                size="3"
+                disabled={isLoading}
+                onClick={handleSubmit}
+              >
+                {isLoading ? <Spinner size="2" /> : "Create Role"}
+              </Button>
+            </Flex>
+          </div>
+        )}
       </Card>
       <Toaster position="top-right" />
     </div>
