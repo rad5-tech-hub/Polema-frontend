@@ -75,6 +75,7 @@ import OfficialReceiptInvoice from "./receipts/OfficeReceiptInvoice";
 import ReceiptDispatchNote from "./receipts/ReceiptDispatchNote";
 // import EditDialog from "./products/EditDialog";
 // import OfficialLPO from "./raise-tickets/OfficialLPO";
+import ChangePassword from "./password/ChangePassword";
 export {
   // OfficialLPO,
   ReceiptDispatchNote,
@@ -83,6 +84,7 @@ export {
   // EditDialog,
   AllDispatchNote,
   AddAdmin,
+  ChangePassword,
   ViewPharmacyStore,
   DepartementStorePlaceOrder,
   DepartmentStoreViewOrders,

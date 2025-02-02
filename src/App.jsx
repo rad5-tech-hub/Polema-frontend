@@ -12,6 +12,7 @@ import {
   AddAdmin,
   ViewSupplierOrder,
   WelcomeComponent,
+  ChangePassword,
   CashManagement,
   EditProducts,
   PharmacyPlaceOrder,
@@ -394,6 +395,12 @@ const App = () => {
                   <Route
                     path="/receipt/waybill-invoice"
                     element={<WaybillInvoice />}
+                  />
+
+                  {/* Change Password Route */}
+                  <Route
+                    path="/change-password"
+                    element={<ChangePassword />}
                   />
 
                   {/* Invoice for Authority to weigh */}

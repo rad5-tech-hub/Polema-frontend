@@ -2,18 +2,20 @@ import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { PersonIcon } from "@radix-ui/react-icons";
 import { Card } from "@radix-ui/themes";
+import { useNavigate } from "react-router-dom";
 import { Dropdown, Menu, Space } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import Logout from "../Logout";
 
 const Profile = () => {
   const [popupOpen, setPopupOpen] = React.useState(false);
+  const navigate = useNavigate()
   const menuItems = [
     {
       key: "change-password",
       label: "Change Password",
       onClick: () => {
-        console.log("Change Password clicked");
+        navigate("/admin/change-password")
       },
     },
     {
