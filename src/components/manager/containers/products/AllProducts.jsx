@@ -13,7 +13,7 @@ import {
 } from "@radix-ui/themes";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPen } from "@fortawesome/free-solid-svg-icons";
+import { faPen ,faTrash} from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import toast, { Toaster } from "react-hot-toast";
@@ -69,6 +69,11 @@ const AllProducts = () => {
     }
     setSelectedEditProduct(product);
   };
+
+  const handleDeleteClick = (product) => {
+    setSelectedProduct(product)
+  }
+
 
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -198,6 +203,11 @@ const AllProducts = () => {
                             onClick={() => handleEditClick(product)}
                           >
                             <FontAwesomeIcon icon={faPen} /> Edit
+                          </DropdownMenu.Item>
+                          <DropdownMenu.Item
+                            onClick={() => handleDeleteClick(product)}
+                          >
+                            <FontAwesomeIcon icon={faTrash} /> Delete
                           </DropdownMenu.Item>
                         </DropdownMenu.Content>
                       </DropdownMenu.Root>
