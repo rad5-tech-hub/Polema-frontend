@@ -12,6 +12,7 @@ import {
   AddAdmin,
   ViewSupplierOrder,
   WelcomeComponent,
+  PharmRecordBook,
   ChangePassword,
   CashManagement,
   EditProducts,
@@ -26,9 +27,11 @@ import {
   BlankLPO,
   AuthorityToGiveCash,
   AllWeigh,
+  GeneralRecordBook,
   EditRole,
   ViewPharmacyOrder,
   GeneralStorePlaceOrder,
+  DepartmentRecordBook,
   SupplierLedger,
   AddProducts,
   CreateDepartmentStore,
@@ -276,6 +279,11 @@ const App = () => {
                     path="/pharmacy-store/view-pharmacy-order"
                     element={<ViewPharmacyOrder />}
                   />
+                  <Route
+                    path="/pharmacy-store/record-book"
+                    element={<PharmRecordBook />}
+                  />
+                   
 
                   {/* Test Routes for general store */}
                   <Route
@@ -294,6 +302,10 @@ const App = () => {
                     path="/general-store/view-general-order"
                     element={<ViewGeneralOrder />}
                   />
+                  <Route
+                    path="/general-store/record-book"
+                    element={<GeneralRecordBook />}
+                  />
 
                   {/* Test Routes for department store */}
                   <Route
@@ -311,6 +323,11 @@ const App = () => {
                   <Route
                     path="/department-store/department-store-products"
                     element={<ViewDepartmentStore />}
+                  />
+
+                  <Route
+                    path="/department-store/record-book"
+                    element={<DepartmentRecordBook />}
                   />
 
                   {/* Weighing operations routes     */}

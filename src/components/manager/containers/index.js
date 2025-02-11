@@ -72,15 +72,23 @@ import ViewDepartmentStore from "./department-store/ViewDepartmentStore";
 import ViewPharmacyStore from "./pharmacy-store/ViewPharmacyStore";
 import NewPassword from "../../../pages/NewPassword";
 import OfficialReceiptInvoice from "./receipts/OfficeReceiptInvoice";
+import PharmRecordBook from "./pharmacy-store/PharmRecordBook";
 import ReceiptDispatchNote from "./receipts/ReceiptDispatchNote";
 // import EditDialog from "./products/EditDialog";
 // import OfficialLPO from "./raise-tickets/OfficialLPO";
 import ChangePassword from "./password/ChangePassword";
+import ManagePharmacyStore from "./pharmacy-store/ManagePharmacyStore";
+import GeneralRecordBook from "./general-store/GeneralRecordBook";
+import DepartmentRecordBook from "./department-store/DepartmentRecordBook";
 export {
   // OfficialLPO,
+  ManagePharmacyStore,
+  DepartmentRecordBook,
   ReceiptDispatchNote,
+  GeneralRecordBook,
   OfficialReceiptInvoice,
   NewPassword,
+  PharmRecordBook,
   // EditDialog,
   AllDispatchNote,
   AddAdmin,
