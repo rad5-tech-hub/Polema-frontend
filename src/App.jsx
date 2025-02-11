@@ -10,6 +10,7 @@ import NewPassword from "./pages/NewPassword";
 import ReceiptDispatchNote from "./components/manager/containers/receipts/ReceiptDispatchNote";
 import {
   AddAdmin,
+  ManagePharmacyStore,
   ViewSupplierOrder,
   WelcomeComponent,
   PharmRecordBook,
@@ -283,7 +284,11 @@ const App = () => {
                     path="/pharmacy-store/record-book"
                     element={<PharmRecordBook />}
                   />
-                   
+                   <Route
+                    path="/pharmacy-store/manage-store"
+                    element={<ManagePharmacyStore />}
+                  />
+                  
 
                   {/* Test Routes for general store */}
                   <Route
