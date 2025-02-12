@@ -15,6 +15,7 @@ const ViewSupplierOrder = () => {
   const [orders, setOrders] = React.useState([]);
   const [raw, setRaw] = React.useState([]);
   const [suppliers, setSuppliers] = React.useState([]);
+  const [failedSearch, setFailedSearch] = React.useState(false);
 
   // Function to fetch suppliers
   const fetchSuppliers = async () => {
@@ -34,6 +35,10 @@ const ViewSupplierOrder = () => {
       setSuppliers(response.data.customers);
     } catch (error) {
       console.log(error);
+      toast.error(
+        error.response?.error?.message ||
+          "An error occurred , please try again later."
+      );
     }
   };
 
@@ -75,9 +80,13 @@ const ViewSupplierOrder = () => {
           },
         }
       );
-      setOrders(response.data);
+
+      response.data.orders.length === 0
+        ? setFailedSearch(true)
+        : setOrders(response.data.orders);
     } catch (error) {
       console.log(error);
+      setFailedSearch(true);
     }
   };
 
@@ -114,7 +123,9 @@ const ViewSupplierOrder = () => {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {orders.length === 0 ? (
+          {failedSearch ? <>
+          <p className="p-4">No records found</p>
+          </> :   orders.length === 0 ? (
             <div className="p-4">
               <Spinner />
             </div>
@@ -158,6 +169,7 @@ const ViewSupplierOrder = () => {
               );
             })
           )}
+        
         </Table.Body>
       </Table.Root>
       <Toaster position="top-right" />

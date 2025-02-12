@@ -218,21 +218,7 @@ const ManagePharmacyStore = () => {
                 <Grid columns={"2"} gap={"6"}>
                     <div>
                         <Text>Select Item</Text>
-                        {/* <Select.Root onValueChange={(val) => {
-                            setItemID(val)
-                        }}>
-                            <Select.Trigger className="w-full" placeholder={productActive ? "Select Product" : "Select Raw Material"} disabled={storeItems.length === 0} />
-                            <Select.Content position="popper">
-                                <Select.Group>
-                                    {storeItems.map((item) => {
-                                        return <Select.Item value={item.id}>{item.product.name}</Select.Item>
-                                    })}
-
-                                </Select.Group>
-
-
-                            </Select.Content>
-                        </Select.Root> */}
+                     
                         <AntSelect
                             placeholder={productActive ? "Select Product" : "Select Raw Material"}
                             onChange={(val) => {
@@ -277,8 +263,8 @@ const ManagePharmacyStore = () => {
                         ></TextField.Root>
                     </div>
                     <div>
-                        <Text>Quantity Removed</Text>
-                        <TextField.Root placeholder="Enter Quantity Removed"
+                        <Text>{ storeAction === "add" ? "Quantity Added " :"Quantity Removed"}</Text>
+                        <TextField.Root placeholder={storeAction === "add" ? "Enter Quantity Added" : "Enter Quantity Removed"}
                             value={quantityOut}
                             onChange={(e) => {
                                 setQuantityOut(e.target.value)

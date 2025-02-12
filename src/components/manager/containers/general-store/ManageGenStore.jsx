@@ -276,9 +276,9 @@ const ManageGenStore = () => {
                             }}
                         ></TextField.Root>
                     </div> */}
-                    <div>
-                        <Text>Quantity Removed</Text>
-                        <TextField.Root placeholder="Enter Quantity Removed"
+                     <div>
+                        <Text>{ storeAction === "add" ? "Quantity Added " :"Quantity Removed"}</Text>
+                        <TextField.Root placeholder={storeAction === "add" ? "Enter Quantity Added" : "Enter Quantity Removed"}
                             value={quantityOut}
                             onChange={(e) => {
                                 setQuantityOut(e.target.value)

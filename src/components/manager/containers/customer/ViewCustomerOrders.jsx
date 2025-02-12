@@ -47,7 +47,7 @@ const ViewCustomerOrders = () => {
       });
 
       setCustomerData(
-        response.data.customers.length ? response.data.customers : []
+        response.data?.customers?.length ? response.data.customers : []
       );
     } catch (error) {
       console.error(error);
@@ -96,9 +96,9 @@ const ViewCustomerOrders = () => {
       });
 
       {
-        response.data.orders.length === 0
+        response.data?.orders?.length === 0 || response.data.length === 0
           ? setFailedSearch(true)
-          : setStore(response.data.orders);
+          : setStore(response.data);
       }
     } catch (error) {
       console.log(error);
