@@ -83,6 +83,7 @@ const DepartmentLedger = () => {
           <div className="relative w-full max-w-md">
             <AntSelect
               placeholder="Select Department"
+              
               size="large"
               style={{ width: "100%" }}
               onChange={(value) => navigate(`/admin/department-ledger/${value}`)}

@@ -91,10 +91,10 @@ const AddAdmin = () => {
       phoneNumber: phone,
       ...(address && { address: address }),
       roleId,
-      department:
-        deptId && additionalDepartments.length !== 0
-          ? [deptId, ...additionalDepartments]
-          : [deptId],
+      ...(deptId && additionalDepartments.length !== 0
+        && { department: [deptId, ...additionalDepartments] }
+        ),
+      
     };
     try {
       const response = await axios.post(

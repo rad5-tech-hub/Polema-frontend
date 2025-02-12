@@ -8,7 +8,7 @@ import { Button,Heading,Spinner, Flex, Select, Separator, TextField, Grid, Text 
 import _ from "lodash"
 const root = import.meta.env.VITE_ROOT
 
-const ManagePharmacyStore = () => {
+const ManageGenStore = () => {
     const [storeAction, setStoreAction] = useState("add")
     const [suppliers, setSuppliers] = useState([])
     const [storeItems, setStoreItems] = useState([]);
@@ -71,7 +71,7 @@ const ManagePharmacyStore = () => {
         // Fetch functionality here:
         //
         try {
-            const response = await axios.get(`${root}/dept/${productActive ? "view-pharmstore-prod" : "view-pharmstore-raw"}`, {
+            const response = await axios.get(`${root}/dept/view-gen-store`, {
                 headers: {
                     Authorization:`Bearer ${token}`
                 }
@@ -117,9 +117,9 @@ const ManagePharmacyStore = () => {
         }
             
         try {
-            const response = await axios.post(`${root}/dept/${storeAction === "add" ? "add-quantity-pharm":"remove-quantity-pharm"}`, {
+            const response = await axios.post(`${root}/dept/${storeAction === "add" ? "add-quantity-gen":"remove-quantity-gen"}`, {
                 item: itemId,
-                batchNo: batchNumber,
+                // batchNo: batchNumber,
                 name: supplierName,
                 quantity: quantityOut,
                 signature:signatureImage
@@ -191,9 +191,9 @@ const ManagePharmacyStore = () => {
         {initialScreenOpen && <InitialScreen />}
         {initialScreenOpen === false && <>
             <Flex justify={"between"}>
-                {/* <Heading>{_.upperFirst(storeAction)} Store</Heading> */}
-                <Heading> {storeAction === "add" ? "Add to Store" : "Remove from Store"}   </Heading>
-                <Select.Root defaultValue="products" onValueChange={(val) => {
+                <Heading>{_.upperFirst(storeAction)  === "add" ? "Add to" :"Remove From"} Store</Heading>
+                {/* <Heading> Select Shelf   </Heading> */}
+                {/* <Select.Root defaultValue="products" onValueChange={(val) => {
                     setProductActive(val === "products")
                 }}>
                     <Select.Trigger />
@@ -207,7 +207,7 @@ const ManagePharmacyStore = () => {
 
 
                     </Select.Content>
-                </Select.Root>
+                </Select.Root> */}
 
             </Flex>
             <Separator className="my-4 w-full" />
@@ -217,7 +217,7 @@ const ManagePharmacyStore = () => {
 
                 <Grid columns={"2"} gap={"6"}>
                     <div>
-                        <Text>Select Item</Text>
+                        <Text>Select Shelf</Text>
                         {/* <Select.Root onValueChange={(val) => {
                             setItemID(val)
                         }}>
@@ -234,7 +234,7 @@ const ManagePharmacyStore = () => {
                             </Select.Content>
                         </Select.Root> */}
                         <AntSelect
-                            placeholder={productActive ? "Select Product" : "Select Raw Material"}
+                            placeholder={productActive ? "Select Shelf" : "Select Shelf"}
                             onChange={(val) => {
                                     setItemID(val)
                                 }}
@@ -242,7 +242,7 @@ const ManagePharmacyStore = () => {
                             style={{ width: "100%" }}
                         >
                             {storeItems.map((item) => {
-                                return <AntSelect.Option value={item.id}>{item.product.name}</AntSelect.Option>
+                                return <AntSelect.Option value={item.id}>{item.name}</AntSelect.Option>
                             })}
                         </AntSelect>
                     </div>
@@ -267,7 +267,7 @@ const ManagePharmacyStore = () => {
                             setSupplierName(e.target.value)
                         }}></TextField.Root>
                     </div>
-                    <div>
+                    {/* <div>
                         <Text>Batch Number</Text>
                         <TextField.Root placeholder="Enter Batch Number"
                             value={batchNumber}
@@ -275,7 +275,7 @@ const ManagePharmacyStore = () => {
                                 setBatchNumber(e.target.value)
                             }}
                         ></TextField.Root>
-                    </div>
+                    </div> */}
                     <div>
                         <Text>Quantity Removed</Text>
                         <TextField.Root placeholder="Enter Quantity Removed"
@@ -317,4 +317,4 @@ const ManagePharmacyStore = () => {
     )
 }
 
-export default ManagePharmacyStore
+export default ManageGenStore

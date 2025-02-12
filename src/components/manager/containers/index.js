@@ -80,10 +80,14 @@ import ChangePassword from "./password/ChangePassword";
 import ManagePharmacyStore from "./pharmacy-store/ManagePharmacyStore";
 import GeneralRecordBook from "./general-store/GeneralRecordBook";
 import DepartmentRecordBook from "./department-store/DepartmentRecordBook";
+import ManageGenStore from "./general-store/ManageGenStore";
+import ManageDeptStore from "./department-store/ManageDeptStore";
 export {
   // OfficialLPO,
+  ManageDeptStore,
   ManagePharmacyStore,
   DepartmentRecordBook,
+  ManageGenStore,
   ReceiptDispatchNote,
   GeneralRecordBook,
   OfficialReceiptInvoice,

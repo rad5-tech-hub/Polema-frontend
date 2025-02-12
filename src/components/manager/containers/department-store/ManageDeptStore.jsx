@@ -8,7 +8,7 @@ import { Button,Heading,Spinner, Flex, Select, Separator, TextField, Grid, Text 
 import _ from "lodash"
 const root = import.meta.env.VITE_ROOT
 
-const ManagePharmacyStore = () => {
+const ManageDeptStore = () => {
     const [storeAction, setStoreAction] = useState("add")
     const [suppliers, setSuppliers] = useState([])
     const [storeItems, setStoreItems] = useState([]);
@@ -71,7 +71,7 @@ const ManagePharmacyStore = () => {
         // Fetch functionality here:
         //
         try {
-            const response = await axios.get(`${root}/dept/${productActive ? "view-pharmstore-prod" : "view-pharmstore-raw"}`, {
+            const response = await axios.get(`${root}/dept/${productActive ? "view-deptstore-prod" : "view-deptstore-raw"}`, {
                 headers: {
                     Authorization:`Bearer ${token}`
                 }
@@ -117,9 +117,9 @@ const ManagePharmacyStore = () => {
         }
             
         try {
-            const response = await axios.post(`${root}/dept/${storeAction === "add" ? "add-quantity-pharm":"remove-quantity-pharm"}`, {
+            const response = await axios.post(`${root}/dept/${storeAction === "add" ? "add-quantity-dept":"remove-quantity-dept"}`, {
                 item: itemId,
-                batchNo: batchNumber,
+                // batchNo: batchNumber,
                 name: supplierName,
                 quantity: quantityOut,
                 signature:signatureImage
@@ -138,7 +138,7 @@ const ManagePharmacyStore = () => {
         } catch (error) {
             console.log(error);
             setLoading(false)
-            toast.error(error.message || "An error occurred, check your details and try again later")
+            toast.error(error?.response?.data?.message || "An error occurred, check your details and try again later")
             
         }
     }
@@ -267,7 +267,7 @@ const ManagePharmacyStore = () => {
                             setSupplierName(e.target.value)
                         }}></TextField.Root>
                     </div>
-                    <div>
+                    {/* <div>
                         <Text>Batch Number</Text>
                         <TextField.Root placeholder="Enter Batch Number"
                             value={batchNumber}
@@ -275,7 +275,7 @@ const ManagePharmacyStore = () => {
                                 setBatchNumber(e.target.value)
                             }}
                         ></TextField.Root>
-                    </div>
+                    </div> */}
                     <div>
                         <Text>Quantity Removed</Text>
                         <TextField.Root placeholder="Enter Quantity Removed"
@@ -317,4 +317,4 @@ const ManagePharmacyStore = () => {
     )
 }
 
-export default ManagePharmacyStore
+export default ManageDeptStore
