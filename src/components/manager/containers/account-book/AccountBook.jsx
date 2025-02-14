@@ -346,7 +346,30 @@ const AccountBook = () => {
                   {accountRecipient === "suppliers" && "Select Raw Materials"}
                   <span className="text-red-500">*</span>
                 </Text>
-                <Select.Root
+                <AntSelect
+                  showSearch
+                  className="mt-2"
+                  placeholder={
+                    accountRecipient === "customers"
+                      ? "Select Customers"
+                      : "Select Suppliers"
+                  }
+                  style={{ width: "100%" }}
+                  onChange={(value) => {
+                    setSelectedProductId(value);
+                  }}
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    option.children.toLowerCase().includes(input.toLowerCase())
+                  }
+                >
+                  {products.map((product) => (
+                    <Option key={product.id} value={product.id}>
+                      {`${product.name} `}
+                    </Option>
+                  ))}
+                </AntSelect>
+                {/* <Select.Root
                   required
                   value={selectedProductId}
                   disabled={products.length === 0}
@@ -367,7 +390,7 @@ const AccountBook = () => {
                       </Select.Item>
                     ))}
                   </Select.Content>
-                </Select.Root>
+                </Select.Root> */}
               </div>
             </>
           )}

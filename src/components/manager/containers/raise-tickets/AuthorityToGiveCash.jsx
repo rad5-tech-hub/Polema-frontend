@@ -40,6 +40,14 @@ const AuthorityToGiveCash = () => {
   const [departmentId, setDepartmentId] = useState("");
   const [staffAmount, setStaffAmount] = useState("");
 
+
+  // Function that is used to remove commas from the amount string
+  function removeCommas(numberStr) {
+    return numberStr.includes(",")
+      ? parseInt(numberStr.replace(/,/g, ""), 10)
+      : numberStr;
+  }
+
   const fetchCustomers = async () => {
     const retrToken = localStorage.getItem("token");
 
@@ -139,7 +147,7 @@ const AuthorityToGiveCash = () => {
     };
 
     const body = {
-      amount: Number(originalAmount),
+      amount: removeCommas(originalAmount),
       customerId: selectedCustomer,
       comments,
       productId: selectedProduct,
