@@ -89,35 +89,87 @@ const CreateRole = () => {
     });
   };
 
-  const handleSubmit = async () => {
-    setIsLoading(true);
-    const token = localStorage.getItem("token");
+  // const handleSubmit = async () => {
+  //   setIsLoading(true);
+  //   const token = localStorage.getItem("token");
 
-    if (!token) {
-      toast.error("An error occurred , try logging in again");
-      return;
-    }
-    try {
-      const payload = {
-        name: roleName,
-        permissionsId: Object.values(selectedCheckboxes).flat(),
-      };
-      await axios.post(`${root}/admin/create-role`, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      toast.success("Role created successfully", {
-        style: {
-          padding: "30px",
-        },
-        duration: 6500, // 6.5 seconds
-      });
-    } catch (err) {
-      toast.error("Error creating role");
-    }
+  //   if (!token) {
+  //     toast.error("An error occurred , try logging in again");
+  //     return;
+  //   }
+  //   if (!name || name.length === 0){
+  //     toast.error("Assign a name to the role");
+  //     return
+  //   }
+
+  //   try {
+  //     const payload = {
+  //       name: roleName,
+  //       permissionsId: Object.values(selectedCheckboxes).flat(),
+  //     };
+  //     await axios.post(`${root}/admin/create-role`, payload, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+  //     toast.success("Role created successfully", {
+  //       style: {
+  //         padding: "30px",
+  //       },
+  //       duration: 6500, // 6.5 seconds
+  //     });
+  //   } catch (err) {
+  //     toast.error("Error creating role");
+  //   }
+  //   setIsLoading(false);
+  // };
+const handleSubmit = async () => {
+  setIsLoading(true);
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    toast.error("An error occurred, try logging in again");
     setIsLoading(false);
-  };
+    return;
+  }
+
+  if (!roleName.trim()) {
+    toast.error("Assign a name to the role", {
+      style:{
+        padding:"30px"
+      },duration:3000
+    });
+    setIsLoading(false);
+    return;
+  }
+
+  try {
+    const payload = {
+      name: roleName,
+      permissionsId: Object.values(selectedCheckboxes).flat(),
+    };
+
+    await axios.post(`${root}/admin/create-role`, payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    toast.success("Role created successfully", {
+      style: { padding: "30px" },
+      duration: 7500,
+    });
+
+    // ✅ Clear form after success
+    setRoleName("");
+    setSelectedCheckboxes({});
+    setSelectAll(false);
+  } catch (err) {
+    toast.error("Error creating role");
+  }
+
+  setIsLoading(false);
+};
 
   return (
     <div className="!font-space">
@@ -200,7 +252,7 @@ const CreateRole = () => {
             </div>
             <Flex justify="end" width="100%">
               <Button
-                className="mt-4 bg-theme hover:bg-theme/85"
+                className="mt-4 bg-theme hover:bg-theme/85 cursor-pointer"
                 size="3"
                 disabled={isLoading}
                 onClick={handleSubmit}
