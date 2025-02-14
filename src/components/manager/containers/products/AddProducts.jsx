@@ -154,12 +154,15 @@ const AddProducts = () => {
       );
       setIsLoading(false);
       setTimeout(() => {
-        toast.success(response.data.message, {
-          duration: 6500,
-          style: {
-            padding: "30px",
-          },
-        });
+        toast.success(
+          selectedCategory === "products" ? "Product Created Successfully" : "Raw Material Created Successfully",
+          {
+            duration: 6500,
+            style: {
+              padding: "30px",
+            },
+          }
+        );
       }, 2000);
 
       ///Close dialog box if request is successful
