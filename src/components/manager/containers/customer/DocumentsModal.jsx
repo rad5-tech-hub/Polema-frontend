@@ -71,7 +71,7 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
                 <p className="text-green-500">
                   Previous Credit: {summary.credit || "0.00"}
                 </p>
-                <p>Paid to:</p>
+                {/* <p>Paid to:</p> */}
               </Flex>
               <p className="text-sm opacity-50 mt-4">
                 Ledger Transactions History
@@ -102,7 +102,7 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
                         entry.creditType ? "text-green-500" : "text-red-500"
                       }`}
                     >
-                      {entry.debit}
+                      ₦ {" "} {entry.debit}
                     </p>
                   </Grid>
                 ))

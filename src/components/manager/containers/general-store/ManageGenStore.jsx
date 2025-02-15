@@ -191,7 +191,9 @@ const ManageGenStore = () => {
         {initialScreenOpen && <InitialScreen />}
         {initialScreenOpen === false && <>
             <Flex justify={"between"}>
-                <Heading>{_.upperFirst(storeAction)  === "add" ? "Add to" :"Remove From"} Store</Heading>
+
+                <Heading>{ _.upperFirst(storeAction === "add" ? "Add to store" :"Remove from Store")}</Heading>
+                
                 {/* <Heading> Select Shelf   </Heading> */}
                 {/* <Select.Root defaultValue="products" onValueChange={(val) => {
                     setProductActive(val === "products")

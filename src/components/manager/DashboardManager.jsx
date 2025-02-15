@@ -405,11 +405,11 @@ const DashBoardManager = ({ children }) => {
               }`}
           >
             <div className="flex items-center justify-between gap-2 px-6 py-[1.375rem] lg:py-[1.625rem]">
-              <NavLink to="/">
+              {/* <NavLink to="/"> */}
                 <Text size={"6"} className="font-extrabold">
                   POLEMA
                 </Text>
-              </NavLink>
+              {/* </NavLink> */}
 
               <button
                 ref={trigger}

@@ -123,7 +123,7 @@ const GeneralRecordBook = () => {
                         recordBookDetails.map((item) => (
                             <Table.Row key={item.id}>
                                 <Table.Cell>{refractor(item.createdAt)}</Table.Cell>
-                                <Table.Cell>{item.pharmacyStore?.product?.name || ""}</Table.Cell>
+                                <Table.Cell>{item.generalStore.name}</Table.Cell>
                                 <Table.Cell>{item.name}</Table.Cell>
                                 {/* <Table.Cell>{item.batchNo}</Table.Cell> */}
                                 <Table.Cell>{item.quantityRemoved > item.quantityAdded ? item.quantityRemoved : ""}</Table.Cell>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-
+import { jwtDecode } from "jwt-decode";
 import _ from "lodash";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -18,6 +18,34 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
 
   // --------------------State management for opening and closing the dialog------------------
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  const [storeDetails, setStoreDetails] = useState([]);
+
+  // Function to fetch general store
+  const fetchGeneralStore = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("An error occurred, try logging in again.");
+    }
+
+    try {
+      const { data } = await axios.get(`${root}/dept/view-gen-store`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setStoreDetails(data.stores);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Function to fetch store item name by id
+  const fetchStoreNameByID = (id) => {
+    const store = storeDetails.find((item) => item.id === id);
+    return store && store;
+  };
 
   const getAppropriateEndpoint = () => {
     switch (selectedTicket.type) {
@@ -141,13 +169,13 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
         }
       );
       setApproveLoading(false);
-      toast.success("Ticket Approved", {
-        style: { padding: "20px" },
-        duration: 3000,
-      });
+      setOpen(false);
       setTimeout(() => {
-        setDetailsPageOpen(false);
-      }, 5000);
+        toast.success("Ticket Approved", {
+          style: { padding: "20px" },
+          duration: 3000,
+        });
+      }, 1000);
     } catch (error) {
       console.log(error);
       setApproveLoading(false);
@@ -207,9 +235,14 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
     }
   };
 
-  // State management for opening and closing the modal
-  const [modalOpen, setModalOpen] = useState(true);
+  
+  // Function to get token from LS
+   const getToken = () => {
+    const token = localStorage.getItem("token");
 
+    return jwtDecode(token);
+  };
+  
   const closeModal = () => {
     // setModalOpen(false);
     setOpen(false);
@@ -217,6 +250,7 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
 
   React.useEffect(() => {
     fetchTicketDetails();
+    fetchGeneralStore();
   }, []);
 
   return (
@@ -351,7 +385,7 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                             PRODUCT
                           </Text>
                           <p className="text-[.7rem]">
-                            {ticketDetails.product.name}
+                            {ticketDetails.product?.name}
                           </p>
                         </div>
                         <div>
@@ -422,7 +456,7 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                             QUANTITY
                           </Text>
                           <p className="text-[.7rem]">
-                            {ticketDetails.transactions.quantity}
+                            {ticketDetails.transactions?.quantity}
                           </p>
                         </div>
                         <div>
@@ -499,7 +533,7 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                             PRODUCT
                           </Text>
                           <p className="text-[.7rem]">
-                            {ticketDetails.product.name}
+                            {ticketDetails.product?.name}
                           </p>
                         </div>
                         <div>
