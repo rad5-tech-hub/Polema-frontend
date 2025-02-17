@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import _ from "lodash";
 import axios from "axios";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import * as Dialog from "@radix-ui/react-dialog";
 import { Spinner, Grid, Button, Text } from "@radix-ui/themes";
 import { Modal } from "antd";
 import Image from "../../../../static/image/polema-logo.png";
@@ -18,17 +16,13 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
 
   // --------------------State management for opening and closing the dialog------------------
   const [dialogOpen, setDialogOpen] = useState(false);
-
   const [storeDetails, setStoreDetails] = useState([]);
-
   // Function to fetch general store
   const fetchGeneralStore = async () => {
-    const token = localStorage.getItem("token");
-
+   const token = localStorage.getItem("token");
     if (!token) {
       toast.error("An error occurred, try logging in again.");
     }
-
     try {
       const { data } = await axios.get(`${root}/dept/view-gen-store`, {
         headers: {
@@ -40,13 +34,11 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
       console.log(error);
     }
   };
-
   // Function to fetch store item name by id
   const fetchStoreNameByID = (id) => {
     const store = storeDetails.find((item) => item.id === id);
     return store && store;
   };
-
   const getAppropriateEndpoint = () => {
     switch (selectedTicket.type) {
       case "lpo":
@@ -67,7 +59,6 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
         break;
     }
   };
-
   const getAppropriateAcceptEndpoint = () => {
     switch (selectedTicket.type) {
       case "lpo":
@@ -88,7 +79,6 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
         return "customer/approve-waybill";
     }
   };
-
   const getAppropriateRejectTicket = () => {
     switch (selectedTicket.type) {
       case "lpo":
@@ -109,7 +99,6 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
         return "customer/reject-waybill";
     }
   };
-
   const fetchTicketDetails = async () => {
     const token = localStorage.getItem("token");
 
@@ -156,7 +145,6 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
       console.log(error);
     }
   };
-
   const approveTicket = async () => {
     const token = localStorage.getItem("token");
     setApproveLoading(true);
@@ -181,16 +169,13 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
       setApproveLoading(false);
     }
   };
-
   const rejectTicket = async () => {
     const token = localStorage.getItem("token");
     setRejectLoading(true);
-
     if (!token) {
       toast.error("An error occurred, try logging in again.");
       return;
-    }
-
+   }
     try {
       const response = await axios.patch(
         `${root}/${getAppropriateRejectTicket()}/${selectedTicket.ticketId}`,
@@ -205,16 +190,13 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
       console.log(error);
     }
   };
-
   // Function to confirm cash ticket
   const confirmCash = async () => {
     setConfirmLoading(true);
     const token = localStorage.getItem("token");
-
     if (!token) {
       toast.error("An error occurred  while trying to log in.");
     }
-
     try {
       const response = await axios.post(
         `${root}/admin/recieve-cash-ticket/${ticketDetails.id}`,
@@ -234,39 +216,22 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
       setConfirmLoading(false);
     }
   };
-
-  
   // Function to get token from LS
    const getToken = () => {
     const token = localStorage.getItem("token");
 
     return jwtDecode(token);
   };
-  
   const closeModal = () => {
     // setModalOpen(false);
     setOpen(false);
-  };
-
+ };
   React.useEffect(() => {
     fetchTicketDetails();
     fetchGeneralStore();
   }, []);
-
   return (
     <>
-      {/* <Dialog.Root open={true}>
-        <Dialog.Portal>
-          <Dialog.Overlay className="bg-black/70 data- fixed inset-0" />
-          <Dialog.Content className=" fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[700px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none">
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Odio sed
-            fuga praesentium mollitia natus incidunt, quibusdam ipsum, doloribus
-            nesciunt omnis molestias pariatur neque adipisci, maiores provident
-            ratione accusamus labore? Mollitia!
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root> */}
-
       <Modal open={open} footer={null} onCancel={closeModal}>
         <div className=" bg-white h-full z-[11] rounded-md top-0 left-0 p-6 right-[-70px] w-[25rem]">
           <div
@@ -275,7 +240,7 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
               setDetailsPageOpen(false);
             }}
           >
-            {/* <FontAwesomeIcon icon={faClose} /> */}
+
           </div>
           <div className="flex items-center gap-4">
             <img src={Image} width={"30px"} />{" "}
@@ -283,7 +248,7 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
               <>{_.upperFirst(selectedTicket.type)} Ticket Details</>
             )}
           </div>
-          {/* <Separator className="my-2 w-full" /> */}
+
           <div className="details-container h-[75%]">
             {typeof ticketDetails !== "object" ? (
               <div className="p-4">
@@ -309,7 +274,7 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                             CUSTOMER
                           </Text>
                           <p className="text-[.7rem]">
-                            {`${ticketDetails.transaction.corder.firstname} ${ticketDetails.transaction.corder.lastname}`}
+                            {`${ticketDetails.transaction?.corder.firstname} ${ticketDetails.transaction?.corder.lastname}`}
                           </p>
                         </div>
                         <div>
@@ -325,7 +290,7 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                             PRODUCT NAME
                           </Text>
                           <p className="text-[.7rem]">
-                            {ticketDetails.transaction.porders.name}
+                            {ticketDetails.transaction?.porders?.name}
                           </p>
                         </div>
                       </>
@@ -656,17 +621,6 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                     </div>
                   )}
                 </div>
-
-                {/* <div className="flex mt-4 justify-end">
-                        <div
-                          className="hover:bg-slate-400/30 cursor-pointer p-2 rounded-md"
-                          onClick={(e) => {
-                            setDialogOpen(!dialogOpen);
-                          }}
-                        >
-                          <FontAwesomeIcon icon={faExpand} />
-                        </div>
-                      </div> */}
               </>
             )}
           </div>

@@ -246,7 +246,7 @@ const ViewPharmacyStore = () => {
                     />
                     {item.status}
                   </Table.Cell>
-                  <Table.Cell>
+                  {/* <Table.Cell>
                     <DropdownMenu.Root>
                       <DropdownMenu.Trigger>
                         <Button variant="soft">
@@ -274,7 +274,7 @@ const ViewPharmacyStore = () => {
                         </DropdownMenu.Item>
                       </DropdownMenu.Content>
                     </DropdownMenu.Root>
-                  </Table.Cell>
+                  </Table.Cell> */}
                 </Table.Row>
               );
             })

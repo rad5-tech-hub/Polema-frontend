@@ -351,8 +351,8 @@ const AccountBook = () => {
                   className="mt-2"
                   placeholder={
                     accountRecipient === "customers"
-                      ? "Select Customers"
-                      : "Select Suppliers"
+                      ? "Select Products"
+                      : "Select Raw Materials"
                   }
                   style={{ width: "100%" }}
                   onChange={(value) => {

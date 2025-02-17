@@ -144,7 +144,7 @@ const ShelfContent = () => {
                     {item.status}
                   </Flex>
                 </Table.Cell>
-                <DropdownMenu.Root>
+                {/* <DropdownMenu.Root>
                   <DropdownMenu.Trigger className="mt-1">
                     <Button variant="soft">
                       <FontAwesomeIcon icon={faEllipsisV} />
@@ -163,7 +163,7 @@ const ShelfContent = () => {
                       Remove
                     </DropdownMenu.Item>
                   </DropdownMenu.Content>
-                </DropdownMenu.Root>
+                </DropdownMenu.Root> */}
               </Table.Row>
             ))
           )}
