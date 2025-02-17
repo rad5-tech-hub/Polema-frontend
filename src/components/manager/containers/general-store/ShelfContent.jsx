@@ -144,26 +144,26 @@ const ShelfContent = () => {
                     {item.status}
                   </Flex>
                 </Table.Cell>
-                {/* <DropdownMenu.Root>
+                <DropdownMenu.Root>
                   <DropdownMenu.Trigger className="mt-1">
                     <Button variant="soft">
                       <FontAwesomeIcon icon={faEllipsisV} />
                     </Button>
                   </DropdownMenu.Trigger>
                   <DropdownMenu.Content>
-                    <DropdownMenu.Item onClick={() => openModal("add", item)}>
+                    {/* <DropdownMenu.Item onClick={() => openModal("add", item)}>
                       Add
-                    </DropdownMenu.Item>
+                    </DropdownMenu.Item> */}
                     <DropdownMenu.Item onClick={() => openModal("edit", item)}>
                       Edit
                     </DropdownMenu.Item>
-                    <DropdownMenu.Item
+                    {/* <DropdownMenu.Item
                       onClick={() => openModal("remove", item)}
                     >
                       Remove
-                    </DropdownMenu.Item>
+                    </DropdownMenu.Item> */}
                   </DropdownMenu.Content>
-                </DropdownMenu.Root> */}
+                </DropdownMenu.Root>
               </Table.Row>
             ))
           )}

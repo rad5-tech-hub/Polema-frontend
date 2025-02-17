@@ -264,20 +264,20 @@ const ManageGenStore = () => {
                             </Select.Content>
                         </Select.Root> */}
                 <AntSelect
+                  showSearch
                   placeholder={productActive ? "Select Shelf" : "Select Shelf"}
-                  onChange={(val) => {
-                    setItemID(val);
-                  }}
+                  onChange={(val) => setItemID(val)}
                   value={itemId}
                   style={{ width: "100%" }}
+                  filterOption={(input, option) =>
+                    option.children.toLowerCase().includes(input.toLowerCase())
+                  }
                 >
-                  {storeItems.map((item) => {
-                    return (
-                      <AntSelect.Option value={item.id}>
-                        {item.name}
-                      </AntSelect.Option>
-                    );
-                  })}
+                  {storeItems.map((item) => (
+                    <AntSelect.Option key={item.id} value={item.id}>
+                      {item.name}
+                    </AntSelect.Option>
+                  ))}
                 </AntSelect>
               </div>
               <div>

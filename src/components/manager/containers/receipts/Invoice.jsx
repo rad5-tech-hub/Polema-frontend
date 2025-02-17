@@ -78,7 +78,7 @@ const Invoice = () => {
             <span className="text-sm sm:text-lg md:text-xl font-semibold text-center">
               Approved Invoice
             </span>{" "}
-            wo
+            
             <button
               onClick={handlePrint}
               className="mt-4 sm:mt-0 rounded-lg h-[40px] border-[1px] border-[#919191] px-4 sm:px-8 shadow-lg text-sm sm:text-base flex gap-2 items-center"

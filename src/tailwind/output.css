@@ -789,11 +789,6 @@ video {
   margin-bottom: 3rem;
 }
 
-.my-2 {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
 .my-3 {
   margin-top: 0.75rem;
   margin-bottom: 0.75rem;
@@ -1908,10 +1903,6 @@ video {
   fill: currentColor;
 }
 
-.p-0 {
-  padding: 0px;
-}
-
 .p-1 {
   padding: 0.25rem;
 }
@@ -2481,10 +2472,6 @@ video {
 .hover\:bg-red-800:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(153 27 27 / var(--tw-bg-opacity, 1));
-}
-
-.hover\:bg-slate-400\/30:hover {
-  background-color: rgb(148 163 184 / 0.3);
 }
 
 .hover\:bg-theme:hover {

@@ -246,7 +246,7 @@ const ViewPharmacyStore = () => {
                     />
                     {item.status}
                   </Table.Cell>
-                  {/* <Table.Cell>
+                  <Table.Cell>
                     <DropdownMenu.Root>
                       <DropdownMenu.Trigger>
                         <Button variant="soft">
@@ -254,7 +254,7 @@ const ViewPharmacyStore = () => {
                         </Button>
                       </DropdownMenu.Trigger>
                       <DropdownMenu.Content>
-                        <DropdownMenu.Item
+                        {/* <DropdownMenu.Item
                           className="hover:bg-theme hover:text-white"
                           onClick={() => openModal("Top Up", item)}
                         >
@@ -265,7 +265,7 @@ const ViewPharmacyStore = () => {
                           onClick={() => openModal("Remove", item)}
                         >
                           Remove
-                        </DropdownMenu.Item>
+                        </DropdownMenu.Item> */}
                         <DropdownMenu.Item
                           className="hover:bg-theme hover:text-white"
                           onClick={() => openModal("Edit", item)}
@@ -274,7 +274,7 @@ const ViewPharmacyStore = () => {
                         </DropdownMenu.Item>
                       </DropdownMenu.Content>
                     </DropdownMenu.Root>
-                  </Table.Cell> */}
+                  </Table.Cell>
                 </Table.Row>
               );
             })

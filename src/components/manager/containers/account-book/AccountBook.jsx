@@ -36,6 +36,9 @@ const AccountBook = () => {
   const [department, setDepartment] = useState([]);
   const [otherName, setOtherName] = useState("");
 
+  // Check if dialog is open
+  const [dialogOpen, setDialogOpen] = useState(true);
+
   // Function to reset form
   const resetForm = () => {
     setSelectedCustomerId("");
@@ -221,80 +224,134 @@ const AccountBook = () => {
     fetchDepartments();
   }, []);
 
+  // Initial Dialog
+  const InitDialog = () => {
+    return (
+      <>
+        <div className="h-screen flex flex-col justify-center items-center">
+          <div>
+            <p className="font-space font-bold">
+              Whose details are you adding to the account book?
+            </p>
+            <div className="flex gap-2 items-center justify-center mt-5">
+              <Button
+                size={"3"}
+                className="bg-theme cursor-pointer"
+                onClick={() => {
+                  setDialogOpen(false);
+                  setAccountRecipient("customers");
+                }}
+              >
+                Customers
+              </Button>
+              <Button
+                size={"3"}
+                className="bg-theme cursor-pointer"
+                onClick={() => {
+                  setDialogOpen(false);
+                  setAccountRecipient("suppliers");
+                }}
+              >
+                Suppliers
+              </Button>
+              <Button
+                size={"3"}
+                className="bg-theme  cursor-pointer"
+                onClick={() => {
+                  setDialogOpen(false);
+                  setAccountRecipient("others");
+                }}
+              >
+                Others
+              </Button>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  };
+
+  // fl,
+
   return (
     <>
-      <Flex justify={"between"}>
-        <Heading className="mb-4">Add</Heading>
-        <Select.Root
-          defaultValue="customers"
-          onValueChange={(value) => {
-            setAccountRecipient(value);
-            resetForm();
-          }}
-        >
-          <Select.Trigger />
-          <Select.Content>
-            <Select.Item value="customers">Customers</Select.Item>
-            <Select.Item value="suppliers">Suppliers</Select.Item>
-            <Select.Item value="others">Others</Select.Item>
-          </Select.Content>
-        </Select.Root>
-      </Flex>
+      {dialogOpen !== false && <InitDialog />}
+      {dialogOpen === false && (
+        <>
+          <Flex justify={"between"}>
+            <Heading className="mb-4">Add</Heading>
+            <Select.Root
+              defaultValue="customers"
+              onValueChange={(value) => {
+                setAccountRecipient(value);
+                resetForm();
+              }}
+            >
+              <Select.Trigger />
+              <Select.Content>
+                <Select.Item value="customers">Customers</Select.Item>
+                <Select.Item value="suppliers">Suppliers</Select.Item>
+                <Select.Item value="others">Others</Select.Item>
+              </Select.Content>
+            </Select.Root>
+          </Flex>
 
-      <Separator className="my-3 w-full" />
-      <form onSubmit={handleSubmit}>
-        <Grid columns={"2"} gap={"4"}>
-          {accountRecipient === "others" && (
-            <>
-              <div className="w-full">
-                <Text>
-                  Input Name<span className="text-red-500">*</span>{" "}
-                </Text>
-                <TextField.Root
-                  className="mt-2 w-full"
-                  value={otherName}
-                  onChange={(e) => {
-                    setOtherName(e.target.value);
-                  }}
-                  placeholder="Input Name"
-                />
-              </div>
-              <div className="w-full">
-                <Text>
-                  Department <span className="text-red-500">*</span>{" "}
-                </Text>
-                <Select.Root
-                  onValueChange={(value) => {
-                    setDeptID(value);
-                  }}
-                  required
-                >
-                  <Select.Trigger
-                    disabled={department.length === 0}
-                    placeholder="Select Department"
-                    className="w-full mt-2"
-                  />
-                  <Select.Content>
-                    {department.map((item) => {
-                      return (
-                        <Select.Item value={item.id}>{item.name}</Select.Item>
-                      );
-                    })}
-                  </Select.Content>
-                </Select.Root>
-              </div>
-            </>
-          )}
+          <Separator className="my-3 w-full" />
+          <form onSubmit={handleSubmit}>
+            <Grid columns={"2"} gap={"4"}>
+              {accountRecipient === "others" && (
+                <>
+                  <div className="w-full">
+                    <Text>
+                      Input Name<span className="text-red-500">*</span>{" "}
+                    </Text>
+                    <TextField.Root
+                      className="mt-2 w-full"
+                      value={otherName}
+                      onChange={(e) => {
+                        setOtherName(e.target.value);
+                      }}
+                      placeholder="Input Name"
+                    />
+                  </div>
+                  <div className="w-full">
+                    <Text>
+                      Department <span className="text-red-500">*</span>{" "}
+                    </Text>
+                    <Select.Root
+                      onValueChange={(value) => {
+                        setDeptID(value);
+                      }}
+                      required
+                    >
+                      <Select.Trigger
+                        disabled={department.length === 0}
+                        placeholder="Select Department"
+                        className="w-full mt-2"
+                      />
+                      <Select.Content>
+                        {department.map((item,index) => {
+                          return (
+                            <Select.Item value={item.id} key={index}>
+                              {item.name}
+                            </Select.Item>
+                          );
+                        })}
+                      </Select.Content>
+                    </Select.Root>
+                  </div>
+                </>
+              )}
 
-          {accountRecipient !== "others" && (
-            <>
-              <div className="w-full">
-                <Text className="mb-4">
-                  {accountRecipient === "customers" && "Customer Name"}
-                  {accountRecipient === "suppliers" && "Supplier Name"}
-                  <span className="text-red-500">*</span>
-                </Text>
-                {/* <Select.Root
+              {accountRecipient !== "others" && (
+                <>
+                  <div className="w-full">
+                    <Text className="mb-4">
+                      {accountRecipient === "customers" && "Customer Name"}
+                      {accountRecipient === "suppliers" && "Supplier Name"}
+                      <span className="text-red-500">*</span>
+                    </Text>
+                    {/* <Select.Root
                   value={selectedCustomerId}
                   required
                   onValueChange={setSelectedCustomerId}
@@ -316,60 +373,65 @@ const AccountBook = () => {
                     ))}
                   </Select.Content>
                 </Select.Root> */}
-                <AntSelect
-                  showSearch
-                  className="mt-2"
-                  placeholder={
-                    accountRecipient === "customers"
-                      ? "Select Customers"
-                      : "Select Suppliers"
-                  }
-                  style={{ width: "100%" }}
-                  onChange={(value) => {
-                    setSelectedCustomerId(value);
-                  }}
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    option.children.toLowerCase().includes(input.toLowerCase())
-                  }
-                >
-                  {customers.map((customer) => (
-                    <Option key={customer.id} value={customer.id}>
-                      {`${customer.firstname} ${customer.lastname}`}
-                    </Option>
-                  ))}
-                </AntSelect>
-              </div>
-              <div className="w-full">
-                <Text className="mb-4">
-                  {accountRecipient === "customers" && "Select Product"}
-                  {accountRecipient === "suppliers" && "Select Raw Materials"}
-                  <span className="text-red-500">*</span>
-                </Text>
-                <AntSelect
-                  showSearch
-                  className="mt-2"
-                  placeholder={
-                    accountRecipient === "customers"
-                      ? "Select Products"
-                      : "Select Raw Materials"
-                  }
-                  style={{ width: "100%" }}
-                  onChange={(value) => {
-                    setSelectedProductId(value);
-                  }}
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    option.children.toLowerCase().includes(input.toLowerCase())
-                  }
-                >
-                  {products.map((product) => (
-                    <Option key={product.id} value={product.id}>
-                      {`${product.name} `}
-                    </Option>
-                  ))}
-                </AntSelect>
-                {/* <Select.Root
+                    <AntSelect
+                      showSearch
+                      className="mt-2"
+                      placeholder={
+                        accountRecipient === "customers"
+                          ? "Select Customers"
+                          : "Select Suppliers"
+                      }
+                      style={{ width: "100%" }}
+                      onChange={(value) => {
+                        setSelectedCustomerId(value);
+                      }}
+                      optionFilterProp="children"
+                      filterOption={(input, option) =>
+                        option.children
+                          .toLowerCase()
+                          .includes(input.toLowerCase())
+                      }
+                    >
+                      {customers.map((customer) => (
+                        <Option key={customer.id} value={customer.id}>
+                          {`${customer.firstname} ${customer.lastname}`}
+                        </Option>
+                      ))}
+                    </AntSelect>
+                  </div>
+                  <div className="w-full">
+                    <Text className="mb-4">
+                      {accountRecipient === "customers" && "Select Product"}
+                      {accountRecipient === "suppliers" &&
+                        "Select Raw Materials"}
+                      <span className="text-red-500">*</span>
+                    </Text>
+                    <AntSelect
+                      showSearch
+                      className="mt-2"
+                      placeholder={
+                        accountRecipient === "customers"
+                          ? "Select Products"
+                          : "Select Raw Materials"
+                      }
+                      style={{ width: "100%" }}
+                      onChange={(value) => {
+                        setSelectedProductId(value);
+                      }}
+                      optionFilterProp="children"
+                      filterOption={(input, option) =>
+                        option.children
+                          .toLowerCase()
+                          .includes(input.toLowerCase())
+                      }
+                    >
+                      {products.map((product) => (
+                        <Option key={product.id} value={product.id}>
+                          {`${product.name} `}
+                        </Option>
+                      ))}
+                    </AntSelect>
+                    {/* <Select.Root
                   required
                   value={selectedProductId}
                   disabled={products.length === 0}
@@ -391,64 +453,66 @@ const AccountBook = () => {
                     ))}
                   </Select.Content>
                 </Select.Root> */}
+                  </div>
+                </>
+              )}
+
+              <div className="w-full">
+                <Text>
+                  Enter Amount <span className="text-red-500">*</span>{" "}
+                </Text>
+                <TextField.Root
+                  className="mt-2"
+                  required
+                  placeholder="Enter Amount in Naira (₦)"
+                  value={formatNumber(basePrice)}
+                  onChange={handleBasePriceChange}
+                />
               </div>
-            </>
-          )}
+              <div className="w-full">
+                <Text>
+                  Bank Name <span className="text-red-500">*</span>
+                </Text>
+                <TextField.Root
+                  className="mt-2"
+                  placeholder="Enter Bank Name"
+                  value={bankName}
+                  onChange={(e) => {
+                    setBankName(e.target.value);
+                  }}
+                  required
+                />
+              </div>
 
-          <div className="w-full">
-            <Text>
-              Enter Amount <span className="text-red-500">*</span>{" "}
-            </Text>
-            <TextField.Root
-              className="mt-2"
-              required
-              placeholder="Enter Amount in Naira (₦)"
-              value={formatNumber(basePrice)}
-              onChange={handleBasePriceChange}
-            />
-          </div>
-          <div className="w-full">
-            <Text>
-              Bank Name <span className="text-red-500">*</span>
-            </Text>
-            <TextField.Root
-              className="mt-2"
-              placeholder="Enter Bank Name"
-              value={bankName}
-              onChange={(e) => {
-                setBankName(e.target.value);
-              }}
-              required
-            />
-          </div>
+              <div className="w-full">
+                <Text>
+                  Comment <span className="text-red-500">*</span>{" "}
+                </Text>
+                <TextField.Root
+                  className="mt-2 "
+                  required
+                  placeholder="Write any comment"
+                  value={comment}
+                  onChange={(e) => {
+                    setComment(e.target.value);
+                  }}
+                />
+              </div>
+            </Grid>
+            <Flex justify={"end"} className="mt-4 cursor-pointer">
+              <Button
+                className="cursor-pointer bg-theme hover:bg-theme/85"
+                type="submit"
+                disabled={loading}
+              >
+                {loading ? <Spinner /> : "Submit"}
+              </Button>
+            </Flex>
+          </form>
 
-          <div className="w-full">
-            <Text>
-              Comment <span className="text-red-500">*</span>{" "}
-            </Text>
-            <TextField.Root
-              className="mt-2 "
-              required
-              placeholder="Write any comment"
-              value={comment}
-              onChange={(e) => {
-                setComment(e.target.value);
-              }}
-            />
-          </div>
-        </Grid>
-        <Flex justify={"end"} className="mt-4 cursor-pointer">
-          <Button
-            className="cursor-pointer bg-theme hover:bg-theme/85"
-            type="submit"
-            disabled={loading}
-          >
-            {loading ? <Spinner /> : "Submit"}
-          </Button>
-        </Flex>
-      </form>
-
-      <Toaster position="top-right" />
+          <Toaster position="top-right" />
+        </>
+      )}
     </>
   );
 };
