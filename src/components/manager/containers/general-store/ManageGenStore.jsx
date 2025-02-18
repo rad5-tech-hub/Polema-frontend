@@ -2,7 +2,8 @@ import axios from "axios";
 import { Select as AntSelect } from "antd";
 import toast, { Toaster } from "react-hot-toast";
 import SignatureCanvas from "../../../signature-pad/SignatureCanvas";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import React, { useState, useEffect } from "react";
 import {
   Button,
@@ -15,6 +16,7 @@ import {
   Grid,
   Text,
 } from "@radix-ui/themes";
+import { Modal } from "antd";
 import _ from "lodash";
 const root = import.meta.env.VITE_ROOT;
 
@@ -34,6 +36,9 @@ const ManageGenStore = () => {
   const [quantityOut, setQuantityOut] = useState("");
   const [signatureImage, setSignatureImage] = useState(null);
   const [productActive, setProductActive] = useState(true);
+
+  // State Management for the question dialog
+  const [questionDialogOpen, setQuationDialogOpen] = React.useState(false);
 
   // Function to fetch suppliers details
   const fetchSuppliers = async () => {
@@ -160,6 +165,8 @@ const ManageGenStore = () => {
     }
   };
 
+  
+
   // Initial Screen showing two buttons
   const InitialScreen = () => {
     return (
@@ -219,11 +226,20 @@ const ManageGenStore = () => {
       {initialScreenOpen === false && (
         <>
           <Flex justify={"between"}>
-            <Heading>
-              {_.upperFirst(
-                storeAction === "add" ? "Add to store" : "Remove from Store"
-              )}
-            </Heading>
+            <div className="flex gap-2 items-center">
+              <FontAwesomeIcon
+                icon={faArrowLeft}
+                className="cursor-pointer"
+                onClick={() => {
+                  setInitialScreenOpen(true);
+                }}
+              />
+              <Heading>
+                {_.upperFirst(
+                  storeAction === "add" ? "Add to store" : "Remove from Store"
+                )}
+              </Heading>
+            </div>
 
             {/* <Heading> Select Shelf   </Heading> */}
             {/* <Select.Root defaultValue="products" onValueChange={(val) => {

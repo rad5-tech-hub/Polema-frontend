@@ -2,7 +2,6 @@ import axios from "axios";
 import { Select as AntSelect } from "antd";
 import toast, { Toaster } from "react-hot-toast";
 import SignatureCanvas from "../../../signature-pad/SignatureCanvas";
-
 import React, { useState, useEffect } from "react";
 import {
   Button,
@@ -16,6 +15,9 @@ import {
   Text,
 } from "@radix-ui/themes";
 import _ from "lodash";
+import { Modal, Button as AntButton } from "antd";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 const root = import.meta.env.VITE_ROOT;
 
 const ManageDeptStore = () => {
@@ -34,6 +36,9 @@ const ManageDeptStore = () => {
   const [quantityOut, setQuantityOut] = useState("");
   const [signatureImage, setSignatureImage] = useState(null);
   const [productActive, setProductActive] = useState(true);
+
+  //State management for the dialog box
+  const [questionDialogOpen, setQuestionDialogOpen] = React.useState(true);
 
   // Function to fetch suppliers details
   const fetchSuppliers = async () => {
@@ -208,6 +213,42 @@ const ManageDeptStore = () => {
     );
   };
 
+  // Question Componenet asking whether they want to add product or raw materials
+  const QuestionComponent = () => {
+    return (
+      <>
+        <Modal open={questionDialogOpen} footer={null} closable={false}>
+          <h1 className="text-[1.5rem] font-space font-bold">
+            What do you want ?
+          </h1>
+          <div className="mt-2 flex gap-2 justify-between">
+            <AntButton
+              color="red"
+              size="large"
+              className="bg-red-400 text-white cursor-pointer"
+              onClick={() => {
+                setProductActive(true);
+                setQuestionDialogOpen(false);
+              }}
+            >
+              Product
+            </AntButton>
+            <AntButton
+              onClick={() => {
+                setProductActive(false);
+                setQuestionDialogOpen(false)
+              }}
+              size="large"
+              className="bg-blue-400 text-white cursor-pointer"
+            >
+              Raw Material
+            </AntButton>
+          </div>
+        </Modal>
+      </>
+    );
+  };
+
   // Run functions when page is loaded
   useEffect(() => {
     fetchSuppliers();
@@ -223,16 +264,27 @@ const ManageDeptStore = () => {
       {initialScreenOpen && <InitialScreen />}
       {initialScreenOpen === false && (
         <>
+          <QuestionComponent />
           <Flex justify={"between"}>
             {/* <Heading>{_.upperFirst(storeAction)} Store</Heading> */}
-            <Heading>
-              {" "}
-              {storeAction === "add"
-                ? "Add to Store"
-                : "Remove from Store"}{" "}
-            </Heading>
+            <div className="flex gap-2 items-center">
+              <FontAwesomeIcon
+                icon={faArrowLeft}
+                className="cursor-pointer"
+                onClick={() => {
+                  setInitialScreenOpen(true);
+                  setQuestionDialogOpen(true)
+                }}
+              />
+              <Heading>
+                {" "}
+                {storeAction === "add"
+                  ? "Add to Store"
+                  : "Remove from Store"}{" "}
+              </Heading>
+            </div>
             <Select.Root
-              defaultValue="products"
+              defaultValue={productActive ? "products" : "raw-materials"}
               onValueChange={(val) => {
                 setProductActive(val === "products");
               }}
@@ -252,21 +304,6 @@ const ManageDeptStore = () => {
             <Grid columns={"2"} gap={"6"}>
               <div>
                 <Text>Select Item</Text>
-                {/* <Select.Root onValueChange={(val) => {
-                            setItemID(val)
-                        }}>
-                            <Select.Trigger className="w-full" placeholder={productActive ? "Select Product" : "Select Raw Material"} disabled={storeItems.length === 0} />
-                            <Select.Content position="popper">
-                                <Select.Group>
-                                    {storeItems.map((item) => {
-                                        return <Select.Item value={item.id}>{item.product.name}</Select.Item>
-                                    })}
-
-                                </Select.Group>
-
-
-                            </Select.Content>
-                        </Select.Root> */}
                 <AntSelect
                   placeholder={
                     productActive ? "Select Product" : "Select Raw Material"
@@ -290,19 +327,6 @@ const ManageDeptStore = () => {
                 <Text>
                   {storeAction === "add" ? "Supplier Name " : "Customer Name"}
                 </Text>
-                {/* <Select.Root onValueChange={(val) => {
-                                                   setSupplierID(val)
-                                               }} >
-                                                   <Select.Trigger className="w-full" placeholder="Enter Supplier Name" disabled={suppliers.length === 0} />
-                                                   <Select.Content position="popper">
-                                                       <Select.Group>
-                                                           {suppliers.map((supplier) => {
-                                                               return <Select.Item value={`${supplier.id}`}>{`${supplier.firstname} ${supplier.lastname}`}</Select.Item>
-                                                           })}
-                       
-                                                       </Select.Group>
-                                                   </Select.Content>
-                                               </Select.Root> */}
                 <TextField.Root
                   placeholder={
                     storeAction === "add"
@@ -315,15 +339,6 @@ const ManageDeptStore = () => {
                   }}
                 ></TextField.Root>
               </div>
-              {/* <div>
-                        <Text>Batch Number</Text>
-                        <TextField.Root placeholder="Enter Batch Number"
-                            value={batchNumber}
-                            onChange={(e) => {
-                                setBatchNumber(e.target.value)
-                            }}
-                        ></TextField.Root>
-                    </div> */}
               <div>
                 <Text>
                   {storeAction === "add"
@@ -363,7 +378,6 @@ const ManageDeptStore = () => {
               </div>
             </Grid>
             {canvasVisible && <SignatureCanvas onSave={setSignatureImage} />}
-
             <Flex justify={"end"}>
               <Button
                 size={"3"}

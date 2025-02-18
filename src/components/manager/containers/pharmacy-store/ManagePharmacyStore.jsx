@@ -1,8 +1,9 @@
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { Select as AntSelect } from "antd";
 import toast, { Toaster } from "react-hot-toast";
 import SignatureCanvas from "../../../signature-pad/SignatureCanvas";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState, useEffect } from "react";
 import {
   Button,
@@ -16,6 +17,7 @@ import {
   Text,
 } from "@radix-ui/themes";
 import _ from "lodash";
+import { Modal, Button as AntButton } from "antd";
 const root = import.meta.env.VITE_ROOT;
 
 const ManagePharmacyStore = () => {
@@ -34,6 +36,9 @@ const ManagePharmacyStore = () => {
   const [quantityOut, setQuantityOut] = useState("");
   const [signatureImage, setSignatureImage] = useState(null);
   const [productActive, setProductActive] = useState(true);
+
+  //State Management for opening and closing
+  const [questionDialogOpen, setQuestionDialogOpen] = useState(true);
 
   // Function to fetch suppliers details
   const fetchSuppliers = async () => {
@@ -165,6 +170,42 @@ const ManagePharmacyStore = () => {
     }
   };
 
+  // Component Prompting the user to choose between Product and Raww Materials
+  const QuestionComponent = () => {
+    return (
+      <>
+        <Modal open={questionDialogOpen} footer={null} closable={false}>
+          <h1 className="text-[1.5rem] font-space font-bold">
+            What do you want ?
+          </h1>
+          <div className="mt-2 flex gap-2 justify-between">
+            <AntButton
+              color="red"
+              size="large"
+              className="bg-red-400 text-white cursor-pointer"
+              onClick={() => {
+                setProductActive(true);
+                setQuestionDialogOpen(false);
+              }}
+            >
+              Product
+            </AntButton>
+            <AntButton
+              onClick={() => {
+                setProductActive(false);
+                setQuestionDialogOpen(false)
+              }}
+              size="large"
+              className="bg-blue-400 text-white cursor-pointer"
+            >
+              Raw Material
+            </AntButton>
+          </div>
+        </Modal>
+      </>
+    );
+  };
+
   // Initial Screen showing two buttons
   const InitialScreen = () => {
     return (
@@ -223,14 +264,25 @@ const ManagePharmacyStore = () => {
       {initialScreenOpen && <InitialScreen />}
       {initialScreenOpen === false && (
         <>
+          <QuestionComponent/>
           <Flex justify={"between"}>
             {/* <Heading>{_.upperFirst(storeAction)} Store</Heading> */}
-            <Heading>
-              {" "}
-              {storeAction === "add"
-                ? "Add to Store"
-                : "Remove from Store"}{" "}
-            </Heading>
+            <div className="flex gap-2 items-center">
+              <FontAwesomeIcon
+                icon={faArrowLeft}
+                className="cursor-pointer"
+                onClick={() => {
+                  setInitialScreenOpen(true);
+                  setQuestionDialogOpen(true)
+                }}
+              />
+              <Heading>
+                {" "}
+                {storeAction === "add"
+                  ? "Add to Store"
+                  : "Remove from Store"}{" "}
+              </Heading>
+            </div>
             <Select.Root
               defaultValue="products"
               onValueChange={(val) => {
