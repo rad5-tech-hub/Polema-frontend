@@ -163,10 +163,10 @@ const ManagePharmacyStore = () => {
     } catch (error) {
       console.log(error);
       setLoading(false);
-      toast.error(
-        error.message ||
-          "An error occurred, check your details and try again later"
-      );
+    toast.error(
+      error.response.data.message ||
+        "An error occurred, check your details and try again later"
+    );
     }
   };
 

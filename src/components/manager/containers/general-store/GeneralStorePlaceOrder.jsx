@@ -171,14 +171,16 @@ const GeneralStorePlaceOrder = () => {
       <form onSubmit={handleSubmit}>
         {plans.map((plan) => (
           <Card className="mt-8" key={plan.id}>
-            <Flex justify={"end"}>
-              <Text
-                className="text-red-500 cursor-pointer"
-                onClick={() => handleRemovePlan(plan.id)} // Correct removal by id
-              >
-                - Remove
-              </Text>
-            </Flex>
+            {plans.length > 1 && (
+              <Flex justify={"end"}>
+                <Text
+                  className="text-red-500 cursor-pointer"
+                  onClick={() => handleRemovePlan(plan.id)} // Correct removal by id
+                >
+                  - Remove
+                </Text>
+              </Flex>
+            )}
             <Flex className="mt-4" gap={"5"}>
               <div className="w-full">
                 <Text className="mb-4">Shelf Name</Text>

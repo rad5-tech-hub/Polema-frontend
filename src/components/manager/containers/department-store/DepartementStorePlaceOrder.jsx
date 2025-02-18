@@ -165,14 +165,16 @@ const DepartementStorePlaceOrder = () => {
       <form action="" onSubmit={placeOrder}>
         {plans.map((plan) => (
           <Card key={plan.id} className="mt-5">
-            <Flex justify={"end"}>
-              <span
-                className="text-red-500 cursor-pointer"
-                onClick={() => removePlan(plan.id)}
-              >
-                - Remove
-              </span>
-            </Flex>
+            {plans.length > 1 && (
+              <Flex justify={"end"}>
+                <span
+                  className="text-red-500 cursor-pointer"
+                  onClick={() => removePlan(plan.id)}
+                >
+                  - Remove
+                </span>
+              </Flex>
+            )}
             <Grid columns={"2"} rows={"2"} gap={"4"}>
               <div className="w-full">
                 <Text>Select Department</Text>

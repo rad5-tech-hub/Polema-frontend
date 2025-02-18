@@ -146,15 +146,18 @@ const PharmacyPlaceOrder = () => {
       <form onSubmit={handleSubmit}>
         {plans.map((plan, index) => (
           <Card key={index} className="mb-4">
-            <Flex justify={"end"}>
-              <button
-                type="button"
-                className="text-red-500"
-                onClick={() => removePlan(index)}
-              >
-                - Remove
-              </button>
-            </Flex>
+            {plans.length > 1 && (
+              <Flex justify={"end"}>
+                <button
+                  type="button"
+                  className="text-red-500"
+                  onClick={() => removePlan(index)}
+                >
+                  - Remove
+                </button>
+              </Flex>
+            )}
+
             <div>
               <Flex className="w-full" gap={"7"}>
                 <div className="w-full">

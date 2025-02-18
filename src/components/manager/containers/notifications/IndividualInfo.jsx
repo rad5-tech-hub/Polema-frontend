@@ -17,9 +17,13 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
   // --------------------State management for opening and closing the dialog------------------
   const [dialogOpen, setDialogOpen] = useState(false);
   const [storeDetails, setStoreDetails] = useState([]);
+
+  // Empty the ticket details if the modal is closed
+  
+
   // Function to fetch general store
   const fetchGeneralStore = async () => {
-   const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
     if (!token) {
       toast.error("An error occurred, try logging in again.");
     }
@@ -175,7 +179,7 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
     if (!token) {
       toast.error("An error occurred, try logging in again.");
       return;
-   }
+    }
     try {
       const response = await axios.patch(
         `${root}/${getAppropriateRejectTicket()}/${selectedTicket.ticketId}`,
@@ -188,6 +192,13 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
       toast.success("Ticket Disapproved");
     } catch (error) {
       console.log(error);
+      setRejectLoading(false);
+      toast.error(
+        error.response?.data?.message ||
+          error.response?.data.error ||
+          error.response?.message ||
+          "An error occurred while trying ot reject ticket"
+      );
     }
   };
   // Function to confirm cash ticket
@@ -217,7 +228,7 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
     }
   };
   // Function to get token from LS
-   const getToken = () => {
+  const getToken = () => {
     const token = localStorage.getItem("token");
 
     return jwtDecode(token);
@@ -225,11 +236,11 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
   const closeModal = () => {
     // setModalOpen(false);
     setOpen(false);
- };
+  };
   React.useEffect(() => {
     fetchTicketDetails();
     fetchGeneralStore();
-  }, []);
+  }, [selectedTicket]);
   return (
     <>
       <Modal open={open} footer={null} onCancel={closeModal}>
@@ -239,9 +250,7 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
             onClick={() => {
               setDetailsPageOpen(false);
             }}
-          >
-
-          </div>
+          ></div>
           <div className="flex items-center gap-4">
             <img src={Image} width={"30px"} />{" "}
             {selectedTicket?.type && (
@@ -256,329 +265,327 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
               </div>
             ) : (
               <>
-                <div className="h-full relative">
-                  <Grid columns={"3"}>
-                    {/* Ticket Type Specific Details */}
-                    {selectedTicket.type === "gatepass" && (
-                      <>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            ESCORT NAME
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.escortName}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            CUSTOMER
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {`${ticketDetails.transaction?.corder.firstname} ${ticketDetails.transaction?.corder.lastname}`}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            DESTINATION
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.destination}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            PRODUCT NAME
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.transaction?.porders?.name}
-                          </p>
-                        </div>
-                      </>
-                    )}
+                <div className="h-full relative mt-4">
+                  {/* <Grid columns={"3"}> */}
+                  {/* Ticket Type Specific Details */}
+                  {selectedTicket.type === "gatepass" && (
+                    <>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          ESCORT NAME
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {ticketDetails.escortName}
+                        </p>
+                      </div>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          CUSTOMER
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {`${ticketDetails.transaction?.corder.firstname} ${ticketDetails.transaction?.corder.lastname}`}
+                        </p>
+                      </div>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          DESTINATION
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {ticketDetails.destination}
+                        </p>
+                      </div>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          PRODUCT NAME
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {ticketDetails.transaction?.porders?.name}
+                        </p>
+                      </div>
+                    </>
+                  )}
 
-                    {/* Vehicle details */}
-                    {selectedTicket.type === "vehicle" && (
-                      <>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            DRIVER NAME
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.driversName}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            VEHICLE NUMBER
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.vehicleNo}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            DESTINATION
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.destination}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            ESCORT NAME
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.escortName}
-                          </p>
-                        </div>
-                      </>
-                    )}
+                  {/* Vehicle details */}
+                  {selectedTicket.type === "vehicle" && (
+                    <>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          DRIVER NAME
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {ticketDetails.driversName}
+                        </p>
+                      </div>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          VEHICLE NUMBER
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {ticketDetails.vehicleNo}
+                        </p>
+                      </div>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          DESTINATION
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {ticketDetails.destination}
+                        </p>
+                      </div>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          ESCORT NAME
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {ticketDetails.escortName}
+                        </p>
+                      </div>
+                    </>
+                  )}
 
-                    {/* Invoice Details */}
-                    {selectedTicket.type === "invoice" && (
-                      <>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            CUSTOMER
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {`${ticketDetails?.customer?.firstname} ${ticketDetails?.customer?.lastname}`}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            PRODUCT
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.product?.name}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            BANK NAME
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.bankName}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            QUANTITY ORDERED
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.quantityOrdered}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            VEHICLE NO
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.vehicleNo}
-                          </p>
-                        </div>
+                  {/* Invoice Details */}
+                  {selectedTicket.type === "invoice" && (
+                    <>
+                      <div className="flex items-center gap-6 justify-between">
+                        <Text className="text-[1rem] font-bold tracking-wide">
+                          CUSTOMER
+                        </Text>
+                        <p className="text-[.9rem]">
+                          {`${ticketDetails?.customer?.firstname} ${ticketDetails?.customer?.lastname}`}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-6 justify-between">
+                        <Text className="text-[1rem] font-bold tracking-wide">
+                          PRODUCT
+                        </Text>
+                        <p className="text-[.9rem]">
+                          {ticketDetails.product?.name}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-6 justify-between">
+                        <Text className="text-[1rem] font-bold tracking-wide">
+                          BANK NAME
+                        </Text>
+                        <p className="text-[.9rem]">{ticketDetails.bankName}</p>
+                      </div>
+                      <div className="flex items-center gap-6 justify-between">
+                        <Text className="text-[1rem] font-bold tracking-wide">
+                          QUANTITY ORDERED
+                        </Text>
+                        <p className="text-[.9rem]">
+                          {ticketDetails.quantityOrdered}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-6 justify-between">
+                        <Text className="text-[1rem] font-bold tracking-wide">
+                          VEHICLE NO
+                        </Text>
+                        <p className="text-[.9rem]">
+                          {ticketDetails.vehicleNo}
+                        </p>
+                      </div>
 
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            LEDGER ENTRIES
-                          </Text>
-                          {/* Ledger Entries */}
+                      <div className="flex items-center gap-6 justify-between">
+                        <Text className="text-[1rem] font-bold tracking-wide">
+                          LEDGER ENTRIES
+                        </Text>
+                        {/* Ledger Entries */}
+                        <div className="flex flex-col">
                           {Array.isArray(ticketDetails.ledgerEntries) ? (
                             ticketDetails.ledgerEntries.map((entry) => {
                               return (
-                                <p className="text-[.7rem]">
-                                  {entry.quantity} {entry.unit} of{" "}
-                                  {entry.productName}
-                                </p>
+                                <>
+                                  <p className="text-[.5rem]">
+                                    {entry.quantity} {entry.unit} of{" "}
+                                    {entry.productName}
+                                  </p>{" "}
+                                </>
                               );
                             })
                           ) : (
                             <div>No entries</div>
                           )}
                         </div>
-                      </>
-                    )}
+                      </div>
+                    </>
+                  )}
 
-                    {/* Weigh Ticket Example */}
-                    {selectedTicket.type === "weigh" && (
-                      <>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            DRIVER
-                          </Text>
-                          <p className="text-[.7rem]">{ticketDetails.driver}</p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            CUSTOMER NAME
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {`${ticketDetails.transactions?.corder.firstname} ${ticketDetails.transactions?.corder.lastname}`}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            QUANTITY
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.transactions?.quantity}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            VEHICLE NO
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.vehicleNo}
-                          </p>
-                        </div>
-                      </>
-                    )}
+                  {/* Weigh Ticket Example */}
+                  {selectedTicket.type === "weigh" && (
+                    <>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          DRIVER
+                        </Text>
+                        <p className="text-[.7rem]">{ticketDetails.driver}</p>
+                      </div>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          CUSTOMER NAME
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {`${ticketDetails.transactions?.corder.firstname} ${ticketDetails.transactions?.corder.lastname}`}
+                        </p>
+                      </div>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          QUANTITY
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {ticketDetails.transactions?.quantity}
+                        </p>
+                      </div>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          VEHICLE NO
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {ticketDetails.vehicleNo}
+                        </p>
+                      </div>
+                    </>
+                  )}
 
-                    {/* LPO DETAILS */}
-                    {selectedTicket.type === "lpo" && (
-                      <>
-                        {/* {console.log(ticketDetails)} */}
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            SUPPLIER
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {`${ticketDetails?.supplier?.firstname} ${ticketDetails?.supplier?.lastname}`}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            PRODUCT
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails?.product?.name || ""}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            QUANTITY ORDERED
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.quantOrdered}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            UNIT PRICE
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.unitPrice}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            DELIVERED TO
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.deliveredTo}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            COMMENT
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.comments}
-                          </p>
-                        </div>
-                      </>
-                    )}
+                  {/* LPO DETAILS */}
+                  {selectedTicket.type === "lpo" && (
+                    <>
+                      {/* {console.log(ticketDetails)} */}
+                      <div className="flex justify-between">
+                        <Text className="text-[1rem] font-bold tracking-wide">
+                          SUPPLIER
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {`${ticketDetails?.supplier?.firstname} ${ticketDetails?.supplier?.lastname}`}
+                        </p>
+                      </div>
+                      <div className="flex justify-between">
+                        <Text className="text-[1rem] font-bold tracking-wide">
+                          PRODUCT
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {ticketDetails?.product?.name || ""}
+                        </p>
+                      </div>
+                      <div className="flex justify-between">
+                        <Text className="text-[1rem] font-bold tracking-wide">
+                          QUANTITY ORDERED
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {ticketDetails.quantOrdered}
+                        </p>
+                      </div>
+                      <div className="flex justify-between">
+                        <Text className="text-[1rem] font-bold tracking-wide">
+                          UNIT PRICE
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {ticketDetails.unitPrice}
+                        </p>
+                      </div>
+                      <div className="flex justify-between">
+                        <Text className="text-[1rem] font-bold tracking-wide">
+                          DELIVERED TO
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {ticketDetails.deliveredTo}
+                        </p>
+                      </div>
+                      <div className="flex justify-between">
+                        <Text className="text-[1rem] font-bold tracking-wide">
+                          COMMENT
+                        </Text>
+                        <p className="text-[.7rem]">{ticketDetails.comments}</p>
+                      </div>
+                    </>
+                  )}
 
-                    {/* Cash Example */}
-                    {selectedTicket.type === "cash" && (
-                      <>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            PRODUCT
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.product?.name}
+                  {/* Cash Example */}
+                  {selectedTicket.type === "cash" && (
+                    <>
+                      <div className="flex items-center gap-6 justify-between">
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          PRODUCT
+                        </Text>
+                        <p className="text-[.9rem]">
+                          {ticketDetails.product?.name}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-6 justify-between">
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          AMOUNT
+                        </Text>
+                        <p className="text-[.9rem]">{ticketDetails.amount}</p>
+                      </div>
+                      <div className="flex items-center gap-6 justify-between">
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          COMMENTS
+                        </Text>
+                        <p className="text-[.9rem]">{ticketDetails.comments}</p>
+                      </div>
+                      <div className="flex items-center gap-6 justify-between">
+                        <Text className="text-[.56rem] font-black tracking-wide">
+                          TYPE
+                        </Text>
+                        {ticketDetails.creditOrDebit === "credit" ? (
+                          <p className="text-[.9rem] text-green-500">
+                            Give Cash
                           </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            AMOUNT
-                          </Text>
-                          <p className="text-[.7rem]">{ticketDetails.amount}</p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            COMMENTS
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.comments}
+                        ) : (
+                          <p className="text-[.9rem] text-red-500">
+                            Collected Cash
                           </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            TYPE
-                          </Text>
-                          {ticketDetails.creditOrDebit === "credit" ? (
-                            <p className="text-[.7rem] text-green-500">
-                              Give Cash
-                            </p>
-                          ) : (
-                            <p className="text-[.7rem] text-red-500">
-                              Collected Cash
-                            </p>
-                          )}
-                        </div>
-                        {ticketDetails?.customer && (
-                          <div>
-                            <Text className="text-[.56rem] font-black tracking-wide">
-                              NAME
-                            </Text>
-                            <p className="text-[.7rem]">
-                              {`${ticketDetails.customer.firstname} ${ticketDetails.customer.lastname}`}
-                            </p>
-                          </div>
                         )}
-                      </>
-                    )}
+                      </div>
+                      {ticketDetails?.customer && (
+                        <div className="flex items-center gap-6 justify-between">
+                          <Text className="text-[.56rem] font-black tracking-wide">
+                            NAME
+                          </Text>
+                          <p className="text-[.9rem]">
+                            {`${ticketDetails.customer.firstname} ${ticketDetails.customer.lastname}`}
+                          </p>
+                        </div>
+                      )}
+                    </>
+                  )}
 
-                    {/* Store Details */}
-                    {selectedTicket.type === "store" && (
-                      <>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            RECEIVED BY
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.recievedBy}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            COMMENTS
-                          </Text>
-                          <p className="text-[.7rem]">
-                            {ticketDetails.comments}
-                          </p>
-                        </div>
-                        <div>
-                          <Text className="text-[.56rem] font-black tracking-wide">
-                            ITEMS
-                          </Text>
-                          {ticketDetails.items &&
-                            Object.entries(ticketDetails.items).map(
-                              ([goodsName, quantity]) => (
-                                <p key={goodsName} className="text-[.7rem]">
+                  {/* Store Details */}
+                  {selectedTicket.type === "store" && (
+                    <>
+                      <div className="flex items-center gap-6 justify-between">
+                        <Text className="text-[1rem] font-bold font-space tracking-wide">
+                          RECEIVED BY
+                        </Text>
+                        <p className="text-[.9rem]">
+                          {ticketDetails.recievedBy}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-6 justify-between">
+                        <Text className="text-[1rem] font-bold tracking-wide">
+                          COMMENTS
+                        </Text>
+                        <p className="text-[.9rem]">{ticketDetails.comments}</p>
+                      </div>
+                      <div className="flex items-center gap-6 justify-between">
+                        <Text className="text-[1rem] font-bold tracking-wide">
+                          ITEMS
+                        </Text>
+                        {ticketDetails.items &&
+                          Object.entries(ticketDetails.items).map(
+                            ([goodsName, quantity]) => (
+                              <>
+                                <p key={goodsName} className="text-[.9rem]">
                                   {fetchStoreNameByID(goodsName).name}:{" "}
                                   {quantity}{" "}
                                   {fetchStoreNameByID(goodsName).unit}
                                 </p>
-                              )
-                            )}
-                        </div>
-                      </>
-                    )}
-                  </Grid>
+                              </>
+                            )
+                          )}
+                      </div>
+                    </>
+                  )}
+                  {/* </Grid> */}
 
                   {ticketDetails?.status === "approved" &&
                     selectedTicket?.type === "cash" &&
@@ -597,20 +604,20 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                     )}
 
                   {ticketDetails.status !== "approved" && (
-                    <div className="buttons-div justify-center mt-[5px] bottom-0 flex">
+                    <div className="buttons-div justify-start mt-12 bottom-0 flex w-full">
                       <div className="flex gap-4">
                         <Button
                           color="red"
                           size={"2"}
                           disabled={rejectLoading}
-                          className="p-3 rounded"
+                          className="p-3 rounded w-full cursor-pointer"
                           onClick={rejectTicket}
                         >
                           {rejectLoading ? <LoaderIcon /> : "Disapprove"}
                         </Button>
                         <Button
                           color="green"
-                          className="p-3 rounded"
+                          className="p-3 rounded w-full cursor-pointer"
                           size={"2"}
                           onClick={approveTicket}
                           disabled={approveLoading}

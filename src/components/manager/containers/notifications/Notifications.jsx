@@ -1,31 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
-
 import { jwtDecode } from "jwt-decode";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
 import { refractor, refractorToTime } from "../../../date";
 import { BellIcon } from "@radix-ui/react-icons";
-import {
-  Card,
-  Text,
-  Tabs,
-  Box,
-  Flex,
-  Button,
-  Spinner,
-  Separator,
-  Grid,
-} from "@radix-ui/themes";
-import {
-  faInfo,
-  faRefresh,
-  faClose,
-  faCheckCircle,
-  faCircle,
-} from "@fortawesome/free-solid-svg-icons";
+import { Card, Text, Tabs, Box, Flex, Button, Spinner } from "@radix-ui/themes";
+import { faInfo, faRefresh, faCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import IndividualInfo from "./IndividualInfo";
 const root = import.meta.env.VITE_ROOT;
 const Notifications = () => {
@@ -207,8 +190,7 @@ const Notifications = () => {
                         if (getToken().id === notification.adminId) {
                           return;
                         } else {
-                          // setSelectedTicket(notification);
-                          // setDetailsPageOpen(true);
+                          
 
                           setSelectedTicket(notification);
                           setDetailsPageOpen(true);
@@ -253,6 +235,7 @@ const Notifications = () => {
                     <div
                       key={notification.id}
                       onClick={() => {
+                        
                         setSelectedTicket(notification);
                         setDetailsPageOpen(true);
                       }}

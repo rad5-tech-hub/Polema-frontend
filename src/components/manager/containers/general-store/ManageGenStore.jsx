@@ -159,7 +159,7 @@ const ManageGenStore = () => {
       console.log(error);
       setLoading(false);
       toast.error(
-        error.message ||
+        error.response.data.message ||
           "An error occurred, check your details and try again later"
       );
     }
