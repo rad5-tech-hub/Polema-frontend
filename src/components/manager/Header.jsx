@@ -1,6 +1,6 @@
 import React from "react";
 import Profile from "./Profile";
-
+import FAQ from "./containers/FAQ/FAQ";
 import { faBars, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Logout from "../Logout";
@@ -37,6 +37,7 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
 
         <div className="flex items-center gap-3 2xsm:gap-7">
           {/* Notifications */}
+          <FAQ/>
           <Notifications />
 
           {/* Logout Button */}

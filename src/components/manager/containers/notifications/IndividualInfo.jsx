@@ -18,8 +18,8 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [storeDetails, setStoreDetails] = useState([]);
 
-  // Empty the ticket details if the modal is closed
-  
+  //------------- State management for approving to to other admins-------------
+  const [approveToOtherAdminChecked,setApproveToOtherAdminChecked] = useState(false)
 
   // Function to fetch general store
   const fetchGeneralStore = async () => {
@@ -111,7 +111,10 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
         style: { padding: "20px" },
         duration: 6000,
       });
+      return
     }
+
+    // setTicketDetails({})
 
     try {
       const response = await axios.get(
@@ -586,6 +589,14 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                     </>
                   )}
                   {/* </Grid> */}
+
+                  {/* Checkbox to approve to other admins */}
+                  {ticketDetails?.status !== "approved" && (
+                    <div className="flex gap-3 mt-4">
+                      <input type="checkbox" name="" id="" />
+                      <p>Approve to other admin</p>
+                    </div>
+                  )}
 
                   {ticketDetails?.status === "approved" &&
                     selectedTicket?.type === "cash" &&
