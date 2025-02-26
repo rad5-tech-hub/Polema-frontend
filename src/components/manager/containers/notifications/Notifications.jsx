@@ -48,7 +48,7 @@ const Notifications = () => {
   // Component for individual notification info
   const [storeDetails, setStoreDetails] = useState([]);
 
-  const [approveButtonLoading, setApproveButtonLoading] = useState(false);
+  const [approveButtonLoading, setApproveButtonLoading] = useState({});
 
   // Function to fetch general store
   const fetchGeneralStore = async () => {
@@ -136,7 +136,10 @@ const Notifications = () => {
       return;
     }
     //Display Loader Ovet the button
-    // setApproveButtonLoading(true);
+    setApproveButtonLoading((prev) => ({
+      ...prev,
+      [ticketId]: true,
+    }));
 
     try {
       const response = await axios.patch(
@@ -149,12 +152,20 @@ const Notifications = () => {
         }
       );
 
-      setApproveButtonLoading(false);
+      setApproveButtonLoading((prev) => ({
+        ...prev,
+        [ticketId]: false,
+      }));
+
       toast.success("Ticket approved successfully.", {
-        duration:3000,
+        duration: 3000,
       });
     } catch (e) {
-      setApproveButtonLoading(false);
+      setApproveButtonLoading((prev) => ({
+        ...prev,
+        [ticketId]: false,
+      }));
+
       console.log(e);
 
       toast.error(
@@ -188,8 +199,8 @@ const Notifications = () => {
           },
         }
       );
-      toast.success("Ticket Denied Successfully",{
-        duration:3500
+      toast.success("Ticket Denied Successfully", {
+        duration: 3500,
       });
     } catch (e) {
       console.log(e);
@@ -236,6 +247,9 @@ const Notifications = () => {
           >
             {/* {detailsPageOpen && <IndividualInfo />} */}
             <Flex justify="between" mb="2" align={"center"} width={"100%"}>
+              <h1 className="font-space font-medium text-[1.7rem]">
+                Notifications
+              </h1>
               <Button
                 color="red"
                 className="text-[.7rem] cursor-pointer"
@@ -243,7 +257,7 @@ const Notifications = () => {
               >
                 <FontAwesomeIcon icon={faClose} />
               </Button>
-              <Button
+              {/* <Button
                 className="text-[.7rem] cursor-pointer"
                 onClick={fetchNotifications}
               >
@@ -252,7 +266,7 @@ const Notifications = () => {
                 ) : (
                   <FontAwesomeIcon icon={faRefresh} />
                 )}
-              </Button>
+              </Button> */}
             </Flex>
             {selectedTicket && (
               <IndividualInfo
@@ -312,7 +326,13 @@ const Notifications = () => {
                                     {refractor(notification.createdAt)},
                                     {refractorToTime(notification.createdAt)}
                                   </div>
-                                  <div className="mt-2 flex gap-2 items-center bg-[#424242]/10 text-black p-2 w-fit rounded-md">
+                                  <div
+                                    className="mt-2 flex gap-2 items-center bg-[#424242]/10 text-black p-2 w-fit rounded-md"
+                                    onClick={() => {
+                                      setSelectedTicket(notification);
+                                      setDetailsPageOpen(true);
+                                    }}
+                                  >
                                     <FontAwesomeIcon icon={faTags} />
                                     <span>
                                       {_.upperFirst(notification.type)}
@@ -332,10 +352,12 @@ const Notifications = () => {
                                     }}
                                   >
                                     {" "}
-                                    {approveButtonLoading ? (
+                                    {approveButtonLoading[
+                                      notification?.ticketId
+                                    ] ? (
                                       <Spinner />
                                     ) : (
-                                      "Approve To"
+                                      "Approve"
                                     )}
                                   </AntButton>
                                   <AntButton
