@@ -236,10 +236,14 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
 
     return jwtDecode(token);
   };
+
+  // Function to close modal
   const closeModal = () => {
     // setModalOpen(false);
     setOpen(false);
   };
+
+  
   React.useEffect(() => {
     fetchTicketDetails();
     fetchGeneralStore();

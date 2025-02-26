@@ -268,8 +268,8 @@ const ViewDepartmentStore = () => {
                   />
                   {storeItem.status}
                 </Table.RowHeaderCell>
-                {/* <Table.RowHeaderCell>
-                  <div className="mt-2 mr-1 top-1 right-1">
+                <Table.RowHeaderCell>
+                  <div className=" mr-1 ">
                     <DropdownMenu.Root>
                       <DropdownMenu.Trigger>
                         <Button variant="surface">
@@ -279,26 +279,26 @@ const ViewDepartmentStore = () => {
 
                       <DropdownMenu.Content>
                         <DropdownMenu.Group>
-                          <DropdownMenu.Item
+                          {/* <DropdownMenu.Item
                             onClick={() => handleOpenModal("add", storeItem)}
                           >
                             Add
-                          </DropdownMenu.Item>
+                          </DropdownMenu.Item> */}
                           <DropdownMenu.Item
                             onClick={() => handleOpenModal("edit", storeItem)}
                           >
                             Edit
                           </DropdownMenu.Item>
-                          <DropdownMenu.Item
+                          {/* <DropdownMenu.Item
                             onClick={() => handleOpenModal("delete", storeItem)}
                           >
                             Remove
-                          </DropdownMenu.Item>
+                          </DropdownMenu.Item> */}
                         </DropdownMenu.Group>
                       </DropdownMenu.Content>
                     </DropdownMenu.Root>
                   </div>
-                </Table.RowHeaderCell> */}
+                </Table.RowHeaderCell>
               </Table.Row>
             ))}
           </Table.Body>

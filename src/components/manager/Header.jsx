@@ -5,6 +5,7 @@ import { faBars, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Logout from "../Logout";
 import { Card } from "@radix-ui/themes";
+const YT_LINK = import.meta.env.VITE_YT_LINK
 import Notifications from "./containers/notifications/Notifications";
 
 const Header = ({ sidebarOpen, setSidebarOpen }) => {
@@ -37,7 +38,9 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
 
         <div className="flex items-center gap-3 2xsm:gap-7">
           {/* Notifications */}
-          <FAQ/>
+          <a href={YT_LINK} target="_blank">
+            <FAQ />
+          </a>
           <Notifications />
 
           {/* Logout Button */}

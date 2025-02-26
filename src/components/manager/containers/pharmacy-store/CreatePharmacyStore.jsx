@@ -190,6 +190,12 @@ const CreatePharmacyStore = () => {
     }
   };
 
+
+  // Initial Dialog containing information
+  const InitialDialog = () => {
+    
+  }
+
   useEffect(() => {
     fetchPharmDetails();
   }, [rawMaterialsActive]);

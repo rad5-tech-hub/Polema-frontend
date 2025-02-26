@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import toast, { LoaderIcon, Toaster } from "react-hot-toast";
-
+import { Modal, Button as AntButton, Select as AntSelect } from "antd";
 import {
   Heading,
   Separator,
@@ -34,6 +34,9 @@ const CreateDepartmentStore = () => {
   const [productId, setProductId] = useState("");
   const [deptId, setDeptId] = useState("");
   const [selectedUnit, setSelcetedUnit] = useState("");
+  const [modalOpen, setModalOpen] = useState(true);
+  const [modalSelected, setModalSelected] = useState(false);
+  const [color, setColor] = useState("");
 
   // Function to handle the click on the "Browse Image" text
   const handleBrowseClick = () => {
@@ -188,30 +191,87 @@ const CreateDepartmentStore = () => {
     }
   };
 
+  // Initial Dialog
+  const InitialDialog = () => {
+    return (
+      <>
+        <Modal
+          open={modalOpen}
+          footer={null}
+          closable={false}
+          onClose={() => {
+            setModalOpen(false);
+            // console.log("Closing Modal");
+          }}
+        >
+          <h1 className="font-space text-lg font-bold">
+            What do you want to add?
+          </h1>
+
+          <div className="flex w-full justify-between mt-3">
+            <AntButton
+              className="bg-red-500 text-white"
+              onClick={() => {
+                setTimeout(setModalSelected(true), 2000);
+                setIsProductActive(true);
+                setModalOpen(false);
+              }}
+            >
+              Product
+            </AntButton>
+            <AntButton
+              className="bg-blue-500 text-white"
+              onClick={() => {
+                setTimeout(setModalSelected(true), 2000);
+                setIsProductActive(false);
+                setModalOpen(false);
+              }}
+            >
+              Raw Material
+            </AntButton>
+          </div>
+        </Modal>
+      </>
+    );
+  };
+
   React.useEffect(() => {
     fetchDept();
   }, []);
 
+  React.useEffect(() => {
+    !productDisabled && fetchRawMaterials(deptId);
+  }, [isProductActive]);
+
   return (
     <>
+      <InitialDialog />
       <Flex justify={"between"} align={"center"}>
         <Heading>Add New</Heading>
-        <Select.Root
-          defaultValue="product"
-          onValueChange={(value) => {
-            value === "product"
-              ? setIsProductActive(true)
-              : setIsProductActive(false);
-          }}
-        >
-          <Select.Trigger />
-          <Select.Content>
-            <Select.Group>
-              <Select.Item value="product">Product </Select.Item>
-              <Select.Item value="raw materials">Raw Materials</Select.Item>
-            </Select.Group>
-          </Select.Content>
-        </Select.Root>
+
+        {modalSelected && (
+          <AntSelect
+            defaultValue={isProductActive ? "product" : "rawMaterial"}
+            style={{
+              width: 120,
+            }}
+            onChange={(value) => {
+              value === "product"
+                ? setIsProductActive(true)
+                : setIsProductActive(false);
+            }}
+            options={[
+              {
+                value: "product",
+                label: "Product",
+              },
+              {
+                value: "rawMaterial",
+                label: "Raw Material",
+              },
+            ]}
+          />
+        )}
       </Flex>
 
       <Separator className="my-3 w-full" />
@@ -300,6 +360,16 @@ const CreateDepartmentStore = () => {
               </Select.Content>
             </Select.Root>
           </div>
+          {/* <div className="w-full">
+            <Text>Color</Text>
+            <TextField.Root
+              placeholder="Input Color"
+              value={color}
+              onChange={(e) => {
+                setColor(e.target.value);
+              }}
+            />
+          </div> */}
           <div className="w-full">
             <Text>
               {" "}
@@ -338,3 +408,20 @@ const CreateDepartmentStore = () => {
 };
 
 export default CreateDepartmentStore;
+
+<Select.Root
+  defaultValue="product"
+  // onValueChange={(value) => {
+  //   value === "product"
+  //     ? setIsProductActive(true)
+  //     : setIsProductActive(false);
+  // }}
+>
+  <Select.Trigger />
+  <Select.Content>
+    <Select.Group>
+      <Select.Item value="product">Product </Select.Item>
+      <Select.Item value="raw materials">Raw Materials</Select.Item>
+    </Select.Group>
+  </Select.Content>
+</Select.Root>;

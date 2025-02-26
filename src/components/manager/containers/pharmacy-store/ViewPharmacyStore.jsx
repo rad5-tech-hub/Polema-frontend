@@ -135,7 +135,7 @@ const ViewPharmacyStore = () => {
       <Separator className="my-4 w-full" />
 
       <div className="overflow-auto max-h-[430px]">
-        <Grid columns={"6"} rows={"3"} gap={"2"} className="grid-container">
+        {/* <Grid columns={"6"} rows={"3"} gap={"2"} className="grid-container">
           {gridLoading ? (
             <div className="flex justify-center items-center">
               <LoaderIcon />
@@ -167,7 +167,7 @@ const ViewPharmacyStore = () => {
               );
             })
           )}
-        </Grid>
+        </Grid> */}
       </div>
 
       <Table.Root className="mt-4" variant="surface">

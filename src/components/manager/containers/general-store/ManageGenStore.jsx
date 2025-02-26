@@ -23,6 +23,7 @@ const root = import.meta.env.VITE_ROOT;
 const ManageGenStore = () => {
   const [storeAction, setStoreAction] = useState("add");
   const [suppliers, setSuppliers] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [storeItems, setStoreItems] = useState([]);
   const [initialScreenOpen, setInitialScreenOpen] = useState(true);
 
@@ -36,6 +37,8 @@ const ManageGenStore = () => {
   const [quantityOut, setQuantityOut] = useState("");
   const [signatureImage, setSignatureImage] = useState(null);
   const [productActive, setProductActive] = useState(true);
+  const [description, setDescription] = useState("");
+  const [departmentId, setDepartmentID] = useState("");
 
   // State Management for the question dialog
   const [questionDialogOpen, setQuationDialogOpen] = React.useState(false);
@@ -98,6 +101,33 @@ const ManageGenStore = () => {
     }
   };
 
+  // Function to fetch departments
+  const fetchDepartments = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("An error occurred , try logging in again", {
+        style: {
+          padding: "30px",
+        },
+        duration: 5500,
+      });
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${root}/dept/view-department`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setDepartments(response.data.departments);
+    } catch (e) {
+      console.log(e);
+      toast.error(
+        e.message || "An error occurred while trying to get departments"
+      );
+    }
+  };
+
   //Function to submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -116,6 +146,8 @@ const ManageGenStore = () => {
       setQuantityOut("");
       setSupplierName("");
       setCanvasVisible(false);
+      setDepartmentID("");
+      setDescription("")
     };
 
     if (typeof Number(quantityOut) !== "number") {
@@ -129,6 +161,13 @@ const ManageGenStore = () => {
       return;
     }
 
+    //Needed Fields -> ItemId,
+
+    if(!itemId){
+      toast.error("Select a Shelf Type First")
+      return
+    }
+
     try {
       const response = await axios.post(
         `${root}/dept/${
@@ -139,6 +178,8 @@ const ManageGenStore = () => {
           // batchNo: batchNumber,
           name: supplierName,
           quantity: quantityOut,
+          comments: description,
+          departmentId,
           signature: signatureImage,
         },
         {
@@ -164,8 +205,6 @@ const ManageGenStore = () => {
       );
     }
   };
-
-  
 
   // Initial Screen showing two buttons
   const InitialScreen = () => {
@@ -213,6 +252,7 @@ const ManageGenStore = () => {
   // Run functions when page is loaded
   useEffect(() => {
     fetchSuppliers();
+    fetchDepartments();
   }, []);
 
   // Run function if the page loads and if the value of "productActive" changes
@@ -241,44 +281,15 @@ const ManageGenStore = () => {
               </Heading>
             </div>
 
-            {/* <Heading> Select Shelf   </Heading> */}
-            {/* <Select.Root defaultValue="products" onValueChange={(val) => {
-                    setProductActive(val === "products")
-                }}>
-                    <Select.Trigger />
-                    <Select.Content position="popper">
-                        <Select.Group>
-
-                            <Select.Item value="raw-materials">Raw Materials</Select.Item>
-                            <Select.Item value="products">Products</Select.Item>
-
-                        </Select.Group>
-
-
-                    </Select.Content>
-                </Select.Root> */}
+         
           </Flex>
           <Separator className="my-4 w-full" />
 
           <form action="" onSubmit={handleSubmit}>
             <Grid columns={"2"} gap={"6"}>
               <div>
-                <Text>Select Shelf</Text>
-                {/* <Select.Root onValueChange={(val) => {
-                            setItemID(val)
-                        }}>
-                            <Select.Trigger className="w-full" placeholder={productActive ? "Select Product" : "Select Raw Material"} disabled={storeItems.length === 0} />
-                            <Select.Content position="popper">
-                                <Select.Group>
-                                    {storeItems.map((item) => {
-                                        return <Select.Item value={item.id}>{item.product.name}</Select.Item>
-                                    })}
-
-                                </Select.Group>
-
-
-                            </Select.Content>
-                        </Select.Root> */}
+                <Text>Select Shelf <span className="text-red-500">*</span></Text>
+             
                 <AntSelect
                   showSearch
                   placeholder={productActive ? "Select Shelf" : "Select Shelf"}
@@ -312,15 +323,7 @@ const ManageGenStore = () => {
                   }}
                 ></TextField.Root>
               </div>
-              {/* <div>
-                        <Text>Batch Number</Text>
-                        <TextField.Root placeholder="Enter Batch Number"
-                            value={batchNumber}
-                            onChange={(e) => {
-                                setBatchNumber(e.target.value)
-                            }}
-                        ></TextField.Root>
-                    </div> */}
+         
               <div>
                 <Text>
                   {storeAction === "add"
@@ -338,6 +341,35 @@ const ManageGenStore = () => {
                     setQuantityOut(e.target.value);
                   }}
                 ></TextField.Root>
+              </div>
+              <div>
+                <Text>Description</Text>
+                <TextField.Root
+                  placeholder="Enter Description"
+                  value={description}
+                  onChange={(e) => {
+                    setDescription(e.target.value)
+                  }}
+                ></TextField.Root>
+              </div>
+              <div>
+                <Text>Select Department</Text>
+                <AntSelect
+                  showSearch
+                  placeholder="Choose Department"
+                  onChange={(val) => setDepartmentID(val)}
+                  value={departmentId}
+                  style={{ width: "100%" }}
+                  filterOption={(input, option) =>
+                    option.children.toLowerCase().includes(input.toLowerCase())
+                  }
+                >
+                  {departments.map((item) => (
+                    <AntSelect.Option key={item.id} value={item.id}>
+                      {item.name}
+                    </AntSelect.Option>
+                  ))}
+                </AntSelect>
               </div>
               <div>
                 <Text>Siganture</Text>

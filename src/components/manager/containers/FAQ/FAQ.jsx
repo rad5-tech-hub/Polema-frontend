@@ -22,11 +22,11 @@ const FAQ = () => {
     <>
       <div
         className="cursor-pointer relative border-[1px] z-[999] border-[#000]/60 rounded-lg p-3"
-        onClick={showLoading}
+        // onClick={showLoading}
       >
         <QuestionMarkIcon />
       </div>
-      <Modal
+      {/* <Modal
         open={modalOpen}
         loading={modalLoading}
         onCancel={() => setModalOpen(false)}
@@ -42,7 +42,7 @@ const FAQ = () => {
                 </div>
               );
             })}
-      </Modal>
+      </Modal> */}
     </>
   );
 };

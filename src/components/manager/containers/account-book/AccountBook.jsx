@@ -29,6 +29,7 @@ const AccountBook = () => {
   const [bankName, setBankName] = useState("");
   const [comment, setComment] = useState("");
   const [deptID, setDeptID] = useState("");
+  const [modalSelected, setModalSelected] = useState(false);
 
   const [isCustomer, setIscustomer] = useState("");
 
@@ -281,7 +282,8 @@ const AccountBook = () => {
           <Flex justify={"between"}>
             <Heading className="mb-4">Add</Heading>
             <Select.Root
-              defaultValue="customers"
+              // defaultValue="customers"
+              defaultValue={accountRecipient}
               onValueChange={(value) => {
                 setAccountRecipient(value);
                 resetForm();
@@ -330,7 +332,7 @@ const AccountBook = () => {
                         className="w-full mt-2"
                       />
                       <Select.Content>
-                        {department.map((item,index) => {
+                        {department.map((item, index) => {
                           return (
                             <Select.Item value={item.id} key={index}>
                               {item.name}

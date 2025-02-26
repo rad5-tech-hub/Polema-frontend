@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import SignatureCanvas from "../../../signature-pad/SignatureCanvas";
 import { EyeOpenIcon, EyeClosedIcon, PlusIcon } from "@radix-ui/react-icons";
 import axios from "axios";
 import {
@@ -10,6 +11,7 @@ import {
   TextField,
   Grid,
   Flex,
+  Text,
   Spinner,
 } from "@radix-ui/themes";
 import { LoaderIcon } from "react-hot-toast";
@@ -33,6 +35,8 @@ const AddAdmin = () => {
   const [roleId, setRoleId] = useState("");
   const [address, setAddress] = useState("");
   const [deptId, setDeptID] = useState("");
+  const [canvasVisible, setCanvasVisible] = useState(false);
+  const [signatureImage, setSignatureImage] = useState(null);
 
   // Fetch departments
   const fetchDept = async () => {
@@ -87,14 +91,16 @@ const AddAdmin = () => {
     const submitObject = {
       firstname: firstName,
       lastname: lastName,
+      signature: signatureImage,
+      
       email: email,
       phoneNumber: phone,
       ...(address && { address: address }),
       roleId,
-      ...(deptId && additionalDepartments.length !== 0
-        && { department: [deptId, ...additionalDepartments] }
-        ),
-      
+      ...(deptId &&
+        additionalDepartments.length !== 0 && {
+          department: [deptId, ...additionalDepartments],
+        }),
     };
     try {
       const response = await axios.post(
@@ -120,6 +126,7 @@ const AddAdmin = () => {
       setAddress("");
       // setRoleId("");
       setDeptID("");
+      setCanvasVisible(false)
       setAdditionalDepartments([]);
     } catch (error) {
       console.log(error);
@@ -140,109 +147,139 @@ const AddAdmin = () => {
 
   return (
     <div className="!font-space">
-      <Card className="w-full">
-        <Heading className="text-left py-4">Create Admin</Heading>
-        <Separator className="w-full" />
-        <form onSubmit={handleSubmit}>
-          <Grid columns={"2"} gap={"3"}>
-            <div className="input-field mt-3">
-              <label
-                className="text-[15px] font-medium leading-[35px]"
-                htmlFor="firstname"
-              >
-                First Name
-              </label>
-              <TextField.Root
-                placeholder="Enter First Name"
-                id="firstname"
-                onChange={(e) => setFirstName(e.target.value)}
-                value={firstName}
+      {/* <Card className="w-full"> */}
+      <Heading className="text-left py-4">Create Admin</Heading>
+      <Separator className="w-full" />
+      <form onSubmit={handleSubmit}>
+        <Grid columns={"2"} gap={"3"}>
+          <div className="input-field mt-3">
+            <label
+              className="text-[15px] font-medium leading-[35px]"
+              htmlFor="firstname"
+            >
+              First Name
+            </label>
+            <TextField.Root
+              required
+              placeholder="Enter First Name"
+              id="firstname"
+              onChange={(e) => setFirstName(e.target.value)}
+              value={firstName}
+            />
+          </div>
+
+          <div className="input-field mt-3">
+            <label
+              className="text-[15px] font-medium leading-[35px]"
+              htmlFor="lastname"
+            >
+              Last Name
+            </label>
+            <TextField.Root
+              required
+              placeholder="Enter Last Name"
+              id="lastname"
+              onChange={(e) => setLastName(e.target.value)}
+              value={lastName}
+            />
+          </div>
+
+          <div className="input-field mt-3">
+            <label
+              className="text-[15px] font-medium leading-[35px]"
+              htmlFor="phone"
+            >
+              Phone Number
+            </label>
+            <TextField.Root
+              placeholder="Enter Phone Number"
+              id="phone"
+              onChange={(e) => setPhone(e.target.value)}
+              value={phone}
+            />
+          </div>
+
+          <div className="input-field mt-3">
+            <label
+              className="text-[15px] font-medium leading-[35px]"
+              htmlFor="email"
+            >
+              Email
+            </label>
+            <TextField.Root
+              placeholder="Enter Email"
+              required
+              id="email"
+              onChange={(e) => setEmail(e.target.value)}
+              value={email}
+            />
+          </div>
+
+          <div className="input-field mt-3">
+            <label
+              className="text-[15px] font-medium leading-[35px]"
+              htmlFor="role"
+            >
+              Assign Role
+            </label>
+            <Select.Root onValueChange={setRoleId} required>
+              <Select.Trigger
+                
+                className="w-full mt-2"
+                placeholder="Select Role"
               />
-            </div>
+              <Select.Content position="popper">
+                {rolesArray.map((role) => (
+                  <Select.Item key={role.id} value={role.id}>
+                    {role.name}
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select.Root>
+          </div>
 
-            <div className="input-field mt-3">
-              <label
-                className="text-[15px] font-medium leading-[35px]"
-                htmlFor="lastname"
-              >
-                Last Name
-              </label>
+          <div className="input-field mt-3">
+            <label
+              className="text-[15px] font-medium leading-[35px]"
+              htmlFor="address"
+            >
+              Address
+            </label>
+            <TextField.Root
+              placeholder="Enter Address "
+              className="mt-2"
+              required
+              id="address"
+              onChange={(e) => setAddress(e.target.value)}
+              value={address}
+            />
+          </div>
+          <div className="input-field mt-3">
+            <Text className="text-[15px] font-medium leading-[35px]">
+              Siganture
+            </Text>
+            <Flex
+              className="w-full"
+              onClick={() => {
+                setCanvasVisible(!canvasVisible);
+              }}
+            >
               <TextField.Root
-                placeholder="Enter Last Name"
-                id="lastname"
-                onChange={(e) => setLastName(e.target.value)}
-                value={lastName}
-              />
-            </div>
+                placeholder="Sign Here"
+                value={""}
+                disabled
+                className="w-[70%]"
+              ></TextField.Root>
+              <Button className="w-[30%] bg-theme" type="button">
+                Sign{" "}
+              </Button>
+            </Flex>
+          </div>
+          {canvasVisible && <SignatureCanvas onSave={setSignatureImage} />}
+        </Grid>
 
-            <div className="input-field mt-3">
-              <label
-                className="text-[15px] font-medium leading-[35px]"
-                htmlFor="phone"
-              >
-                Phone Number
-              </label>
-              <TextField.Root
-                placeholder="Enter Phone Number"
-                id="phone"
-                onChange={(e) => setPhone(e.target.value)}
-                value={phone}
-              />
-            </div>
-
-            <div className="input-field mt-3">
-              <label
-                className="text-[15px] font-medium leading-[35px]"
-                htmlFor="email"
-              >
-                Email
-              </label>
-              <TextField.Root
-                placeholder="Enter Email"
-                id="email"
-                onChange={(e) => setEmail(e.target.value)}
-                value={email}
-              />
-            </div>
-
-            <div className="input-field mt-3">
-              <label
-                className="text-[15px] font-medium leading-[35px]"
-                htmlFor="role"
-              >
-                Assign Role
-              </label>
-              <Select.Root onValueChange={setRoleId}>
-                <Select.Trigger
-                  className="w-full mt-2"
-                  placeholder="Select Role"
-                />
-                <Select.Content position="popper">
-                  {rolesArray.map((role) => (
-                    <Select.Item key={role.id} value={role.id}>
-                      {role.name}
-                    </Select.Item>
-                  ))}
-                </Select.Content>
-              </Select.Root>
-            </div>
-
-            <div className="input-field mt-3">
-              <label
-                className="text-[15px] font-medium leading-[35px]"
-                htmlFor="address"
-              >
-                Address
-              </label>
-              <TextField.Root
-                placeholder="Enter Address "
-                className="mt-2"
-                id="address"
-                onChange={(e) => setAddress(e.target.value)}
-                value={address}
-              />
-            </div>
-
+        <Card className="mt-4">
+          <Grid columns={"2"} width={"100%"} gap={"3"}>
             <div className="input-field mt-3">
               <label
                 className="text-[15px] font-medium leading-[35px]"
@@ -293,26 +330,27 @@ const AddAdmin = () => {
               </div>
             ))}
           </Grid>
+        </Card>
 
-          <Button type="button" onClick={handleAddDepartment} className="mt-4">
-            <Flex align={"center"} gap={"1"}>
-              <PlusIcon />
-              Add Department
-            </Flex>
-          </Button>
-
-          <Flex justify={"end"} align={"end"} width={"100%"}>
-            <Button
-              className="mt-4 bg-theme hover:bg-theme/85"
-              size={3}
-              type="submit"
-              disabled={isLoading}
-            >
-              {isLoading ? <LoaderIcon /> : "Create Admin"}
-            </Button>
+        <Button type="button" onClick={handleAddDepartment} className="mt-4">
+          <Flex align={"center"} gap={"1"}>
+            <PlusIcon />
+            Add Department
           </Flex>
-        </form>
-      </Card>
+        </Button>
+
+        <Flex justify={"end"} align={"end"} width={"100%"}>
+          <Button
+            className="mt-4 bg-theme hover:bg-theme/85"
+            size={3}
+            type="submit"
+            disabled={isLoading}
+          >
+            {isLoading ? <LoaderIcon /> : "Create Admin"}
+          </Button>
+        </Flex>
+      </form>
+      {/* </Card> */}
       <Toaster position="top-right" />
     </div>
   );
