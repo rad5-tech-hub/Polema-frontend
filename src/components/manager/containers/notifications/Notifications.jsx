@@ -23,7 +23,7 @@ import {
   faUser,
   faTags,
 } from "@fortawesome/free-solid-svg-icons";
-import { Button as AntButton } from "antd";
+import { Button as AntButton, Select } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import IndividualInfo from "./IndividualInfo";
@@ -41,6 +41,7 @@ const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
   const [unreadNotifications, setUnreadNotifications] = useState([]);
   const [detailsPageOpen, setDetailsPageOpen] = useState(false);
+  const [admins, setAdmins] = useState([]);
   const notificationRef = useRef(null);
 
   const [selectedTicket, setSelectedTicket] = useState("");
@@ -212,6 +213,89 @@ const Notifications = () => {
     }
   };
 
+  //  Function to fetch admin details
+  const fetchAdminDetails = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("An error occurred , try loggin in again");
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${root}/admin/all-staff`, {
+        headers: {
+          Authorization: `Bearer ${retrToken}`,
+        },
+      });
+      setAdmins(response.data.staffList);
+    } catch (e) {
+      console.log(e);
+      toast.error(
+        e.message ||
+          e.response.data.message ||
+          "An error occurred while trying to fetch admin details"
+      );
+    }
+  };
+
+  // Component for select admin side pane
+  const SelectAdminSidePane = () => {
+    return (
+      <>
+        <div className="absolute left-[-300px] top-0 bg-white min-w-[250px] h-[110%] p-4 shadow-md">
+          <h1 className="font-space font-bold text-[1.1rem]">Choose Admin</h1>
+          <p className="text-[.7rem]">
+            <span>Selected Admin</span> : <span></span>
+          </p>
+          <Select
+            showSearch
+            style={{
+              width: 200,
+            }}
+            placeholder="Search to Select"
+            optionFilterProp="label"
+            className="my-2"
+            filterSort={(optionA, optionB) =>
+              (optionA?.label ?? "")
+                .toLowerCase()
+                .localeCompare((optionB?.label ?? "").toLowerCase())
+            }
+            options={[
+              {
+                value: "1",
+                label: "Not Identified",
+              },
+              {
+                value: "2",
+                label: "Closed",
+              },
+              {
+                value: "3",
+                label: "Communicated",
+              },
+              {
+                value: "4",
+                label: "Identified",
+              },
+              {
+                value: "5",
+                label: "Resolved",
+              },
+              {
+                value: "6",
+                label: "Cancelled",
+              },
+            ]}
+          />
+          <div className="flex justify-end">
+            <Button className="bg-theme">Submit</Button>
+          </div>
+        </div>
+      </>
+    );
+  };
+
   useEffect(() => {
     fetchNotifications();
     fetchGeneralStore();
@@ -241,7 +325,7 @@ const Notifications = () => {
             className={`notifications-panel absolute top-10 right-[-70px] w-[30rem] z-[9999] shadow-md p-4 bg-white border border-gray-200 rounded-md transition-transform duration-300 ${
               isNotificationsOpen && !isSlidingOut
                 ? "translate-x-0"
-                : "translate-x-full"
+                : "translate-x-[160%]"
             }`}
             style={{ borderRadius: "8px" }}
           >
@@ -287,7 +371,7 @@ const Notifications = () => {
 
               <Box
                 pt="3"
-                style={{ maxHeight: "300px", overflowY: "auto" }}
+                style={{ maxHeight: "500px" }}
                 className="notifications-box"
               >
                 <Tabs.Content value="all">
@@ -300,8 +384,9 @@ const Notifications = () => {
                             // setSelectedTicket(notification);
                             // setDetailsPageOpen(true);
                           }}
-                          className="mb-3 p-2 rounded  cursor-pointer"
+                          className="mb-3 p-2 rounded  cursor-pointer relative"
                         >
+                          <SelectAdminSidePane />
                           <Flex gap="2" align="center" className="relative">
                             <div className="self-start">
                               <Card className="bg-green-400 p-4 w-[40px] h-[40px] flex justify-center items-center">
@@ -373,10 +458,6 @@ const Notifications = () => {
                                   </AntButton>
                                 </div>
                               </div>
-
-                              {/* <div>
-                                
-                              </div> */}
                             </Flex>
                           </Flex>
                         </div>
