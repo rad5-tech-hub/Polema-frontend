@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { rejectTicket, acceptTicket } from "./NotificationsData";
+import { rejectTicket, acceptTicket,sendTicket } from "./NotificationsData";
 import toast, { Toaster } from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
 import { faClose, faTrash } from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
+// import { jwtDecode } from "jwt-decode";
 import { refractor, refractorToTime } from "../../../date";
 import { BellIcon } from "@radix-ui/react-icons";
 import {
@@ -43,6 +44,9 @@ const Notifications = () => {
   const [detailsPageOpen, setDetailsPageOpen] = useState(false);
   const [admins, setAdmins] = useState([]);
   const notificationRef = useRef(null);
+  const [isSidePaneOpen,setIsSidePaneOpen] = useState({});
+  const [sSelectedTicketType,setSelectedTicketType] = useState("")
+
 
   const [selectedTicket, setSelectedTicket] = useState("");
 
@@ -121,6 +125,7 @@ const Notifications = () => {
 
   const closeNotifications = (event) => {
     slideOutNotifications();
+    setIsSidePaneOpen({})
   };
 
   // Function to approve ticket
@@ -158,9 +163,9 @@ const Notifications = () => {
         [ticketId]: false,
       }));
 
-      toast.success("Ticket approved successfully.", {
-        duration: 3000,
-      });
+      // toast.success("Ticket approved successfully.", {
+      //   duration: 3000,
+      // });
     } catch (e) {
       setApproveButtonLoading((prev) => ({
         ...prev,
@@ -225,7 +230,7 @@ const Notifications = () => {
     try {
       const response = await axios.get(`${root}/admin/all-staff`, {
         headers: {
-          Authorization: `Bearer ${retrToken}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       setAdmins(response.data.staffList);
@@ -239,65 +244,93 @@ const Notifications = () => {
     }
   };
 
+  // Function to decode token 
+  const decodeToken = ()=>{
+    return jwtDecode(localStorage.getItem("token"))
+  }
+
+  
+
   // Component for select admin side pane
-  const SelectAdminSidePane = () => {
+  const SelectAdminSidePane = ({type,ticketID}) => {
+    const [selectedAdmins, setSelectedAdmins] = useState([]);
+  
+    const handleCheckboxChange = (adminId) => {
+      setSelectedAdmins((prev) =>
+        prev.includes(adminId) ? prev.filter((id) => id !== adminId) : [...prev, adminId]
+      );
+    };
+
+    const token = localStorage.getItem("token")
+    
+    
+    const handleSubmit = async(e) => {
+      e.preventDefault()
+      if(!token){
+        toast.error("An error occurred , try logging in again.")
+        return
+      }
+      
+      if(selectedAdmins.length === 0) {
+        toast.error("Select at least one admin");
+        return;
+      }
+
+      try {
+        const firstRequest = await approveTicket(type,ticketID)
+      } catch (error) {
+        console.log(error);
+        
+      }
+      console.log("Selected Admin IDs:", selectedAdmins);
+    };
+  
+     // approveTicket(
+     //   notification.type,
+       //   notification?.ticketId || null
+           // );
     return (
-      <>
-        <div className="absolute left-[-300px] top-0 bg-white min-w-[250px] h-[110%] p-4 shadow-md">
-          <h1 className="font-space font-bold text-[1.1rem]">Choose Admin</h1>
-          <p className="text-[.7rem]">
-            <span>Selected Admin</span> : <span></span>
-          </p>
-          <Select
-            showSearch
-            style={{
-              width: 200,
-            }}
-            placeholder="Search to Select"
-            optionFilterProp="label"
-            className="my-2"
-            filterSort={(optionA, optionB) =>
-              (optionA?.label ?? "")
-                .toLowerCase()
-                .localeCompare((optionB?.label ?? "").toLowerCase())
-            }
-            options={[
-              {
-                value: "1",
-                label: "Not Identified",
-              },
-              {
-                value: "2",
-                label: "Closed",
-              },
-              {
-                value: "3",
-                label: "Communicated",
-              },
-              {
-                value: "4",
-                label: "Identified",
-              },
-              {
-                value: "5",
-                label: "Resolved",
-              },
-              {
-                value: "6",
-                label: "Cancelled",
-              },
-            ]}
-          />
-          <div className="flex justify-end">
-            <Button className="bg-theme">Submit</Button>
-          </div>
+      <div className="absolute z-30 left-[-300px] top-0 mb-20 bg-white min-w-[250px] h-[230px] p-4 shadow-md overflow-scroll overflow-x-hidden">
+        <h1 className="font-space font-bold text-[1.1rem]">Approve To</h1>
+        <p className="absolute right-[10px] cursor-pointer top-[5px]" onClick={()=>{
+          setIsSidePaneOpen({})
+        }}>
+          <FontAwesomeIcon icon={faClose}/>
+        </p>
+        {/* <p className="text-[.7rem]">
+          <span>Selected Admin</span>: <span>{selectedAdmins.join(", ") || "None"}</span>
+        </p> */}
+  
+        <form action="" onSubmit={handleSubmit}>
+        <div className="my-2">
+          {admins.map((admin) => (
+            <label key={admin.id} className="flex items-center flex-row-reverse cursor-pointer gap-2">
+              <input
+                type="checkbox"
+                className=""
+                value={admin.id}
+                checked={selectedAdmins.includes(admin.roleId)}
+                onChange={() => handleCheckboxChange(admin.roleId)}
+              />
+             <span className="w-full p-2"> {`${admin.firstname} ${admin.lastname}`} {`(${admin.role?.name || ""})`}
+             </span>
+                         </label>
+          ))}
         </div>
-      </>
+  
+        <div className="flex justify-end mt-4 mb-15">
+          <button className="bg-theme px-4 py-2 text-white rounded" >
+            Submit
+          </button>
+        </div>
+        </form>
+      </div>
     );
   };
 
   useEffect(() => {
     fetchNotifications();
+    fetchAdminDetails()
     fetchGeneralStore();
   }, []);
 
@@ -322,15 +355,16 @@ const Notifications = () => {
         </div>
         <div>
           <div
-            className={`notifications-panel absolute top-10 right-[-70px] w-[30rem] z-[9999] shadow-md p-4 bg-white border border-gray-200 rounded-md transition-transform duration-300 ${
+            className={`notifications-panel absolute top-10 right-[-70px] w-[30rem] z-[9999] !overflow-x-visible shadow-md p-4 bg-white border border-gray-200 rounded-md transition-transform duration-300 ${
               isNotificationsOpen && !isSlidingOut
-                ? "translate-x-0"
-                : "translate-x-[160%]"
+                ? "translate-x-0 block opacity-100"
+                : "translate-x-[160%] opacity-0 hidden"
             }`}
-            style={{ borderRadius: "8px" }}
+            style={{ borderRadius: "8px" ,overflowY:""}}
           >
             {/* {detailsPageOpen && <IndividualInfo />} */}
-            <Flex justify="between" mb="2" align={"center"} width={"100%"}>
+            <div className="flex justify-between items-center w-full">
+
               <h1 className="font-space font-medium text-[1.7rem]">
                 Notifications
               </h1>
@@ -351,7 +385,8 @@ const Notifications = () => {
                   <FontAwesomeIcon icon={faRefresh} />
                 )}
               </Button> */}
-            </Flex>
+            
+            </div>
             {selectedTicket && (
               <IndividualInfo
                 // ticketDetails={}
@@ -369,11 +404,12 @@ const Notifications = () => {
                 <Tabs.Trigger value="inventory">Inventory</Tabs.Trigger>
               </Tabs.List>
 
-              <Box
+              <div className="pt-3 max-h-[500px] notifications-box">
+              {/* <Box
                 pt="3"
                 style={{ maxHeight: "500px" }}
                 className="notifications-box"
-              >
+              > */}
                 <Tabs.Content value="all">
                   {notifications.length > 0 ? (
                     notifications.map((notification) => (
@@ -386,7 +422,7 @@ const Notifications = () => {
                           }}
                           className="mb-3 p-2 rounded  cursor-pointer relative"
                         >
-                          <SelectAdminSidePane />
+                          {isSidePaneOpen[notification.id] && <SelectAdminSidePane  type={notification.type} ticketID={notification.ticketId}/>}
                           <Flex gap="2" align="center" className="relative">
                             <div className="self-start">
                               <Card className="bg-green-400 p-4 w-[40px] h-[40px] flex justify-center items-center">
@@ -424,16 +460,18 @@ const Notifications = () => {
                                     </span>
                                   </div>
                                 </Text>
-
-                                <div className="button-groups flex gap-4 mt-4">
+                                {decodeToken().isAdmin  &&      <div className="button-groups flex gap-4 mt-4">
                                   <AntButton
                                     className="bg-theme text-white hover:!bg-theme hover:text-white"
                                     onClick={(e) => {
                                       e.preventDefault();
-                                      approveTicket(
-                                        notification.type,
-                                        notification?.ticketId || null
-                                      );
+                                     
+                                      // setIsSidePaneOpen((prev) => ({
+                                      //   ...prev,
+                                      //   [notification.id]: true,
+                                      // }));
+                                      // setSelectedTicket(notification.type)
+                                      
                                     }}
                                   >
                                     {" "}
@@ -456,7 +494,25 @@ const Notifications = () => {
                                   >
                                     Deny
                                   </AntButton>
-                                </div>
+                                </div> }
+
+                                {notification.type === "cash" && <div className="button-groups flex gap-4 mt-4">
+                              
+                              <AntButton
+                              className="bg-green-500 text-white"
+                                onClick={(e) => { 
+                                  e.preventDefault();
+                                  denyTicket(
+                                    notification.type,
+                                    notification?.ticketId || null
+                                  );
+                                }}
+                              >
+                                Confirm
+                              </AntButton>
+                            </div>}
+
+                           
                               </div>
                             </Flex>
                           </Flex>
@@ -477,7 +533,9 @@ const Notifications = () => {
                     No Inventory notifications
                   </Text>
                 </Tabs.Content>
-              </Box>
+              {/* </Box> */}
+
+              </div>
             </Tabs.Root>
           </div>
         </div>

@@ -19,3 +19,14 @@ export const acceptTicket = {
     cash: "admin/approve-cash-ticket",
     waybill: "customer/approve-waybill",
 }
+
+export const sendTicket ={
+    lpo:'admin/send-lpo',
+    vehicle:"customer/send-vehicle",
+    store:'admin/send-store-auth',
+    invoice:'customer/sendInvoice',
+    weigh:'admin/send-weigh-auth',
+    gatepass:'customer/send-gate-pass',
+    cash:'admin/send-ticket',
+    waybill:'customer/send-Waybill'
+}
