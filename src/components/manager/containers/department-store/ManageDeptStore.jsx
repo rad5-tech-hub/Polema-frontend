@@ -36,6 +36,7 @@ const ManageDeptStore = () => {
   const [quantityOut, setQuantityOut] = useState("");
   const [signatureImage, setSignatureImage] = useState(null);
   const [productActive, setProductActive] = useState(true);
+  const [modalClicked,setModalClicked] = useState(false)
 
   //State management for the dialog box
   const [questionDialogOpen, setQuestionDialogOpen] = React.useState(true);
@@ -228,7 +229,9 @@ const ManageDeptStore = () => {
               className="bg-red-400 text-white cursor-pointer"
               onClick={() => {
                 setProductActive(true);
+
                 setQuestionDialogOpen(false);
+                setModalClicked(true)
               }}
             >
               Product
@@ -237,6 +240,8 @@ const ManageDeptStore = () => {
               onClick={() => {
                 setProductActive(false);
                 setQuestionDialogOpen(false)
+                setModalClicked(true)
+
               }}
               size="large"
               className="bg-blue-400 text-white cursor-pointer"
@@ -283,7 +288,7 @@ const ManageDeptStore = () => {
                   : "Remove from Store"}{" "}
               </Heading>
             </div>
-            <Select.Root
+           {modalClicked &&  <Select.Root
               defaultValue={productActive ? "products" : "raw-materials"}
               onValueChange={(val) => {
                 setProductActive(val === "products");
@@ -296,7 +301,7 @@ const ManageDeptStore = () => {
                   <Select.Item value="products">Products</Select.Item>
                 </Select.Group>
               </Select.Content>
-            </Select.Root>
+            </Select.Root>}
           </Flex>
           <Separator className="my-4 w-full" />
 
