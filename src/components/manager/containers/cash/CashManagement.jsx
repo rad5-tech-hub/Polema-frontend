@@ -12,6 +12,7 @@ import {
 } from "@radix-ui/themes";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
+import {Modal,Button as AntButton} from "antd"
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -22,9 +23,11 @@ const CashManagement = () => {
   const [dropdownBlur, setDropdownBlur] = useState(true);
   const [adminId, setAdminId] = useState("");
   const [cashAmount, setCashAmount] = useState("");
+  const [modalOpen,setModalOpen] = useState(true)
   const [name, setName] = useState("");
   const [comment, setComment] = useState("");
   const [amount, setAmount] = useState("");
+  const [modalSelected,setModalSelected] = useState(false)
 
   // Fetch Admins
   const fetchAdmins = async () => {
@@ -120,17 +123,42 @@ const CashManagement = () => {
     }
   };
 
+  const InitialScreen = ()=>{
+    return <>
+        <Modal open={modalOpen} footer={null} closable={false}>
+            <h1 className="font-space font-bold text-lg">What do you want to do?</h1>
+            <div className="flex mt-4 justify-between">
+            <AntButton className="bg-green-500 text-white" onClick={()=>{
+              setIsCashCollection(true);
+              setModalSelected(true)
+              setModalOpen(false)
+
+            }}>Collect Cash</AntButton>
+            <AntButton className="bg-red-500 text-white" onClick={()=>{
+              setIsCashCollection(false);
+              setModalSelected(true)
+              setModalOpen(false)
+            }}>Give Cash</AntButton>
+            </div>
+
+        </Modal>
+    </>
+  }
+
   // Fetch admins on component mount
   useEffect(() => {
     fetchAdmins();
   }, []);
 
   return (
+    <>
+    <InitialScreen/>
     <div>
       <Flex justify={"between"}>
         <Heading>Cash Management</Heading>
-        <Select.Root
-          defaultValue="Cash Collection"
+  {modalSelected &&       <Select.Root
+          // defaultValue="Cash Collection"
+          defaultValue={isCashCollection ? "Cash Collection" : "Cash Disbursement"}
           onValueChange={(value) =>
             setIsCashCollection(value === "Cash Collection")
           }
@@ -142,7 +170,7 @@ const CashManagement = () => {
             </Select.Item>
             <Select.Item value="Cash Collection">Cash Collection</Select.Item>
           </Select.Content>
-        </Select.Root>
+        </Select.Root>}
       </Flex>
       <Separator className="my-4 w-full" />
 
@@ -215,6 +243,7 @@ const CashManagement = () => {
 
       <Toaster position="top-right" />
     </div>
+    </>
   );
 };
 

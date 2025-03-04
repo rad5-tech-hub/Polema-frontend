@@ -32,12 +32,12 @@ const LoginContent = () => {
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("adminFirstName", response.data.admin.firstname);
 
-      toast.success("Login Successful", {
-        style: {
-          padding: "30px",
-        },
-        duration: 6000,
-      });
+      // toast.success("Login Successful", {
+      //   style: {
+      //     padding: "30px",
+      //   },
+      //   duration: 6000,
+      // });
       navigate("/admin");
     } catch (error) {
       

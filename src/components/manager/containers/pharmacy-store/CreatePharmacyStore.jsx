@@ -25,6 +25,7 @@ const CreatePharmacyStore = () => {
   const [buttonLoading, setButtonLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(true);
   const [modalSelected, setModalSelected] = useState(false);
+  
 
   // State management for Pharmacy ID
   const [pharmId, setPharmId] = React.useState("");
@@ -324,6 +325,9 @@ const CreatePharmacyStore = () => {
                   value: selectedProductId,
                 })}
                 onChange={(value) => {
+                  const product = products.find((item)=> item.id === value);
+                  setUnit(product.price[0].unit)
+                  
                   setSelectedProductId(value);
                 }}
               >
@@ -365,9 +369,10 @@ const CreatePharmacyStore = () => {
 
             <div className="w-full">
               <Text className="mb-4">
-                Unit<span className="text-red-500">*</span>
+                Unit
               </Text>
               <TextField.Root
+              disabled
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
                 placeholder="Enter Product unit"
