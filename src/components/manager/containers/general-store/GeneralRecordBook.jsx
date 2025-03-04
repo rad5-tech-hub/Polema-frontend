@@ -11,6 +11,7 @@ import {
   Flex,
   Button,
 } from "@radix-ui/themes";
+import {} from "antd"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquare } from "@fortawesome/free-solid-svg-icons";
 
@@ -126,7 +127,7 @@ const GeneralRecordBook = () => {
             <div className="p-4">No records found</div>
           ) : (
             recordBookDetails.map((item) => (
-              <Table.Row key={item.id}>
+              <Table.Row key={item.id} className="hover:bg-theme/10 cursor-pointer">
                 <Table.Cell>{refractor(item.createdAt)}</Table.Cell>
                 <Table.Cell>{item.generalStore.name}</Table.Cell>
                 <Table.Cell>{item.name}</Table.Cell>

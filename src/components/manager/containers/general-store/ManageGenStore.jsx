@@ -251,7 +251,7 @@ const ManageGenStore = () => {
 
   // Run functions when page is loaded
   useEffect(() => {
-    fetchSuppliers();
+    // fetchSuppliers();
     fetchDepartments();
   }, []);
 

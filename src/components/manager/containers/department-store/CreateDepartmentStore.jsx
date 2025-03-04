@@ -36,7 +36,9 @@ const CreateDepartmentStore = () => {
   const [selectedUnit, setSelcetedUnit] = useState("");
   const [modalOpen, setModalOpen] = useState(true);
   const [modalSelected, setModalSelected] = useState(false);
-  const [color, setColor] = useState("");
+  const [plasticsDeptSelected,setPlasticsDeptSelected] = useState(false);
+  const [otherDetails,setOtherDetails] = useState("")
+  const [deptName, setDeptName] = useState("")
 
   // Function to handle the click on the "Browse Image" text
   const handleBrowseClick = () => {
@@ -149,12 +151,17 @@ const CreateDepartmentStore = () => {
 
     const body = {
       thresholdValue: threshHoldVal,
-      productId: productId,
+      ...(!checkForDepartmentName(deptName,"plastics") &&{productId: productId}),
       departmentId: deptId,
+      ...(checkForDepartmentName(deptName,"plastics") && {other:otherDetails}),
       ...(image && { image }),
-      unit: selectedUnit,
+      ...(!checkForDepartmentName(deptName,"plastics") && { unit: selectedUnit}),
+
+     
     };
 
+    // console.log(body);
+    
     try {
       const response = await axios.post(
         `${root}/dept/create-dept-store`,
@@ -176,13 +183,12 @@ const CreateDepartmentStore = () => {
     } catch (error) {
       console.log(error);
       setButtonLoading(false);
-      toast.error(error?.response?.data?.message);
+      toast.error( error.response.data.errors.join("\n") ||   error.response.data.message  || "An error occurred while adding to department store");
     }
   };
 
   const getMatchingProductNameById = (id) => {
     const product = products.find((product) => product.id === id);
-    console.log(product);
 
     if (product) {
       setSelcetedUnit(product.price[0].unit);
@@ -191,6 +197,13 @@ const CreateDepartmentStore = () => {
     }
   };
 
+  // Function to check by a particular dept name 
+  const checkForDepartmentName = (arg,deptName)=>{
+    return arg.toLowerCase().includes(deptName);
+  }
+
+  
+  
   // Initial Dialog
   const InitialDialog = () => {
     return (
@@ -313,26 +326,35 @@ const CreateDepartmentStore = () => {
             <Text>
               Select Department <span className="text-red-500">*</span>
             </Text>
-            <Select.Root
-              onValueChange={(value) => {
-                setProducts([]);
-                setDeptId(value);
-                fetchRawMaterials(value);
-              }}
-            >
-              <Select.Trigger
-                disabled={deptDisabled}
-                className="w-full mt-2"
-                placeholder="Select Departmemt"
-              />
-              <Select.Content position="popper">
-                {dept.map((item) => {
-                  return <Select.Item value={item.id}>{item.name}</Select.Item>;
-                })}
-              </Select.Content>
-            </Select.Root>
+              <Select.Root
+                onValueChange={(value) => {
+                  const selectedDept = dept.find((item) => item.id === value);
+                  setProducts([]);
+                  setDeptId(value);
+                  setDeptName(selectedDept ? selectedDept.name : ""); // Store the name
+                  fetchRawMaterials(value);
+                }}
+              >
+                <Select.Trigger
+                  disabled={deptDisabled}
+                  className="w-full mt-2"
+                  placeholder="Select Departmemt"
+                />
+                <Select.Content position="popper">
+                  {dept.map((item) => {
+                    return <Select.Item value={item.id}>{item.name}</Select.Item>;
+                  })}
+                </Select.Content>
+              </Select.Root>
           </div>
-          <div className="w-full">
+         {checkForDepartmentName(deptName,"plastics") &&  <div className="w-full">
+            <Text>Product</Text>
+            <TextField.Root className="mt-2 " placeholder="Enter Plastics Product" value={otherDetails} onChange={(e)=>{
+              setOtherDetails(e.target.value)
+            }}/> 
+          </div>}
+       {!checkForDepartmentName(deptName,"plastics") &&   <>
+         <div className="w-full">
             <Text>
               {isProductActive ? "Product" : "Raw Material"} Name
               <span className="text-red-500">*</span>
@@ -360,16 +382,7 @@ const CreateDepartmentStore = () => {
               </Select.Content>
             </Select.Root>
           </div>
-          {/* <div className="w-full">
-            <Text>Color</Text>
-            <TextField.Root
-              placeholder="Input Color"
-              value={color}
-              onChange={(e) => {
-                setColor(e.target.value);
-              }}
-            />
-          </div> */}
+         
           <div className="w-full">
             <Text>
               {" "}
@@ -382,12 +395,14 @@ const CreateDepartmentStore = () => {
               disabled
             />
           </div>
+         </>}
           <div className="w-full">
             <Text>
               {" "}
               Threshold Value <span className="text-red-500">*</span>{" "}
             </Text>
             <TextField.Root
+            required
               value={threshHoldVal}
               className="mt-2 w-full"
               placeholder="Enter threshold value"
@@ -408,20 +423,3 @@ const CreateDepartmentStore = () => {
 };
 
 export default CreateDepartmentStore;
-
-<Select.Root
-  defaultValue="product"
-  // onValueChange={(value) => {
-  //   value === "product"
-  //     ? setIsProductActive(true)
-  //     : setIsProductActive(false);
-  // }}
->
-  <Select.Trigger />
-  <Select.Content>
-    <Select.Group>
-      <Select.Item value="product">Product </Select.Item>
-      <Select.Item value="raw materials">Raw Materials</Select.Item>
-    </Select.Group>
-  </Select.Content>
-</Select.Root>;
