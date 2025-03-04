@@ -718,6 +718,22 @@ video {
   top: 100%;
 }
 
+.right-\[\] {
+  right: ;
+}
+
+.right-\[20px\] {
+  right: 20px;
+}
+
+.top-\[\] {
+  top: ;
+}
+
+.top-\[20px\] {
+  top: 20px;
+}
+
 .z-0 {
   z-index: 0;
 }
@@ -2329,6 +2345,11 @@ video {
 .text-yellow-500 {
   --tw-text-opacity: 1;
   color: rgb(234 179 8 / var(--tw-text-opacity, 1));
+}
+
+.text-green-400 {
+  --tw-text-opacity: 1;
+  color: rgb(74 222 128 / var(--tw-text-opacity, 1));
 }
 
 .underline {

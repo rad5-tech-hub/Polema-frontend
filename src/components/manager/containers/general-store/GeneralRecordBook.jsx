@@ -11,9 +11,9 @@ import {
   Flex,
   Button,
 } from "@radix-ui/themes";
-import {} from "antd"
+import {Modal} from "antd"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSquare } from "@fortawesome/free-solid-svg-icons";
+import { faSquare,faClose } from "@fortawesome/free-solid-svg-icons";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -26,6 +26,8 @@ const GeneralRecordBook = () => {
   const [failedSearch, setFailedSearch] = useState(false);
   const [tableLoading, setTableLoading] = useState(false);
   const [nextPageClicked, setnextPageClicked] = useState(false);
+  const [modalOpen,setModalOpen] = useState(false);
+  const [modalDetails,setModalDetails] = useState({})
 
   const pageParams = {
     lastCreatedAt: searchParams.get("lastCreatedAt"),
@@ -127,7 +129,10 @@ const GeneralRecordBook = () => {
             <div className="p-4">No records found</div>
           ) : (
             recordBookDetails.map((item) => (
-              <Table.Row key={item.id} className="hover:bg-theme/10 cursor-pointer">
+              <Table.Row key={item.id} className="hover:bg-theme/10 cursor-pointer" onClick={()=>{
+                setModalDetails(item)
+                setModalOpen(true)
+              }}>
                 <Table.Cell>{refractor(item.createdAt)}</Table.Cell>
                 <Table.Cell>{item.generalStore.name}</Table.Cell>
                 <Table.Cell>{item.name}</Table.Cell>
@@ -135,15 +140,15 @@ const GeneralRecordBook = () => {
                 {/* <Table.Cell>{item.batchNo}</Table.Cell> */}
                 <Table.Cell>
                   {item.quantityRemoved > item.quantityAdded
-                    ? formatMoney(item.quantityRemoved)
+                    ? `${formatMoney(item.quantityRemoved)}`
                     : ""}
                 </Table.Cell>
                 <Table.Cell>
                   {item.quantityRemoved < item.quantityAdded
-                    ? formatMoney(item.quantityAdded)
+                    ? `${formatMoney(item.quantityAdded)}`
                     : ""}
                 </Table.Cell>
-                <Table.Cell>{item.amountRemaining}</Table.Cell>
+                <Table.Cell>{`₦${item.amountRemaining}`}</Table.Cell>
                 <Table.Cell>
                   {item.signature ? (
                     <>
@@ -168,6 +173,49 @@ const GeneralRecordBook = () => {
           )}
         </Table.Body>
       </Table.Root>
+      
+      <Modal  open={modalOpen}
+          footer={null}
+          centered
+          closable={false}
+           >
+            <p className="absolute top-[10px] right-[20px] cursor-pointer" onClick={()=>{
+              setModalOpen(false)
+            }}><FontAwesomeIcon icon={faClose}/></p>
+          <div>
+           <div className="mb-3 mt-3">
+            <h1 className="font-bold font-inter font-lg ">NAME</h1>
+            <p>{modalDetails.name} </p>
+           </div>
+           <div className="mb-3">
+           <h1 className="font-bold font-inter font-lg">ITEM</h1>
+           <p>{modalDetails.generalStore?.name || ""} </p>
+           </div>
+           <div className="mb-3">
+           <h1 className="font-bold font-inter font-lg">DEPARTMENT</h1>
+           <p>{modalDetails.department?.name} </p>
+           </div>
+           {modalDetails.quantityRemoved < modalDetails.quantityAdded &&  <div className="mb-3">
+           <h1 className="font-bold font-inter font-lg text-green-400">QUANTITY ADDED</h1>
+           <p>{modalDetails.quantityAdded} </p>
+           </div>}
+           {modalDetails.quantityRemoved > modalDetails.quantityAdded && <div className="mb-3">
+           <h1 className="font-bold font-inter font-lg text-red-500">QUANTITY REMOVED</h1>
+           <p>{modalDetails.quantityRemoved} </p>
+           </div>}
+           
+           <div className="mb-3">
+           <h1 className="font-bold font-inter font-lg">BALANCE</h1>
+           <p>{`₦${modalDetails.amountRemaining}`} </p>
+           </div>
+           <div className="mb-3">
+           <h1 className="font-bold font-inter font-lg">COMMENTS</h1>
+           <p>{modalDetails.comments} </p>
+           </div>
+          
+          </div>
+      </Modal>
+
 
       {details?.pagination?.nextPage && (
         <Flex className="my-6" justify={"end"}>

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "push":"git push -u origin working-branch-two",
     "lint": "eslint .",
     "build-css": "tailwindcss build -i ./src/tailwind/input.css -o ./src/tailwind/output.css --watch",
     "preview": "vite preview"

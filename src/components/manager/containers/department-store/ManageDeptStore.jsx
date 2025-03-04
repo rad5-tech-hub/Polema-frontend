@@ -218,7 +218,7 @@ const ManageDeptStore = () => {
   const QuestionComponent = () => {
     return (
       <>
-        <Modal open={questionDialogOpen} footer={null} closable={false}>
+        <Modal open={questionDialogOpen} footer={null} closable={false} centered>
           <h1 className="text-[1.5rem] font-space font-bold">
             What do you want ?
           </h1>

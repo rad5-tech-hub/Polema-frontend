@@ -199,6 +199,7 @@ const CreatePharmacyStore = () => {
       <AntModal
         open={modalOpen}
         footer={null}
+        centered
         closable={false}
         onClose={() => {
           setModalOpen(false);
