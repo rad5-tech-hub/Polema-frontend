@@ -40,11 +40,13 @@ const ViewPharmacyOrder = () => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
+      console.log(response );
       {
-        response.data.stores.length === 0
+        response.data?.Orders?.length === 0
           ? setFailedSearch(true)
-          : setOrders(response.data.stores);
+          : setOrders(response.data.Orders);
       }
+      
     } catch (error) {
       console.log(error);
       {

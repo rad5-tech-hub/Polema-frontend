@@ -30,3 +30,5 @@ export const sendTicket ={
     cash:'admin/send-ticket',
     waybill:'customer/send-Waybill'
 }
+
+export const cashTicketConfirm = ""

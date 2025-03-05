@@ -166,6 +166,7 @@ const Notifications = () => {
       // toast.success("Ticket approved successfully.", {
       //   duration: 3000,
       // });
+      return e.status
     } catch (e) {
       setApproveButtonLoading((prev) => ({
         ...prev,
@@ -178,6 +179,7 @@ const Notifications = () => {
         e.response.data.message ||
           "An error occurred , while trying to approve ticket"
       );
+      return e.status
     }
   };
 
@@ -249,6 +251,8 @@ const Notifications = () => {
     return jwtDecode(localStorage.getItem("token"))
   }
 
+
+  // Function to confrim cash ticket 
   
 
   // Component for select admin side pane
@@ -277,7 +281,11 @@ const Notifications = () => {
       }
 
       try {
-        const firstRequest = await approveTicket(type,ticketID)
+        const firstRequest = await approveTicket(type,ticketID);
+
+        // if firstRequest
+        console.log(firstRequest);
+        
       } catch (error) {
         console.log(error);
         
@@ -460,6 +468,8 @@ const Notifications = () => {
                                     </span>
                                   </div>
                                 </Text>
+                                
+                                {/* Make approve and deny button only available to super admins  */}
                                 {decodeToken().isAdmin  &&      <div className="button-groups flex gap-4 mt-4">
                                   <AntButton
                                     className="bg-theme text-white hover:!bg-theme hover:text-white"
