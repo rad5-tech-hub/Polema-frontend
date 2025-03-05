@@ -256,7 +256,7 @@ const AddAdmin = () => {
           </div>
           <div className="input-field mt-3">
             <Text className="text-[15px] font-medium leading-[35px]">
-              Siganture
+              Signature
             </Text>
             <Flex
               className="w-full"
