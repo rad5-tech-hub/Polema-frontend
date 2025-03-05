@@ -322,7 +322,7 @@ const ManageDeptStore = () => {
                   {storeItems.map((item) => {
                     return (
                       <AntSelect.Option value={item.id}>
-                        {item.product.name}
+                        {item.product.name} {`(${item.unit})`}
                       </AntSelect.Option>
                     );
                   })}

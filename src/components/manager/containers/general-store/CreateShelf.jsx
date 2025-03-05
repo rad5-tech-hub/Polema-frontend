@@ -62,10 +62,10 @@ const CreateShelf = () => {
     } catch (error) {
       console.log(error);
       setIsLoading(false);
-      toast.error("An error occured.");
+      toast.error(error.response.data.message || error.message ||"An error occured.");
     }
 
-    console.log(body);
+    // console.log(body);
   };
   return (
     <>

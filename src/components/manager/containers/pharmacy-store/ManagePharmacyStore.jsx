@@ -36,6 +36,7 @@ const ManagePharmacyStore = () => {
   const [quantityOut, setQuantityOut] = useState("");
   const [signatureImage, setSignatureImage] = useState(null);
   const [productActive, setProductActive] = useState(true);
+  const [modalClicked,setModalClicked]  = useState(false)
 
   //State Management for opening and closing
   const [questionDialogOpen, setQuestionDialogOpen] = useState(true);
@@ -186,6 +187,8 @@ const ManagePharmacyStore = () => {
               onClick={() => {
                 setProductActive(true);
                 setQuestionDialogOpen(false);
+                setModalClicked(true)
+
               }}
             >
               Product
@@ -193,7 +196,8 @@ const ManagePharmacyStore = () => {
             <AntButton
               onClick={() => {
                 setProductActive(false);
-                setQuestionDialogOpen(false)
+                setQuestionDialogOpen(false);
+                setModalClicked(true)
               }}
               size="large"
               className="bg-blue-400 text-white cursor-pointer"
@@ -283,8 +287,8 @@ const ManagePharmacyStore = () => {
                   : "Remove from Store"}{" "}
               </Heading>
             </div>
-            <Select.Root
-              defaultValue="products"
+          {modalClicked &&   <Select.Root
+              defaultValue={productActive ? "products" : "raw-materials"}
               onValueChange={(val) => {
                 setProductActive(val === "products");
               }}
@@ -296,7 +300,7 @@ const ManagePharmacyStore = () => {
                   <Select.Item value="products">Products</Select.Item>
                 </Select.Group>
               </Select.Content>
-            </Select.Root>
+            </Select.Root>}
           </Flex>
           <Separator className="my-4 w-full" />
 
@@ -318,7 +322,7 @@ const ManagePharmacyStore = () => {
                   {storeItems.map((item) => {
                     return (
                       <AntSelect.Option value={item.id}>
-                        {item.product.name}
+                        {item.product.name} {`(${item.unit})`}
                       </AntSelect.Option>
                     );
                   })}
@@ -353,7 +357,7 @@ const ManagePharmacyStore = () => {
                   }}
                 ></TextField.Root>
               </div>
-              <div>
+             {productActive &&  <div>
                 <Text>Batch Number</Text>
                 <TextField.Root
                   placeholder="Enter Batch Number"
@@ -362,7 +366,7 @@ const ManagePharmacyStore = () => {
                     setBatchNumber(e.target.value);
                   }}
                 ></TextField.Root>
-              </div>
+              </div>}
               <div>
                 <Text>
                   {storeAction === "add"

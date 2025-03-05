@@ -345,10 +345,10 @@ const Notifications = () => {
           }}
         >
           <BellIcon />
-          {unreadNotifications.length > 0 && (
+          {notifications.length > 0 && (
             <div className="absolute right-[-5px] top-[-3px] bg-red-500 w-[15px] h-[15px] rounded-full">
               <span className="text-white flex justify-center items-center text-[.6rem] font-bold">
-                {unreadNotifications.length}
+                {notifications.length}
               </span>
             </div>
           )}
@@ -466,11 +466,11 @@ const Notifications = () => {
                                     onClick={(e) => {
                                       e.preventDefault();
                                      
-                                      // setIsSidePaneOpen((prev) => ({
-                                      //   ...prev,
-                                      //   [notification.id]: true,
-                                      // }));
-                                      // setSelectedTicket(notification.type)
+                                      setIsSidePaneOpen((prev) => ({
+                                        ...prev,
+                                        [notification.id]: true,
+                                      }));
+                                      setSelectedTicket(notification.type)
                                       
                                     }}
                                   >
