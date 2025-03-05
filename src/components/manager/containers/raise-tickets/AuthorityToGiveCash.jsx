@@ -166,7 +166,7 @@ const AuthorityToGiveCash = () => {
 
       await axios.post(
         `${root}/admin/send-ticket/${ticketId}`,
-        { adminId },
+        { adminIds:[adminId] },
         {
           headers: {
             Authorization: `Bearer ${retrToken}`,
@@ -233,7 +233,7 @@ const AuthorityToGiveCash = () => {
       const secondResponse = await axios.post(
         `${root}/admin/send-ticket/${newTicketId}`,
         {
-          adminId,
+          adminIds:[adminId],
         },
         {
           headers: {
@@ -396,11 +396,11 @@ const AuthorityToGiveCash = () => {
               </div>
 
               <div className="comments w-[50%]">
-                <label htmlFor="comments">Comment or Description</label>
+                <label htmlFor="comments">Comments</label>
                 <TextField.Root
                   id="comments"
                   required
-                  className="mt-3"
+                  className="mt-3 mb-4"
                   value={comments}
                   onChange={(e) => setComments(e.target.value)}
                   placeholder="Enter a description..."
@@ -420,8 +420,8 @@ const AuthorityToGiveCash = () => {
                 <Select.Content position="popper">
                   {superAdmins.map((admin) => (
                     <Select.Item
-                      key={admin.id}
-                      value={admin.id}
+                      key={admin.role?.id || " "}
+                      value={admin.role?.id || " "}
                     >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
                   ))}
                 </Select.Content>
@@ -500,7 +500,7 @@ const AuthorityToGiveCash = () => {
                 </Select.Root>
               </div>
               <div className="w-full">
-                <Text>Comments and Description</Text>
+                <Text>Comments </Text>
                 <TextField.Root className="mt-2" placeholder="Enter Comments" />
               </div>
               <div className="w-full">
@@ -519,7 +519,7 @@ const AuthorityToGiveCash = () => {
                     {superAdmins.map((admin) => {
                       return (
                         <Select.Item
-                          value={admin.id}
+                          value={admin.role?.id || ""}
                         >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
                       );
                     })}

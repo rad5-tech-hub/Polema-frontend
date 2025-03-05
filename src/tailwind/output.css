@@ -726,6 +726,10 @@ video {
   top: 100%;
 }
 
+.-right-0 {
+  right: -0px;
+}
+
 .z-0 {
   z-index: 0;
 }
@@ -1122,6 +1126,10 @@ video {
   min-height: 90%;
 }
 
+.min-h-\[300px\] {
+  min-height: 300px;
+}
+
 .\!w-\[25\%\] {
   width: 25% !important;
 }
@@ -1295,6 +1303,14 @@ video {
   width: 100%;
 }
 
+.w-\[\] {
+  width: ;
+}
+
+.w-\[48\%\] {
+  width: 48%;
+}
+
 .min-w-\[250px\] {
   min-width: 250px;
 }
@@ -1428,6 +1444,10 @@ video {
   cursor: pointer;
 }
 
+.scroll-ml-6 {
+  scroll-margin-left: 1.5rem;
+}
+
 .appearance-none {
   -webkit-appearance: none;
      -moz-appearance: none;
@@ -1504,6 +1524,10 @@ video {
 
 .gap-8 {
   gap: 2rem;
+}
+
+.gap-1 {
+  gap: 0.25rem;
 }
 
 .space-x-2 > :not([hidden]) ~ :not([hidden]) {

@@ -100,7 +100,7 @@ const CreateShelf = () => {
           <div className="w-full">
             <Text className="mb-4">Threshold Value </Text>
             <TextField.Root
-              className="mt-2 "
+              className="mt-2 w-[48%] "
               required={true}
               onChange={(e) => setThresholdVal(e.target.value)}
               value={thresholdVal}

@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { rejectTicket, acceptTicket,sendTicket,cashTicketConfirm } from "./NotificationsData";
+import {
+  rejectTicket,
+  acceptTicket,
+  sendTicket,
+  cashTicketConfirm,
+} from "./NotificationsData";
 import toast, { Toaster } from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
 import { faClose, faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -24,7 +29,7 @@ import {
   faUser,
   faTags,
 } from "@fortawesome/free-solid-svg-icons";
-import { Button as AntButton, Select } from "antd";
+import { Button as AntButton, Select, Switch } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import IndividualInfo from "./IndividualInfo";
@@ -44,12 +49,11 @@ const Notifications = () => {
   const [detailsPageOpen, setDetailsPageOpen] = useState(false);
   const [admins, setAdmins] = useState([]);
   const notificationRef = useRef(null);
-  const [isSidePaneOpen,setIsSidePaneOpen] = useState({});
-  const [SelectedTicketType,setSelectedTicketType] = useState("")
-
+  const [isSidePaneOpen, setIsSidePaneOpen] = useState({});
+  const [SelectedTicketType, setSelectedTicketType] = useState("");
 
   const [selectedTicket, setSelectedTicket] = useState("");
-
+  
   // Component for individual notification info
   const [storeDetails, setStoreDetails] = useState([]);
 
@@ -91,12 +95,12 @@ const Notifications = () => {
         },
       });
 
+      const fetchedUnreadNotifications =
+      response.data.data.unreadNotifications || [];
       const allNotifications = [
         ...response.data.data.unreadNotifications,
         ...response.data.data.readNotifications,
       ];
-      const fetchedUnreadNotifications =
-        response.data.data.unreadNotifications || [];
 
       setNotifications(allNotifications);
       setUnreadNotifications(fetchedUnreadNotifications);
@@ -125,7 +129,7 @@ const Notifications = () => {
 
   const closeNotifications = (event) => {
     slideOutNotifications();
-    setIsSidePaneOpen({})
+    setIsSidePaneOpen({});
   };
 
   // Function to approve ticket
@@ -166,7 +170,7 @@ const Notifications = () => {
       // toast.success("Ticket approved successfully.", {
       //   duration: 3000,
       // });
-      return e.status
+      return e.status;
     } catch (e) {
       setApproveButtonLoading((prev) => ({
         ...prev,
@@ -179,7 +183,7 @@ const Notifications = () => {
         e.response.data.message ||
           "An error occurred , while trying to approve ticket"
       );
-      return e.status
+      return e.status;
     }
   };
 
@@ -246,76 +250,98 @@ const Notifications = () => {
     }
   };
 
-  // Function to decode token 
-  const decodeToken = ()=>{
-    return jwtDecode(localStorage.getItem("token"))
-  }
+  // Function to decode token
+  const decodeToken = () => {
+    return jwtDecode(localStorage.getItem("token"));
+  };
 
-
-  // Function to confirm cash ticket 
-  const confirmCashTicket = async()=>{
+  // Function to confirm cash ticket
+  const confirmCashTicket = async (ticketId) => {
     const token = localStorage.getItem("token");
 
-    if(!token){
-      toast.error("An error occurred , try logging in again.")     
-      return
+    if (!token) {
+      toast.error("An error occurred , try logging in again.");
+      return;
     }
-  }
+    try {
+      const response = await axios.post(
+        `${root}/${cashTicketConfirm}/${ticketId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      toast.success(response.data.message);
+    } catch (error) {
+      toast.error(
+        error.response.data.message || "Error confirming cash ticket"
+      );
+    }
+  };
 
   // Function to send approvedTicket
-  const sendApprovedTicket = async(type,ticketId,adminsId)=>{
-   const token = localStorage.getItem("token");
+  const sendApprovedTicket = async (type, ticketId, adminsId) => {
+    const token = localStorage.getItem("token");
 
-   if(!token){
-    toast.error("An error occured ,try logging in again") 
-    return
-   }
+    if (!token) {
+      toast.error("An error occured ,try logging in again");
+      return;
+    }
 
-   try {
-    const response = await axios.post(`${root}/${sendTicket[type]}/${ticketId}`,{
-      adminsId:adminsId
-    },{
-      headers:{
-        Authorization:`Bearer ${token}`
-      }
-    })
-    toast.success("Ticket Sent Successfully")
-    return response.status
-   } catch (error) {
-    console.log(error)
-    toast.error(error.response.data.message || "Ticket not sent successfullly.")
-    return error.status    
-   }
-  }
-
+    try {
+      const response = await axios.post(
+        `${root}/${sendTicket[type]}/${ticketId}`,
+        {
+          adminsId: adminsId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      toast.success("Ticket Sent Successfully");
+      return response.status;
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        error.response.data.message || "Ticket not sent successfullly."
+      );
+      return error.status;
+    }
+  };
 
   // Component for select admin side pane
-  const SelectAdminSidePane = ({type,ticketID}) => {
+  const SelectAdminSidePane = ({ type, ticketID }) => {
     const [selectedAdmins, setSelectedAdmins] = useState([]);
-  
+
     const handleCheckboxChange = (adminId) => {
       setSelectedAdmins((prev) =>
-        prev.includes(adminId) ? prev.filter((id) => id !== adminId) : [...prev, adminId]
+        prev.includes(adminId)
+          ? prev.filter((id) => id !== adminId)
+          : [...prev, adminId]
       );
     };
 
-    const token = localStorage.getItem("token")
-    
-    
-    const handleSubmit = async(e) => {
-      e.preventDefault()
-      if(!token){
-        toast.error("An error occurred , try logging in again.")
-        return
+    const token = localStorage.getItem("token");
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      if (!token) {
+        toast.error("An error occurred , try logging in again.");
+        return;
       }
-      
-      if(selectedAdmins.length === 0 || selectedAdmins.includes(null)) {
+
+      if (selectedAdmins.length === 0 || selectedAdmins.includes(null)) {
         toast.error("Select at least one staff  ");
         return;
       }
 
       try {
-        const firstRequest = await approveTicket(type,ticketID);
+        const firstRequest = await approveTicket(type, ticketID);
 
         // if (firstRequest == 200){
         //   await sendApprovedTicket(type,ticketID,selectedAdmins)
@@ -323,52 +349,63 @@ const Notifications = () => {
         //   // toast.error("Error Occured in approving ticket")
         // }
 
-        {firstRequest === 200 && await sendApprovedTicket(type,ticketID,selectedAdmins)}
-          
-
-
-        
+        {
+          firstRequest === 200 &&
+            (await sendApprovedTicket(type, ticketID, selectedAdmins)
+              .then((res) => {
+                console.log(res);
+              })
+              .catch((err) => {
+                console.log(err);
+              }));
+        }
       } catch (error) {
         console.log(error);
-        
       }
       console.log("Selected Admin IDs:", selectedAdmins);
     };
- 
+
     return (
-      <div className="absolute z-30 left-[-300px] top-0 mb-20 bg-white min-w-[250px] h-[300px] p-4 shadow-md  ">
+      <div className="absolute z-30 left-[-300px] top-0 mb-20 bg-white min-w-[250px] min-h-[300px] p-4 shadow-md  ">
         <h1 className="font-space font-bold text-[1.1rem]">Approve To</h1>
-        <p className="absolute right-[10px] cursor-pointer top-[5px]" onClick={()=>{
-          setIsSidePaneOpen({})
-        }}>
-          <FontAwesomeIcon icon={faClose}/>
+        <p
+          className="absolute right-[10px] cursor-pointer top-[5px]"
+          onClick={() => {
+            setIsSidePaneOpen({});
+          }}>
+          <FontAwesomeIcon icon={faClose} />
         </p>
         {/* <p className="text-[.7rem]">
           <span>Selected Admin</span>: <span>{selectedAdmins.join(", ") || "None"}</span>
         </p> */}
-  
+
         <form action="" onSubmit={handleSubmit}>
-        <div className="my-2 h-[180px] overflow-scroll overflow-x-hidden">
-          {admins.map((admin) => (
-            <label key={admin.id} className="flex items-center flex-row-reverse cursor-pointer gap-2">
-              <input
-                type="checkbox"
-                className=""
-                value={admin.id}
-                checked={selectedAdmins.includes(admin.roleId)}
-                onChange={() => handleCheckboxChange(admin.roleId)}
-              />
-             <span className="w-full p-2"> {`${admin.firstname} ${admin.lastname}`} {`(${admin.role?.name || ""})`}
-             </span>
-                         </label>
-          ))}
-        </div>
-  
-        <div className="flex justify-end mt-4 mb-15">
-          <button className="bg-theme px-4 py-2 text-white rounded" >
-            Submit
-          </button>
-        </div>
+          <div className="my-2 h-[180px] overflow-scroll overflow-x-hidden">
+            {admins.map((admin) => (
+              <label
+                key={admin.id}
+                className="flex items-center flex-row-reverse cursor-pointer gap-2">
+                <input
+                  type="checkbox"
+                  className=""
+                  value={admin.id}
+                  checked={selectedAdmins.includes(admin.roleId)}
+                  onChange={() => handleCheckboxChange(admin.roleId)}
+                />
+                <span className="w-full p-2">
+                  {" "}
+                  {`${admin.firstname} ${admin.lastname}`}{" "}
+                  {`(${admin.role?.name || ""})`}
+                </span>
+              </label>
+            ))}
+          </div>
+
+          <div className="flex justify-end mt-4 mb-15">
+            <button className="bg-theme px-4 py-2 text-white rounded">
+              Submit
+            </button>
+          </div>
         </form>
       </div>
     );
@@ -376,7 +413,7 @@ const Notifications = () => {
 
   useEffect(() => {
     fetchNotifications();
-    fetchAdminDetails()
+    fetchAdminDetails();
     fetchGeneralStore();
   }, []);
 
@@ -388,8 +425,7 @@ const Notifications = () => {
           onClick={() => {
             toggleNotifications();
             fetchNotifications();
-          }}
-        >
+          }}>
           <BellIcon />
           {notifications.length > 0 && (
             <div className="absolute right-[-5px] top-[-3px] bg-red-500 w-[15px] h-[15px] rounded-full">
@@ -406,19 +442,16 @@ const Notifications = () => {
                 ? "translate-x-0 block opacity-100"
                 : "translate-x-[160%] opacity-0 hidden"
             }`}
-            style={{ borderRadius: "8px" ,overflowY:""}}
-          >
+            style={{ borderRadius: "8px", overflowY: "" }}>
             {/* {detailsPageOpen && <IndividualInfo />} */}
             <div className="flex justify-between items-center w-full">
-
               <h1 className="font-space font-medium text-[1.7rem]">
                 Notifications
               </h1>
               <Button
                 color="red"
                 className="text-[.7rem] cursor-pointer"
-                onClick={closeNotifications}
-              >
+                onClick={closeNotifications}>
                 <FontAwesomeIcon icon={faClose} />
               </Button>
               {/* <Button
@@ -431,16 +464,18 @@ const Notifications = () => {
                   <FontAwesomeIcon icon={faRefresh} />
                 )}
               </Button> */}
-            
             </div>
             {selectedTicket && (
               <IndividualInfo
                 // ticketDetails={}
                 open={detailsPageOpen}
                 selectedTicket={selectedTicket}
-                setOpen={setDetailsPageOpen}
-              ></IndividualInfo>
+                setOpen={setDetailsPageOpen}></IndividualInfo>
             )}
+            <div className="absolute right-[10px] mt-3 flex gap-1 items-center">
+              <label htmlFor="" className="text-sm font-amsterdam">Unread</label>
+              <Switch size="small" />
+            </div>
 
             <Tabs.Root defaultValue="all">
               <Tabs.List>
@@ -451,11 +486,12 @@ const Notifications = () => {
               </Tabs.List>
 
               <div className="pt-3 max-h-[500px] notifications-box">
-              {/* <Box
+                {/* <Box
                 pt="3"
                 style={{ maxHeight: "500px" }}
                 className="notifications-box"
               > */}
+
                 <Tabs.Content value="all">
                   {notifications.length > 0 ? (
                     notifications.map((notification) => (
@@ -466,9 +502,13 @@ const Notifications = () => {
                             // setSelectedTicket(notification);
                             // setDetailsPageOpen(true);
                           }}
-                          className="mb-3 p-2 rounded  cursor-pointer relative"
-                        >
-                          {isSidePaneOpen[notification.id] && <SelectAdminSidePane  type={notification.type} ticketID={notification.ticketId}/>}
+                          className="mb-3 p-2 rounded  cursor-pointer relative">
+                          {isSidePaneOpen[notification.id] && (
+                            <SelectAdminSidePane
+                              type={notification.type}
+                              ticketID={notification.ticketId}
+                            />
+                          )}
                           <Flex gap="2" align="center" className="relative">
                             <div className="self-start">
                               <Card className="bg-green-400 p-4 w-[40px] h-[40px] flex justify-center items-center">
@@ -483,8 +523,7 @@ const Notifications = () => {
                                   onClick={() => {
                                     setSelectedTicket(notification);
                                     setDetailsPageOpen(true);
-                                  }}
-                                >
+                                  }}>
                                   {notification.message}
                                 </Text>
                                 <br />
@@ -498,69 +537,68 @@ const Notifications = () => {
                                     onClick={() => {
                                       setSelectedTicket(notification);
                                       setDetailsPageOpen(true);
-                                    }}
-                                  >
+                                    }}>
                                     <FontAwesomeIcon icon={faTags} />
                                     <span>
                                       {_.upperFirst(notification.type)}
                                     </span>
                                   </div>
                                 </Text>
-                                
+
                                 {/* Make approve and deny button only available to super admins  */}
-                                {decodeToken().isAdmin  &&      <div className="button-groups flex gap-4 mt-4">
-                                  <AntButton
-                                    className="bg-theme text-white hover:!bg-theme hover:text-white"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                     
-                                      setIsSidePaneOpen((prev) => ({
-                                        ...prev,
-                                        [notification.id]: true,
-                                      }));
-                                      setSelectedTicketType(notification.type)
-                                      
-                                    }}
-                                  >
-                                    {" "}
-                                    {approveButtonLoading[
-                                      notification?.ticketId
-                                    ] ? (
-                                      <Spinner />
-                                    ) : (
-                                      "Approve"
-                                    )}
-                                  </AntButton>
-                                  <AntButton
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      denyTicket(
-                                        notification.type,
-                                        notification?.ticketId || null
-                                      );
-                                    }}
-                                  >
-                                    Deny
-                                  </AntButton>
-                                </div> }
+                                {decodeToken().isAdmin &&
+                                  notification.ticketStatus == "pending" && (
+                                    <div className="button-groups flex gap-4 mt-4">
+                                      <AntButton
+                                        className="bg-theme text-white hover:!bg-theme hover:text-white"
+                                        onClick={(e) => {
+                                          e.preventDefault();
 
-                                {notification.type === "cash" && <div className="button-groups flex gap-4 mt-4">
-                              
-                              <AntButton
-                              className="bg-green-500 text-white"
-                                onClick={(e) => { 
-                                  e.preventDefault();
-                                  denyTicket(
-                                    notification.type,
-                                    notification?.ticketId || null
-                                  );
-                                }}
-                              >
-                                Confirm
-                              </AntButton>
-                            </div>}
+                                          setIsSidePaneOpen((prev) => ({
+                                            ...prev,
+                                            [notification.id]: true,
+                                          }));
+                                          setSelectedTicketType(
+                                            notification.type
+                                          );
+                                        }}>
+                                        {" "}
+                                        {approveButtonLoading[
+                                          notification?.ticketId
+                                        ] ? (
+                                          <Spinner />
+                                        ) : (
+                                          "Approve"
+                                        )}
+                                      </AntButton>
+                                      <AntButton
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          denyTicket(
+                                            notification.type,
+                                            notification?.ticketId || null
+                                          );
+                                        }}>
+                                        Deny
+                                      </AntButton>
+                                    </div>
+                                  )}
 
-                           
+                                {notification.type === "cash" &&
+                                  notification.ticketStatus == "approved" && (
+                                    <div className="button-groups flex gap-4 mt-4">
+                                      <AntButton
+                                        className="bg-green-500 text-white"
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          confirmCashTicket(
+                                            notification.ticketId
+                                          );
+                                        }}>
+                                        Confirm
+                                      </AntButton>
+                                    </div>
+                                  )}
                               </div>
                             </Flex>
                           </Flex>
@@ -581,8 +619,7 @@ const Notifications = () => {
                     No Inventory notifications
                   </Text>
                 </Tabs.Content>
-              {/* </Box> */}
-
+                {/* </Box> */}
               </div>
             </Tabs.Root>
           </div>
