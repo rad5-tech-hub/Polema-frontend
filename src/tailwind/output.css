@@ -570,6 +570,10 @@ video {
   position: relative;
 }
 
+.sticky {
+  position: sticky;
+}
+
 .inset-0 {
   inset: 0px;
 }
@@ -1033,6 +1037,10 @@ video {
   height: 50vh;
 }
 
+.h-\[70\%\] {
+  height: 70%;
+}
+
 .h-\[70vh\] {
   height: 70vh;
 }
@@ -1068,6 +1076,26 @@ video {
 
 .h-screen {
   height: 100vh;
+}
+
+.h-\[\] {
+  height: ;
+}
+
+.h-\[180px\] {
+  height: 180px;
+}
+
+.h-\[270px\] {
+  height: 270px;
+}
+
+.h-\[280px\] {
+  height: 280px;
+}
+
+.h-\[300px\] {
+  height: 300px;
 }
 
 .max-h-48 {

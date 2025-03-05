@@ -179,7 +179,7 @@ const ManageGenStore = () => {
           name: supplierName,
           quantity: quantityOut,
           comments: description,
-          departmentId,
+          ...(storeAction !== "add" && departmentId),
           signature: signatureImage,
         },
         {
@@ -352,7 +352,7 @@ const ManageGenStore = () => {
                   }}
                 ></TextField.Root>
               </div>
-              <div>
+           {storeAction !== "add" &&    <div>
                 <Text>Select Department</Text>
                 <AntSelect
                   showSearch
@@ -370,7 +370,7 @@ const ManageGenStore = () => {
                     </AntSelect.Option>
                   ))}
                 </AntSelect>
-              </div>
+              </div>}
               <div>
                 <Text>Siganture</Text>
                 <Flex

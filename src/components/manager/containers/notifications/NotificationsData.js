@@ -31,4 +31,4 @@ export const sendTicket ={
     waybill:'customer/send-Waybill'
 }
 
-export const cashTicketConfirm = ""
+export const cashTicketConfirm = "admin/receive-cash-ticket"

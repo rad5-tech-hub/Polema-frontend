@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { rejectTicket, acceptTicket,sendTicket } from "./NotificationsData";
+import { rejectTicket, acceptTicket,sendTicket,cashTicketConfirm } from "./NotificationsData";
 import toast, { Toaster } from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
 import { faClose, faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -45,7 +45,7 @@ const Notifications = () => {
   const [admins, setAdmins] = useState([]);
   const notificationRef = useRef(null);
   const [isSidePaneOpen,setIsSidePaneOpen] = useState({});
-  const [sSelectedTicketType,setSelectedTicketType] = useState("")
+  const [SelectedTicketType,setSelectedTicketType] = useState("")
 
 
   const [selectedTicket, setSelectedTicket] = useState("");
@@ -252,8 +252,42 @@ const Notifications = () => {
   }
 
 
-  // Function to confrim cash ticket 
-  
+  // Function to confirm cash ticket 
+  const confirmCashTicket = async()=>{
+    const token = localStorage.getItem("token");
+
+    if(!token){
+      toast.error("An error occurred , try logging in again.")     
+      return
+    }
+  }
+
+  // Function to send approvedTicket
+  const sendApprovedTicket = async(type,ticketId,adminsId)=>{
+   const token = localStorage.getItem("token");
+
+   if(!token){
+    toast.error("An error occured ,try logging in again") 
+    return
+   }
+
+   try {
+    const response = await axios.post(`${root}/${sendTicket[type]}/${ticketId}`,{
+      adminsId:adminsId
+    },{
+      headers:{
+        Authorization:`Bearer ${token}`
+      }
+    })
+    toast.success("Ticket Sent Successfully")
+    return response.status
+   } catch (error) {
+    console.log(error)
+    toast.error(error.response.data.message || "Ticket not sent successfullly.")
+    return error.status    
+   }
+  }
+
 
   // Component for select admin side pane
   const SelectAdminSidePane = ({type,ticketID}) => {
@@ -275,16 +309,24 @@ const Notifications = () => {
         return
       }
       
-      if(selectedAdmins.length === 0) {
-        toast.error("Select at least one admin");
+      if(selectedAdmins.length === 0 || selectedAdmins.includes(null)) {
+        toast.error("Select at least one staff  ");
         return;
       }
 
       try {
         const firstRequest = await approveTicket(type,ticketID);
 
-        // if firstRequest
-        console.log(firstRequest);
+        // if (firstRequest == 200){
+        //   await sendApprovedTicket(type,ticketID,selectedAdmins)
+        // }else{
+        //   // toast.error("Error Occured in approving ticket")
+        // }
+
+        {firstRequest === 200 && await sendApprovedTicket(type,ticketID,selectedAdmins)}
+          
+
+
         
       } catch (error) {
         console.log(error);
@@ -292,13 +334,9 @@ const Notifications = () => {
       }
       console.log("Selected Admin IDs:", selectedAdmins);
     };
-  
-     // approveTicket(
-     //   notification.type,
-       //   notification?.ticketId || null
-           // );
+ 
     return (
-      <div className="absolute z-30 left-[-300px] top-0 mb-20 bg-white min-w-[250px] h-[230px] p-4 shadow-md overflow-scroll overflow-x-hidden">
+      <div className="absolute z-30 left-[-300px] top-0 mb-20 bg-white min-w-[250px] h-[300px] p-4 shadow-md  ">
         <h1 className="font-space font-bold text-[1.1rem]">Approve To</h1>
         <p className="absolute right-[10px] cursor-pointer top-[5px]" onClick={()=>{
           setIsSidePaneOpen({})
@@ -310,7 +348,7 @@ const Notifications = () => {
         </p> */}
   
         <form action="" onSubmit={handleSubmit}>
-        <div className="my-2">
+        <div className="my-2 h-[180px] overflow-scroll overflow-x-hidden">
           {admins.map((admin) => (
             <label key={admin.id} className="flex items-center flex-row-reverse cursor-pointer gap-2">
               <input
@@ -480,7 +518,7 @@ const Notifications = () => {
                                         ...prev,
                                         [notification.id]: true,
                                       }));
-                                      setSelectedTicket(notification.type)
+                                      setSelectedTicketType(notification.type)
                                       
                                     }}
                                   >

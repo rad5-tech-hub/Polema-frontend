@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-
+import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import { refractor, formatMoney } from "../../../date";
 import { faPills } from "@fortawesome/free-solid-svg-icons";
@@ -40,7 +40,7 @@ const ViewPharmacyOrder = () => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      console.log(response );
+      // console.log(response );
       {
         response.data?.Orders?.length === 0
           ? setFailedSearch(true)
@@ -81,8 +81,10 @@ const ViewPharmacyOrder = () => {
       (item) => item.product.id === rawMaterialId
     );
 
-    return rawMaterial ? rawMaterial.product.name : "Unknown"; // Return "Unknown" if not found
+    return rawMaterial ? rawMaterial.product.name : "Unknown Raw Material"; // Return "Unknown" if not found
   };
+
+  // Function to confirm cash ticket 
 
   useEffect(() => {
     fetchOrders();
