@@ -349,8 +349,8 @@ const CreateDepartmentStore = () => {
               </Select.Root>
           </div>
          {checkForDepartmentName(deptName,"plastics") &&  <div className="w-full">
-            <Text>Product</Text>
-            <TextField.Root className="mt-2 " placeholder="Enter Plastics Product" value={otherDetails} onChange={(e)=>{
+            <Text>{`${isProductActive ? "Products" :"Raw Material"}`}</Text>
+            <TextField.Root className="mt-2 " placeholder={`Enter Plastics ${isProductActive ? "Products" :"Raw Materials"}`} value={otherDetails} onChange={(e)=>{
               setOtherDetails(e.target.value)
             }}/> 
           </div>}
