@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { refractor } from "../../../date";
+import { refractor,formatMoney } from "../../../date";
 import {
   Table,
   Select,
@@ -136,12 +136,12 @@ const CashManagementLedger = () => {
                   {matchAdminNameById(entry.approvedByAdminId)}
                 </Table.RowHeaderCell>
                 <Table.RowHeaderCell className="text-green-500">
-                  {entry.credit > entry.debit && entry.credit}
+                  {entry.credit > entry.debit && formatMoney(entry.credit)}
                 </Table.RowHeaderCell>
                 <Table.RowHeaderCell className="text-red-500">
-                  {entry.debit > entry.credit && entry.debit}
+                  {entry.debit > entry.credit && formatMoney(entry.debit)}
                 </Table.RowHeaderCell>
-                <Table.RowHeaderCell>{entry.balance}</Table.RowHeaderCell>
+                <Table.RowHeaderCell>{formatMoney(entry.balance)}</Table.RowHeaderCell>
                 <Table.RowHeaderCell>
                   {entry.credit > entry.debit && (
                     <DropdownMenu.Root>
