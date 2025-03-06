@@ -16,7 +16,7 @@ import {
   Grid,
   Text,
 } from "@radix-ui/themes";
-import { Modal } from "antd";
+import { Modal, Input } from "antd";
 import _ from "lodash";
 const root = import.meta.env.VITE_ROOT;
 
@@ -39,6 +39,8 @@ const ManageGenStore = () => {
   const [productActive, setProductActive] = useState(true);
   const [description, setDescription] = useState("");
   const [departmentId, setDepartmentID] = useState("");
+  const [isOtherSelected, setIsOtherSelected] = useState(false);
+  const [customDepartment,setCustomDepartment] = useState("")
 
   // State Management for the question dialog
   const [questionDialogOpen, setQuationDialogOpen] = React.useState(false);
@@ -120,6 +122,7 @@ const ManageGenStore = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setDepartments(response.data.departments);
+      
     } catch (e) {
       console.log(e);
       toast.error(
@@ -147,7 +150,8 @@ const ManageGenStore = () => {
       setSupplierName("");
       setCanvasVisible(false);
       setDepartmentID("");
-      setDescription("")
+      setDescription("");
+      setCustomDepartment("")
     };
 
     if (typeof Number(quantityOut) !== "number") {
@@ -163,9 +167,9 @@ const ManageGenStore = () => {
 
     //Needed Fields -> ItemId,
 
-    if(!itemId){
-      toast.error("Select a Shelf Type First")
-      return
+    if (!itemId) {
+      toast.error("Select a Shelf Type First");
+      return;
     }
 
     try {
@@ -178,8 +182,9 @@ const ManageGenStore = () => {
           // batchNo: batchNumber,
           name: supplierName,
           quantity: quantityOut,
+          ...(isOtherSelected && {other:customDepartment}),
           comments: description,
-          ...(storeAction !== "add" && {departmentId}),
+          ...(storeAction !== "add" && !isOtherSelected && { departmentId }),
           signature: signatureImage,
         },
         {
@@ -206,6 +211,22 @@ const ManageGenStore = () => {
     }
   };
 
+  // Function for switching from one dept to another 
+  const handleChange = (val) => {
+    if (val === "other") {
+      setIsOtherSelected(true);
+      // console.log(val);
+      
+      // setDepartmentID(null); // Reset selected item
+    } else {
+      setIsOtherSelected(false);
+      setDepartmentID(val);
+    }
+    // console.log(val);
+    
+  };
+
+
   // Initial Screen showing two buttons
   const InitialScreen = () => {
     return (
@@ -226,8 +247,7 @@ const ManageGenStore = () => {
                   setStoreAction("add");
                   setInitialScreenOpen(false);
                 }}
-                size={"3"}
-              >
+                size={"3"}>
                 Add to Store
               </Button>
               or
@@ -238,8 +258,7 @@ const ManageGenStore = () => {
                   e.preventDefault();
                   setStoreAction("remove");
                   setInitialScreenOpen(false);
-                }}
-              >
+                }}>
                 Remove from Store
               </Button>
             </Flex>
@@ -280,16 +299,16 @@ const ManageGenStore = () => {
                 )}
               </Heading>
             </div>
-
-         
           </Flex>
           <Separator className="my-4 w-full" />
 
           <form action="" onSubmit={handleSubmit}>
             <Grid columns={"2"} gap={"6"}>
               <div>
-                <Text>Select Shelf <span className="text-red-500">*</span></Text>
-             
+                <Text>
+                  Select Shelf <span className="text-red-500">*</span>
+                </Text>
+
                 <AntSelect
                   showSearch
                   placeholder={productActive ? "Select Shelf" : "Select Shelf"}
@@ -298,11 +317,10 @@ const ManageGenStore = () => {
                   style={{ width: "100%" }}
                   filterOption={(input, option) =>
                     option.children.toLowerCase().includes(input.toLowerCase())
-                  }
-                >
+                  }>
                   {storeItems.map((item) => (
                     <AntSelect.Option key={item.id} value={item.id}>
-                      {item.name} {`(${item.quantity} ${item.unit} left )`}
+                      {item.name} {`(${item.quantity} ${item.unit} left)`}
                     </AntSelect.Option>
                   ))}
                 </AntSelect>
@@ -320,10 +338,9 @@ const ManageGenStore = () => {
                   value={supplierName}
                   onChange={(e) => {
                     setSupplierName(e.target.value);
-                  }}
-                ></TextField.Root>
+                  }}></TextField.Root>
               </div>
-         
+
               <div>
                 <Text>
                   {storeAction === "add"
@@ -339,8 +356,7 @@ const ManageGenStore = () => {
                   value={quantityOut}
                   onChange={(e) => {
                     setQuantityOut(e.target.value);
-                  }}
-                ></TextField.Root>
+                  }}></TextField.Root>
               </div>
               <div>
                 <Text>Description</Text>
@@ -348,43 +364,65 @@ const ManageGenStore = () => {
                   placeholder="Enter Description"
                   value={description}
                   onChange={(e) => {
-                    setDescription(e.target.value)
-                  }}
-                ></TextField.Root>
+                    setDescription(e.target.value);
+                  }}></TextField.Root>
               </div>
-           {storeAction !== "add" &&    <div>
-                <Text>Select Department</Text>
-                <AntSelect
-                  showSearch
-                  placeholder="Choose Department"
-                  onChange={(val) => setDepartmentID(val)}
-                  value={departmentId}
-                  style={{ width: "100%" }}
-                  filterOption={(input, option) =>
-                    option.children.toLowerCase().includes(input.toLowerCase())
-                  }
-                >
-                  {departments.map((item) => (
-                    <AntSelect.Option key={item.id} value={item.id}>
-                      {item.name}
-                    </AntSelect.Option>
-                  ))}
-                </AntSelect>
-              </div>}
+              {storeAction !== "add" &&
+                (isOtherSelected ? (
+                  <>
+                  <div>
+                    <h1>Enter Department Name</h1>
+                  <TextField.Root
+                    placeholder="Enter department name"
+                    value={customDepartment}
+                    onChange={(e) => setCustomDepartment(e.target.value)}
+                    // style={{ width: "100%" }}
+                  />
+                  </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <h1>Select Department</h1>
+                      <AntSelect
+                        showSearch
+                        placeholder="Select Department"
+                        // onChange={(val) => setDepartmentID(val)}
+                        onChange={handleChange}
+                        
+                        value={departmentId}
+                        style={{ width: "100%" }}
+                        filterOption={(input, option) =>
+                          option.children
+                            .toLowerCase()
+                            .includes(input.toLowerCase())
+                        }>
+                        {departments.map((item) => (
+                          <AntSelect.Option key={item.id} value={item.id}>
+                            {item.name}
+                          </AntSelect.Option>
+                        ))}
+                        {/* Statically added "Other" option */}
+                        <AntSelect.Option key="other" value="other">
+                          Other
+                        </AntSelect.Option>
+                      </AntSelect>
+                    </div>
+                  </>
+                ))}
+
               <div>
                 <Text>Siganture</Text>
                 <Flex
                   className="w-full"
                   onClick={() => {
                     setCanvasVisible(!canvasVisible);
-                  }}
-                >
+                  }}>
                   <TextField.Root
                     placeholder="Sign Here"
                     value={""}
                     disabled
-                    className="w-[70%]"
-                  ></TextField.Root>
+                    className="w-[70%]"></TextField.Root>
                   <Button className="w-[30%] bg-theme" type="button">
                     Sign{" "}
                   </Button>
@@ -398,8 +436,7 @@ const ManageGenStore = () => {
                 size={"3"}
                 className="bg-theme mt-12 cursor-pointer"
                 type="submit"
-                disabled={loading}
-              >
+                disabled={loading}>
                 {loading ? <Spinner /> : _.upperFirst(storeAction)}
               </Button>
             </Flex>

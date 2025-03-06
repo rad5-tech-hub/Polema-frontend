@@ -13,50 +13,12 @@ import {
   AreaChart,
 } from "recharts";
 import { Card } from "@radix-ui/themes";
+import mockData from "./mockData";
+
+import SuperAdminDashboardDetails from "./SuperAdminDashabordDetails";
 
 const MockDashboard = () => {
-  const mockData = [
-    {
-      name: "Jan",
-      product1: 450,
-      product2: 50,
-    },
-    {
-      name: "Feb",
-      product1: 250,
-      product2: 400,
-    },
-    {
-      name: "Mar",
-      product1: 200,
-      product2: 450,
-    },
-    {
-      name: "Apr",
-      product1: 800,
-      product2: 450,
-    },
-    {
-      name: "May",
-      product1: 800,
-      product2: 450,
-    },
-    {
-      name: "Jun",
-      product1: 800,
-      product2: 450,
-    },
-    {
-      name: "Jul",
-      product1: 800,
-      product2: 450,
-    },
-    {
-      name: "Aug",
-      product1: 800,
-      product2: 450,
-    },
-  ];
+  
   const CircularProgress = ({ progress }) => {
     // Clamp the progress value between 0 and 100
     const clampedProgress = Math.min(Math.max(progress, 0), 100);
@@ -241,6 +203,7 @@ const Onboarding = () =>{
   return (
     <>
     <MockDashboard/>
+    {/* <SuperAdminDashboardDetails/> */}
     </>
   )
 }
