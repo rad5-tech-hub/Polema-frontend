@@ -136,7 +136,7 @@ const GeneralRecordBook = () => {
                 <Table.Cell>{refractor(item.createdAt)}</Table.Cell>
                 <Table.Cell>{item.generalStore.name}</Table.Cell>
                 <Table.Cell>{item.name}</Table.Cell>
-                <Table.Cell>{item.department?.name || ""}</Table.Cell>
+                <Table.Cell>{item.department?.name || item.other}</Table.Cell>
                 {/* <Table.Cell>{item.batchNo}</Table.Cell> */}
                 <Table.Cell>
                   {item.quantityRemoved > item.quantityAdded

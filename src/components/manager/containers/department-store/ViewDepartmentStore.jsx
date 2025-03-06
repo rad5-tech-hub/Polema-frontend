@@ -88,11 +88,13 @@ const ViewDepartmentStore = () => {
 
     const filtered = store.filter((item) => {
       if (searchCriteria === "department") {
-        return item.product.department.name
+        //where I edited
+        return (item.product?.department?.name ?? item.department?.name ?? "")
           .toLowerCase()
           .includes(searchTerm.toLowerCase());
       } else if (searchCriteria === "product") {
-        return item.product.name
+        // here too
+        return (item.product?.name ?? item.other ?? "")
           .toLowerCase()
           .includes(searchTerm.toLowerCase());
       }
@@ -173,8 +175,7 @@ const ViewDepartmentStore = () => {
         <Heading>View Store</Heading>
         <Select.Root
           defaultValue="products"
-          onValueChange={(value) => setIsProductActive(value === "products")}
-        >
+          onValueChange={(value) => setIsProductActive(value === "products")}>
           <Select.Trigger />
           <Select.Content>
             <Select.Item value="products">Products</Select.Item>
@@ -196,8 +197,7 @@ const ViewDepartmentStore = () => {
               setFailedToSelectCriteria(false);
             }
           }}
-          placeholder="Search Store"
-        >
+          placeholder="Search Store">
           <TextField.Slot>
             <MagnifyingGlassIcon width={"16px"} height={"16px"} />
           </TextField.Slot>
@@ -229,8 +229,7 @@ const ViewDepartmentStore = () => {
                 <Flex
                   justify="center"
                   align="center"
-                  style={{ height: "100px" }}
-                >
+                  style={{ height: "100px" }}>
                   {failedSearch ? "No records found" : <Spinner size="2" />}
                 </Flex>
               </Table.Cell>
@@ -245,13 +244,18 @@ const ViewDepartmentStore = () => {
                 </Table.RowHeaderCell>
                 <Table.RowHeaderCell
                   dangerouslySetInnerHTML={{
-                    __html: highlightText(storeItem.product.name, searchTerm),
+                    __html: highlightText(
+                      storeItem.product?.name ?? storeItem.other ?? "N/A",
+                      searchTerm
+                    ),
                   }}
                 />
                 <Table.RowHeaderCell
                   dangerouslySetInnerHTML={{
                     __html: highlightText(
-                      storeItem.product.department.name,
+                      storeItem.product?.department?.name ??
+                        storeItem.department?.name ??
+                        "N/A",
                       searchTerm
                     ),
                   }}
@@ -285,8 +289,7 @@ const ViewDepartmentStore = () => {
                             Add
                           </DropdownMenu.Item> */}
                           <DropdownMenu.Item
-                            onClick={() => handleOpenModal("edit", storeItem)}
-                          >
+                            onClick={() => handleOpenModal("edit", storeItem)}>
                             Edit
                           </DropdownMenu.Item>
                           {/* <DropdownMenu.Item

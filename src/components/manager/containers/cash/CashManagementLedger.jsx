@@ -136,10 +136,10 @@ const CashManagementLedger = () => {
                   {matchAdminNameById(entry.approvedByAdminId)}
                 </Table.RowHeaderCell>
                 <Table.RowHeaderCell className="text-green-500">
-                  {entry.credit}
+                  {entry.credit > entry.debit && entry.credit}
                 </Table.RowHeaderCell>
                 <Table.RowHeaderCell className="text-red-500">
-                  {entry.debit}
+                  {entry.debit > entry.credit && entry.debit}
                 </Table.RowHeaderCell>
                 <Table.RowHeaderCell>{entry.balance}</Table.RowHeaderCell>
                 <Table.RowHeaderCell>

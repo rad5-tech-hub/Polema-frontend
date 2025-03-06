@@ -595,14 +595,14 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                   {/* </Grid> */}
 
                   {/* Checkbox to approve to other admins */}
-                  {ticketDetails?.status !== "approved" && (
+                  {/* {ticketDetails?.status !== "approved" && (
                     <div className="flex gap-3 mt-4">
                       <input type="checkbox" name="" id="" />
                       <p>Approve to other admin</p>
                     </div>
-                  )}
+                  )} */}
 
-                  {ticketDetails?.status === "approved" &&
+                  {/* {ticketDetails?.status === "approved" &&
                     selectedTicket?.type === "cash" &&
                     ticketDetails?.approvedBySuperAdminId !==
                       getToken()?.id && (
@@ -641,7 +641,7 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                         </Button>
                       </div>
                     </div>
-                  )}
+                  )} */}
                 </div>
               </>
             )}

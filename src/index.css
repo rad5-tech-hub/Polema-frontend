@@ -21,7 +21,7 @@
 /* Styling sidebar scrollbar */
 /* width */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 6px;
 }
 
 /* Track */
@@ -61,6 +61,7 @@
 /* Notifications panel animation */
 .notifications-panel {
   transition: transform 0.3s ease-in-out;
+  /* overflow-y:scroll ; */
 }
 
 .notifications-panel.translate-x-0 {
@@ -74,3 +75,6 @@
 .hamburger-icon {
   display: none;
 }
+
+
+/* Side Pane View  */

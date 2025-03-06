@@ -15,8 +15,7 @@ import {
 import { Card } from "@radix-ui/themes";
 import mockData from "./mockData";
 
-import SuperAdminDashboardDetails from "./SuperAdminDashabordDetails";
-
+import SuperAdminDashboardDetails from "./super-admin/SuperAdminDashabordDetails";
 const MockDashboard = () => {
   
   const CircularProgress = ({ progress }) => {
@@ -202,8 +201,8 @@ const MockDashboard = () => {
 const Onboarding = () =>{
   return (
     <>
-    <MockDashboard/>
-    {/* <SuperAdminDashboardDetails/> */}
+    {/* <MockDashboard/> */}
+    <SuperAdminDashboardDetails/>
     </>
   )
 }

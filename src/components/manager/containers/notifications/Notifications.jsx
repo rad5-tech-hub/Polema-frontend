@@ -46,6 +46,7 @@ const Notifications = () => {
   const [fetchLoading, setFetchLoading] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadNotifications, setUnreadNotifications] = useState([]);
+  const [alllNotifications, setAllNotifications] = useState([]);
   const [detailsPageOpen, setDetailsPageOpen] = useState(false);
   const [admins, setAdmins] = useState([]);
   const notificationRef = useRef(null);
@@ -53,7 +54,7 @@ const Notifications = () => {
   const [SelectedTicketType, setSelectedTicketType] = useState("");
 
   const [selectedTicket, setSelectedTicket] = useState("");
-  
+
   // Component for individual notification info
   const [storeDetails, setStoreDetails] = useState([]);
 
@@ -96,13 +97,14 @@ const Notifications = () => {
       });
 
       const fetchedUnreadNotifications =
-      response.data.data.unreadNotifications || [];
-      const allNotifications = [
+        response.data.data.unreadNotifications || [];
+      const generalNotifications = [
         ...response.data.data.unreadNotifications,
         ...response.data.data.readNotifications,
       ];
 
-      setNotifications(allNotifications);
+      setNotifications(generalNotifications);
+      setAllNotifications(generalNotifications);
       setUnreadNotifications(fetchedUnreadNotifications);
       setFetchLoading(false);
     } catch (error) {
@@ -303,13 +305,15 @@ const Notifications = () => {
           },
         }
       );
-      toast.success("Ticket Sent Successfully");
+      // toast.success("Ticket Sent Successfully");
       return response.status;
     } catch (error) {
       console.log(error);
       toast.error(
         error.response.data.message || "Ticket not sent successfullly."
-      );
+      ,{
+        duration:4500
+      });
       return error.status;
     }
   };
@@ -353,10 +357,12 @@ const Notifications = () => {
           firstRequest === 200 &&
             (await sendApprovedTicket(type, ticketID, selectedAdmins)
               .then((res) => {
-                console.log(res);
+                // console.log(res);
+                // toast.success("Ticket approved and sent successfully.")
               })
               .catch((err) => {
-                console.log(err);
+                // console.log(err);
+
               }));
         }
       } catch (error) {
@@ -437,12 +443,12 @@ const Notifications = () => {
         </div>
         <div>
           <div
-            className={`notifications-panel absolute top-10 right-[-70px] w-[30rem] z-[9999] !overflow-x-visible shadow-md p-4 bg-white border border-gray-200 rounded-md transition-transform duration-300 ${
+            className={`notifications-panel  absolute top-10 right-[-70px] w-[30rem] z-[9999] !overflow-x-visible shadow-md p-4 bg-white border border-gray-200 rounded-md transition-transform duration-300 ${
               isNotificationsOpen && !isSlidingOut
                 ? "translate-x-0 block opacity-100"
                 : "translate-x-[160%] opacity-0 hidden"
             }`}
-            style={{ borderRadius: "8px", overflowY: "" }}>
+            style={{ borderRadius: "8px", overflowY: "sc" }}>
             {/* {detailsPageOpen && <IndividualInfo />} */}
             <div className="flex justify-between items-center w-full">
               <h1 className="font-space font-medium text-[1.7rem]">
@@ -473,8 +479,20 @@ const Notifications = () => {
                 setOpen={setDetailsPageOpen}></IndividualInfo>
             )}
             <div className="absolute right-[10px] mt-3 flex gap-1 items-center">
-              <label htmlFor="" className="text-sm font-amsterdam">Unread</label>
-              <Switch size="small" />
+              <label htmlFor="switch" className="text-sm cursor-pointer font-amsterdam">
+                Unread
+              </label>
+              <Switch
+                id="switch"
+                size="small"
+                onChange={(val) => {
+                  if (val) {
+                    setNotifications(unreadNotifications);
+                  } else {
+                    setNotifications(alllNotifications);
+                  }
+                }}
+              />
             </div>
 
             <Tabs.Root defaultValue="all">
@@ -603,7 +621,10 @@ const Notifications = () => {
                             </Flex>
                           </Flex>
                         </div>
-                        <Separator className="w-full" />
+
+                        {notifications.length > 1 && (
+                          <Separator className="w-full" />
+                        )}
                       </>
                     ))
                   ) : (

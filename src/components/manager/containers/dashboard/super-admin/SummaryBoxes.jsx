@@ -1,17 +1,6 @@
-import React, { useState, useEffect } from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Legend,
-  Tooltip,
-} from "recharts";
-import mockData from "./mockData";
+import React,{useState,useEffect} from "react";
 
-const SuperAdminDashboardDetails = () => {
-  const [chartWidth, setChartWidth] = useState(850);
+const SummaryBoxes = () => {
   const [customers, setCustomers] = useState(0);
   const [suppliers, setSuppliers] = useState(0);
   const [products, setProducts] = useState(0);
@@ -21,18 +10,6 @@ const SuperAdminDashboardDetails = () => {
   const supplierTarget = 45;
   const productTarget = 67;
   const rawMaterialTarget = 32;
-
-  useEffect(() => {
-    const handleResize = () => {
-      const newWidth = Math.max(500, Math.min(window.innerWidth - 50, 850));
-      setChartWidth(newWidth);
-    };
-
-    window.addEventListener("resize", handleResize);
-    handleResize();
-
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   // Counter animation function
   const animateCounter = (setCount, targetValue, duration = 2000) => {
@@ -55,7 +32,6 @@ const SuperAdminDashboardDetails = () => {
     animateCounter(setProducts, productTarget);
     animateCounter(setRawMaterials, rawMaterialTarget);
   }, []);
-
   return (
     <>
       {/* Data Summary Boxes with Animated Counters */}
@@ -74,35 +50,13 @@ const SuperAdminDashboardDetails = () => {
         </div>
         <div className="bg-theme min-h-[150px] rounded p-5 w-full">
           <h1 className="text-lg font-bold font-space">Raw Materials</h1>
-          <p className="text-center text-[3rem] font-amsterdam">{rawMaterials}</p>
+          <p className="text-center text-[3rem] font-amsterdam">
+            {rawMaterials}
+          </p>
         </div>
-      </div>
-
-      {/* Bar Chart Section */}
-      <div className="customer-stats mt-8">
-        <h1 className="font-bold font-amsterdam">Customer Performance</h1>
-        <BarChart
-          className="w-full"
-          width={chartWidth}
-          height={500}
-          data={mockData}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis
-            dataKey="name"
-            label={{ value: "Months", position: "insideBottom", offset: -10 }}
-          />
-          <YAxis
-            label={{ value: "Units Sold", angle: -90, position: "insideLeft" }}
-          />
-          <Legend layout="horizontal" verticalAlign="top" align="right" />
-          <Tooltip />
-          <Bar dataKey="product1" stroke="#cad000" fill="#2563eb" />
-          <Bar dataKey="product2" fill="#8b5cf6" />
-        </BarChart>
       </div>
     </>
   );
 };
 
-export default SuperAdminDashboardDetails;
+export default SummaryBoxes;
