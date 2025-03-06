@@ -1,6 +1,7 @@
-import Onboarding from "./onboarding/Onboarding";
+import Onboarding from "./dashboard/Onboarding";
 import OfficialLPO from "./raise-tickets/OfficialLPO";
-import WelcomeComponent from "./WelcomeComponent";
+// import WelcomeComponent from "./WelcomeComponent";
+// import WelcomeComponent from "./dashbaord/WelcomeComponent";
 import BlankLPO from "./raise-tickets/BlankLPO";
 import EditDialog from "./products/EditDialog";
 import EditProducts from "./products/EditProducts";
@@ -118,7 +119,6 @@ export {
   AllAdmins,
   AllProducts,
   AuthorityToLoad,
-  WelcomeComponent,
   AddCustomer,
   CreateDepartmentStore,
   AddDepartment,

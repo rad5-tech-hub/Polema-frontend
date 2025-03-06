@@ -10,7 +10,6 @@ import { DropDownIcon, DeleteIcon } from "../../../icons";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { refractor } from "../../../date";
-import UpdateURL from "../ChangeRoute";
 import toast, { Toaster } from "react-hot-toast";
 
 const root = import.meta.env.VITE_ROOT;

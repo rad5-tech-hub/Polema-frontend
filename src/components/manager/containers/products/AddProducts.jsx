@@ -19,7 +19,6 @@ import {
   Spinner,
 } from "@radix-ui/themes";
 import { PlusIcon } from "@radix-ui/react-icons";
-import UpdateURL from "../ChangeRoute";
 import toast, { Toaster } from "react-hot-toast";
 
 const root = import.meta.env.VITE_ROOT;

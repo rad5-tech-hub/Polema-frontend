@@ -13,7 +13,7 @@ import {
   ManagePharmacyStore,
   ViewSupplierOrder,
   ManageDeptStore,
-  WelcomeComponent,
+  // WelcomeComponent,
   PharmRecordBook,
   ChangePassword,
   CashManagement,

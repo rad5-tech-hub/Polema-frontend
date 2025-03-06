@@ -179,7 +179,7 @@ const ManageGenStore = () => {
           name: supplierName,
           quantity: quantityOut,
           comments: description,
-          ...(storeAction !== "add" && departmentId),
+          ...(storeAction !== "add" && {departmentId}),
           signature: signatureImage,
         },
         {
@@ -302,7 +302,7 @@ const ManageGenStore = () => {
                 >
                   {storeItems.map((item) => (
                     <AntSelect.Option key={item.id} value={item.id}>
-                      {item.name}
+                      {item.name} {`(${item.quantity} ${item.unit} left )`}
                     </AntSelect.Option>
                   ))}
                 </AntSelect>

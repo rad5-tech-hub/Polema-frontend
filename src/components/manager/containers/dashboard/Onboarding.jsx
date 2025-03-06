@@ -14,7 +14,7 @@ import {
 } from "recharts";
 import { Card } from "@radix-ui/themes";
 
-const Onboarding = () => {
+const MockDashboard = () => {
   const mockData = [
     {
       name: "Jan",
@@ -236,6 +236,14 @@ const Onboarding = () => {
     </>
   );
 };
+
+const Onboarding = () =>{
+  return (
+    <>
+    <MockDashboard/>
+    </>
+  )
+}
 
 export default Onboarding;
 
