@@ -141,9 +141,9 @@ const AuthorityToWeigh = () => {
 
     try {
       // Show loading toast
-      const ticketToastId = toast.loading("Creating Ticket...", {
-        style: { padding: "20px" },
-      });
+      // const ticketToastId = toast.loading("Creating Ticket...", {
+      //   style: { padding: "20px" },
+      // });
 
       // First API Request: Raise the ticket
       const ticketResponse = await axios.post(
@@ -163,7 +163,7 @@ const AuthorityToWeigh = () => {
 
       const sendResponse = await axios.post(
         `${root}/admin/send-weigh-auth/${ticketId}`,
-        { adminsId: [chiefAdminId] },
+        { adminIds: [chiefAdminId] },
         {
           headers: {
             Authorization: `Bearer ${retrToken}`,

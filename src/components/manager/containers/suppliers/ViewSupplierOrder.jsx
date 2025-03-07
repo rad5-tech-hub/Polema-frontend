@@ -81,9 +81,14 @@ const ViewSupplierOrder = () => {
         }
       );
 
-      response.data.orders.length === 0
+      const orders = response.data.orders || response.data;
+
+      console.log(orders);
+      
+
+      orders.length === 0
         ? setFailedSearch(true)
-        : setOrders(response.data.orders);
+        : setOrders(orders);
     } catch (error) {
       console.log(error);
       setFailedSearch(true);
@@ -93,7 +98,7 @@ const ViewSupplierOrder = () => {
   // Function to get productName by Id
   const getProductNamebyId = (id) => {
     const product = raw.find((product) => product.id === id);
-    return product ? product.name : "Raw Materialnot Found.";
+    return product ? product.name : "Raw Material Not Found.";
   };
 
   // Function to get supplierName by id
