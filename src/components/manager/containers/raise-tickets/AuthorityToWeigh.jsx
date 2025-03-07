@@ -352,7 +352,7 @@ const AuthorityToWeigh = () => {
                   <Select.Content position="popper">
                     {admins.map((item) => {
                       return (
-                        <Select.Item key={item.id} value={item.id}>
+                        <Select.Item key={item.role?.id} value={item.role?.id}>
                           {item.firstname} {item.lastname}
                         </Select.Item>
                       );

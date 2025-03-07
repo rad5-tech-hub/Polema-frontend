@@ -148,7 +148,7 @@ const GeneralRecordBook = () => {
                     ? `${formatMoney(item.quantityAdded)}`
                     : ""}
                 </Table.Cell>
-                <Table.Cell>{`₦${item.amountRemaining}`}</Table.Cell>
+                <Table.Cell>{`${item.amountRemaining}`}</Table.Cell>
                 <Table.Cell>
                   {item.signature ? (
                     <>

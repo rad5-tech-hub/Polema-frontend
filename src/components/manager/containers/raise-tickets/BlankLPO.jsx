@@ -391,7 +391,7 @@ const BlankLPO = () => {
                 {superAdmins.map((admin) => {
                   return (
                     <Select.Item
-                      value={admin.id}
+                      value={admin.role?.id}
                     >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
                   );
                 })}

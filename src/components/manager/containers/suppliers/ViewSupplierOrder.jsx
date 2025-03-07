@@ -82,10 +82,6 @@ const ViewSupplierOrder = () => {
       );
 
       const orders = response.data.orders || response.data;
-
-      console.log(orders);
-      
-
       orders.length === 0
         ? setFailedSearch(true)
         : setOrders(orders);

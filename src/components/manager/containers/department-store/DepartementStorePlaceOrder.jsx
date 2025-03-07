@@ -156,6 +156,7 @@ const DepartementStorePlaceOrder = () => {
     } catch (error) {
       console.error("Failed to place order:", error);
       setBtnLoading(false);
+      toast.error(error.response.message)
     }
   };
 
