@@ -174,7 +174,7 @@ const CollectFromGeneralStore = () => {
       const secondRequest = await axios.post(
         `${root}/admin/send-store-auth/${ticketId}`,
         {
-          adminId: superAdminId,
+          adminIds: [superAdminId],
         },
         {
           headers: {
