@@ -42,8 +42,8 @@ const DepartmentPerformanceChart = () => {
           />
           <Legend layout="horizontal" verticalAlign="top" align="right" />
           <Tooltip />
-          <Bar dataKey="product1" stroke="#cad000" fill="#2563eb" />
-          <Bar dataKey="product2" fill="#8b5cf6" />
+          <Bar dataKey="product1"  fill="#434343" />
+          <Bar dataKey="product2" fill="#e1e1e1" />
         </BarChart>
       </div>
     </>

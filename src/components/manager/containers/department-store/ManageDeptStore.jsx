@@ -15,6 +15,8 @@ import {
   Text,
 } from "@radix-ui/themes";
 import _ from "lodash";
+import { refractor, formatMoney } from "../../../date";
+
 import { Modal, Button as AntButton } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
@@ -36,7 +38,7 @@ const ManageDeptStore = () => {
   const [quantityOut, setQuantityOut] = useState("");
   const [signatureImage, setSignatureImage] = useState(null);
   const [productActive, setProductActive] = useState(true);
-  const [modalClicked,setModalClicked] = useState(false)
+  const [modalClicked, setModalClicked] = useState(false);
 
   //State management for the dialog box
   const [questionDialogOpen, setQuestionDialogOpen] = React.useState(true);
@@ -73,7 +75,7 @@ const ManageDeptStore = () => {
 
   // Function to fetch products/raw materials
   const fetchItems = async () => {
-    setStoreItems([]);
+    // setStoreItems([]);
     const token = localStorage.getItem("token");
     if (!token) {
       toast.error("An error occurred , try logging in again.", {
@@ -191,8 +193,7 @@ const ManageDeptStore = () => {
                   setStoreAction("add");
                   setInitialScreenOpen(false);
                 }}
-                size={"3"}
-              >
+                size={"3"}>
                 Add to Store
               </Button>
               or
@@ -203,8 +204,7 @@ const ManageDeptStore = () => {
                   e.preventDefault();
                   setStoreAction("remove");
                   setInitialScreenOpen(false);
-                }}
-              >
+                }}>
                 Remove from Store
               </Button>
             </Flex>
@@ -218,7 +218,11 @@ const ManageDeptStore = () => {
   const QuestionComponent = () => {
     return (
       <>
-        <Modal open={questionDialogOpen} footer={null} closable={false} centered>
+        <Modal
+          open={questionDialogOpen}
+          footer={null}
+          closable={false}
+          centered>
           <h1 className="text-[1.5rem] font-space font-bold">
             What do you want ?
           </h1>
@@ -231,21 +235,18 @@ const ManageDeptStore = () => {
                 setProductActive(true);
 
                 setQuestionDialogOpen(false);
-                setModalClicked(true)
-              }}
-            >
+                setModalClicked(true);
+              }}>
               Product
             </AntButton>
             <AntButton
               onClick={() => {
                 setProductActive(false);
-                setQuestionDialogOpen(false)
-                setModalClicked(true)
-
+                setQuestionDialogOpen(false);
+                setModalClicked(true);
               }}
               size="large"
-              className="bg-blue-400 text-white cursor-pointer"
-            >
+              className="bg-blue-400 text-white cursor-pointer">
               Raw Material
             </AntButton>
           </div>
@@ -278,7 +279,7 @@ const ManageDeptStore = () => {
                 className="cursor-pointer"
                 onClick={() => {
                   setInitialScreenOpen(true);
-                  setQuestionDialogOpen(true)
+                  setQuestionDialogOpen(true);
                 }}
               />
               <Heading>
@@ -288,20 +289,23 @@ const ManageDeptStore = () => {
                   : "Remove from Store"}{" "}
               </Heading>
             </div>
-           {modalClicked &&  <Select.Root
-              defaultValue={productActive ? "products" : "raw-materials"}
-              onValueChange={(val) => {
-                setProductActive(val === "products");
-              }}
-            >
-              <Select.Trigger />
-              <Select.Content position="popper">
-                <Select.Group>
-                  <Select.Item value="raw-materials">Raw Materials</Select.Item>
-                  <Select.Item value="products">Products</Select.Item>
-                </Select.Group>
-              </Select.Content>
-            </Select.Root>}
+            {modalClicked && (
+              <Select.Root
+                defaultValue={productActive ? "products" : "raw-materials"}
+                onValueChange={(val) => {
+                  setProductActive(val === "products");
+                }}>
+                <Select.Trigger />
+                <Select.Content position="popper">
+                  <Select.Group>
+                    <Select.Item value="raw-materials">
+                      Raw Materials
+                    </Select.Item>
+                    <Select.Item value="products">Products</Select.Item>
+                  </Select.Group>
+                </Select.Content>
+              </Select.Root>
+            )}
           </Flex>
           <Separator className="my-4 w-full" />
 
@@ -317,12 +321,16 @@ const ManageDeptStore = () => {
                     setItemID(val);
                   }}
                   value={itemId}
-                  style={{ width: "100%" }}
-                >
+                  style={{ width: "100%" }}>
                   {storeItems.map((item) => {
                     return (
                       <AntSelect.Option value={item.id}>
-                        {item.product.name} {`(${item.unit})`}
+                        {/* {item.product?.name || ""} {`(${item.unit})`} */}
+                        {item.product === null
+                          ? `${item.other} `
+                          : `${item.product.name} (${
+                              formatMoney(item?.quantity) || ""
+                            } ${item.unit} left)`}
                       </AntSelect.Option>
                     );
                   })}
@@ -341,8 +349,7 @@ const ManageDeptStore = () => {
                   value={supplierName}
                   onChange={(e) => {
                     setSupplierName(e.target.value);
-                  }}
-                ></TextField.Root>
+                  }}></TextField.Root>
               </div>
               <div>
                 <Text>
@@ -359,8 +366,7 @@ const ManageDeptStore = () => {
                   value={quantityOut}
                   onChange={(e) => {
                     setQuantityOut(e.target.value);
-                  }}
-                ></TextField.Root>
+                  }}></TextField.Root>
               </div>
               <div>
                 <Text>Siganture</Text>
@@ -368,14 +374,12 @@ const ManageDeptStore = () => {
                   className="w-full"
                   onClick={() => {
                     setCanvasVisible(!canvasVisible);
-                  }}
-                >
+                  }}>
                   <TextField.Root
                     placeholder="Sign Here"
                     value={""}
                     disabled
-                    className="w-[70%]"
-                  ></TextField.Root>
+                    className="w-[70%]"></TextField.Root>
                   <Button className="w-[30%] bg-theme" type="button">
                     Sign{" "}
                   </Button>
@@ -388,8 +392,7 @@ const ManageDeptStore = () => {
                 size={"3"}
                 className="bg-theme mt-12 cursor-pointer"
                 type="submit"
-                disabled={loading}
-              >
+                disabled={loading}>
                 {loading ? <Spinner /> : _.upperFirst(storeAction)}
               </Button>
             </Flex>
