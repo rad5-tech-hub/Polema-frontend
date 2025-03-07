@@ -170,7 +170,7 @@ const BlankLPO = () => {
       // SECOND API REQUEST
       const secondResponse = await axios.post(
         `${root}/admin/send-lpo/${ticketId}`,
-        { adminId },
+        { adminsId:[adminId] },
         {
           headers: {
             Authorization: `Bearer ${retrToken}`, // Use `retrToken` here

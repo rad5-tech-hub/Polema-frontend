@@ -163,7 +163,7 @@ const AuthorityToWeigh = () => {
 
       const sendResponse = await axios.post(
         `${root}/admin/send-weigh-auth/${ticketId}`,
-        { adminId: chiefAdminId },
+        { adminsId: [chiefAdminId] },
         {
           headers: {
             Authorization: `Bearer ${retrToken}`,
@@ -344,8 +344,7 @@ const AuthorityToWeigh = () => {
                   disabled={adminDropdownDisabled}
                   onValueChange={(value) => {
                     setChiefAdminId(value);
-                  }}
-                >
+                  }}>
                   <Select.Trigger
                     placeholder="Select Admin"
                     className="w-full mt-2"
