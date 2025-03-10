@@ -13,11 +13,13 @@ import {
   AreaChart,
 } from "recharts";
 import { Card } from "@radix-ui/themes";
+import { jwtDecode } from "jwt-decode";
+import WelcomeComponent from "./AdminDashboardDetails";
 import mockData from "./mockData";
 
 import SuperAdminDashboardDetails from "./super-admin/SuperAdminDashabordDetails";
+import toast from "react-hot-toast";
 const MockDashboard = () => {
-  
   const CircularProgress = ({ progress }) => {
     // Clamp the progress value between 0 and 100
     const clampedProgress = Math.min(Math.max(progress, 0), 100);
@@ -43,8 +45,7 @@ const MockDashboard = () => {
             transform: isMoreThanHalf
               ? "rotate(180deg)"
               : `rotate(${rotationAngle}deg)`,
-          }}
-        ></div>
+          }}></div>
 
         {/* Right Half Arc */}
         <div
@@ -52,8 +53,7 @@ const MockDashboard = () => {
           style={{
             clipPath: "polygon(50% 0, 100% 0, 100% 100%, 50% 100%)",
             transform: `rotate(${Math.min(rotationAngle, 180)}deg)`,
-          }}
-        ></div>
+          }}></div>
 
         {/* Inner Text */}
         <div className="absolute inset-0 flex items-center justify-center text-blue-500 font-bold">
@@ -198,25 +198,32 @@ const MockDashboard = () => {
   );
 };
 
-const Onboarding = () =>{
+const Onboarding = () => {
+  // Function to check if user is superAdmin or not
+  const checkSuperAdmin = () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("An error occurred , try logging in again.");
+      return;
+    }
+
+    const details = jwtDecode(token);
+    return details.isAdmin;
+  };
+
+
   return (
     <>
-    {/* <MockDashboard/> */}
-    <SuperAdminDashboardDetails/>
+      {checkSuperAdmin() === true ? (
+        <SuperAdminDashboardDetails />
+      ) : (
+        <WelcomeComponent />
+      )}
     </>
-  )
-}
+  );
+};
 
 export default Onboarding;
 
-// {/* <Card className="p-6 shadow-lg border rounded-md bg-white">
-//   <Heading size="3" className="mb-4 text-center">
-//     Polema Dashboard
-//   </Heading>
-//   <Text size="2" className="text-gray-600 text-center">
-//     Manage your tasks seamlessly and stay organized. Use the navigation
-//     menu to explore action tabs tailored to your role and
-//     responsibilities. Each action tab is designed to streamline your
-//     workflow and enhance productivity.
-//   </Text>
-// </Card> */}
+

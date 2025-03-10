@@ -160,7 +160,7 @@ const LocalPurchaseOrder = () => {
       // SECOND API REQUEST
       const secondResponse = await axios.post(
         `${root}/admin/send-lpo/${ticketId}`,
-        { adminId },
+        {adminIds: [adminId] },
         {
           headers: {
             Authorization: `Bearer ${retrToken}`, // Use `retrToken` here
@@ -379,7 +379,7 @@ const LocalPurchaseOrder = () => {
                 {superAdmins.map((admin) => {
                   return (
                     <Select.Item
-                      value={admin.id}
+                      value={admin.role?.id || " " }
                     >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
                   );
                 })}

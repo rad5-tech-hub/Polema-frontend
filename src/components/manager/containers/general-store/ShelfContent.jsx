@@ -101,7 +101,8 @@ const ShelfContent = () => {
       {/* Search Input */}
       <TextField.Root
         placeholder="Search Store"
-        className="w-[55%] my-4"
+        // className="w-[55%] my-4"
+        className="w-[55%] my-4 sticky top-0 bg-white z-10"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
       >
@@ -165,6 +166,7 @@ const ShelfContent = () => {
                   </DropdownMenu.Content>
                 </DropdownMenu.Root>
               </Table.Row>
+              
             ))
           )}
         </Table.Body>

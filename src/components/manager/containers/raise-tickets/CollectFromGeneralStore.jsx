@@ -241,8 +241,8 @@ const CollectFromGeneralStore = () => {
                 {superAdmins.map((admins) => {
                   return (
                     <Select.Item
-                      key={admins.id}
-                      value={admins.id}
+                      key={admins.role?.id || " "}
+                      value={admins?.role?.id || " "}
                     >{`${admins.firstname} ${admins.lastname}`}</Select.Item>
                   );
                 })}

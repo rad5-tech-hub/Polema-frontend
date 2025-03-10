@@ -474,7 +474,7 @@ const AuthorityToGiveCash = () => {
                     setStaffAmount(e.target.value);
                   }}
                 >
-                  <TextField.Slot>N</TextField.Slot>
+                  <TextField.Slot>₦</TextField.Slot>
                 </TextField.Root>
               </div>
               <div className="w-full">
@@ -488,10 +488,10 @@ const AuthorityToGiveCash = () => {
                     className="w-full mt-2"
                     placeholder="Select Department"
                   />
-                  <Select.Content>
+                  <Select.Content position="popper">
                     {departments.map((dept) => {
                       return (
-                        <Select.Item key={dept.id} value={dept.id}>
+                        <Select.Item key={dept.id} value={dept.id} >
                           {dept.name}
                         </Select.Item>
                       );
@@ -519,7 +519,7 @@ const AuthorityToGiveCash = () => {
                     {superAdmins.map((admin) => {
                       return (
                         <Select.Item
-                          value={admin.role?.id || ""}
+                          value={admin.role?.id || " "}
                         >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
                       );
                     })}

@@ -76,7 +76,11 @@ const Notifications = () => {
       });
       setStoreDetails(data.stores);
     } catch (error) {
-      console.log(error);
+        //putting check for only error 403
+      if(error.status =! 403){
+
+        console.log(error);
+      }
     }
   };
 
@@ -108,7 +112,9 @@ const Notifications = () => {
       setUnreadNotifications(fetchedUnreadNotifications);
       setFetchLoading(false);
     } catch (error) {
-      console.error("Error fetching notifications:", error);
+      if (error.status != 403) {
+        console.error("Error fetching notifications:", error);
+      }
       setFetchLoading(false);
     }
   };
@@ -243,12 +249,14 @@ const Notifications = () => {
       });
       setAdmins(response.data.staffList);
     } catch (e) {
-      console.log(e);
-      toast.error(
-        e.message ||
-          e.response.data.message ||
-          "An error occurred while trying to fetch admin details"
-      );
+      if (e.status !== 403) {
+        console.log(e);
+        toast.error(
+          e.message ||
+            e.response.data.message ||
+            "An error occurred while trying to fetch admin details"
+        );
+      }
     }
   };
 
@@ -310,10 +318,11 @@ const Notifications = () => {
     } catch (error) {
       console.log(error);
       toast.error(
-        error.response.data.message || "Ticket not sent successfullly."
-      ,{
-        duration:4500
-      });
+        error.response.data.message || "Ticket not sent successfullly.",
+        {
+          duration: 4500,
+        }
+      );
       return error.status;
     }
   };
@@ -357,12 +366,13 @@ const Notifications = () => {
           firstRequest === 200 &&
             (await sendApprovedTicket(type, ticketID, selectedAdmins)
               .then((res) => {
-                // console.log(res);
-                // toast.success("Ticket approved and sent successfully.")
+                console.log(res);
+                toast.success("Ticket approved and sent successfully.")
               })
               .catch((err) => {
-                // console.log(err);
-
+                toast.error("Ticket not sent successfully.")
+                
+                console.log(err);
               }));
         }
       } catch (error) {
@@ -479,7 +489,9 @@ const Notifications = () => {
                 setOpen={setDetailsPageOpen}></IndividualInfo>
             )}
             <div className="absolute right-[10px] mt-3 flex gap-1 items-center">
-              <label htmlFor="switch" className="text-sm cursor-pointer font-amsterdam">
+              <label
+                htmlFor="switch"
+                className="text-sm cursor-pointer font-amsterdam">
                 Unread
               </label>
               <Switch
