@@ -42,20 +42,24 @@ const CustomerPerformanceChart = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const detailsArray = response.data?.topCustomers || [];
+      console.log(response);
+      
+      const detailsArray = response.data.data || [];
 
       // Update returned date range
-      setReturnedDateRange({ start: response.data.startDate || "N/A", end: response.data.startDate || "N/A" });
+      setReturnedDateRange({ start: response.data.startDate || "N/A", end: response.data.endDate || "N/A" });
 
       // Transform the API response to match the chart format
       const formattedData = detailsArray.map((customer) => ({
-        name: `${customer.customer.firstName} ${customer.customer.lastName}`,
+        name: `${customer.firstName} ${customer.lastName}`,
         totalCredit: parseFloat(customer.totalCredit),
         totalDebit: parseFloat(customer.totalDebit),
       }));
 
       setChartData(formattedData);
     } catch (error) {
+      console.log(error);
+      
       toast.error("Error fetching data. Please try again.");
     }
   };

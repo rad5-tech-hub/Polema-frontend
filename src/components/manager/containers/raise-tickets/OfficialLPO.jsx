@@ -169,7 +169,7 @@ const OfficialLPO = () => {
                 <Text>Cheque No.</Text>
                 <TextField.Root
                   value={lpoDetails.chequeNo}
-                  placeholder="Enter Cheque No."
+                  // placeholder="Enter Cheque No."
                   className="mt-2"
                   disabled
                 />
@@ -181,7 +181,7 @@ const OfficialLPO = () => {
                 <Text>Cheque Voucher No.</Text>
                 <TextField.Root
                   value={lpoDetails.chequeVoucherNo}
-                  placeholder="Enter Cheque Voucher Number"
+                  // placeholder="Enter Cheque Voucher Number"
                   className="mt-2"
                   disabled
                 />
@@ -210,7 +210,8 @@ const OfficialLPO = () => {
               </div>
               <div className="w-full">
                 <Text>
-                  Raw Materials Needed <span className="text-red-500">*</span>
+                  Raw Materials Needed
+                   {/* <span className="text-red-500">*</span> */}
                 </Text>
                 <TextField.Root disabled value={`${lpoDetails.product.name}`} />
               </div>
@@ -219,7 +220,8 @@ const OfficialLPO = () => {
             <Flex gap={"5"} className="mt-4">
               <div className="w-full">
                 <Text>
-                  Unit Price <span className="text-red-500">*</span>
+                  Unit Price 
+                  {/* <span className="text-red-500">*</span> */}
                 </Text>
                 <TextField.Root
                   placeholder="Enter Unit Price"
@@ -233,7 +235,8 @@ const OfficialLPO = () => {
               </div>
               <div className="w-full">
                 <Text>
-                  Quantity Ordered <span className="text-red-500">*</span>
+                  Quantity Ordered 
+                  {/* <span className="text-red-500">*</span> */}
                 </Text>
                 <TextField.Root
                   required
@@ -250,7 +253,7 @@ const OfficialLPO = () => {
                 <Text>L.P.O Expires</Text>
                 <TextField.Root
                   placeholder="Enter Date"
-                  value={lpoDetails.expires && lpoDetails.expires}
+                  value={refractor(lpoDetails.expires )&& refractor(lpoDetails.expires)}
                   className="mt-2"
                   disabled
                   //   onChange={(e) => setExpiration(e.target.value)}

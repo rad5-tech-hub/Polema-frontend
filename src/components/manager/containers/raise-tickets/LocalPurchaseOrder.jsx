@@ -12,6 +12,8 @@ import {
 } from "@radix-ui/themes";
 import { LoaderIcon } from "react-hot-toast";
 import axios from "axios";
+import { Select as AntSelect } from "antd";
+const {Option} = AntSelect
 import toast, { Toaster } from "react-hot-toast";
 const root = import.meta.env.VITE_ROOT;
 
@@ -160,7 +162,7 @@ const LocalPurchaseOrder = () => {
       // SECOND API REQUEST
       const secondResponse = await axios.post(
         `${root}/admin/send-lpo/${ticketId}`,
-        {adminIds: [adminId] },
+        { adminIds: [adminId] },
         {
           headers: {
             Authorization: `Bearer ${retrToken}`, // Use `retrToken` here
@@ -241,13 +243,12 @@ const LocalPurchaseOrder = () => {
             <Text>
               Name of Supplier <span className="text-red-500">*</span>
             </Text>
-            <Select.Root
+            {/* <Select.Root
               disabled={suppliers.length === 0}
               required
               onValueChange={(value) => {
                 setSupplierId(value);
-              }}
-            >
+              }}>
               <Select.Trigger
                 className="w-full mt-2"
                 placeholder="Select Supplier"
@@ -256,12 +257,34 @@ const LocalPurchaseOrder = () => {
                 {suppliers.map((supplier) => {
                   return (
                     <Select.Item
-                      value={supplier.id}
-                    >{`${supplier.firstname} ${supplier.lastname}`}</Select.Item>
+                      value={
+                        supplier.id
+                      }>{`${supplier.firstname} ${supplier.lastname}`}</Select.Item>
                   );
                 })}
               </Select.Content>
-            </Select.Root>
+            </Select.Root> */}
+            <AntSelect
+              showSearch
+              className="mt-2"
+              placeholder={
+                "Select Supplier"
+              }
+              // value={supplierId}
+              style={{ width: "100%" }}
+              onChange={(value) => {
+                setSupplierId(value);
+              }}
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                option.children.toLowerCase().includes(input.toLowerCase())
+              }>
+              {suppliers.map((customer) => (
+                <Option key={customer.id} value={customer.id}>
+                  {`${customer.firstname} ${customer.lastname}`}
+                </Option>
+              ))}
+            </AntSelect>
           </div>
           <div className="w-full">
             <Text>
@@ -276,8 +299,7 @@ const LocalPurchaseOrder = () => {
                 setSelectedPrice(
                   selectedRaw ? selectedRaw.price[0].amount : ""
                 );
-              }}
-            >
+              }}>
               <Select.Trigger
                 className="w-full mt-2"
                 placeholder="Select Raw Material"
@@ -300,8 +322,11 @@ const LocalPurchaseOrder = () => {
               className="mt-2"
               required
               type="text"
+              onChange={(E) => {
+                setSelectedPrice(E.target.value);
+              }}
               value={selectedPrice}
-              disabled
+              // disabled
             >
               <TextField.Slot>₦</TextField.Slot>
             </TextField.Root>
@@ -360,8 +385,7 @@ const LocalPurchaseOrder = () => {
               }}
               value={comment}
               className="mt-2"
-              asChild
-            ></TextField.Root>
+              asChild></TextField.Root>
           </div>
           <div className="w-full">
             <Text>
@@ -372,15 +396,15 @@ const LocalPurchaseOrder = () => {
               required
               onValueChange={(value) => {
                 setAdminId(value);
-              }}
-            >
+              }}>
               <Select.Trigger className="w-full mt-2" placeholder="Send to " />
               <Select.Content>
                 {superAdmins.map((admin) => {
                   return (
                     <Select.Item
-                      value={admin.role?.id || " " }
-                    >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
+                      value={
+                        admin.role?.id || " "
+                      }>{`${admin.firstname} ${admin.lastname}`}</Select.Item>
                   );
                 })}
               </Select.Content>
@@ -388,7 +412,10 @@ const LocalPurchaseOrder = () => {
           </div>
         </Grid>
         <Flex justify={"end"}>
-          <Button variant="solid" className="mt-4 !bg-theme" size="3">
+          <Button
+            variant="solid"
+            className="mt-4 !bg-theme cursor-pointer"
+            size="3">
             {buttonLoading ? <LoaderIcon /> : "Send"}
           </Button>
         </Flex>

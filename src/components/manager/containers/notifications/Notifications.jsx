@@ -76,9 +76,8 @@ const Notifications = () => {
       });
       setStoreDetails(data.stores);
     } catch (error) {
-        //putting check for only error 403
-      if(error.status =! 403){
-
+      //putting check for only error 403
+      if ((error.status = !403)) {
         console.log(error);
       }
     }
@@ -141,59 +140,59 @@ const Notifications = () => {
   };
 
   // Function to approve ticket
-  const approveTicket = async (ticketType, ticketId) => {
-    const token = localStorage.getItem("token");
-    const endpoint = acceptTicket[ticketType];
-    if (!token) {
-      toast.error("An error occurred , try logging in again");
-      return;
-    }
+  // const approveTicket = async (ticketType, ticketId) => {
+  //   const token = localStorage.getItem("token");
+  //   const endpoint = acceptTicket[ticketType];
+  //   if (!token) {
+  //     toast.error("An error occurred , try logging in again");
+  //     return;
+  //   }
 
-    if (!endpoint || endpoint === null || endpoint === undefined) {
-      toast.error("ticket type does not exist");
-      return;
-    }
-    //Display Loader Ovet the button
-    setApproveButtonLoading((prev) => ({
-      ...prev,
-      [ticketId]: true,
-    }));
+  //   if (!endpoint || endpoint === null || endpoint === undefined) {
+  //     toast.error("ticket type does not exist");
+  //     return;
+  //   }
+  //   //Display Loader Ovet the button
+  //   setApproveButtonLoading((prev) => ({
+  //     ...prev,
+  //     [ticketId]: true,
+  //   }));
 
-    try {
-      const response = await axios.patch(
-        `${root}/${endpoint}/${ticketId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  //   try {
+  //     const response = await axios.patch(
+  //       `${root}/${endpoint}/${ticketId}`,
+  //       {},
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
 
-      setApproveButtonLoading((prev) => ({
-        ...prev,
-        [ticketId]: false,
-      }));
+  //     setApproveButtonLoading((prev) => ({
+  //       ...prev,
+  //       [ticketId]: false,
+  //     }));
 
-      // toast.success("Ticket approved successfully.", {
-      //   duration: 3000,
-      // });
-      return e.status;
-    } catch (e) {
-      setApproveButtonLoading((prev) => ({
-        ...prev,
-        [ticketId]: false,
-      }));
+  //     // toast.success("Ticket approved successfully.", {
+  //     //   duration: 3000,
+  //     // });
+  //     return e.status;
+  //   } catch (e) {
+  //     setApproveButtonLoading((prev) => ({
+  //       ...prev,
+  //       [ticketId]: false,
+  //     }));
 
-      console.log(e);
+  //     // console.log(e);
 
-      toast.error(
-        e.response.data.message ||
-          "An error occurred , while trying to approve ticket"
-      );
-      return e.status;
-    }
-  };
+  //     toast.error(
+  //       e.response.data.message ||
+  //         "An error occurred , while trying to approve ticket"
+  //     );
+  //     return e.status;
+  //   }
+  // };
 
   // Function to deny ticket
   const denyTicket = async (ticketType, ticketId) => {
@@ -343,6 +342,61 @@ const Notifications = () => {
 
     const handleSubmit = async (e) => {
       e.preventDefault();
+      // Function to approve ticket
+      const approveTicket = async (ticketType, ticketId) => {
+        const token = localStorage.getItem("token");
+        const endpoint = acceptTicket[ticketType];
+        if (!token) {
+          toast.error("An error occurred , try logging in again");
+          return;
+        }
+
+        if (!endpoint || endpoint === null || endpoint === undefined) {
+          toast.error("ticket type does not exist");
+          return;
+        }
+        //Display Loader Ovet the button
+        setApproveButtonLoading((prev) => ({
+          ...prev,
+          [ticketId]: true,
+        }));
+
+        try {
+          const response = await axios.patch(
+            `${root}/${endpoint}/${ticketId}`,
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          setApproveButtonLoading((prev) => ({
+            ...prev,
+            [ticketId]: false,
+          }));
+
+          // toast.success("Ticket approved successfully.", {
+          //   duration: 3000,
+          // });
+          return e.status;
+        } catch (e) {
+          setApproveButtonLoading((prev) => ({
+            ...prev,
+            [ticketId]: false,
+          }));
+
+          // console.log(e);
+
+          toast.error(
+            e.response.data.message ||
+              "An error occurred , while trying to approve ticket"
+          );
+          return e.status;
+        }
+      };
+
       if (!token) {
         toast.error("An error occurred , try logging in again.");
         return;
@@ -363,7 +417,7 @@ const Notifications = () => {
         // }
 
         console.log(firstRequest);
-        
+
         // {
         //   firstRequest === 200 &&
         //     (await sendApprovedTicket(type, ticketID, selectedAdmins)
@@ -373,7 +427,7 @@ const Notifications = () => {
         //       })
         //       .catch((err) => {
         //         toast.error("Ticket not sent successfully.")
-                
+
         //         console.log(err);
         //       }));
         // }
@@ -384,7 +438,7 @@ const Notifications = () => {
     };
 
     return (
-      <div className="absolute z-30 left-[-300px] top-0 mb-20 bg-white min-w-[250px] min-h-[300px] p-4 shadow-md  ">
+      <div className="absolute z-[60] left-[-300px] top-0 mb-20 bg-white min-w-[250px] min-h-[300px] p-4 shadow-md  ">
         <h1 className="font-space font-bold text-[1.1rem]">Approve To</h1>
         <p
           className="absolute right-[10px] cursor-pointer top-[5px]"
@@ -398,7 +452,7 @@ const Notifications = () => {
         </p> */}
 
         <form action="" onSubmit={handleSubmit}>
-          <div className="my-2 h-[180px] overflow-scroll overflow-x-hidden">
+          <div className="my-2 h-[180px] overflow-scroll overflow-x-hidden ">
             {admins.map((admin) => (
               <label
                 key={admin.id}
@@ -439,7 +493,7 @@ const Notifications = () => {
     <>
       <div className="relative" ref={notificationRef}>
         <div
-          className="cursor-pointer relative border-[1px] z-[999] border-[#000]/60 rounded-lg p-3"
+          className="cursor-pointer relative border-[1px] z-[40] border-[#000]/60 rounded-lg p-3"
           onClick={() => {
             toggleNotifications();
             fetchNotifications();
@@ -455,12 +509,12 @@ const Notifications = () => {
         </div>
         <div>
           <div
-            className={`notifications-panel  absolute top-10 right-[-70px] w-[30rem] z-[9999] !overflow-x-visible shadow-md p-4 bg-white border border-gray-200 rounded-md transition-transform duration-300 ${
+            className={`notifications-panel  absolute top-10 right-[-70px] w-[30rem] z-[50] !overflow-x-visible shadow-md p-4 bg-white border border-gray-200 rounded-md transition-transform duration-300 ${
               isNotificationsOpen && !isSlidingOut
                 ? "translate-x-0 block opacity-100"
                 : "translate-x-[160%] opacity-0 hidden"
             }`}
-            style={{ borderRadius: "8px", overflowY: "sc" }}>
+            style={{ borderRadius: "8px",  }}>
             {/* {detailsPageOpen && <IndividualInfo />} */}
             <div className="flex justify-between items-center w-full">
               <h1 className="font-space font-medium text-[1.7rem]">
@@ -517,7 +571,7 @@ const Notifications = () => {
                 <Tabs.Trigger value="inventory">Inventory</Tabs.Trigger>
               </Tabs.List>
 
-              <div className="pt-3 max-h-[500px] notifications-box">
+              <div className="pt-3 max-h-[500px] notifications-box"   style={{ overflowY: 'scroll', overflowX: '' }}>
                 {/* <Box
                 pt="3"
                 style={{ maxHeight: "500px" }}
