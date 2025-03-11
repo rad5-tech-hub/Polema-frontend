@@ -174,6 +174,7 @@ const GeneralRecordBook = () => {
         </Table.Body>
       </Table.Root>
       
+      {/* Modal Opens when you click on an item in history  */}
       <Modal  open={modalOpen}
           footer={null}
           centered
@@ -206,7 +207,7 @@ const GeneralRecordBook = () => {
            
            <div className="mb-3">
            <h1 className="font-bold font-inter font-lg">BALANCE</h1>
-           <p>{`₦${modalDetails.amountRemaining}`} </p>
+           <p>{`${modalDetails.amountRemaining}`} </p>
            </div>
            <div className="mb-3">
            <h1 className="font-bold font-inter font-lg">COMMENTS</h1>

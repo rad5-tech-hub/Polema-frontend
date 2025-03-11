@@ -172,7 +172,11 @@ const AuthorityToWeigh = () => {
       );
 
       // Success Toast
-      toast.success("Ticket successfully sent!", { id: ticketToastId });
+      toast.success("Ticket successfully sent!",{
+        style:{
+          padding:"20px"
+        },duration:5000
+      });
 
       // Reset form fields
       resetForm();
@@ -352,7 +356,7 @@ const AuthorityToWeigh = () => {
                   <Select.Content position="popper">
                     {admins.map((item) => {
                       return (
-                        <Select.Item key={item.role?.id} value={item.role?.id}>
+                        <Select.Item key={item.role?.id} value={item.role?.id || " "}>
                           {item.firstname} {item.lastname}
                         </Select.Item>
                       );

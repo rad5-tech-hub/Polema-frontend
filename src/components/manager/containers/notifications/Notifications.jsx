@@ -362,23 +362,25 @@ const Notifications = () => {
         //   // toast.error("Error Occured in approving ticket")
         // }
 
-        {
-          firstRequest === 200 &&
-            (await sendApprovedTicket(type, ticketID, selectedAdmins)
-              .then((res) => {
-                console.log(res);
-                toast.success("Ticket approved and sent successfully.")
-              })
-              .catch((err) => {
-                toast.error("Ticket not sent successfully.")
+        console.log(firstRequest);
+        
+        // {
+        //   firstRequest === 200 &&
+        //     (await sendApprovedTicket(type, ticketID, selectedAdmins)
+        //       .then((res) => {
+        //         console.log(res);
+        //         toast.success("Ticket approved and sent successfully.")
+        //       })
+        //       .catch((err) => {
+        //         toast.error("Ticket not sent successfully.")
                 
-                console.log(err);
-              }));
-        }
+        //         console.log(err);
+        //       }));
+        // }
       } catch (error) {
         console.log(error);
       }
-      console.log("Selected Admin IDs:", selectedAdmins);
+      // console.log("Selected Admin IDs:", selectedAdmins);
     };
 
     return (

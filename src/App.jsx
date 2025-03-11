@@ -292,7 +292,7 @@ const App = () => {
                   />
                   
 
-                  {/* Test Routes for general store */}
+                  {/*  Routes for general store */}
                   <Route
                     path="/general-store/create-shelf"
                     element={<CreateShelf />}

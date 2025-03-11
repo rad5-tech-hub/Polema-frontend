@@ -118,7 +118,7 @@ const WaybillCreateInvoice = () => {
       // SECOND REQUEST: Send Waybill
       await axios.post(
         `${root}/customer/send-Waybill/${wayBillId}`,
-        { adminId },
+        { adminIds:[adminId] },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -253,7 +253,7 @@ const WaybillCreateInvoice = () => {
                 {superAdmins.map((admin) => (
                   <Select.Item
                     key={admin.id}
-                    value={admin.id}
+                    value={admin.role?.id || " "}
                   >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
                 ))}
               </Select.Content>

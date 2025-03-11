@@ -7,8 +7,10 @@ import {
   DropdownMenu,
   Separator,
   Table,
+  TextField,
   Button,
 } from "@radix-ui/themes";
+import {MagnifyingGlassIcon} from "@radix-ui/react-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPills,
@@ -39,8 +41,35 @@ const ViewPharmacyStore = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalAction, setModalAction] = useState(null);
   const [failedSearch, setFailedSearch] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const itemsPerPage = 10;
 
+
+  const filteredProducts = fetchedProducts.filter((item) =>
+    item.product.name.toLowerCase().includes(searchTerm)
+  );
+  
+  const currentItems = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Function to match the highlighted text 
+  const highlightMatch = (text, query) => {
+    if (!query) return text; // Return original text if no search query
+  
+    const regex = new RegExp(`(${query})`, "gi");
+    return text.split(regex).map((part, index) =>
+      part.toLowerCase() === query.toLowerCase() ? (
+        <span key={index} className="bg-yellow-300 ">
+          {part}
+        </span>
+      ) : (
+        part
+      )
+    );
+  };
+  
   const fetchStore = async () => {
     const retrToken = localStorage.getItem("token");
     if (!retrToken) {
@@ -85,10 +114,10 @@ const ViewPharmacyStore = () => {
 
   const totalPages = Math.ceil(fetchedProducts.length / itemsPerPage);
 
-  const currentItems = fetchedProducts.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  // const currentItems = fetchedProducts.slice(
+  //   (currentPage - 1) * itemsPerPage,
+  //   currentPage * itemsPerPage
+  // );
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
@@ -133,6 +162,17 @@ const ViewPharmacyStore = () => {
       </Flex>
 
       <Separator className="my-4 w-full" />
+      <TextField.Root 
+  placeholder="Search Pharmacy Store"
+  className="w-[58%]"
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
+>
+  <TextField.Slot>
+      <MagnifyingGlassIcon />
+  </TextField.Slot>
+</TextField.Root>
+
 
       <div className="overflow-auto max-h-[430px]">
         {/* <Grid columns={"6"} rows={"3"} gap={"2"} className="grid-container">
@@ -228,7 +268,7 @@ const ViewPharmacyStore = () => {
               return (
                 <Table.Row key={item.productTag}>
                   <Table.Cell>{refractor(item.createdAt)}</Table.Cell>
-                  <Table.Cell>{item.product.name}</Table.Cell>
+                  <Table.Cell>{highlightMatch(item.product.name,searchTerm)}</Table.Cell>
                   {!isRawMaterials && (
                     <>
                       <Table.Cell>{item.productTag}</Table.Cell>

@@ -74,7 +74,7 @@ const CreateInvoice = () => {
       const secondResponse = await axios.post(
         `${root}/customer/sendInvoice/${invoiceId}`,
         {
-          adminId,
+          adminIds:[adminId],
         },
         {
           headers: {
@@ -88,7 +88,9 @@ const CreateInvoice = () => {
         style: {
           padding: "20px",
         },
+        
       });
+      setAddress("")
       setBtnLoading(false);
     } catch (error) {
       console.log(error);
@@ -150,7 +152,7 @@ const CreateInvoice = () => {
               />
               <Select.Content position="popper">
                 {superAdmins.map((admin) => (
-                  <Select.Item key={admin.id} value={admin.id}>
+                  <Select.Item key={admin.role?.id} value={admin.role?.id || " "}>
                     {`${admin.firstname} ${admin.lastname}`}
                   </Select.Item>
                 ))}

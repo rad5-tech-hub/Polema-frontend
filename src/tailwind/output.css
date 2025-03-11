@@ -1238,6 +1238,10 @@ video {
   width: 550px;
 }
 
+.w-\[58\%\] {
+  width: 58%;
+}
+
 .w-\[60\%\] {
   width: 60%;
 }
@@ -2090,6 +2094,11 @@ video {
 .py-\[20px\] {
   padding-top: 20px;
   padding-bottom: 20px;
+}
+
+.px-1 {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
 }
 
 .pb-16 {

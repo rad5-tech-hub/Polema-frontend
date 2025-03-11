@@ -97,10 +97,13 @@ const CreateGatepass = () => {
       const secondResponse = await axios.post(
         `${root}/customer/send-gate-pass/${passID}`,
         {
-          adminId,
+          adminIds:[adminId],
         }
       );
       toast.success("Successfully sent to admin", {
+        style:{
+          padding:"30px"
+        },
         duration: 10000,
       });
       setButtonLoading(false);
@@ -197,7 +200,7 @@ const CreateGatepass = () => {
                 {superAdmins.map((admin) => {
                   return (
                     <Select.Item
-                      value={admin.id}
+                      value={admin.role?.id || " "}
                     >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
                   );
                 })}
