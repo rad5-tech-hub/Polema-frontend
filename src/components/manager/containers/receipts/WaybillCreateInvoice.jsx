@@ -94,7 +94,7 @@ const WaybillCreateInvoice = () => {
     // Prepare the request body
     const body = {
       ...(bagNumber && { bags: bagNumber }),
-      driverLicense: driverLicense,
+      driversLicense: driverLicense,
       transportedBy: carriedByWho,
     };
 

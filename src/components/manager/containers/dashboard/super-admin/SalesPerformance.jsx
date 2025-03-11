@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { formatMoney } from "../../../../date"; // Assuming refractor is elsewhere or a typo
+import { formatMoney ,refractor} from "../../../../date"; 
 import {
   BarChart,
   Bar,
@@ -46,7 +46,7 @@ const SalesPerformance = () => {
       const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("API Response:", response.data); // Debug API response
+      // console.log("API Response:", response.data); // Debug API response
 
       const detailsArray = response.data?.data || [];
       setReturnedDateRange({
@@ -59,7 +59,7 @@ const SalesPerformance = () => {
         totalSales: parseFloat(customer.totalSales) || 0,
       }));
 
-      console.log("Formatted Chart Data:", formattedData); // Debug chart data
+      // console.log("Formatted Chart Data:", formattedData); // Debug chart data
       setChartData(formattedData);
     } catch (error) {
       console.error("Fetch Error:", error.response?.data || error.message);
@@ -81,7 +81,7 @@ const SalesPerformance = () => {
 
   // Fetch data on date range change
   useEffect(() => {
-    console.log("Date Range Changed:", dateRange); // Debug date range
+    // console.log("Date Range Changed:", dateRange); // Debug date range
     fetchChartData(dateRange.startDate, dateRange.endDate);
   }, [dateRange]);
 
@@ -125,8 +125,8 @@ const SalesPerformance = () => {
         ) : (
           <div className="w-full h-[50vh] flex justify-center items-center">
             <p className="text-center mt-4 text-gray-500">
-              No top performing department from{" "}
-              <b>{returnedDateRange.start}</b> to <b>{returnedDateRange.end}</b>.
+              No sales from{" "}
+              <b>{refractor(returnedDateRange.start)}</b> to <b>{refractor(returnedDateRange.end)}</b>.
             </p>
           </div>
         )}

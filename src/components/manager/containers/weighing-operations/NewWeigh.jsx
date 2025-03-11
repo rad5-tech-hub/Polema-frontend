@@ -61,6 +61,11 @@ const NewWeigh = () => {
     try {
       const request = await axios.post(`${root}/dept/upload`, formData);
       setImageURL(request.data.imageUrl);
+      toast.success("Image Uploaded Successfully", {
+        style: {
+          padding: "20px",
+        },duration:3000
+      })
     } catch (error) {
       console.error("Upload failed:", error);
       // alert("Failed to upload image.");

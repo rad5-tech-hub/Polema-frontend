@@ -119,7 +119,7 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    console.log("Date Range Changed:", dateRange);
+    // console.log("Date Range Changed:", dateRange);
     fetchBankSummary(dateRange.startDate, dateRange.endDate); // Fixed typo
   }, [dateRange, fetchBankSummary]);
 

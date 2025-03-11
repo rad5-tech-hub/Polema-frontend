@@ -164,6 +164,14 @@ const InvoiceAuthorityToWeigh = () => {
                 ))}
               </div>
 
+                <div>
+                  {/* <p>{authDetails}</p> */}
+                  <p>
+                    
+                  {`${authDetails.transactions.quantity} ${authDetails.transactions.unit} of ${authDetails.transactions.porders.name}`}
+                </p>
+              </div>
+
               <div className="flex justify-between mt-12">
                 {[
                   "AUTHORISED SIGNATURE",

@@ -426,7 +426,7 @@ const App = () => {
                     element={<WaybillCreateInvoice />}
                   />
                   <Route
-                    path="/receipt/waybill-invoice"
+                    path="/receipts/waybill-invoice/:id"
                     element={<WaybillInvoice />}
                   />
 
