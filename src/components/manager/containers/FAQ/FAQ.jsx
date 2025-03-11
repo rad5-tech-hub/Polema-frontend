@@ -26,23 +26,7 @@ const FAQ = () => {
       >
         <QuestionMarkIcon />
       </div>
-      {/* <Modal
-        open={modalOpen}
-        loading={modalLoading}
-        onCancel={() => setModalOpen(false)}
-        footer={null}
-        title="FAQ"
-      >
-        {FAQData.length === 0
-          ? "No Video available yet"
-          : FAQData.map((item) => {
-              return (
-                <div className="flex items-center gap-2">
-                  <p>{item.videoTitle}</p>
-                </div>
-              );
-            })}
-      </Modal> */}
+    
     </>
   );
 };

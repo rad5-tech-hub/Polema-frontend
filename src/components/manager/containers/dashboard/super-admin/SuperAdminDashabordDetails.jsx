@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Legend,
-  Tooltip,
-} from "recharts";
+import {Grid} from "@radix-ui/themes"
 import mockData from "../mockData";
 
 // import Dashboard Components 
@@ -24,12 +16,15 @@ const SuperAdminDashboardDetails = () => {
       {/* Boxes showing customers ,suppliers , products , raw materials  */}
       <SummaryBoxes/>
      
+     {/* <div className="grid grid-cols-2 gap-5"> */}
 
       {/* Bar Chart Section */}
       <CustomerPerformanceChart />
 
       {/* Department Performance  */}
       <DepartmentPerformanceChart/>
+
+     {/* </div> */}
 
       {/* Bank Summary Charts  */}
       <BankSummaryCharts/>

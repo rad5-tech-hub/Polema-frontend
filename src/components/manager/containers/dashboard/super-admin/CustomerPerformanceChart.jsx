@@ -17,7 +17,7 @@ const root = import.meta.env.VITE_ROOT;
 const { RangePicker } = DatePicker;
 
 const CustomerPerformanceChart = () => {
-  const [chartWidth, setChartWidth] = useState(850);
+  const [chartWidth, setChartWidth] = useState("50%");
   const [dateRange, setDateRange] = useState({ startDate: "", endDate: "" });
   const [returnedDateRange, setReturnedDateRange] = useState({ start: "", end: "" });
   const [chartData, setChartData] = useState([]);

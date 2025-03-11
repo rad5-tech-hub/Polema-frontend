@@ -30,6 +30,8 @@ const AccountBook = () => {
   const [comment, setComment] = useState("");
   const [deptID, setDeptID] = useState("");
   const [modalSelected, setModalSelected] = useState(false);
+  const [bankDetails,setBankDetails] = useState([]);
+  const [bankId,setBankId] = useState("")
 
   const [isCustomer, setIscustomer] = useState("");
 
@@ -184,7 +186,8 @@ const AccountBook = () => {
     };
 
     const submissionData = {
-      bankName: bankName,
+      // bankName: bankName,
+      bankId,
       ...(isCustomer() === true && { customerId: selectedCustomerId }),
       ...(isCustomer() === false && { supplierId: selectedCustomerId }),
       ...(customerOrSupplier() && { productId: selectedProductId }),
@@ -215,6 +218,29 @@ const AccountBook = () => {
     setLoading(false);
   };
 
+  // Function to fetch bank names and details 
+  const fetchBankDetails = async()=>{
+    const token = localStorage.getItem("token");
+
+    if(!token){
+      toast.error("An error occrred , try loggging in again");
+      return;
+    }
+
+    try {
+      const response =  await axios.get(`${root}/admin/get-banks`,{
+        headers:{
+          Authorization:`Bearer ${token}`
+        }
+      });
+      setBankDetails(response.data.banks)
+    } catch (error) {
+      console.log(error);
+      toast.error("Error: Error in getting bank details")
+      
+    }
+  }
+
   // Make the below requests when page loads
   useEffect(() => {
     fetchCustomer();
@@ -223,6 +249,7 @@ const AccountBook = () => {
 
   useEffect(() => {
     fetchDepartments();
+    fetchBankDetails()
   }, []);
 
   // Initial Dialog
@@ -433,28 +460,7 @@ const AccountBook = () => {
                         </Option>
                       ))}
                     </AntSelect>
-                    {/* <Select.Root
-                  required
-                  value={selectedProductId}
-                  disabled={products.length === 0}
-                  onValueChange={setSelectedProductId} // Update selected product ID
-                >
-                  <Select.Trigger
-                    className="w-full mt-2"
-                    placeholder={
-                      accountRecipient === "customers"
-                        ? "Select Products"
-                        : "Select Raw Materials"
-                    }
-                  />
-                  <Select.Content position="popper">
-                    {products.map((product) => (
-                      <Select.Item key={product.id} value={product.id}>
-                        {product.name}
-                      </Select.Item>
-                    ))}
-                  </Select.Content>
-                </Select.Root> */}
+          
                   </div>
                 </>
               )}
@@ -475,15 +481,32 @@ const AccountBook = () => {
                 <Text>
                   Bank Name <span className="text-red-500">*</span>
                 </Text>
-                <TextField.Root
-                  className="mt-2"
-                  placeholder="Enter Bank Name"
-                  value={bankName}
-                  onChange={(e) => {
-                    setBankName(e.target.value);
-                  }}
-                  required
-                />
+                
+                  <AntSelect
+                 
+                 showSearch
+                      className="mt-2"
+                      placeholder={
+                          "Select Bank"
+                      }
+                      style={{ width: "100%" }}
+                      onChange={(value) => {
+                        // setSelectedProductId(value);
+                        setBankId(value)
+                      }}
+                      optionFilterProp="children"
+                      filterOption={(input, option) =>
+                        option.children
+                          .toLowerCase()
+                          .includes(input.toLowerCase())
+                      }
+                    >
+                      {bankDetails.map((bank) => (
+                        <Option key={bank.id} value={bank.id} > 
+                          {`${bank.name} `}
+                        </Option>
+                      ))}
+                    </AntSelect>
               </div>
 
               <div className="w-full">

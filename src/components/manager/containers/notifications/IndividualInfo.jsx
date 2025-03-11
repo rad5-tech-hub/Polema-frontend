@@ -59,6 +59,8 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
         return "customer/invoice-pdf";
       case "weigh":
         return "admin/view-auth-weigh";
+        case "waybill":
+          return "customer/waybill-pdf";
       default:
         break;
     }
@@ -145,6 +147,9 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
         case "store":
           setTicketDetails(response.data.records);
           break;
+          case "waybill":
+            setTicketDetails(response.data?.parse || []);
+            break;
         default:
           break;
       }
@@ -591,6 +596,39 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                           )}
                       </div>
                     </>
+                  )}
+
+                  {/* Waybill Details  */}
+                  {selectedTicket.type === "waybill" && (
+                    <>
+                      <div className="flex items-center gap-6 justify-between">
+                        <Text className="text-[1rem] font-bold font-space tracking-wide">
+                         CUSTOMER
+                        </Text>
+                        <p className="text-[.9rem]">
+                          {`${ticketDetails.transaction.corder.firstname} ${ticketDetails.transaction.corder.lastname} ` || ""}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-6 justify-between">
+                        <Text className="text-[1rem] font-bold tracking-wide">
+                          PRODUCT ORDERED
+                        </Text>
+                        <p className="text-[.9rem]">{ticketDetails.transaction.porders.name}</p>
+                      </div>
+                      <div className="flex items-center gap-6 justify-between">
+                        <Text className="text-[1rem] font-bold tracking-wide">
+                          CUSTOMER ADDRESS
+                        </Text>
+                              {ticketDetails.address || ""}                      
+                      </div>
+                      <div className="flex items-center gap-6 justify-between">
+                        <Text className="text-[1rem] font-bold tracking-wide">
+                       BAGS (FOR PKC)
+                        </Text>
+                              {ticketDetails.bags || ""}                      
+                      </div>
+                    </>
+                   
                   )}
                   {/* </Grid> */}
 
