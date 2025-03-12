@@ -16,10 +16,13 @@ const SuperAdminDashboardDetails = () => {
       {/* Boxes showing customers ,suppliers , products , raw materials  */}
       <SummaryBoxes/>
      
-     {/* <div className="grid grid-cols-2 gap-5"> */}
+     {/* <div className="grid grid-cols-2 gap-5 mt-4"> */}
 
+      <div className="shadow-md p-4 mt-4">
+        
       {/* Bar Chart Section */}
       <CustomerPerformanceChart />
+      </div>
 
       {/* Department Performance  */}
       <DepartmentPerformanceChart/>

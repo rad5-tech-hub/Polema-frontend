@@ -327,7 +327,9 @@ const ManageDeptStore = () => {
                       <AntSelect.Option value={item.id}>
                         {/* {item.product?.name || ""} {`(${item.unit})`} */}
                         {item.product === null
-                          ? `${item.other} `
+                          ? `${item.other} (${
+                              formatMoney(item?.quantity) || ""
+                            } ${item.unit || ""} left)`
                           : `${item.product.name} (${
                               formatMoney(item?.quantity) || ""
                             } ${item.unit} left)`}

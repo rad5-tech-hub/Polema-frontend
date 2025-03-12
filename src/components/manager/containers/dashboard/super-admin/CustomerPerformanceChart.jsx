@@ -84,7 +84,11 @@ const CustomerPerformanceChart = () => {
       <h1 className="font-bold font-amsterdam">Customer Performance</h1>
 
       {chartData.length > 0 ? (
-        <BarChart className="mt-4 mx-auto" width={chartWidth} height={500} data={chartData}>
+        <BarChart className="mt-4 mx-auto"
+        width={350}
+         
+        // width={chartWidth}
+          height={500} data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
           <YAxis domain={[0, "auto"]} tick={{ fontSize: 9 }} tickFormatter={(value) => value.toLocaleString()} />
