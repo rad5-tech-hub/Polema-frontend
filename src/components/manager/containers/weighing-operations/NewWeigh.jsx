@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "react-router-dom";
+import { refractor,formatMoney } from "../../../date";
 import {
   Heading,
   Separator,
@@ -109,7 +110,7 @@ const NewWeigh = () => {
       setFullName("");
       setQuantityNet("");
       setInitialQuantity("");
-      setVehicleNumber("");
+      // setVehicleNumber("");
       setExtraNet("");
       setTar("");
       setGross("");
@@ -135,6 +136,7 @@ const NewWeigh = () => {
       setFullName(
         `${request.data.ticket.transactions.corder.firstname} ${request.data.ticket.transactions.corder.lastname}`
       );
+      setVehicleNumber(request.data.ticket.vehicleNo  || "")
     } catch (error) {
       console.log(error);
     }
@@ -180,6 +182,7 @@ const NewWeigh = () => {
             <Text>Vehicle No.</Text>
             <TextField.Root
               placeholder="Input Vehicle No."
+              disabled
               className="mt-2"
               value={vehicleNumber}
               onChange={(e) => setVehicleNumber(e.target.value)}
@@ -202,12 +205,14 @@ const NewWeigh = () => {
               className="mt-2"
               value={gross}
               type="number"
-              onChange={(e) => setGross(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  setQuantityNet(gross - tar);
-                }
+              onChange={(e) => {
+                setGross(e.target.value)
+                setQuantityNet(e.target.value - tar);
               }}
+              // onKeyDown={(e) => {
+              //   if (e.key === "Enter") {
+              //   }
+              // }}
             />
           </div>
           <div className="w-full">
@@ -225,7 +230,8 @@ const NewWeigh = () => {
             <TextField.Root
               placeholder="Input Initial Quantity"
               className="mt-2"
-              value={intialQuantity}
+              disabled
+              value={formatMoney(intialQuantity)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   setExtraNet(quantityNet - intialQuantity);
@@ -250,7 +256,7 @@ const NewWeigh = () => {
           </Button>
         </Flex>
       </form>
-      <Toaster position="top-right" />
+      {/* <Toaster position="top-right" />   */}
     </>
   );
 };

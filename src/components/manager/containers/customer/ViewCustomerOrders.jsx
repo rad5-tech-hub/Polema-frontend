@@ -167,8 +167,9 @@ const ViewCustomerOrders = () => {
               >
                 <Table.Cell>{refractor(item.createdAt)}</Table.Cell>
                 <Table.Cell>
-                  {getMatchingCustomerById(item.customerId).firstname}{" "}
-                  {getMatchingCustomerById(item.customerId).lastname}
+                  {`${item.corder.firstname} ${item.corder.lastname}`}
+                  {/* {getMatchingCustomerById(item.customerId).firstname}{" "}
+                  {getMatchingCustomerById(item.customerId).lastname} */}
                 </Table.Cell>
                 <Table.Cell>
                   {getMatchingProductByID(item.productId)}

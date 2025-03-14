@@ -17,7 +17,7 @@ const root = import.meta.env.VITE_ROOT;
 const { RangePicker } = DatePicker;
 
 const CustomerPerformanceChart = () => {
-  const [chartWidth, setChartWidth] = useState("50%");
+  const [chartWidth, setChartWidth] = useState(850);
   const [dateRange, setDateRange] = useState({ startDate: "", endDate: "" });
   const [returnedDateRange, setReturnedDateRange] = useState({ start: "", end: "" });
   const [chartData, setChartData] = useState([]);
@@ -85,9 +85,9 @@ const CustomerPerformanceChart = () => {
 
       {chartData.length > 0 ? (
         <BarChart className="mt-4 mx-auto"
-        width={350}
+        // width={350}
          
-        // width={chartWidth}
+        width={chartWidth}
           height={500} data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />

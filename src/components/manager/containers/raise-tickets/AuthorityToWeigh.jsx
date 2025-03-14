@@ -17,6 +17,7 @@ import { useParams } from "react-router-dom";
 
 const root = import.meta.env.VITE_ROOT;
 import toast, { Toaster } from "react-hot-toast";
+import { SendOutlined } from "@ant-design/icons";
 
 const AuthorityToWeigh = () => {
   const { customerId, orderId } = useParams();
@@ -35,6 +36,7 @@ const AuthorityToWeigh = () => {
   const [adminDropdownDisabled, setAdminDropdownDisabled] =
     React.useState(true);
   const [ticketId, setTicketId] = React.useState("");
+  const [btnLoading,setBtnLoading] = React.useState(false)
 
   // Function to check status
 
@@ -130,6 +132,7 @@ const AuthorityToWeigh = () => {
     const resetForm = () => {
       setAdminId("");
       setDriverName("");
+      setChiefAdminId("")
       setVehicleNumber("");
     };
 
@@ -138,6 +141,7 @@ const AuthorityToWeigh = () => {
       vehicleNo: vehicleNumber,
       driver: driverName,
     };
+    setBtnLoading(true)
 
     try {
       // Show loading toast
@@ -170,6 +174,7 @@ const AuthorityToWeigh = () => {
           },
         }
       );
+      setBtnLoading(false)
 
       // Success Toast
       toast.success("Ticket successfully sent!",{
@@ -182,8 +187,9 @@ const AuthorityToWeigh = () => {
       resetForm();
     } catch (error) {
       // Error Toast
+      setBtnLoading(false)
       console.error(error);
-      toast.error("An error occurred. Please try again later.", {
+      toast.error(error.response.message || error.response.error || "An error occurred. Please try again later.", {
         style: { padding: "20px" },
       });
     }
@@ -289,9 +295,9 @@ const AuthorityToWeigh = () => {
   }, []);
   return (
     <>
-      {viewPageOpen ? (
+      {/* {viewPageOpen ? (
         <ViewAuthorityToWeigh />
-      ) : (
+      ) : ( */}
         <>
           <Heading>Authority to Weigh</Heading>
 
@@ -346,6 +352,7 @@ const AuthorityToWeigh = () => {
                 <Select.Root
                   required
                   disabled={adminDropdownDisabled}
+                  value={chiefAdminId}
                   onValueChange={(value) => {
                     setChiefAdminId(value);
                   }}>
@@ -367,14 +374,15 @@ const AuthorityToWeigh = () => {
             </Grid>
 
             <Flex justify={"end"}>
-              <Button size={"3"} className="cursor-pointer mt-5 !bg-theme">
-                Send
+              <Button size={"3"} className="cursor-pointer mt-5 !bg-theme" disabled={btnLoading}>
+                
+                {btnLoading ? <Spinner/> :  "Send"}
               </Button>
             </Flex>
           </form>
           <Toaster position="top-right" />
         </>
-      )}
+      {/* )} */}
     </>
   );
 };

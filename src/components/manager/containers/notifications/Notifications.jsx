@@ -438,7 +438,7 @@ const Notifications = () => {
     };
 
     return (
-      <div className="absolute z-[60] left-[-300px] top-0 mb-20 bg-white min-w-[250px] min-h-[300px] p-4 shadow-md  ">
+      <div className="absolute z-[60]  -translate-x-[350px]  top-0 mb-20 bg-white min-w-[250px] min-h-[300px] p-4 shadow-md  ">
         <h1 className="font-space font-bold text-[1.1rem]">Approve To</h1>
         <p
           className="absolute right-[10px] cursor-pointer top-[5px]"
@@ -497,6 +497,7 @@ const Notifications = () => {
           onClick={() => {
             toggleNotifications();
             fetchNotifications();
+            fetchAdminDetails()
           }}>
           <BellIcon />
           {notifications.length > 0 && (
@@ -509,12 +510,12 @@ const Notifications = () => {
         </div>
         <div>
           <div
-            className={`notifications-panel  absolute top-10 right-[-70px] w-[30rem] z-[50] !overflow-x-visible shadow-md p-4 bg-white border border-gray-200 rounded-md transition-transform duration-300 ${
+            className={`notifications-panel  absolute top-10 right-[-70px] w-[30rem] z-[50] !overflow-x-visible shadow-md p-4 max-h-[100vh]  bg-white border border-gray-200 rounded-md ${
               isNotificationsOpen && !isSlidingOut
                 ? "translate-x-0 block opacity-100"
                 : "translate-x-[160%] opacity-0 hidden"
             }`}
-            style={{ borderRadius: "8px",  }}>
+            style={{ borderRadius: "8px",overflow:"scroll"  }}>
             {/* {detailsPageOpen && <IndividualInfo />} */}
             <div className="flex justify-between items-center w-full">
               <h1 className="font-space font-medium text-[1.7rem]">
@@ -563,7 +564,7 @@ const Notifications = () => {
               />
             </div>
 
-            <Tabs.Root defaultValue="all">
+            <Tabs.Root defaultValue="all" className="overflow-visible">
               <Tabs.List>
                 <Tabs.Trigger value="all">All</Tabs.Trigger>
                 {/* <Tabs.Trigger value="unread">Unread</Tabs.Trigger> */}
@@ -571,7 +572,7 @@ const Notifications = () => {
                 <Tabs.Trigger value="inventory">Inventory</Tabs.Trigger>
               </Tabs.List>
 
-              <div className="pt-3 max-h-[500px] notifications-box"   style={{ overflowY: 'scroll', overflowX: '' }}>
+              <div className="pt-3 max-h-[100vh] w-fit notifications-box border-2 border-red-500"    style={{ overflowY: '', overflowX: '' }}>
                 {/* <Box
                 pt="3"
                 style={{ maxHeight: "500px" }}

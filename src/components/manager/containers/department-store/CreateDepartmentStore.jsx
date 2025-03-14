@@ -147,6 +147,8 @@ const CreateDepartmentStore = () => {
     const resetForm = () => {
       setThresholdVal(""), setSelcetedUnit("");
       setImage(null);
+      setProductId("");
+      setDeptId("")
     };
 
     const body = {
@@ -183,7 +185,7 @@ const CreateDepartmentStore = () => {
     } catch (error) {
       console.log(error);
       setButtonLoading(false);
-      toast.error( error.response.data.errors.join("\n") ||   error.response.data.message  || "An error occurred while adding to department store");
+      toast.error( error.response.data.message || error.response.data.errors.join("\n") ||   error.response.data.message  || "An error occurred while adding to department store");
     }
   };
 
@@ -328,6 +330,7 @@ const CreateDepartmentStore = () => {
               Select Department <span className="text-red-500">*</span>
             </Text>
               <Select.Root
+              value={deptId}
                 onValueChange={(value) => {
                   const selectedDept = dept.find((item) => item.id === value);
                   setProducts([]);
@@ -362,6 +365,7 @@ const CreateDepartmentStore = () => {
             </Text>
             <Select.Root
               disabled={products.length === 0}
+              value={productId}
               onValueChange={(value) => {
                 setProductId(value);
                 getMatchingProductNameById(value);
@@ -413,7 +417,7 @@ const CreateDepartmentStore = () => {
         </Grid>
 
         <Flex className="mt-4" justify={"end"}>
-          <Button className="!bg-theme" size={"3"}>
+          <Button className="!bg-theme cursor-pointer" size={"3"}>
             {buttonLoading ? <Spinner /> : "Add"}
           </Button>
         </Flex>

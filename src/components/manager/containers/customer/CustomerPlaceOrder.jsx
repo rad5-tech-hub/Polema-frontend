@@ -95,11 +95,26 @@ const CustomerPlaceOrder = () => {
 
       return;
     }
+
+    // // Check if customer was seleected 
+    // if(!selectedCustomerId){
+    //   toast.error("Sele", {
+    //     duration: 2000,
+    //     style: {
+    //       padding: "30px",
+    //     },
+    //   });
+
+    //   return;
+    // }
+
+    
     const body = {
       customerId: selectedCustomerId,
       productId: selectedProductId,
       quantity: quantity,
       unit: getMatchingUnitFromId(selectedProductId).price[0].unit,
+      price:basePrice,
       ...(planAmount && { discount: Number(planAmount) }),
     };
 
@@ -198,6 +213,7 @@ const CustomerPlaceOrder = () => {
               onValueChange={(value) => {
                 setSelectedProductId(value);
                 getMatchingPlansFromId(value);
+                setBasePrice(getMatchingUnitFromId(value).price[0].amount)
               }}
             >
               <Select.Trigger
@@ -278,12 +294,16 @@ const CustomerPlaceOrder = () => {
             <TextField.Root
               className="mt-2  "
               placeholder="Select Product First"
-              disabled
-              value={
-                selectedProductId.length == 0
-                  ? ""
-                  : getMatchingUnitFromId(selectedProductId).price[0].amount
-              }
+              // disabled
+              onChange={(e)=>{
+                setBasePrice(e.target.value)
+              }}
+              // value={
+              //   selectedProductId.length == 0
+              //     ? ""
+              //     : getMatchingUnitFromId(selectedProductId).price[0].amount
+              // }
+              value={basePrice}
             />
           </div>
         </Grid>

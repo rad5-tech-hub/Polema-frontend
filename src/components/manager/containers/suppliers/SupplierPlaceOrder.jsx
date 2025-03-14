@@ -74,6 +74,7 @@ const SupplierPlaceOrder = () => {
         (product) => product.id === selectedProductId
       );
       setSelectedUnit(selectedProduct ? selectedProduct : "");
+      setBasePrice(selectedProduct.price[0].amount)
     }
   }, [selectedProductId, products]);
 
@@ -92,7 +93,8 @@ const SupplierPlaceOrder = () => {
       supplierId: selectedCustomerId,
       productId: selectedProductId,
       quantity,
-      price: selectedUnit.price[0].amount,
+      // price: selectedUnit.price[0].amount,
+      price:basePrice,
       ...(comment && { comments: comment }),
       unit: selectedUnit.price[0].unit,
     };
@@ -210,8 +212,12 @@ const SupplierPlaceOrder = () => {
           <div className="w-full">
             <Text>Base Price (₦)</Text>
             <TextField.Root
-              disabled
-              value={selectedUnit && selectedUnit.price[0].amount}
+              // disabled
+              onChange={(e)=>{
+                setBasePrice(e.target.value)
+              }}
+              // value={selectedUnit && selectedUnit.price[0].amount}
+              value={basePrice}
               className="mt-2"
               placeholder="Enter Price"
             />

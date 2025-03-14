@@ -18,7 +18,7 @@ const SuperAdminDashboardDetails = () => {
      
      {/* <div className="grid grid-cols-2 gap-5 mt-4"> */}
 
-      <div className="shadow-md p-4 mt-4">
+      <div className="shadow-lg p-4 mt-4 rounded">
         
       {/* Bar Chart Section */}
       <CustomerPerformanceChart />

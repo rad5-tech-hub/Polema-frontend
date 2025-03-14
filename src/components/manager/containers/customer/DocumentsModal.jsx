@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
+import { formatMoney } from "../../../date";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
+import { CameraFilled } from "@ant-design/icons";
 import { Flex, Button, Separator, Spinner, Grid, Text } from "@radix-ui/themes";
 
 const root = import.meta.env.VITE_ROOT;
@@ -13,12 +15,21 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
   const [docOrders, setDocOrders] = useState({});
   const [summary, setSummary] = useState({});
   const [failedSearch, setFailedSearch] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState({
+    cashTicket: null,
+    invoice: null,
+    gatepass: null,
+  });
+
   const divRef = useRef(null);
   const navigate = useNavigate();
 
-  const handleFullscreen = () => {
-    if (divRef.current?.requestFullscreen) {
-      divRef.current.requestFullscreen();
+  const handleFullscreen = (type) => {
+    if (uploadedFiles[type]?.url) {
+      const imageElement = document.getElementById(`image-${type}`);
+      if (imageElement?.requestFullscreen) {
+        imageElement.requestFullscreen();
+      }
     }
   };
 
@@ -39,14 +50,99 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
       setSummary(data.ledgerSummary || {});
       setDocOrders(data.order || {});
       setFailedSearch(false);
-    } catch {
+    } catch (error) {
       setFailedSearch(true);
+      toast.error("Failed to fetch invoice details.");
     }
   };
 
   useEffect(() => {
-    if (isOpen) fetchInvoice();
-  }, [isOpen]);
+    if (isOpen && customerId) fetchInvoice();
+  }, [isOpen, customerId]);
+
+  const handleFileUpload = async (file, type) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Login required.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("type", type);
+
+    try {
+      const response = await axios.post(`${root}/dept/upload`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === 200) {
+        setUploadedFiles((prev) => ({
+          ...prev,
+          [type]: { ...prev[type], uploaded: true },
+        }));
+
+        // Function to change body based on file type
+        const changeBodyFunction = (receiptType, imageUrl) => {
+          if (!imageUrl) {
+            console.error("Invalid image URL");
+            return null;
+          }
+
+          switch (receiptType) {
+            case "CashTicket":
+              return { cashImage: imageUrl };
+
+            case "Invoice":
+              return { invoiceImg: imageUrl };
+
+            case "Gatepass":
+              return { gatepassImage: imageUrl };
+
+            case "Waybill":
+              return { wayBillImage: imageUrl };
+
+            default:
+              console.warn(`Unknown receipt type: ${receiptType}`);
+              return null;
+          }
+        };
+
+        //Second Request to Upload Cloudinary Link from backend
+
+        try {
+          const response = await axios.patch(
+            `${root}/customer/ledgers-images/${customerId}`,
+            changeBodyFunction()
+          );
+          setImageUploaded(true);
+        } catch (error) {
+          // setImageUploaded()
+          console.log(error);
+        }
+      } else {
+        toast.error(`Upload failed for ${type}.`);
+      }
+    } catch (error) {
+      toast.error("Upload error. Please try again.");
+    }
+  };
+
+  const handleFileChange = async (event, type) => {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith("image/")) {
+      setUploadedFiles((prev) => ({
+        ...prev,
+        [type]: { file, url: URL.createObjectURL(file), uploaded: false },
+      }));
+      await handleFileUpload(file, type);
+    } else {
+      toast.error("Invalid file type. Please upload an image.");
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -60,7 +156,7 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
               <p className="text-lg font-bold">{customerName}</p>
             </div>
             <div>
-              <p className="text-sm font-bold opacity-50">Customer ID:</p>
+              <p className="text-sm font-bold opacity-50">Tranx ID:</p>
               <p className="text-lg font-bold">{customerId}</p>
             </div>
           </Flex>
@@ -68,12 +164,11 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
           <div className="flex">
             <div className="w-3/5 border-r-2 border-gray-300 p-4">
               <Flex justify="between">
-                <p className="text-green-500">
-                  Previous Credit: {summary.credit || "0.00"}
+                <p className="text-green-500 text-sm">
+                  Previous Credit: ₦{formatMoney(summary.credit) || "0.00"}
                 </p>
-                {/* <p>Paid to:</p> */}
               </Flex>
-              <p className="text-sm opacity-50 mt-4">
+              <p className="text-lg font-bold mt-4">
                 Ledger Transactions History
               </p>
               {entries.length === 0 ? (
@@ -88,7 +183,7 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
                 </div>
               ) : (
                 entries.map((entry, idx) => (
-                  <Grid key={idx} columns="3" className="p-1">
+                  <Grid key={idx} columns="3" gap="2" className="p-1">
                     <p className="text-xs">
                       {entry.creditType === null &&
                         `${entry.quantity} ${entry.unit} of`}{" "}
@@ -100,13 +195,49 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
                     <p
                       className={`text-xs ${
                         entry.creditType ? "text-green-500" : "text-red-500"
-                      }`}
-                    >
-                      ₦ {" "} {entry.debit}
+                      }`}>
+                      ₦ {entry.debit}
                     </p>
                   </Grid>
                 ))
               )}
+
+              <div>
+                <p className="text-lg font-bold opacity mt-6 mb-2">Receipts</p>
+                <div className="flex gap-3">
+                  {["CashTicket", "Invoice", "Gatepass", "Waybill"].map(
+                    (type, idx) => (
+                      <div key={idx} className="text-center">
+                        <label className="cursor-pointer block">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => handleFileChange(e, type)}
+                          />
+                          <div
+                            id={`image-${type}`}
+                            className="bg-gray-300 rounded min-w-[70px] h-[70px] flex justify-center items-center overflow-hidden cursor-pointer"
+                            style={{
+                              backgroundImage: uploadedFiles[type]?.url
+                                ? `url(${uploadedFiles[type].url})`
+                                : "none",
+                              backgroundSize: "cover",
+                              backgroundPosition: "center",
+                            }}>
+                            {!uploadedFiles[type]?.url && <CameraFilled />}
+                          </div>
+                        </label>
+                        <p
+                          className="text-[.75rem] cursor-pointer font-bold hover:underline"
+                          onClick={() => handleFullscreen(type)}>
+                          {type.replace(/([A-Z])/g, " $1")}
+                        </p>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
             </div>
             <div className="w-2/5 p-4">
               <Text className="font-bold">Weigh Bridge Summary</Text>
@@ -120,58 +251,49 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
                     : "none",
                   backgroundSize: "cover",
                   backgroundPosition: "center",
-                }}
-              ></div>
+                }}></div>
               {docOrders.authToWeighTickets && (
                 <div>
-                  <p>Vehicle No: {docOrders.authToWeighTickets.vehicleNo}</p>
-                  <p>Driver's Name: {docOrders.authToWeighTickets.driver}</p>
-                  <p>Tar Quantity: {docOrders.weighBridge?.tar}</p>
-                  <p>Gross Quantity: {docOrders.weighBridge?.gross}</p>
-                  <p>Net Quantity: {docOrders.weighBridge?.net}</p>
+                  <p className="py-2">
+                    Vehicle No: {docOrders.authToWeighTickets.vehicleNo}
+                  </p>
+                  <p className="py-2">
+                    Driver's Name: {docOrders.authToWeighTickets.driver}
+                  </p>
+                  <p className="py-2">
+                    Tar Quantity: {docOrders.weighBridge?.tar}
+                  </p>
+                  <p className="py-2">
+                    Gross Quantity: {docOrders.weighBridge?.gross}
+                  </p>
+                  <p className="py-2">
+                    Net Quantity: {docOrders.weighBridge?.net}
+                  </p>
                 </div>
               )}
             </div>
           </div>
           <Flex justify="end" className="mt-5">
             <Flex gap="2">
-              <button
-                onClick={() =>
-                  navigate(`/admin/receipt/create-invoice/${customerId}`)
-                }
-                className="border px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100"
-              >
-                Generate Invoice
-              </button>
-              <button
-                onClick={() =>
-                  navigate(`/admin/receipt/create-gatepass/${customerId}`)
-                }
-                className="border px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100"
-              >
-                Generate Gate Pass
-              </button>
-              <button
-                onClick={() =>
-                  navigate(
-                    `/admin/receipt/create-waybill-invoice/${customerId}`
-                  )
-                }
-                className="border px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100"
-              >
-                Generate Waybill
-              </button>
+              {["invoice", "gatepass", "waybill-invoice"].map((route, idx) => (
+                <button
+                  key={idx}
+                  onClick={() =>
+                    navigate(`/admin/receipt/create-${route}/${customerId}`)
+                  }
+                  className="border px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100">
+                  Generate {route.replace(/-/g, " ")}
+                </button>
+              ))}
             </Flex>
           </Flex>
           <Button
             onClick={onClose}
-            className="absolute top-2 right-2 bg-red-400"
-          >
+            className="absolute top-2 right-2 bg-red-400">
             <FontAwesomeIcon icon={faClose} />
           </Button>
         </div>
       </div>
-      <Toaster position="top-right" />
     </>
   );
 };
