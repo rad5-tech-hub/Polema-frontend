@@ -10,6 +10,7 @@ import {
   Button,
   Grid,
 } from "@radix-ui/themes";
+import { Select as AntSelect } from "antd";
 import axios from "axios";
 const root = import.meta.env.VITE_ROOT;
 import toast, { LoaderIcon, Toaster } from "react-hot-toast";
@@ -25,18 +26,24 @@ const CustomerPlaceOrder = () => {
   const [buttonLoading, setButtonLoading] = useState(false);
   const [planAmount, setPlanAmount] = useState("");
 
-  // Function to format number with commas
-  const formatNumber = (num) => {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const [rawPrice, setRawPrice] = useState("");
+
+  // Function to format the number with commas
+  const formatNumberWithCommas = (value) => {
+    if (!value) return "";
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
-  // Handle base price input change
-  const handleBasePriceChange = (e) => {
-    const inputValue = e.target.value.replace(/,/g, ""); // Remove commas from the input value
-    if (!isNaN(inputValue)) {
-      setBasePrice(inputValue); // Update state with raw number (without commas)
+  // Function to remove commas and store raw number
+  const handlePriceChange = (e) => {
+    const rawValue = e.target.value.replace(/,/g, ""); // Remove commas
+    if (!isNaN(rawValue)) {
+      setRawPrice(rawValue);
+      setBasePrice(rawValue); // Store raw number in parent state
     }
-  };
+  }
+
+  
 
   const fetchCustomers = async () => {
     const retrToken = localStorage.getItem("token");
@@ -96,7 +103,7 @@ const CustomerPlaceOrder = () => {
       return;
     }
 
-    // // Check if customer was seleected 
+    // // Check if customer was seleected
     // if(!selectedCustomerId){
     //   toast.error("Sele", {
     //     duration: 2000,
@@ -108,13 +115,12 @@ const CustomerPlaceOrder = () => {
     //   return;
     // }
 
-    
     const body = {
       customerId: selectedCustomerId,
       productId: selectedProductId,
       quantity: quantity,
       unit: getMatchingUnitFromId(selectedProductId).price[0].unit,
-      price:basePrice,
+      price: basePrice,
       ...(planAmount && { discount: Number(planAmount) }),
     };
 
@@ -182,52 +188,50 @@ const CustomerPlaceOrder = () => {
             <Text className="mb-4">
               Customer Name <span className="text-red-500">*</span>{" "}
             </Text>
-            <Select.Root
-              required
+            <AntSelect
+              showSearch
+              className="w-full mt-2"
+              placeholder="Select Customer"
+              value={selectedCustomerId || undefined}
+              onChange={setSelectedCustomerId}
               disabled={customers.length === 0}
-              value={selectedCustomerId}
-              onValueChange={setSelectedCustomerId}
-            >
-              <Select.Trigger
-                className="w-full mt-2"
-                placeholder="Select Customer"
-              />
-              <Select.Content position="popper">
-                {customers.map((customer) => (
-                  <Select.Item key={customer.id} value={customer.id}>
-                    {customer.firstname} {customer.lastname}
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select.Root>
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                option.children.toLowerCase().includes(input.toLowerCase())
+              }>
+              {customers.map((customer) => (
+                <AntSelect.Option key={customer.id} value={customer.id}>
+                  {customer.firstname} {customer.lastname}
+                </AntSelect.Option>
+              ))}
+            </AntSelect>
           </div>
 
           <div className="w-full">
             <Text className="mb-4">
               Product<span className="text-red-500">*</span>
             </Text>
-            <Select.Root
-              required
-              disabled={products.length === 0}
-              value={selectedProductId}
-              onValueChange={(value) => {
+            <AntSelect
+              showSearch
+              className="w-full mt-2"
+              placeholder="Select Product"
+              value={selectedProductId || undefined}
+              onChange={(value) => {
                 setSelectedProductId(value);
                 getMatchingPlansFromId(value);
-                setBasePrice(getMatchingUnitFromId(value).price[0].amount)
+                setBasePrice(getMatchingUnitFromId(value).price[0].amount);
               }}
-            >
-              <Select.Trigger
-                className="w-full mt-2"
-                placeholder="Select Product"
-              />
-              <Select.Content position="popper">
-                {products.map((product) => (
-                  <Select.Item key={product.id} value={product.id}>
-                    {product.name}
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select.Root>
+              disabled={products.length === 0}
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                option.children.toLowerCase().includes(input.toLowerCase())
+              }>
+              {products.map((product) => (
+                <AntSelect.Option key={product.id} value={product.id}>
+                  {product.name}
+                </AntSelect.Option>
+              ))}
+            </AntSelect>
           </div>
         </Flex>
 
@@ -264,12 +268,11 @@ const CustomerPlaceOrder = () => {
         <Grid className="w-full mb-4" columns={"2"} gap={"4"}>
           <div className="w-full">
             <Text className="mb-4">Price Discount (Optional)</Text>
-            <Select.Root
+            {/* <Select.Root
               disabled={seletedProductPlan.length === 0}
               onValueChange={(val) => {
                 setPlanAmount(val);
-              }}
-            >
+              }}>
               <Select.Trigger
                 className="mt-2 w-full"
                 placeholder={
@@ -281,39 +284,59 @@ const CustomerPlaceOrder = () => {
               <Select.Content position="popper">
                 {seletedProductPlan.map((plan) => {
                   return (
+                   <>
                     <Select.Item value={plan.amount}>
                       {plan.category}
                     </Select.Item>
+                    <Select.Item value="none">
+                      none
+                    </Select.Item>
+                   </>
                   );
                 })}
               </Select.Content>
-            </Select.Root>
+            </Select.Root> */}
+            <AntSelect
+              className="w-full mt-2"
+              placeholder={
+                seletedProductPlan.length === 0
+                  ? "Product Selected has no discount"
+                  : "Select plan"
+              }
+              disabled={seletedProductPlan.length === 0}
+              value={undefined} // Ensure no default selection
+              onChange={(value) => {
+                if (value === "none") {
+                  setPlanAmount(null); // Set nothing if "None" is selected
+                } else {
+                  setPlanAmount(value);
+                }
+              }}>
+              {seletedProductPlan.map((plan) => (
+                <AntSelect.Option key={plan.category} value={plan.amount}>
+                  {plan.category}
+                </AntSelect.Option>
+              ))}
+              {/* Add "None" option to remove discount */}
+              <AntSelect.Option value="none">None</AntSelect.Option>
+            </AntSelect>
           </div>
           <div className="w-full">
-            <Text className="mb-4"> Product Price</Text>
-            <TextField.Root
-              className="mt-2  "
-              placeholder="Select Product First"
-              // disabled
-              onChange={(e)=>{
-                setBasePrice(e.target.value)
-              }}
-              // value={
-              //   selectedProductId.length == 0
-              //     ? ""
-              //     : getMatchingUnitFromId(selectedProductId).price[0].amount
-              // }
-              value={basePrice}
-            />
-          </div>
+      <Text className="mb-4">Product Price</Text>
+      <TextField.Root
+        className="mt-2"
+        placeholder="Select Product First"
+        value={formatNumberWithCommas(basePrice)} // Show formatted value
+        onChange={handlePriceChange} // Handle change with raw number
+      />
+    </div>
         </Grid>
         <Flex className="w-full mb-4" gap={"5"} justify={"end"}>
           <Button
             size={"3"}
             type="submit"
             disabled={buttonLoading}
-            className=" bg-theme hover:bg-theme/85"
-          >
+            className=" bg-theme hover:bg-theme/85">
             {buttonLoading ? <LoaderIcon /> : "Add"}
           </Button>
         </Flex>

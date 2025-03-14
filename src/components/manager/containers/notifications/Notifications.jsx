@@ -6,7 +6,6 @@ import {
   cashTicketConfirm,
 } from "./NotificationsData";
 import toast, { Toaster } from "react-hot-toast";
-import { FixedSizeList } from "react-window";
 import { jwtDecode } from "jwt-decode";
 import { faClose, faTrash } from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
@@ -305,7 +304,7 @@ const Notifications = () => {
       const response = await axios.post(
         `${root}/${sendTicket[type]}/${ticketId}`,
         {
-          adminsId: adminsId,
+          adminIds: adminsId,
         },
         {
           headers: {
@@ -328,7 +327,7 @@ const Notifications = () => {
   };
 
   // Component for select admin side pane
-  const SelectAdminSidePane = ({ type, ticketID }) => {
+  const SelectAdminSidePane = ({ type, ticketID,ticketStatus }) => {
     const [selectedAdmins, setSelectedAdmins] = useState([]);
 
     const handleCheckboxChange = (adminId) => {
@@ -341,103 +340,103 @@ const Notifications = () => {
 
     const token = localStorage.getItem("token");
 
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      // Function to approve ticket
-      const approveTicket = async (ticketType, ticketId) => {
-        const token = localStorage.getItem("token");
-        const endpoint = acceptTicket[ticketType];
-        if (!token) {
-          toast.error("An error occurred , try logging in again");
-          return;
-        }
-
-        if (!endpoint || endpoint === null || endpoint === undefined) {
-          toast.error("ticket type does not exist");
-          return;
-        }
-        //Display Loader Ovet the button
+    const approveTicket = async (ticketType, ticketId) => {
+      const token = localStorage.getItem("token");
+      const endpoint = acceptTicket[ticketType];
+    
+      if (!token) {
+        toast.error("An error occurred, try logging in again");
+        return;
+      }
+    
+      if (!endpoint) {
+        toast.error("Ticket type does not exist");
+        return;
+      }
+    
+      // Display Loader over the button
+      setApproveButtonLoading((prev) => ({
+        ...prev,
+        [ticketId]: true,
+      }));
+    
+      try {
+        const response = await axios.patch(
+          `${root}/${endpoint}/${ticketId}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+    
         setApproveButtonLoading((prev) => ({
           ...prev,
-          [ticketId]: true,
+          [ticketId]: false,
         }));
-
-        try {
-          const response = await axios.patch(
-            `${root}/${endpoint}/${ticketId}`,
-            {},
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          setApproveButtonLoading((prev) => ({
-            ...prev,
-            [ticketId]: false,
-          }));
-
-          // toast.success("Ticket approved successfully.", {
-          //   duration: 3000,
-          // });
-          return e.status;
-        } catch (e) {
-          setApproveButtonLoading((prev) => ({
-            ...prev,
-            [ticketId]: false,
-          }));
-
-          // console.log(e);
-
-          toast.error(
-            e.response.data.message ||
-              "An error occurred , while trying to approve ticket"
-          );
-          return e.status;
-        }
-      };
-
+    
+        return response.status;
+      } catch (error) {
+        setApproveButtonLoading((prev) => ({
+          ...prev,
+          [ticketId]: false,
+        }));
+    
+        toast.error(
+          error.response?.data?.message || "An error occurred while trying to approve ticket"
+        );
+    
+        return error.response?.status || 500;
+      }
+    };
+    
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      const token = localStorage.getItem("token");
+    
       if (!token) {
-        toast.error("An error occurred , try logging in again.");
+        toast.error("An error occurred, try logging in again.");
         return;
       }
-
+    
       if (selectedAdmins.length === 0 || selectedAdmins.includes(null)) {
-        toast.error("Select at least one staff  ");
+        toast.error("Select at least one staff.");
         return;
       }
-
+    
       try {
-        const firstRequest = await approveTicket(type, ticketID);
-
-        // if (firstRequest == 200){
-        //   await sendApprovedTicket(type,ticketID,selectedAdmins)
-        // }else{
-        //   // toast.error("Error Occured in approving ticket")
-        // }
-
-        console.log(firstRequest);
-
-        {
-          firstRequest === 200 &&
-            (await sendApprovedTicket(type, ticketID, selectedAdmins)
-              .then((res) => {
-                console.log(res);
-                toast.success("Ticket approved and sent successfully.")
-              })
-              .catch((err) => {
-                toast.error("Ticket not sent successfully.")
-
-                console.log(err);
-              }));
+        if (ticketStatus === "approved") {
+          // ✅ Directly send approved ticket if already approved
+          await sendApprovedTicket(type, ticketID, selectedAdmins);
+          toast.success("Ticket already approved, sending details...", {
+            duration: 3000,
+            style: {
+              padding: "30px",
+            },
+          });
+        } else {
+          // ✅ Approve first, then send ticket
+          const firstRequest = await approveTicket(type, ticketID);
+    
+          if (firstRequest === 200) {
+            await sendApprovedTicket(type, ticketID, selectedAdmins);
+            toast.success("Ticket approved and sent successfully", {
+              duration: 3000,
+              style: {
+                padding: "30px",
+              },
+            });
+          } else {
+            throw new Error("Error occurred in approving ticket");
+          }
         }
       } catch (error) {
-        console.log(error);
+        console.error("Error in handleSubmit:", error);
       }
-      // console.log("Selected Admin IDs:", selectedAdmins);
     };
-
+    
+    
     return (
       <div className="absolute z-[60]  -translate-x-[350px]  top-0 mb-20 bg-white min-w-[250px] min-h-[300px] p-4 shadow-md  ">
         <h1 className="font-space font-bold text-[1.1rem]">Approve To</h1>
@@ -516,7 +515,7 @@ const Notifications = () => {
                 ? "translate-x-0 block opacity-100"
                 : "translate-x-[160%] opacity-0 hidden"
             }`}
-            style={{ borderRadius: "8px",overflow:"scroll"  }}>
+            style={{ borderRadius: "8px",overflow:""  }}>
             {/* {detailsPageOpen && <IndividualInfo />} */}
             <div className="flex justify-between items-center w-full">
               <h1 className="font-space font-medium text-[1.7rem]">
@@ -573,7 +572,7 @@ const Notifications = () => {
                 <Tabs.Trigger value="inventory">Inventory</Tabs.Trigger>
               </Tabs.List>
 
-              <div className="pt-3 max-h-[100vh] w-fit notifications-box border-2 border-red-500"    style={{ overflowY: '', overflowX: '' }}>
+              <div className="pt-3 max-h-[100vh] w-fit notifications-box "    style={{ overflowY: '', overflowX: '' }}>
                 {/* <Box
                 pt="3"
                 style={{ maxHeight: "500px" }}
@@ -595,6 +594,7 @@ const Notifications = () => {
                             <SelectAdminSidePane
                               type={notification.type}
                               ticketID={notification.ticketId}
+                              ticketStatus={notification.ticketStatus}
                             />
                           )}
                           <Flex gap="2" align="center" className="relative">
@@ -716,7 +716,7 @@ const Notifications = () => {
           </div>
         </div>
       </div>
-      <Toaster position="top-right" />
+      {/* <Toaster position="top-right" /> */}
     </>
   );
 };
