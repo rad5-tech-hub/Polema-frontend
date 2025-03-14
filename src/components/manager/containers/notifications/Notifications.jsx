@@ -54,6 +54,12 @@ const Notifications = () => {
   const [isSidePaneOpen, setIsSidePaneOpen] = useState({});
   const [confirmAuthOpen, setConfirmAuthOpen] = useState({});
   const [SelectedTicketType, setSelectedTicketType] = useState("");
+  const [confirmBtnLoading,setConfirmBtnLoading] = useState({})
+
+  // State manangement for everything that has to do with  the Select Admin Side PAne 
+  const [sidePaneDetails,setSidePanelDetails] = useState({});
+  const [fixedTopValue,setFixedTopValue] = useState(0);
+
 
   const [selectedTicket, setSelectedTicket] = useState("");
 
@@ -141,61 +147,7 @@ const Notifications = () => {
     setIsSidePaneOpen({});
   };
 
-  // Function to approve ticket
-  // const approveTicket = async (ticketType, ticketId) => {
-  //   const token = localStorage.getItem("token");
-  //   const endpoint = acceptTicket[ticketType];
-  //   if (!token) {
-  //     toast.error("An error occurred , try logging in again");
-  //     return;
-  //   }
-
-  //   if (!endpoint || endpoint === null || endpoint === undefined) {
-  //     toast.error("ticket type does not exist");
-  //     return;
-  //   }
-  //   //Display Loader Ovet the button
-  //   setApproveButtonLoading((prev) => ({
-  //     ...prev,
-  //     [ticketId]: true,
-  //   }));
-
-  //   try {
-  //     const response = await axios.patch(
-  //       `${root}/${endpoint}/${ticketId}`,
-  //       {},
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-
-  //     setApproveButtonLoading((prev) => ({
-  //       ...prev,
-  //       [ticketId]: false,
-  //     }));
-
-  //     // toast.success("Ticket approved successfully.", {
-  //     //   duration: 3000,
-  //     // });
-  //     return e.status;
-  //   } catch (e) {
-  //     setApproveButtonLoading((prev) => ({
-  //       ...prev,
-  //       [ticketId]: false,
-  //     }));
-
-  //     // console.log(e);
-
-  //     toast.error(
-  //       e.response.data.message ||
-  //         "An error occurred , while trying to approve ticket"
-  //     );
-  //     return e.status;
-  //   }
-  // };
-
+ 
   // Function to deny ticket
   const denyTicket = async (ticketType, ticketId) => {
     const token = localStorage.getItem("token");
@@ -274,6 +226,11 @@ const Notifications = () => {
       toast.error("An error occurred , try logging in again.");
       return;
     }
+    
+    setConfirmBtnLoading((prev) => ({
+      ...prev,
+      [ticketId]: true,
+    }));
     try {
       const response = await axios.post(
         `${root}/${cashTicketConfirm}/${ticketId}`,
@@ -286,10 +243,18 @@ const Notifications = () => {
       );
 
       toast.success(response.data.message);
+      setConfirmBtnLoading((prev) => ({
+        ...prev,
+        [ticketId]: false,
+      }));
     } catch (error) {
       toast.error(
         error.response.data.message || "Error confirming cash ticket"
       );
+      setConfirmBtnLoading((prev) => ({
+        ...prev,
+        [ticketId]: false,
+      }));
     }
   };
 
@@ -624,9 +589,11 @@ const Notifications = () => {
                 ? "translate-x-0 block opacity-100"
                 : "translate-x-[160%] opacity-0 hidden"
             }`}
-            style={{ borderRadius: "8px", overflow: "" }}>
+            style={{ borderRadius: "8px", overflowY: "",overflowX:"visible" }}>
             {/* {detailsPageOpen && <IndividualInfo />} */}
-            <div className="flex justify-between items-center w-full">
+         
+          <div className="notification-container">
+               <div className="flex justify-between items-center w-full">
               <h1 className="font-space font-medium text-[1.7rem]">
                 Notifications
               </h1>
@@ -636,16 +603,7 @@ const Notifications = () => {
                 onClick={closeNotifications}>
                 <FontAwesomeIcon icon={faClose} />
               </Button>
-              {/* <Button
-                className="text-[.7rem] cursor-pointer"
-                onClick={fetchNotifications}
-              >
-                {fetchLoading ? (
-                  <Spinner />
-                ) : (
-                  <FontAwesomeIcon icon={faRefresh} />
-                )}
-              </Button> */}
+            
             </div>
             {selectedTicket && (
               <IndividualInfo
@@ -673,7 +631,7 @@ const Notifications = () => {
               />
             </div>
 
-            <Tabs.Root defaultValue="all" className="overflow-visible">
+            <Tabs.Root defaultValue="all" className="!overflow-visible">
               <Tabs.List>
                 <Tabs.Trigger value="all">All</Tabs.Trigger>
                 {/* <Tabs.Trigger value="unread">Unread</Tabs.Trigger> */}
@@ -682,7 +640,7 @@ const Notifications = () => {
               </Tabs.List>
 
               <div
-                className="pt-3 max-h-[100vh] w-fit notifications-box "
+                className="pt-3 max-h-[100vh] w-full notifications-box "
                 style={{ overflowY: "", overflowX: "" }}>
                 {/* <Box
                 pt="3"
@@ -708,17 +666,15 @@ const Notifications = () => {
                               ticketStatus={notification.ticketStatus}
                             />
                           )} */}
-                          {isSidePaneOpen[notification.id] &&
-                            ReactDOM.createPortal(
-                              <div className="fixed top-0 left-0 z-[100] w-full h-full">
-                                <SelectAdminSidePane
-                                  type={notification.type}
-                                  ticketID={notification.ticketId}
-                                  ticketStatus={notification.ticketStatus}
-                                />
-                              </div>,
-                              document.body
-                            )}
+                          {isSidePaneOpen[notification.id] && (
+                            <div className=" top-0 left-0 z-[100] w-full h-full">
+                              <SelectAdminSidePane
+                                type={notification.type}
+                                ticketID={notification.ticketId}
+                                ticketStatus={notification.ticketStatus}
+                              />
+                            </div>
+                          )}
                           {confirmAuthOpen[notification.id] && (
                             <AuthToWeighConfirmPane
                               id={notification.ticketId}
@@ -810,7 +766,13 @@ const Notifications = () => {
                                             notification.ticketId
                                           );
                                         }}>
-                                        Confirm
+                                      {confirmBtnLoading[
+                                          notification?.ticketId
+                                        ] ? (
+                                          <Spinner />
+                                        ) : (
+                                          "Confirm"
+                                        )}
                                       </AntButton>
                                     </div>
                                   )}
@@ -855,6 +817,7 @@ const Notifications = () => {
                 {/* </Box> */}
               </div>
             </Tabs.Root>
+          </div>
           </div>
         </div>
       </div>
