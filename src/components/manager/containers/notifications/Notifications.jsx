@@ -493,6 +493,7 @@ const Notifications = () => {
         setQuantity(false);
       } catch (error) {
         setBUttonLoading(false);
+        // toast.error(error)
       }
       // admin/load
       // Handle submission logic here...
