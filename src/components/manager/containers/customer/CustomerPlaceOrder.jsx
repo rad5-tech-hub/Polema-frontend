@@ -41,9 +41,7 @@ const CustomerPlaceOrder = () => {
       setRawPrice(rawValue);
       setBasePrice(rawValue); // Store raw number in parent state
     }
-  }
-
-  
+  };
 
   const fetchCustomers = async () => {
     const retrToken = localStorage.getItem("token");
@@ -322,14 +320,14 @@ const CustomerPlaceOrder = () => {
             </AntSelect>
           </div>
           <div className="w-full">
-      <Text className="mb-4">Product Price</Text>
-      <TextField.Root
-        className="mt-2"
-        placeholder="Select Product First"
-        value={formatNumberWithCommas(basePrice)} // Show formatted value
-        onChange={handlePriceChange} // Handle change with raw number
-      />
-    </div>
+            <Text className="mb-4">Product Price</Text>
+            <TextField.Root
+              className="mt-2"
+              placeholder="Select Product First"
+              value={formatNumberWithCommas(basePrice)} // Show formatted value
+              onChange={handlePriceChange} // Handle change with raw number
+            />
+          </div>
         </Grid>
         <Flex className="w-full mb-4" gap={"5"} justify={"end"}>
           <Button

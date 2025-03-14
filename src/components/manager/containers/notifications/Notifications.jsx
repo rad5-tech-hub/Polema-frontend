@@ -21,6 +21,7 @@ import {
   Button,
   Spinner,
   Separator,
+  TextField,
 } from "@radix-ui/themes";
 import {
   faInfo,
@@ -51,6 +52,7 @@ const Notifications = () => {
   const [admins, setAdmins] = useState([]);
   const notificationRef = useRef(null);
   const [isSidePaneOpen, setIsSidePaneOpen] = useState({});
+  const [confirmAuthOpen, setConfirmAuthOpen] = useState({});
   const [SelectedTicketType, setSelectedTicketType] = useState("");
 
   const [selectedTicket, setSelectedTicket] = useState("");
@@ -327,7 +329,7 @@ const Notifications = () => {
   };
 
   // Component for select admin side pane
-  const SelectAdminSidePane = ({ type, ticketID,ticketStatus }) => {
+  const SelectAdminSidePane = ({ type, ticketID, ticketStatus }) => {
     const [selectedAdmins, setSelectedAdmins] = useState([]);
 
     const handleCheckboxChange = (adminId) => {
@@ -343,23 +345,23 @@ const Notifications = () => {
     const approveTicket = async (ticketType, ticketId) => {
       const token = localStorage.getItem("token");
       const endpoint = acceptTicket[ticketType];
-    
+
       if (!token) {
         toast.error("An error occurred, try logging in again");
         return;
       }
-    
+
       if (!endpoint) {
         toast.error("Ticket type does not exist");
         return;
       }
-    
+
       // Display Loader over the button
       setApproveButtonLoading((prev) => ({
         ...prev,
         [ticketId]: true,
       }));
-    
+
       try {
         const response = await axios.patch(
           `${root}/${endpoint}/${ticketId}`,
@@ -370,41 +372,42 @@ const Notifications = () => {
             },
           }
         );
-    
+
         setApproveButtonLoading((prev) => ({
           ...prev,
           [ticketId]: false,
         }));
-    
+
         return response.status;
       } catch (error) {
         setApproveButtonLoading((prev) => ({
           ...prev,
           [ticketId]: false,
         }));
-    
+
         toast.error(
-          error.response?.data?.message || "An error occurred while trying to approve ticket"
+          error.response?.data?.message ||
+            "An error occurred while trying to approve ticket"
         );
-    
+
         return error.response?.status || 500;
       }
     };
-    
+
     const handleSubmit = async (e) => {
       e.preventDefault();
       const token = localStorage.getItem("token");
-    
+
       if (!token) {
         toast.error("An error occurred, try logging in again.");
         return;
       }
-    
+
       if (selectedAdmins.length === 0 || selectedAdmins.includes(null)) {
         toast.error("Select at least one staff.");
         return;
       }
-    
+
       try {
         if (ticketStatus === "approved") {
           // ✅ Directly send approved ticket if already approved
@@ -418,7 +421,7 @@ const Notifications = () => {
         } else {
           // ✅ Approve first, then send ticket
           const firstRequest = await approveTicket(type, ticketID);
-    
+
           if (firstRequest === 200) {
             await sendApprovedTicket(type, ticketID, selectedAdmins);
             toast.success("Ticket approved and sent successfully", {
@@ -435,10 +438,9 @@ const Notifications = () => {
         console.error("Error in handleSubmit:", error);
       }
     };
-    
-    
+
     return (
-      <div className="absolute z-[60]  -translate-x-[350px]  top-0 mb-20 bg-white min-w-[250px] min-h-[300px] p-4 shadow-md  ">
+      <div className="absolute z-[60]  -translate-x-[300px]  top-0 mb-20 bg-white min-w-[300px] min-h-[300px] p-4 shadow-md  ">
         <h1 className="font-space font-bold text-[1.1rem]">Approve To</h1>
         <p
           className="absolute right-[10px] cursor-pointer top-[5px]"
@@ -483,6 +485,113 @@ const Notifications = () => {
     );
   };
 
+  // Component for auth to weigh  side pane
+  const AuthToWeighConfirmPane = ({ id }) => {
+    const [selectedOption, setSelectedOption] = useState("all");
+    const [quantity, setQuantity] = useState("");
+    const [buttonLoading, setBUttonLoading] = useState(false);
+
+    const handleRadioChange = (e) => {
+      setSelectedOption(e.target.value);
+    };
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("An error occurred, try logging in again");
+        return;
+      }
+
+      if (selectedOption === "other" && quantity.length === 0) {
+        // console.log("Quantity:", quantity);
+        toast.error("Provide a quantity");
+      }
+      const body = {
+        ...(quantity && { quantityLoaded: quantity }),
+      };
+
+      setBUttonLoading(true);
+      try {
+        const response = await axios.post(`${root}/admin/load/${id}`, body);
+        toast.success("Ticket Sent Successffuly", {
+          duration: 3000,
+          style: {
+            padding: "20px",
+          },
+        });
+        setBUttonLoading(false);
+        setQuantity(false);
+      } catch (error) {
+        setBUttonLoading(false);
+      }
+      // admin/load
+      // Handle submission logic here...
+    };
+
+    return (
+      <div className="absolute z-[60] -translate-x-[300px] top-0 mb-20 bg-white min-w-[250px] min-h-[170px] p-4 shadow-md rounded-md">
+        {/* Close Button */}
+        <button
+          className="absolute right-[10px] top-[10px] text-gray-600 hover:text-gray-800"
+          onClick={() => setConfirmAuthOpen(false)}>
+          <FontAwesomeIcon icon={faClose} />
+        </button>
+
+        {/* Title */}
+        <h1 className="font-bold mb-3">What quantity did you load?</h1>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit}>
+          {/* Radio Options */}
+          <div className="flex flex-col gap-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="options"
+                value="all"
+                checked={selectedOption === "all"}
+                onChange={handleRadioChange}
+              />
+              All
+            </label>
+
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="options"
+                value="other"
+                checked={selectedOption === "other"}
+                onChange={handleRadioChange}
+              />
+              Other
+            </label>
+          </div>
+
+          {/* Quantity Input (Only when "Other" is selected) */}
+          {selectedOption === "other" && (
+            <TextField.Root
+              type="number"
+              placeholder="Enter Quantity"
+              className="mt-3 w-full"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+            />
+          )}
+
+          {/* Submit Button */}
+          <div className="flex justify-end mt-4">
+            <Button
+              type="submit"
+              className="bg-blue-500 text-white px-4 py-2 rounded">
+              {buttonLoading ? <Spinner /> : "Submit"}
+            </Button>
+          </div>
+        </form>
+      </div>
+    );
+  };
+
   useEffect(() => {
     fetchNotifications();
     fetchAdminDetails();
@@ -497,7 +606,7 @@ const Notifications = () => {
           onClick={() => {
             toggleNotifications();
             fetchNotifications();
-            fetchAdminDetails()
+            fetchAdminDetails();
           }}>
           <BellIcon />
           {notifications.length > 0 && (
@@ -515,7 +624,7 @@ const Notifications = () => {
                 ? "translate-x-0 block opacity-100"
                 : "translate-x-[160%] opacity-0 hidden"
             }`}
-            style={{ borderRadius: "8px",overflow:""  }}>
+            style={{ borderRadius: "8px", overflow: "" }}>
             {/* {detailsPageOpen && <IndividualInfo />} */}
             <div className="flex justify-between items-center w-full">
               <h1 className="font-space font-medium text-[1.7rem]">
@@ -572,7 +681,9 @@ const Notifications = () => {
                 <Tabs.Trigger value="inventory">Inventory</Tabs.Trigger>
               </Tabs.List>
 
-              <div className="pt-3 max-h-[100vh] w-fit notifications-box "    style={{ overflowY: '', overflowX: '' }}>
+              <div
+                className="pt-3 max-h-[100vh] w-fit notifications-box "
+                style={{ overflowY: "", overflowX: "" }}>
                 {/* <Box
                 pt="3"
                 style={{ maxHeight: "500px" }}
@@ -590,11 +701,27 @@ const Notifications = () => {
                             // setDetailsPageOpen(true);
                           }}
                           className="mb-3 p-2 rounded  cursor-pointer relative">
-                          {isSidePaneOpen[notification.id] && (
+                          {/* {isSidePaneOpen[notification.id] && (
                             <SelectAdminSidePane
                               type={notification.type}
                               ticketID={notification.ticketId}
                               ticketStatus={notification.ticketStatus}
+                            />
+                          )} */}
+                          {isSidePaneOpen[notification.id] &&
+                            ReactDOM.createPortal(
+                              <div className="fixed top-0 left-0 z-[100] w-full h-full">
+                                <SelectAdminSidePane
+                                  type={notification.type}
+                                  ticketID={notification.ticketId}
+                                  ticketStatus={notification.ticketStatus}
+                                />
+                              </div>,
+                              document.body
+                            )}
+                          {confirmAuthOpen[notification.id] && (
+                            <AuthToWeighConfirmPane
+                              id={notification.ticketId}
                             />
                           )}
                           <Flex gap="2" align="center" className="relative">
@@ -687,6 +814,21 @@ const Notifications = () => {
                                       </AntButton>
                                     </div>
                                   )}
+                                {notification.type === "weigh" && (
+                                  <div className="button-groups flex gap-4 mt-4">
+                                    <AntButton
+                                      className="bg-green-500 text-white"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        setConfirmAuthOpen((prev) => ({
+                                          ...prev,
+                                          [notification.id]: true,
+                                        }));
+                                      }}>
+                                      Confirm
+                                    </AntButton>
+                                  </div>
+                                )}
                               </div>
                             </Flex>
                           </Flex>
@@ -716,7 +858,7 @@ const Notifications = () => {
           </div>
         </div>
       </div>
-      {/* <Toaster position="top-right" /> */}
+      <Toaster position="top-right" />
     </>
   );
 };
