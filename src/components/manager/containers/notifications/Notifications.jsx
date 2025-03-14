@@ -418,19 +418,19 @@ const Notifications = () => {
 
         console.log(firstRequest);
 
-        // {
-        //   firstRequest === 200 &&
-        //     (await sendApprovedTicket(type, ticketID, selectedAdmins)
-        //       .then((res) => {
-        //         console.log(res);
-        //         toast.success("Ticket approved and sent successfully.")
-        //       })
-        //       .catch((err) => {
-        //         toast.error("Ticket not sent successfully.")
+        {
+          firstRequest === 200 &&
+            (await sendApprovedTicket(type, ticketID, selectedAdmins)
+              .then((res) => {
+                console.log(res);
+                toast.success("Ticket approved and sent successfully.")
+              })
+              .catch((err) => {
+                toast.error("Ticket not sent successfully.")
 
-        //         console.log(err);
-        //       }));
-        // }
+                console.log(err);
+              }));
+        }
       } catch (error) {
         console.log(error);
       }
