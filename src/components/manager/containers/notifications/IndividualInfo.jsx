@@ -449,6 +449,14 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                       </div>
                       <div>
                         <Text className="text-[.56rem] font-black tracking-wide">
+                          PRODUCT
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {ticketDetails.transactions?.porders.name}
+                        </p>
+                      </div>
+                      <div>
+                        <Text className="text-[.56rem] font-black tracking-wide">
                           VEHICLE NO
                         </Text>
                         <p className="text-[.7rem]">

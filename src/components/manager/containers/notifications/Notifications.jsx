@@ -6,6 +6,7 @@ import {
   cashTicketConfirm,
 } from "./NotificationsData";
 import toast, { Toaster } from "react-hot-toast";
+import { FixedSizeList } from "react-window";
 import { jwtDecode } from "jwt-decode";
 import { faClose, faTrash } from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
