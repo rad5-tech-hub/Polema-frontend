@@ -1,50 +1,105 @@
 // Filename - App.js
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 import { BarChart, Bar, XAxis, Tooltip, YAxis, CartesianGrid } from "recharts";
+import { DatePicker } from "antd";
+
+const { RangePicker } = DatePicker;
+const API_ROOT = import.meta.env.VITE_ROOT;
 
 const App = () => {
   const [chartWidth, setChartWidth] = useState(950);
+  const [dateRange, setDateRange] = useState({ startDate: "", endDate: "" });
+  const [returnedDateRange, setReturnedDateRange] = useState({ start: "", end: "" });
+  const [chartData, setChartData] = useState([]);
 
+  // Adjust chart width on window resize
   useEffect(() => {
     const handleResize = () => {
-      const newWidth = Math.max(500, Math.min(window.innerWidth - 50, 850));
-      setChartWidth(newWidth);
+      setChartWidth(Math.max(500, Math.min(window.innerWidth - 50, 850)));
     };
-
     window.addEventListener("resize", handleResize);
     handleResize();
-
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-  // Sample data
-  const data = [
-    { name: "A", x: 12, y: 23, z: 122 },
-    { name: "B", x: 22, y: 3, z: 73 },
-    { name: "C", x: 13, y: 15, z: 32 },
-    { name: "D", x: 44, y: 35, z: 23 },
-    { name: "E", x: 35, y: 45, z: 20 },
-    { name: "F", x: 62, y: 25, z: 29 },
-    { name: "G", x: 37, y: 17, z: 61 },
-    { name: "H", x: 28, y: 32, z: 45 },
-    { name: "I", x: 19, y: 43, z: 93 },
-  ];
+
+  // Function to fetch bank summary data
+  const fetchBankSummary = useCallback(async (startDate, endDate) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("An error occurred. Try logging in again.");
+      return;
+    }
+
+    let url = `${API_ROOT}/admin/bank-performance`;
+    if (startDate && endDate) {
+      url += `?startDate=${startDate}&endDate=${endDate}`;
+    }
+
+    try {
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const detailsArray = response.data?.data || [];
+      setReturnedDateRange({
+        start: response.data.startDate || "N/A",
+        end: response.data.endDate || "N/A",
+      });
+
+      const formattedData = detailsArray.map((item) => ({
+        name: item.bankName,
+        totalCredit: parseFloat(item.totalCredit) || 0,
+        totalDebit: parseFloat(item.totalDebit) || 0,
+      }));
+
+      setChartData(formattedData);
+    } catch (error) {
+      toast.error("Error fetching bank summary data. Please try again.");
+    }
+  }, []);
+
+  // Fetch data when date range changes
+  useEffect(() => {
+    fetchBankSummary(dateRange.startDate, dateRange.endDate);
+  }, [dateRange, fetchBankSummary]);
 
   return (
     <>
-      <div>
-        <h1 className="font-bold font-amsterdam">Bank  Summary</h1>
+      <div className="relative mt-4">
+        <h1 className="font-bold font-amsterdam">Bank Summary</h1>
 
-        <BarChart width={chartWidth} height={500} data={data} className="mt-4">
-          {/* <CartesianGrid />  */}
+        {/* Chart Component */}
+        <BarChart width={chartWidth} height={500} data={chartData} className="mt-4">
           <CartesianGrid strokeDasharray="3 3" />
           <Tooltip />
           <XAxis dataKey="name" />
-          <YAxis />
-          <Bar dataKey="x" stackId="a" fill="#8884d8" />
-          <Bar dataKey="y" stackId="a" fill="#82ca9d" />
+          <YAxis
+            domain={[0, "auto"]}
+            tick={{ fontSize: 9 }}
+            tickFormatter={(value) => value.toLocaleString()}
+          />
+          <Bar dataKey="totalCredit" stackId="a" fill="#8884d8" />
+          <Bar dataKey="totalDebit" stackId="a" fill="#82ca9d" />
         </BarChart>
+
+        {/* Date Picker */}
+        <div className="date-picker absolute right-0 top-0">
+          <RangePicker
+            onCalendarChange={(dates) => {
+              if (dates && dates[0] && dates[1]) {
+                setDateRange({
+                  startDate: dates[0].format("YYYY-MM-DD"),
+                  endDate: dates[1].format("YYYY-MM-DD"),
+                });
+              }
+            }}
+          />
+        </div>
       </div>
+
+      <Toaster position="top-right" />
     </>
   );
 };

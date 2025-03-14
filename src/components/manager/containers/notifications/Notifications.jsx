@@ -478,7 +478,11 @@ const Notifications = () => {
 
       setBUttonLoading(true);
       try {
-        const response = await axios.post(`${root}/admin/load/${id}`, body);
+        const response = await axios.post(`${root}/admin/load/${id}`, body,{
+          headers:{
+            Authorization:`Bearer ${token}`
+          }
+        });
         toast.success("Ticket Sent Successffuly", {
           duration: 3000,
           style: {

@@ -64,7 +64,7 @@ const DepartmentPerformanceChart = () => {
 
       setChartData(formattedData);
     } catch (error) {
-      toast.error("Error fetching data. Please try again.");
+      toast.error("Error fetching department performance data. Please try again.");
     }
   };
   useEffect(() => {

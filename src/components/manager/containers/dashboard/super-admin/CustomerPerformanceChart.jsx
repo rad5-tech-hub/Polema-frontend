@@ -42,7 +42,7 @@ const CustomerPerformanceChart = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log(response);
+      // console.log(response);
       
       const detailsArray = response.data.data || [];
 

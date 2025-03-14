@@ -187,22 +187,28 @@ const CustomerPlaceOrder = () => {
               Customer Name <span className="text-red-500">*</span>{" "}
             </Text>
             <AntSelect
-              showSearch
-              className="w-full mt-2"
-              placeholder="Select Customer"
-              value={selectedCustomerId || undefined}
-              onChange={setSelectedCustomerId}
-              disabled={customers.length === 0}
-              optionFilterProp="children"
-              filterOption={(input, option) =>
-                option.children.toLowerCase().includes(input.toLowerCase())
-              }>
-              {customers.map((customer) => (
-                <AntSelect.Option key={customer.id} value={customer.id}>
-                  {customer.firstname} {customer.lastname}
-                </AntSelect.Option>
-              ))}
-            </AntSelect>
+  showSearch
+  className="w-full mt-2"
+  placeholder="Select Customer"
+  value={selectedCustomerId || undefined}
+  onChange={setSelectedCustomerId}
+  disabled={customers.length === 0}
+  optionFilterProp="label"
+  filterOption={(input, option) =>
+    option.label.toLowerCase().includes(input.toLowerCase())
+  }
+>
+  {customers.map((customer) => (
+    <AntSelect.Option
+      key={customer.id}
+      value={customer.id}
+      label={`${customer.firstname} ${customer.lastname}`}
+    >
+      {customer.firstname} {customer.lastname}
+    </AntSelect.Option>
+  ))}
+</AntSelect>
+
           </div>
 
           <div className="w-full">
