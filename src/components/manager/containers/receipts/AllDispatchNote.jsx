@@ -3,7 +3,7 @@ import { Heading } from "@radix-ui/themes";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-
+const root = import.meta.env.VITE_ROOT
 const AllDispatchNote = () => {
   const [dispatchNotes, setDispatchNotes] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -24,7 +24,7 @@ const AllDispatchNote = () => {
 
     try {
       const response = await axios.get(
-        "https://polema.bookbank.com.ng/customer/get-all-vehicle-dispatch",
+        `${root}/customer/get-all-vehicle-dispatch`,
         {
           headers: { Authorization: `Bearer ${token}` }, // Attach token in Authorization header
         }

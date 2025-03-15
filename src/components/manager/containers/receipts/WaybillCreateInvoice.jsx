@@ -242,6 +242,7 @@ const WaybillCreateInvoice = () => {
             <label>Send TO:</label>
             <Select.Root
               size="3"
+              value={adminId}
               disabled={superAdmins.length === 0}
               onValueChange={(value) => setAdminId(value)}
             >

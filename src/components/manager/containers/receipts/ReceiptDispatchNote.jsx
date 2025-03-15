@@ -34,12 +34,12 @@ const ReceiptDispatchNote = () => {
     }
 
     console.log(
-      `Fetching data from: https://polema.bookbank.com.ng/customer/view-vehicle/${id}`
+      `Fetching data from:${root}g/customer/view-vehicle/${id}`
     );
 
     // Fetch data from API
     axios
-      .get(`https://polema.bookbank.com.ng/customer/view-vehicle/${id}`)
+      .get(`${root}/customer/view-vehicle/${id}`)
       .then((response) => {
         console.log("API Response:", response); // Log the full response
         const data = response.data.vehicle; // Access the 'vehicle' object inside the response

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { refractor, refractorToTime } from "../../../date";
+import { formatMoney, refractor, refractorToTime } from "../../../date";
 import { faPrint } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
@@ -172,6 +172,7 @@ const Invoice = () => {
               </div>
             </div>
 
+              <p className="mt-4 text-xs">Balance Brought Forward : ₦ {formatMoney(invoice.balanceBeforeDebit)} </p>
             {/* Table Section */}
             <table className="w-full mt-6 sm:mt-8 border-collapse border-spacing-0">
               <thead>
@@ -192,8 +193,8 @@ const Invoice = () => {
               </thead>
               <tbody>
                 {tableData.map((row, index) => (
-                  <tr key={index} className="text-center">
-                    <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
+                  <tr key={index} className={`text-center ${row.debit > row.credit && "text-red-"}`}>
+                    <td className="border border-[#43434380] px-4  py-2 text-xs sm:text-sm">
                       {index + 1}
                     </td>
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
@@ -206,7 +207,7 @@ const Invoice = () => {
                       {row?.order?.rate && row.order.rate}
                     </td>
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                      {row.debit > row.credit ? row.debit : row.credit}
+                      {row.debit > row.credit ? formatMoney(row.debit) : formatMoney(row.credit)}
                     </td>
                   </tr>
                 ))}
@@ -225,6 +226,9 @@ const Invoice = () => {
                 </tr>
               </tfoot>
             </table>
+
+            <p className="mt-4 text-xs">Customer Current Balance : ₦ {formatMoney(invoice.currentBalance)} </p>
+
 
             {/* Additional Table Section */}
             <table className="w-full mt-6 sm:mt-8 border-collapse border-spacing-0">

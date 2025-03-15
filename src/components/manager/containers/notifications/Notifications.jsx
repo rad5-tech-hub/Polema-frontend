@@ -493,6 +493,8 @@ const Notifications = () => {
         setQuantity(false);
       } catch (error) {
         setBUttonLoading(false);
+        console.log(error);
+        
         // toast.error(error)
       }
       // admin/load
