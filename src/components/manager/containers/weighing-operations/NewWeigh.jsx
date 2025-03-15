@@ -261,7 +261,7 @@ const NewWeigh = () => {
           </Button>
         </Flex>
       </form>
-      {/* <Toaster position="top-right" />   */}
+      <Toaster position="top-right" />  
     </>
   );
 };

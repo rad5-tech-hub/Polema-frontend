@@ -323,7 +323,7 @@ const WaybillInvoice = () => {
                   <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm">
                     {/* <p>Name: Michael Smith</p>
                 <p className="mt-2">Sign: ___________</p>
-                <p className="mt-2">Date: 06-12-24</p> */}
+                <p className="mt-2>Date: 06-12-24</p> */}
                   </td>
                   <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm">
                     {/* <p>Name: Chibuike Ugwuanyi</p>

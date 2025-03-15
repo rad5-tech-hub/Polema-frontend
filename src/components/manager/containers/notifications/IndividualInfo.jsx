@@ -3,6 +3,7 @@ import { jwtDecode } from "jwt-decode";
 import _ from "lodash";
 import axios from "axios";
 import { Spinner, Grid, Button, Text } from "@radix-ui/themes";
+import {refractor,formatMoney} from "../../../date"
 import { Modal } from "antd";
 import Image from "../../../../static/image/polema-logo.png";
 import { Toaster, toast, LoaderIcon } from "react-hot-toast";
@@ -269,7 +270,6 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
               <>{_.upperFirst(selectedTicket.type)} Ticket Details</>
             )}
           </div>
-         
 
           <div className="details-container h-[75%]">
             {typeof ticketDetails !== "object" ? (
@@ -426,41 +426,43 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                   {/* Weigh Ticket Example */}
                   {selectedTicket.type === "weigh" && (
                     <>
-                      <div>
-                        <Text className="text-[.56rem] font-black tracking-wide">
+                      <div className="flex w-full justify-between items-center p-2">
+                        <Text className="text-[.9rem] font-black tracking-wide">
                           DRIVER
                         </Text>
-                        <p className="text-[.7rem]">{ticketDetails.driver}</p>
+                        <p className="text-[.9rem]">{ticketDetails.driver}</p>
                       </div>
-                      <div>
-                        <Text className="text-[.56rem] font-black tracking-wide">
+                      <div className="flex w-full justify-between items-center p-2">
+                        <Text className="text-[.9rem] font-black tracking-wide">
                           CUSTOMER NAME
                         </Text>
-                        <p className="text-[.7rem]">
+                        <p className="text-[.9rem]">
                           {`${ticketDetails.transactions?.corder.firstname} ${ticketDetails.transactions?.corder.lastname}`}
                         </p>
                       </div>
-                      <div>
-                        <Text className="text-[.56rem] font-black tracking-wide">
+                      <div className="flex w-full justify-between items-center p-2">
+                        <Text className="text-[.9rem] font-black tracking-wide">
                           QUANTITY
                         </Text>
-                        <p className="text-[.7rem]">
-                          {ticketDetails.transactions?.quantity}
+                        <p className="text-[.9rem]">
+                          {formatMoney(ticketDetails.transactions?.quantity) ||
+                            ""}{" "}
+                          {ticketDetails.transactions?.unit || ""}
                         </p>
                       </div>
-                      <div>
-                        <Text className="text-[.56rem] font-black tracking-wide">
+                      <div className="flex w-full justify-between items-center p-2">
+                        <Text className="text-[.9rem] font-black tracking-wide">
                           PRODUCT
                         </Text>
-                        <p className="text-[.7rem]">
+                        <p className="text-[.9rem]">
                           {ticketDetails.transactions?.porders.name}
                         </p>
                       </div>
-                      <div>
-                        <Text className="text-[.56rem] font-black tracking-wide">
+                      <div className="flex w-full justify-between items-center p-2">
+                        <Text className="text-[.9rem] font-black tracking-wide">
                           VEHICLE NO
                         </Text>
-                        <p className="text-[.7rem]">
+                        <p className="text-[.9rem]">
                           {ticketDetails.vehicleNo}
                         </p>
                       </div>
@@ -608,36 +610,38 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                   )}
 
                   {/* Waybill Details  */}
-                  {selectedTicket.type === "waybill"  && (
+                  {selectedTicket.type === "waybill" && (
                     <>
                       <div className="flex items-center gap-6 justify-between">
                         <Text className="text-[1rem] font-bold font-space tracking-wide">
-                         CUSTOMER
+                          CUSTOMER
                         </Text>
                         <p className="text-[.9rem]">
-                          {`${ticketDetails.transaction.corder.firstname} ${ticketDetails.transaction.corder.lastname} ` || ""}
+                          {`${ticketDetails.transaction.corder.firstname} ${ticketDetails.transaction.corder.lastname} ` ||
+                            ""}
                         </p>
                       </div>
                       <div className="flex items-center gap-6 justify-between">
                         <Text className="text-[1rem] font-bold tracking-wide">
                           PRODUCT ORDERED
                         </Text>
-                        <p className="text-[.9rem]">{ticketDetails.transaction.porders.name}</p>
+                        <p className="text-[.9rem]">
+                          {ticketDetails.transaction.porders.name}
+                        </p>
                       </div>
                       <div className="flex items-center gap-6 justify-between">
                         <Text className="text-[1rem] font-bold tracking-wide">
                           CUSTOMER ADDRESS
                         </Text>
-                              {ticketDetails.address || ""}                      
+                        {ticketDetails.address || ""}
                       </div>
                       <div className="flex items-center gap-6 justify-between">
                         <Text className="text-[1rem] font-bold tracking-wide">
-                       BAGS (FOR PKC)
+                          BAGS (FOR PKC)
                         </Text>
-                              {ticketDetails.bags || ""}                      
+                        {ticketDetails.bags || ""}
                       </div>
                     </>
-                   
                   )}
                   {/* </Grid> */}
 

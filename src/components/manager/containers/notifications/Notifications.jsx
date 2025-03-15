@@ -548,8 +548,8 @@ const Notifications = () => {
                                         </AntButton>
                                       </div>
                                     )}
-
-                                    {notification.type === "cash" && notification.ticketStatus == "approved" && (
+                                    
+                                    {notification.type === "cash" && notification.ticketStatus == "approved"  && (
                                       <div className="button-groups flex gap-4 mt-4">
                                         <AntButton
                                           className="bg-green-500 text-white"
@@ -562,7 +562,7 @@ const Notifications = () => {
                                         </AntButton>
                                       </div>
                                     )}
-                                    {notification.type === "weigh" && notification.ticketStatus === "approved" && (
+                                    {notification.type === "weigh" && notification.ticketStatus === "approved" && decodeToken().roleName.toLowerCase().includes("keeper") && (
                                       <div className="button-groups flex gap-4 mt-4">
                                         <AntButton
                                           className="bg-green-500 text-white"

@@ -224,25 +224,39 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
               </p>
               {summary.bankName && <p>Paid to {summary.bankName}</p>}
             </Flex>
-            <p className="text-lg font-bold mt-4">Ledger Transactions History</p>
+            <p className="text-lg font-bold mt-4">
+              Ledger Transactions History
+            </p>
             {loading ? (
               <Spinner />
             ) : entries.length === 0 ? (
               <p className="text-red-500 p-4">
-                {failedSearch ? "An error occurred. Try again." : "No transactions found."}
+                {failedSearch
+                  ? "An error occurred. Try again."
+                  : "No transactions found."}
               </p>
             ) : (
               entries.map((entry, idx) => (
                 <Grid key={idx} columns="3" gap="2" className="p-1">
                   <p className="text-xs">
-                    {entry.creditType === null && `${entry.quantity} ${entry.unit} of`}{" "}
-                    {entry.product?.name}
+                    {entry.creditType === null &&
+                      `${entry.quantity} ${entry.unit} of`}{" "}
+                    {entry.quantity && formatMoney(entry?.quantity) || ""} {entry.unit && entry?.unit || ""} of  {entry.product?.name}
                   </p>
                   <p className="text-xs">
                     {entry.creditType && `Paid with ${entry.creditType}`}
                   </p>
-                  <p className={`text-xs ${entry.credit > entry.debit ? "text-green-500" : "text-red-500"}`}>
-                    ₦ {entry.debit > entry.credit  ? formatMoney(entry.debit) : formatMoney(entry.credit)}
+                  <p
+                    className={`text-xs ${
+                      entry.credit > entry.debit
+                        ? "text-green-500"
+                        : "text-red-500"
+                    }`}
+                  >
+                    ₦{" "}
+                    {entry.debit > entry.credit
+                      ? formatMoney(entry.debit)
+                      : formatMoney(entry.credit)}
                   </p>
                 </Grid>
               ))
@@ -259,18 +273,30 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
               className="w-20 h-20 mt-2 rounded-md bg-gray-400/40 border-2 cursor-pointer"
               onClick={() => handleFullscreen("weigh", entries[0]?.weighImage)}
               style={{
-                backgroundImage: entries[0]?.weighImage ? `url(${entries[0].weighImage})` : "none",
+                backgroundImage: entries[0]?.weighImage
+                  ? `url(${entries[0].weighImage})`
+                  : "none",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
             />
             {docOrders.authToWeighTickets && (
               <div>
-                <p className="py-2">Vehicle No: {docOrders.authToWeighTickets.vehicleNo}</p>
-                <p className="py-2">Driver's Name: {docOrders.authToWeighTickets.driver}</p>
-                <p className="py-2">Tar Quantity: {docOrders.weighBridge?.tar}</p>
-                <p className="py-2">Gross Quantity: {docOrders.weighBridge?.gross}</p>
-                <p className="py-2">Net Quantity: {docOrders.weighBridge?.net}</p>
+                <p className="py-2">
+                  Vehicle No: {docOrders.authToWeighTickets.vehicleNo}
+                </p>
+                <p className="py-2">
+                  Driver's Name: {docOrders.authToWeighTickets.driver}
+                </p>
+                <p className="py-2">
+                  Tar Quantity: {docOrders.weighBridge?.tar}
+                </p>
+                <p className="py-2">
+                  Gross Quantity: {docOrders.weighBridge?.gross}
+                </p>
+                <p className="py-2">
+                  Net Quantity: {docOrders.weighBridge?.net}
+                </p>
               </div>
             )}
           </div>
@@ -280,7 +306,9 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
             {["invoice", "gatepass", "waybill-invoice"].map((route) => (
               <Button
                 key={route}
-                onClick={() => navigate(`/admin/receipt/create-${route}/${customerId}`)}
+                onClick={() =>
+                  navigate(`/admin/receipt/create-${route}/${customerId}`)
+                }
                 variant="outline"
                 disabled={loading}
               >
@@ -292,8 +320,18 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
         <Button
           onClick={() => {
             onClose();
-            setReceiptImages({ cashticket: null, invoice: null, gatepass: null, waybill: null });
-            setUploadedFiles({ cashticket: null, invoice: null, gatepass: null, waybill: null });
+            setReceiptImages({
+              cashticket: null,
+              invoice: null,
+              gatepass: null,
+              waybill: null,
+            });
+            setUploadedFiles({
+              cashticket: null,
+              invoice: null,
+              gatepass: null,
+              waybill: null,
+            });
           }}
           className="absolute top-2 right-2 bg-red-400 cursor-pointer"
           disabled={loading}
