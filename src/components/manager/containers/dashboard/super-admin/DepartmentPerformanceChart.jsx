@@ -108,7 +108,7 @@ const DepartmentPerformanceChart = () => {
         ) : (
           <>
             <div className="w-full h-[50vh] flex justify-center items-center">
-              {console.log(returnedDateRange)}
+              {/* {console.log(returnedDateRange)} */}
               <p className="text-center mt-4 text-gray-500">
                 No top peforming department from{" "}
                 <b>{refractor(returnedDateRange.start)}</b> to{" "}

@@ -258,6 +258,9 @@ const AllCustomers = () => {
   // Use this function to derive the filtered customer data
   const filteredCustomers = filterCustomers(customerData, searchTerm);
 
+
+
+
   useEffect(() => {
     fetchCustomers();
   }, []);
@@ -345,6 +348,7 @@ const AllCustomers = () => {
           </Table.Body>
         )}
       </Table.Root>
+      
 
       {selectEditCustomer && (
         <EditDialog

@@ -269,6 +269,7 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
               <>{_.upperFirst(selectedTicket.type)} Ticket Details</>
             )}
           </div>
+         
 
           <div className="details-container h-[75%]">
             {typeof ticketDetails !== "object" ? (
@@ -607,7 +608,7 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                   )}
 
                   {/* Waybill Details  */}
-                  {selectedTicket.type === "waybill" && (
+                  {selectedTicket.type === "waybill"  && (
                     <>
                       <div className="flex items-center gap-6 justify-between">
                         <Text className="text-[1rem] font-bold font-space tracking-wide">
