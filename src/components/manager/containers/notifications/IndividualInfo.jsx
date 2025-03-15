@@ -695,7 +695,7 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
           </div>
         </div>
       </Modal>
-      <Toaster position="top-right" />
+      {/* <Toaster position="top-right" /> */}
     </>
   );
 };
