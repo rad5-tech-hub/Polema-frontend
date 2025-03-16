@@ -43,6 +43,13 @@ const EditProductModal = ({ closeModal, product, runFetch }) => {
     }
   };
 
+  // if (product.product === null) {
+  //   return (
+  //     <>
+  //     Not a Valid Product
+  //     </>
+  //   )
+  // }
   return (
     <>
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[101]">
@@ -55,7 +62,7 @@ const EditProductModal = ({ closeModal, product, runFetch }) => {
               <input
                 type="text"
                 disabled
-                placeholder={product?.product.name || "Show product name"}
+                placeholder={product?.product?.name || product.other}
                 className="border h-[44px] px-4 lg:w-[273px] rounded-lg"
               />
             </div>

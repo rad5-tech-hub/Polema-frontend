@@ -45,9 +45,11 @@
   width: 85%;
   transition: width 0.3s ease-in-out;
 }
+
 .search-input:focus-within {
   width: 100%;
 }
+
 .notifications-box::-webkit-scrollbar {
   width: 6px;
 }
@@ -62,15 +64,17 @@
 .notifications-panel {
   transition: transform 0.3s ease-in-out;
   /* overflow-y:scroll ; */
-  
+
 }
 
 .notifications-panel.translate-x-0 {
-  transform: translateX(0); /* Fully visible */
+  transform: translateX(0);
+  /* Fully visible */
 }
 
 .notifications-panel.translate-x-full {
-  transform: translateX(150%); /* Slide out of view */
+  transform: translateX(150%);
+  /* Slide out of view */
 }
 
 .hamburger-icon {
@@ -78,4 +82,8 @@
 }
 
 
-/* Side Pane View  */
+@media print {
+  header {
+    display: none !important;
+  }
+}

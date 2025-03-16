@@ -12,6 +12,7 @@ import {
   TextField,
   Grid,
   Flex,
+  Text,
   Skeleton,
   Spinner,
 } from "@radix-ui/themes";
@@ -19,6 +20,7 @@ import { LoaderIcon } from "react-hot-toast";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import toast, { Toaster } from "react-hot-toast";
+import SignatureCanvas from "../../../signature-pad/SignatureCanvas";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -41,6 +43,8 @@ const EditAdmin = () => {
   const [address, setAddress] = useState("");
   const [deptId, setDeptID] = useState("");
   const [adminDepartments, setAdminDepartments] = useState([]);
+   const [canvasVisible, setCanvasVisible] = useState(false);
+    const [signatureImage, setSignatureImage] = useState(null);
 
   // Fetch departments
   const fetchDept = async () => {
@@ -320,6 +324,7 @@ const EditAdmin = () => {
               >
                 Assign Role
               </label>
+
               <Select.Root onValueChange={setRoleId} defaultValue={roleId}>
                 <Select.Trigger
                   className="w-full mt-2"
@@ -335,6 +340,35 @@ const EditAdmin = () => {
               </Select.Root>
             </div>
 
+            <div className="input-field mt-3">
+              <Text className="text-[15px] font-medium leading-[35px]">
+                Signature
+              </Text>
+              <Flex
+                className="w-full mt-2"
+                onClick={() => {
+                  setCanvasVisible(!canvasVisible);
+                }}
+              >
+                <TextField.Root
+                  placeholder="Sign Here"
+                  value={""}
+                  disabled
+                  className="w-[70%]"
+                ></TextField.Root>
+                <Button
+                  className="w-[30%] bg-theme cursor-pointer"
+                  type="button"
+                >
+                  Sign{" "}
+                </Button>
+              </Flex>
+            </div>
+            {canvasVisible && (
+              <div className="block">
+                <SignatureCanvas onSave={setSignatureImage} />
+              </div>
+            )}
             <div className="input-field mt-3">
               <label
                 className="text-[15px] font-medium leading-[35px]"
