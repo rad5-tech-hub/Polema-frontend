@@ -7,6 +7,7 @@ import CustomerPerformanceChart from "./CustomerPerformanceChart";
 import DepartmentPerformanceChart from "./DepartmentPerformanceChart";
 import SummaryBoxes from "./SummaryBoxes";
 import BankSummaryCharts from "./BankSummaryCharts";
+import SalesPerformance from "./SalesPerformance";
 
 const SuperAdminDashboardDetails = () => {
   return (
@@ -27,8 +28,15 @@ const SuperAdminDashboardDetails = () => {
       </div>
       {/* </div> */}
 
-      {/* Bank Summary Charts  */}
-      <BankSummaryCharts />
+      <div className="shadow-lg p-4 mt-4 mb-4 rounded">
+        {/* Bank Summary Charts  */}
+        <BankSummaryCharts />
+      </div>
+
+      {/* Sales Performance  */}
+      <div className="shadow-lg p-4 mt-4 mb-4 rounded">
+      <SalesPerformance/>
+</div>
     </>
   );
 };

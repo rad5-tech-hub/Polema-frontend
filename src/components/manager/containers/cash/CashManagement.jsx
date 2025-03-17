@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
   Heading,
-  Select,
   Flex,
   Button,
   Separator,
@@ -12,23 +11,24 @@ import {
 } from "@radix-ui/themes";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
-import { Modal, Button as AntButton } from "antd";
+import { Modal, Button as AntButton, Select as AntSelect } from "antd";
 
 const root = import.meta.env.VITE_ROOT;
 
 const CashManagement = () => {
   const [buttonLoading, setButtonLoading] = useState(false);
   const [admins, setAdmins] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [isCashCollection, setIsCashCollection] = useState(true);
   const [dropdownBlur, setDropdownBlur] = useState(true);
-  const [adminId, setAdminId] = useState("");
+  const [adminId, setAdminId] = useState(undefined); // Changed to undefined
+  const [departmentId, setDepartmentId] = useState(undefined); // Changed to undefined
   const [cashAmount, setCashAmount] = useState("");
-  const [modalOpen, setModalOpen] = useState(true); // Modal opens on mount
+  const [modalOpen, setModalOpen] = useState(true);
   const [name, setName] = useState("");
   const [comment, setComment] = useState("");
   const [amount, setAmount] = useState("");
 
-  // Fetch Admins
   const fetchAdmins = async () => {
     const retrToken = localStorage.getItem("token");
     if (!retrToken) {
@@ -51,7 +51,27 @@ const CashManagement = () => {
     }
   };
 
-  // Format Amount
+  const fetchDepartments = async () => {
+    const retrToken = localStorage.getItem("token");
+    if (!retrToken) {
+      toast.error("An error occurred. Try logging in again");
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${root}/dept/view-department`, {
+        headers: { Authorization: `Bearer ${retrToken}` },
+      });
+      if (response.data.departments.length === 0) {
+        toast.error("No departments found.");
+      }
+      setDepartments(response.data.departments);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to fetch departments. Please try again.");
+    }
+  };
+
   const formatAmount = (value) => {
     const cleanedValue = value.replace(/,/g, "");
     if (cleanedValue === "") return "";
@@ -60,13 +80,11 @@ const CashManagement = () => {
       : amount;
   };
 
-  // Parse Input Amount to a Number
   const parseNumber = (input) => {
     const cleanedInput = input.replace(/,/g, "");
     return parseFloat(cleanedInput) || "";
   };
 
-  // Handle Submit
   const handleSubmit = async (e) => {
     if (confirm("Are you sure you want to continue?")) {
       e.preventDefault();
@@ -78,7 +96,7 @@ const CashManagement = () => {
         return;
       }
 
-      if (!name || !cashAmount || !adminId || !comment) {
+      if (!name || !cashAmount || !adminId || !comment ) {
         toast.error("Please fill all required fields.");
         setButtonLoading(false);
         return;
@@ -88,6 +106,7 @@ const CashManagement = () => {
         name,
         comment,
         approvedByAdminId: adminId,
+        departmentId,
         [isCashCollection ? "credit" : "debit"]: cashAmount,
       };
 
@@ -104,8 +123,8 @@ const CashManagement = () => {
           duration: 5500,
         });
 
-        // Clear form fields
-        setAdminId("");
+        setAdminId(undefined); // Reset to undefined
+        setDepartmentId(undefined); // Reset to undefined
         setCashAmount("");
         setName("");
         setComment("");
@@ -121,37 +140,28 @@ const CashManagement = () => {
     }
   };
 
-  // Handle modal button clicks
   const handleCollectCash = () => {
-    console.log("Collect Cash clicked, closing modal");
     setIsCashCollection(true);
     setModalOpen(false);
   };
 
   const handleGiveCash = () => {
-    console.log("Give Cash clicked, closing modal");
     setIsCashCollection(false);
     setModalOpen(false);
   };
 
-  // Debug modal state changes
-  useEffect(() => {
-    console.log("modalOpen state changed to:", modalOpen);
-  }, [modalOpen]);
-
-  // Fetch admins on component mount
   useEffect(() => {
     fetchAdmins();
+    fetchDepartments();
   }, []);
 
   return (
     <>
-      {/* Modal integrated directly into the component */}
       <Modal
         open={modalOpen}
         footer={null}
         closable={false}
-        onCancel={() => setModalOpen(false)} // Optional: allow manual closing for testing
+        onCancel={() => setModalOpen(false)}
       >
         <h1 className="font-space font-bold text-lg">What do you want to do?</h1>
         <div className="flex mt-4 justify-between">
@@ -167,17 +177,16 @@ const CashManagement = () => {
       <div>
         <Flex justify={"between"}>
           <Heading>Cash Management</Heading>
-          {!modalOpen && ( // Only show Select when modal is closed
-            <Select.Root
+          {!modalOpen && (
+            <AntSelect
               defaultValue={isCashCollection ? "Cash Collection" : "Cash Disbursement"}
-              onValueChange={(value) => setIsCashCollection(value === "Cash Collection")}
-            >
-              <Select.Trigger placeholder="Transaction Type" />
-              <Select.Content>
-                <Select.Item value="Cash Disbursement">Cash Disbursement</Select.Item>
-                <Select.Item value="Cash Collection">Cash Collection</Select.Item>
-              </Select.Content>
-            </Select.Root>
+              onChange={(value) => setIsCashCollection(value === "Cash Collection")}
+              style={{ width: 200 }}
+              options={[
+                { value: "Cash Collection", label: "Cash Collection" },
+                { value: "Cash Disbursement", label: "Cash Disbursement" },
+              ]}
+            />
           )}
         </Flex>
         <Separator className="my-4 w-full" />
@@ -211,24 +220,30 @@ const CashManagement = () => {
             </div>
             <div>
               <Text>Approved by:</Text>
-              <Select.Root
+              <AntSelect
                 value={adminId}
-                required
-                onValueChange={(val) => setAdminId(val)}
-              >
-                <Select.Trigger
-                  disabled={dropdownBlur}
-                  className="w-full mt-2"
-                  placeholder="Select Admin"
-                />
-                <Select.Content position="popper">
-                  {admins.map((admin) => (
-                    <Select.Item key={admin.id} value={admin.id}>
-                      {admin.firstname} {admin.lastname}
-                    </Select.Item>
-                  ))}
-                </Select.Content>
-              </Select.Root>
+                onChange={(val) => setAdminId(val)}
+                placeholder="Select Admin"
+                disabled={dropdownBlur}
+                style={{ width: "100%", marginTop: "8px" }}
+                options={admins.map((admin) => ({
+                  value: admin.id,
+                  label: `${admin.firstname} ${admin.lastname}`,
+                }))}
+              />
+            </div>
+            <div>
+              <Text>Department</Text>
+              <AntSelect
+                value={departmentId}
+                onChange={(val) => setDepartmentId(val)}
+                placeholder="Select Department"
+                style={{ width: "100%", marginTop: "8px" }}
+                options={departments.map((dept) => ({
+                  value: dept.id,
+                  label: dept.name,
+                }))}
+              />
             </div>
             <div>
               <Text>Comment/Description</Text>
