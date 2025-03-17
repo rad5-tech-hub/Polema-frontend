@@ -12,7 +12,7 @@ import {
 } from "@radix-ui/themes";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
-import {Modal,Button as AntButton} from "antd"
+import { Modal, Button as AntButton } from "antd";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -23,11 +23,10 @@ const CashManagement = () => {
   const [dropdownBlur, setDropdownBlur] = useState(true);
   const [adminId, setAdminId] = useState("");
   const [cashAmount, setCashAmount] = useState("");
-  const [modalOpen,setModalOpen] = useState(true)
+  const [modalOpen, setModalOpen] = useState(true); // Modal opens on mount
   const [name, setName] = useState("");
   const [comment, setComment] = useState("");
   const [amount, setAmount] = useState("");
-  const [modalSelected,setModalSelected] = useState(false)
 
   // Fetch Admins
   const fetchAdmins = async () => {
@@ -79,7 +78,6 @@ const CashManagement = () => {
         return;
       }
 
-      // Validate form fields
       if (!name || !cashAmount || !adminId || !comment) {
         toast.error("Please fill all required fields.");
         setButtonLoading(false);
@@ -123,27 +121,23 @@ const CashManagement = () => {
     }
   };
 
-  const InitialScreen = ()=>{
-    return <>
-        <Modal open={modalOpen} footer={null} closable={false}>
-            <h1 className="font-space font-bold text-lg">What do you want to do?</h1>
-            <div className="flex mt-4 justify-between">
-            <AntButton className="bg-green-500 text-white" onClick={()=>{
-              setIsCashCollection(true);
-              setModalSelected(true)
-              setModalOpen(false)
+  // Handle modal button clicks
+  const handleCollectCash = () => {
+    console.log("Collect Cash clicked, closing modal");
+    setIsCashCollection(true);
+    setModalOpen(false);
+  };
 
-            }}>Collect Cash</AntButton>
-            <AntButton className="bg-red-500 text-white" onClick={()=>{
-              setIsCashCollection(false);
-              setModalSelected(true)
-              setModalOpen(false)
-            }}>Give Cash</AntButton>
-            </div>
+  const handleGiveCash = () => {
+    console.log("Give Cash clicked, closing modal");
+    setIsCashCollection(false);
+    setModalOpen(false);
+  };
 
-        </Modal>
-    </>
-  }
+  // Debug modal state changes
+  useEffect(() => {
+    console.log("modalOpen state changed to:", modalOpen);
+  }, [modalOpen]);
 
   // Fetch admins on component mount
   useEffect(() => {
@@ -152,97 +146,111 @@ const CashManagement = () => {
 
   return (
     <>
-    <InitialScreen/>
-    <div>
-      <Flex justify={"between"}>
-        <Heading>Cash Management</Heading>
-  {modalSelected &&       <Select.Root
-          // defaultValue="Cash Collection"
-          defaultValue={isCashCollection ? "Cash Collection" : "Cash Disbursement"}
-          onValueChange={(value) =>
-            setIsCashCollection(value === "Cash Collection")
-          }
-        >
-          <Select.Trigger placeholder="Transaction Type" />
-          <Select.Content>
-            <Select.Item value="Cash Disbursement">
-              Cash Disbursement
-            </Select.Item>
-            <Select.Item value="Cash Collection">Cash Collection</Select.Item>
-          </Select.Content>
-        </Select.Root>}
-      </Flex>
-      <Separator className="my-4 w-full" />
+      {/* Modal integrated directly into the component */}
+      <Modal
+        open={modalOpen}
+        footer={null}
+        closable={false}
+        onCancel={() => setModalOpen(false)} // Optional: allow manual closing for testing
+      >
+        <h1 className="font-space font-bold text-lg">What do you want to do?</h1>
+        <div className="flex mt-4 justify-between">
+          <AntButton className="bg-green-500 text-white" onClick={handleCollectCash}>
+            Collect Cash
+          </AntButton>
+          <AntButton className="bg-red-500 text-white" onClick={handleGiveCash}>
+            Give Cash
+          </AntButton>
+        </div>
+      </Modal>
 
-      <form onSubmit={handleSubmit}>
-        <Grid columns={"2"} rows={"2"} gap={"5"}>
-          <div>
-            <Text>{isCashCollection ? "Received From" : "Given To"}</Text>
-            <TextField.Root
-              placeholder="Input Name"
-              className="mt-2"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-          <div>
-            <Text>Amount</Text>
-            <TextField.Root
-              placeholder="Enter Amount"
-              className="mt-2"
-              required
-              value={amount}
-              onChange={(e) => {
-                setCashAmount(parseNumber(e.target.value));
-                setAmount(formatAmount(e.target.value));
-              }}
-            >
-              <TextField.Slot>₦</TextField.Slot>
-            </TextField.Root>
-          </div>
-          <div>
-            <Text>Approved by:</Text>
+      <div>
+        <Flex justify={"between"}>
+          <Heading>Cash Management</Heading>
+          {!modalOpen && ( // Only show Select when modal is closed
             <Select.Root
-              value={adminId}
-              required
-              onValueChange={(val) => setAdminId(val)}
+              defaultValue={isCashCollection ? "Cash Collection" : "Cash Disbursement"}
+              onValueChange={(value) => setIsCashCollection(value === "Cash Collection")}
             >
-              <Select.Trigger
-                disabled={dropdownBlur}
-                className="w-full mt-2"
-                placeholder="Select Admin"
-              />
-              <Select.Content position="popper">
-                {admins.map((admin) => (
-                  <Select.Item key={admin.id} value={admin.id}>
-                    {admin.firstname} {admin.lastname}
-                  </Select.Item>
-                ))}
+              <Select.Trigger placeholder="Transaction Type" />
+              <Select.Content>
+                <Select.Item value="Cash Disbursement">Cash Disbursement</Select.Item>
+                <Select.Item value="Cash Collection">Cash Collection</Select.Item>
               </Select.Content>
             </Select.Root>
-          </div>
-          <div>
-            <Text>Comment/Description</Text>
-            <TextField.Root
-              placeholder="Add your comment"
-              required
-              className="mt-2"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-            />
-          </div>
-        </Grid>
-
-        <Flex justify={"end"} className="mt-4">
-          <Button className="!bg-theme cursor-pointer" type="submit" size="3">
-            {buttonLoading ? <Spinner /> : "Submit"}
-          </Button>
+          )}
         </Flex>
-      </form>
+        <Separator className="my-4 w-full" />
 
-      <Toaster position="top-right" />
-    </div>
+        <form onSubmit={handleSubmit}>
+          <Grid columns={"2"} rows={"2"} gap={"5"}>
+            <div>
+              <Text>{isCashCollection ? "Received From" : "Given To"}</Text>
+              <TextField.Root
+                placeholder="Input Name"
+                className="mt-2"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+            <div>
+              <Text>Amount</Text>
+              <TextField.Root
+                placeholder="Enter Amount"
+                className="mt-2"
+                required
+                value={amount}
+                onChange={(e) => {
+                  setCashAmount(parseNumber(e.target.value));
+                  setAmount(formatAmount(e.target.value));
+                }}
+              >
+                <TextField.Slot>₦</TextField.Slot>
+              </TextField.Root>
+            </div>
+            <div>
+              <Text>Approved by:</Text>
+              <Select.Root
+                value={adminId}
+                required
+                onValueChange={(val) => setAdminId(val)}
+              >
+                <Select.Trigger
+                  disabled={dropdownBlur}
+                  className="w-full mt-2"
+                  placeholder="Select Admin"
+                />
+                <Select.Content position="popper">
+                  {admins.map((admin) => (
+                    <Select.Item key={admin.id} value={admin.id}>
+                      {admin.firstname} {admin.lastname}
+                    </Select.Item>
+                  ))}
+                </Select.Content>
+              </Select.Root>
+            </div>
+            <div>
+              <Text>Comment/Description</Text>
+              <TextField.Root
+                placeholder="Add your comment"
+                required
+                className="mt-2"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              />
+            </div>
+          </Grid>
+
+          <Flex justify={"end"} className="mt-4">
+            <Button className="!bg-theme cursor-pointer" type="submit" size="3">
+              {buttonLoading ? <Spinner /> : "Submit"}
+            </Button>
+          </Flex>
+        </form>
+
+        <Toaster position="top-right" />
+      </div>
     </>
   );
 };

@@ -149,19 +149,19 @@ const CreateDepartmentStore = () => {
       setImage(null);
       setProductId("");
       setDeptId("")
+      setOtherDetails("")
     };
 
     const body = {
-      thresholdValue: threshHoldVal,
-      ...(!checkForDepartmentName(deptName,"plastics") &&{productId: productId}),
+      thresholdValue: threshHoldVal, // Fixed typo from threshHoldVal
+      ...(deptName && !checkForDepartmentName(deptName, "plastics") && { productId: productId }),
       departmentId: deptId,
-      ...(checkForDepartmentName(deptName,"plastics") && {other:otherDetails}),
+      ...(deptName && checkForDepartmentName(deptName, "plastics") && {
+        ...(isProductActive ? { other: otherDetails } : { otherRaw: otherDetails }),
+      }),
       ...(image && { image }),
-      ...(!checkForDepartmentName(deptName,"plastics") && { unit: selectedUnit}),
-
-     
+      ...(deptName && !checkForDepartmentName(deptName, "plastics") && { unit: selectedUnit }),
     };
-
     // console.log(body);
     
     try {

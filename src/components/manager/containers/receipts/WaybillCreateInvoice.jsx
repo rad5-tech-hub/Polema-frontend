@@ -76,7 +76,7 @@ const WaybillCreateInvoice = () => {
   };
 
   const handleTransportChange = (e) => {
-    setSelectedTransport(e.target.value);
+    setCarriedByWho(e.target.value);
   };
 
   const handleSubmit = async (e) => {
@@ -97,6 +97,8 @@ const WaybillCreateInvoice = () => {
       driverLicense: driverLicense,
       transportedBy: carriedByWho,
     };
+
+      // console.log(body);
 
     try {
       // FIRST REQUEST: Create Waybill
@@ -188,7 +190,7 @@ const WaybillCreateInvoice = () => {
             <label>Transport Carried out by</label>
             <select
               required
-              value={selectedTransport}
+              value={carriedByWho}
               onChange={handleTransportChange}
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             >

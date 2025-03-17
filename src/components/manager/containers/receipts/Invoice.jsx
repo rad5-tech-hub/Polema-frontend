@@ -181,6 +181,9 @@ const Invoice = () => {
                     ITEM
                   </th>
                   <th className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
+                    DATE
+                  </th>
+                  <th className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                     DESCRIPTION
                   </th>
                   <th className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
@@ -197,11 +200,15 @@ const Invoice = () => {
                     <td className="border border-[#43434380] px-4  py-2 text-xs sm:text-sm">
                       {index + 1}
                     </td>
+                    <td className="border border-[#43434380] px-4  py-2 text-xs sm:text-sm">
+                      {refractor(row.createdAt)}
+                    </td>
+                    
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                       {row.quantity &&
                         row.unit &&
                         `${row.quantity}  ${row.unit} of`}{" "}
-                      {row.productName}
+                      {`${row.productName} ${row.credit > row.debit ? "returned" :""}`}
                     </td>
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                       {row?.order?.rate && row.order.rate}
@@ -212,11 +219,11 @@ const Invoice = () => {
                   </tr>
                 ))}
               </tbody>
-              <tfoot>
+              {/* <tfoot>
                 <tr>
                   <td
-                    colSpan="3"
-                    className="text-right px-4 py-2 font-bold text-sm sm:text-base"
+                    colSpan="4"
+                    className="text-right mt-4 px-4 py-2 font-bold text-sm sm:text-base"
                   >
                     TOTAL BALANCE:
                   </td>
@@ -224,10 +231,16 @@ const Invoice = () => {
                     {totalCreditBalance.toLocaleString()}
                   </td>
                 </tr>
-              </tfoot>
-            </table>
+              </tfoot> */}
 
-            <p className="mt-4 text-xs">Customer Current Balance : ₦ {formatMoney(invoice.currentBalance)} </p>
+            </table>
+              <div className="flex justify-end w-full text-[0.8rem] mt-6">
+                <div>
+                  <p><span className="underline">TOTAL CREDIT BALANCE</span>: ₦{formatMoney(invoice.currentBalance)}</p>
+                </div>
+              </div>
+
+            {/* <p className="mt-4 text-xs">Customer Current Balance : ₦ {formatMoney(invoice.currentBalance)} </p> */}
 
 
             {/* Additional Table Section */}
