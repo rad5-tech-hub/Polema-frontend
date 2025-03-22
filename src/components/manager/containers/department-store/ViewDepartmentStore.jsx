@@ -32,7 +32,8 @@ const ViewDepartmentStore = () => {
   const [loading, setLoading] = useState(true);
   const [openModal, setOpenModal] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
-
+  const [products,setProducts] = useState([]);
+  const [rawMaterials,setRawMaterials] = useState([]);
   // Search state
   const [searchCriteria, setSearchCriteria] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -49,14 +50,18 @@ const ViewDepartmentStore = () => {
     try {
       const response = await axios.get(
         `${root}/dept/${
-          isProductActive ? "view-deptstore-prod" : "view-deptstore-raw"
+          "view-deptstore-prod" 
         }`,
         {
           headers: { Authorization: `Bearer ${retrToken}` },
         }
       );
-      setStore(response.data.stores);
-      setFilteredStore(response.data.stores); // Initially show all items
+      
+      // setStore(response.data.stores);
+      setRawMaterials(response.data.rawMaterials);
+      setProducts(response.data.departmentProducts);
+      // setFilteredStore(response.data.stores); // Initially show all items
+      // setFilteredStore(store);
     } catch (error) {
       console.error("Error fetching store data:", error);
       toast.error("Failed to fetch store data");
@@ -119,6 +124,12 @@ const ViewDepartmentStore = () => {
     setLoading(true);
     fetchStore();
   }, [isProductActive]);
+
+  //changing products based on click 
+  useEffect(() => {
+    setStore(isProductActive ? products : rawMaterials);
+    setFilteredStore(isProductActive ? products : rawMaterials);
+  })
 
   // Handle opening modals
   const handleOpenModal = (type, product = null) => {
@@ -245,7 +256,7 @@ const ViewDepartmentStore = () => {
                 <Table.RowHeaderCell
                   dangerouslySetInnerHTML={{
                     __html: highlightText(
-                      storeItem.product?.name ?? storeItem.other ?? "N/A",
+                      storeItem.product?.name ?? storeItem.name ?? "N/A",
                       searchTerm
                     ),
                   }}

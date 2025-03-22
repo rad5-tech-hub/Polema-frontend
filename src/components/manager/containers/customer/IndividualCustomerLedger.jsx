@@ -111,7 +111,7 @@ const IndividualCustomerLedger = () => {
   };
 
   const handleModal = (tranxId) => {
-    if (!tranxId) return;
+    // if (!tranxId) return;
 
     setModalOpen(true);
     setTransactionId(tranxId);

@@ -170,10 +170,13 @@ const EditAdmin = () => {
       email: email,
       phoneNumber: phone,
       ...(address && { address }),
+      ...(signatureImage && {signature:signatureImage}),
 
       roleId,
       department: [...adminDepartments, ...additionalDepartments],
     };
+
+    
 
     try {
       const response = await axios.patch(
@@ -202,7 +205,7 @@ const EditAdmin = () => {
       // setAdditionalDepartments([]);
       setTimeout(() => {
         navigate("/admin/admins/view-admins");
-      }, 8000);
+      }, 5000);
     } catch (error) {
       console.log(error);
       setIsLoading(false);

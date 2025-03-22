@@ -2496,6 +2496,11 @@ video {
   color: rgb(234 179 8 / var(--tw-text-opacity, 1));
 }
 
+.text-red-400 {
+  --tw-text-opacity: 1;
+  color: rgb(248 113 113 / var(--tw-text-opacity, 1));
+}
+
 .underline {
   text-decoration-line: underline;
 }
@@ -2607,6 +2612,12 @@ video {
   transition-duration: 150ms;
 }
 
+.transition-colors {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
 .duration-100 {
   transition-duration: 100ms;
 }
@@ -2630,6 +2641,10 @@ video {
 
 .hover\:bg-\[\#444242\]\/85:hover {
   background-color: rgb(68 66 66 / 0.85);
+}
+
+.hover\:bg-black\/10:hover {
+  background-color: rgb(0 0 0 / 0.1);
 }
 
 .hover\:bg-blue-600:hover {
@@ -2715,6 +2730,10 @@ video {
 
 .hover\:bg-theme\/85:hover {
   background-color: rgb(67 67 67 / 0.85);
+}
+
+.hover\:bg-gray-400\/10:hover {
+  background-color: rgb(156 163 175 / 0.1);
 }
 
 .hover\:text-black:hover {

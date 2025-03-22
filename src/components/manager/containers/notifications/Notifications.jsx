@@ -54,8 +54,9 @@ const Notifications = () => {
         ...response.data.data.readNotifications,
       ];
 
-      setNotifications(generalNotifications);
-      setAllNotifications(generalNotifications);
+      // setNotifications(generalNotifications);
+      // Let the notifications that come in be unread by default 
+      setAllNotifications(response.data.data.unreadNotifications);
       setUnreadNotifications(fetchedUnreadNotifications);
       setFetchLoading(false);
     } catch (error) {
@@ -150,7 +151,7 @@ const Notifications = () => {
       const response = await axios.post(`${root}/${cashTicketConfirm}/${ticketId}`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success(response.data.message);
+      toast.success(response.data.message || "Cash ticket confirmed successfully", { duration: 4500 });
       fetchNotifications();
       setConfirmBtnLoading((prev) => ({ ...prev, [ticketId]: false }));
     } catch (error) {
@@ -448,7 +449,7 @@ const Notifications = () => {
                   setOpen={setDetailsPageOpen}
                 />
               )}
-              <div className="absolute right-[10px] mt-3 flex gap-1 items-center">
+              {/* <div className="absolute right-[10px] mt-3 flex gap-1 items-center">
                 <label htmlFor="switch" className="text-sm cursor-pointer font-amsterdam">
                   Unread
                 </label>
@@ -463,7 +464,7 @@ const Notifications = () => {
                     }
                   }}
                 />
-              </div>
+              </div> */}
 
               <Tabs.Root defaultValue="all" className="!overflow-visible">
                 <Tabs.List>

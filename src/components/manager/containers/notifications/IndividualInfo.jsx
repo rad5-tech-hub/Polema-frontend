@@ -537,7 +537,9 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                         <Text className="text-[.56rem] font-black tracking-wide">
                           AMOUNT
                         </Text>
-                        <p className="text-[.9rem]">{ticketDetails.amount}</p>
+                        <p className="text-[.9rem]">
+                          ₦{formatMoney(ticketDetails.amount)}
+                        </p>
                       </div>
                       <div className="flex items-center gap-6 justify-between">
                         <Text className="text-[.56rem] font-black tracking-wide">
@@ -551,11 +553,15 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                         </Text>
                         {ticketDetails.creditOrDebit === "credit" ? (
                           <p className="text-[.9rem] text-green-500">
-                            Give Cash
+                            {/* Give Cash */}
+                            {/* This was changed to collected cash because if the cash is given , the admin collect it  */}
+                            Collect Cash
                           </p>
                         ) : (
                           <p className="text-[.9rem] text-red-500">
-                            Collected Cash
+                            {/* This was changed because of the reverse of the abpve comments  */}
+                            {/* Collected Cash */}
+                            Give Cash
                           </p>
                         )}
                       </div>

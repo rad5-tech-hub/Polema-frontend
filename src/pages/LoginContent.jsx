@@ -3,6 +3,7 @@ import Image from "../static/image/login-bg.png";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import {jwtDecode} from "jwt-decode"  
 import { TextField, Heading, Card, Button } from "@radix-ui/themes";
 import {
   LockClosedIcon,
@@ -28,9 +29,17 @@ const LoginContent = () => {
         email: email,
         password: e.target[1].value,
       });
+        console.log(response.data);
 
+      const adminData = {
+        firstname: response.data.admin.lastname,
+        lastname: response.data.admin.firstname,
+        role: jwtDecode(response.data.token).roleName,
+      }; 
       localStorage.setItem("token", response.data.token);
-      localStorage.setItem("adminFirstName", response.data.admin.firstname);
+      localStorage.setItem("adminData", JSON.stringify(adminData));
+
+        
 
       // toast.success("Login Successful", {
       //   style: {

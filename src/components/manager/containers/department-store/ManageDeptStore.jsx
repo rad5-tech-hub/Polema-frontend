@@ -39,6 +39,9 @@ const ManageDeptStore = () => {
   const [signatureImage, setSignatureImage] = useState(null);
   const [productActive, setProductActive] = useState(true);
   const [modalClicked, setModalClicked] = useState(false);
+  const [rawMaterials,setRawMaterials] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [description,setDescription] = useState("");
 
   //State management for the dialog box
   const [questionDialogOpen, setQuestionDialogOpen] = React.useState(true);
@@ -92,7 +95,7 @@ const ManageDeptStore = () => {
     try {
       const response = await axios.get(
         `${root}/dept/${
-          productActive ? "view-deptstore-prod" : "view-deptstore-raw"
+           "view-deptstore-prod" 
         }`,
         {
           headers: {
@@ -100,7 +103,9 @@ const ManageDeptStore = () => {
           },
         }
       );
-      setStoreItems(response.data.parsedStores || response.data.stores);
+      // setStoreItems(response.data.parsedStores || response.data.stores);
+      setRawMaterials(response.data.rawMaterials);
+      setProducts(response.data.departmentProducts);
     } catch (error) {
       console.log(error);
     }
@@ -123,6 +128,7 @@ const ManageDeptStore = () => {
       setBatchNumber("");
       setQuantityOut("");
       setSupplierName("");
+      setDescription("")
       setCanvasVisible(false);
     };
 
@@ -147,6 +153,8 @@ const ManageDeptStore = () => {
           // batchNo: batchNumber,
           name: supplierName,
           quantity: quantityOut,
+          ...(description && { comments:description }),
+          
           signature: signatureImage,
         },
         {
@@ -172,6 +180,12 @@ const ManageDeptStore = () => {
       );
     }
   };
+
+   //changing products based on click 
+    useEffect(() => {
+      setStoreItems(productActive ? products : rawMaterials);
+      // setFilteredStore(isProductActive ? products : rawMaterials);
+    })
 
   // Initial Screen showing two buttons
   const InitialScreen = () => {
@@ -294,7 +308,8 @@ const ManageDeptStore = () => {
                 defaultValue={productActive ? "products" : "raw-materials"}
                 onValueChange={(val) => {
                   setProductActive(val === "products");
-                }}>
+                }}
+              >
                 <Select.Trigger />
                 <Select.Content position="popper">
                   <Select.Group>
@@ -321,13 +336,14 @@ const ManageDeptStore = () => {
                     setItemID(val);
                   }}
                   value={itemId}
-                  style={{ width: "100%" }}>
+                  style={{ width: "100%" }}
+                >
                   {storeItems.map((item) => {
                     return (
                       <AntSelect.Option value={item.id}>
                         {/* {item.product?.name || ""} {`(${item.unit})`} */}
                         {item.product === null
-                          ? `${item.other} (${
+                          ? `${item.name || ""} (${
                               formatMoney(item?.quantity) || ""
                             } ${item.unit || ""} left)`
                           : `${item.product.name} (${
@@ -351,7 +367,8 @@ const ManageDeptStore = () => {
                   value={supplierName}
                   onChange={(e) => {
                     setSupplierName(e.target.value);
-                  }}></TextField.Root>
+                  }}
+                ></TextField.Root>
               </div>
               <div>
                 <Text>
@@ -368,7 +385,26 @@ const ManageDeptStore = () => {
                   value={quantityOut}
                   onChange={(e) => {
                     setQuantityOut(e.target.value);
-                  }}></TextField.Root>
+                  }}
+                ></TextField.Root>
+              </div>
+              <div>
+                <Text> Description</Text>
+                <Flex
+                  className="w-full"
+               
+                >
+                  <TextField.Root
+                    placeholder="Enter Description here"
+                    
+                    value={description}
+                    onChange={(e) => {
+                      setDescription(e.target.value)
+                    }}
+                    className="w-full"
+                  ></TextField.Root>
+                 
+                </Flex>
               </div>
               <div>
                 <Text>Siganture</Text>
@@ -376,12 +412,14 @@ const ManageDeptStore = () => {
                   className="w-full"
                   onClick={() => {
                     setCanvasVisible(!canvasVisible);
-                  }}>
+                  }}
+                >
                   <TextField.Root
                     placeholder="Sign Here"
                     value={""}
                     disabled
-                    className="w-[70%]"></TextField.Root>
+                    className="w-[70%]"
+                  ></TextField.Root>
                   <Button className="w-[30%] bg-theme" type="button">
                     Sign{" "}
                   </Button>
@@ -394,7 +432,8 @@ const ManageDeptStore = () => {
                 size={"3"}
                 className="bg-theme mt-12 cursor-pointer"
                 type="submit"
-                disabled={loading}>
+                disabled={loading}
+              >
                 {loading ? <Spinner /> : _.upperFirst(storeAction)}
               </Button>
             </Flex>

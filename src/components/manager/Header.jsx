@@ -10,8 +10,11 @@ import Notifications from "./containers/notifications/Notifications";
 
 const Header = ({ sidebarOpen, setSidebarOpen }) => {
   const getAdminName = () => {
-    const name = localStorage.getItem("adminFirstName");
-    return name || "Admin";
+    const name = localStorage.getItem("adminData");
+    if (name) {
+      const adminData = JSON.parse(name);
+      return `${adminData.firstname} (${adminData.role})`;
+    }
   };
 
   return (

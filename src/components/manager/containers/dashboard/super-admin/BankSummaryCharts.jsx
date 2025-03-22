@@ -104,10 +104,10 @@ const App = () => {
         });
       }
 
-      console.log("Formatted Chart Data:", formattedData);
+      // console.log("Formatted Chart Data:", formattedData);
       if (formattedData.length === 0 || formattedData.every((d) => Object.values(d).slice(1).every((v) => v === 0))) {
         // console.log("No meaningful data to display.");
-        toast.error("No meaningful data to display.");
+        // toast.error("No meaningful data to display.");
         setChartData([]);
       } else {
         setChartData(formattedData);

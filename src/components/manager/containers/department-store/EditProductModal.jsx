@@ -62,7 +62,7 @@ const EditProductModal = ({ closeModal, product, runFetch }) => {
               <input
                 type="text"
                 disabled
-                placeholder={product?.product?.name || product.other}
+                placeholder={product?.product?.name || product?.name}
                 className="border h-[44px] px-4 lg:w-[273px] rounded-lg"
               />
             </div>
