@@ -54,7 +54,7 @@ const Notifications = () => {
         ...response.data.data.readNotifications,
       ];
 
-      // setNotifications(generalNotifications);
+      setNotifications(response.data.data.unreadNotifications);
       // Let the notifications that come in be unread by default 
       setAllNotifications(response.data.data.unreadNotifications);
       setUnreadNotifications(fetchedUnreadNotifications);
@@ -399,6 +399,7 @@ const Notifications = () => {
 
   useEffect(() => {
     fetchNotifications();
+    
     fetchAdminDetails();
   }, []);
 

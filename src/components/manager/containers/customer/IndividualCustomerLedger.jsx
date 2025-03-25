@@ -111,7 +111,7 @@ const IndividualCustomerLedger = () => {
   };
 
   const handleModal = (tranxId) => {
-    // if (!tranxId) return;
+    if (!tranxId) return;
 
     setModalOpen(true);
     setTransactionId(tranxId);
@@ -188,15 +188,17 @@ const IndividualCustomerLedger = () => {
           <Table.Row>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>PRODUCT</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>QUANTITY</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>UNIT</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>QUANTITY</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>UNIT PRICE</Table.ColumnHeaderCell>
+
             <Table.ColumnHeaderCell className="text-green-500">
-              CREDIT
+              CREDIT(₦)
             </Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell className="text-red-500">
-              DEBIT
+              DEBIT(₦)
             </Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>BALANCE</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>BALANCE(₦)</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -213,8 +215,10 @@ const IndividualCustomerLedger = () => {
               >
                 <Table.Cell>{refractor(entry.createdAt)}</Table.Cell>
                 <Table.Cell>{getProductByID(entry.productId)}</Table.Cell>
-                <Table.Cell>{entry.quantity}</Table.Cell>
                 <Table.Cell>{entry.unit}</Table.Cell>
+                <Table.Cell>{entry.quantity}</Table.Cell>
+                <Table.Cell>{entry.unitPrice ? formatMoney(entry.unitPrice) :""}</Table.Cell>
+
                 <Table.Cell className="text-green-500 font-bold">
                   {formatMoney(entry.credit > entry.debit ? entry.credit : " ")}
                 </Table.Cell>

@@ -117,7 +117,7 @@ const CreateInvoice = () => {
             <label>Customer Name</label>
             <input
               type="text"
-              disabled
+              // disabled
               value={
                 entry?.ledgerEntries?.[0]?.customer
                   ? `${entry.ledgerEntries[0].customer.firstname} ${entry.ledgerEntries[0].customer.lastname}`

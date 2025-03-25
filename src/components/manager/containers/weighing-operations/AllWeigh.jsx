@@ -47,6 +47,7 @@ const AllWeigh = () => {
             <Table.ColumnHeaderCell>GROSS</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>TAR</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>NET</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>EXTRA</Table.ColumnHeaderCell>
 
             <Table.ColumnHeaderCell>VEHICLE NUMBER</Table.ColumnHeaderCell>
           </Table.Row>
@@ -67,6 +68,8 @@ const AllWeigh = () => {
                   <Table.Cell>{item.gross}</Table.Cell>
                   <Table.Cell>{item.tar}</Table.Cell>
                   <Table.Cell>{item.net}</Table.Cell>
+                  <Table.Cell>{item.extra || 0}</Table.Cell>
+
                   <Table.Cell>{item.vehicleNo}</Table.Cell>
                 </Table.Row>
               );

@@ -416,7 +416,7 @@ const AddProducts = () => {
           </div>
         </div>
 
-        {selectedCategory !== "raw-materials" && (
+        {/* {selectedCategory !== "raw-materials" && (
           <div className="input-field mt-3 flex justify-end">
             <div>
               <label
@@ -438,7 +438,7 @@ const AddProducts = () => {
               </Switch.Root>
             </div>
           </div>
-        )}
+        )} */}
 
         {pricePlan && (
           <>

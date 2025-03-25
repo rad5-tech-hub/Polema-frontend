@@ -68,6 +68,7 @@ const IndividualDepartmentLedger = () => {
             <Table.ColumnHeaderCell>PRODUCTS</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>UNITS</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>QUANTITY</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>UNIT PRICE</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell className="text-green-500">
               CREDIT(₦)
             </Table.ColumnHeaderCell>
@@ -92,6 +93,7 @@ const IndividualDepartmentLedger = () => {
                   <Table.Cell>{item.productName}</Table.Cell>
                   <Table.Cell>{item.unit}</Table.Cell>
                   <Table.Cell>{item.quantity}</Table.Cell>
+                  <Table.Cell>{item.unitPrice}</Table.Cell>
                   <Table.Cell className="text-green-500 font-bold">
                     {formatMoney(item.credit > item.debit ? item.credit : "")}
                   </Table.Cell>

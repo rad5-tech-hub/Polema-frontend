@@ -1,3 +1,5 @@
+
+// ₦₦₦₦₦ 
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { Suspense } from "react";
 // import "antd/dist/reset.css";

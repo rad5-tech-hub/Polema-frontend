@@ -52,7 +52,7 @@ const DepartmentPerformanceChart = () => {
       const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("API Response:", response.data);
+      // console.log("API Response:", response.data);
 
       const detailsArray = response.data?.data || [];
       setReturnedDateRange({
@@ -99,7 +99,7 @@ const DepartmentPerformanceChart = () => {
         return dataPoint;
       });
 
-      console.log("Formatted Chart Data:", formattedData);
+      // console.log("Formatted Chart Data:", formattedData);
       setChartData(formattedData);
     } catch (error) {
       console.error("Fetch Error:", error.response?.data || error.message);
@@ -123,7 +123,7 @@ const DepartmentPerformanceChart = () => {
 
   // Fetch data on date range change
   useEffect(() => {
-    console.log("Date Range Changed:", dateRange);
+    // console.log("Date Range Changed:", dateRange);
     fetchChartData(dateRange.startDate, dateRange.endDate);
   }, [dateRange]);
 

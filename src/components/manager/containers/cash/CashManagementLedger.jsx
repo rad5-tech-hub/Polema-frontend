@@ -51,30 +51,10 @@ const CashManagementLedger = () => {
     }
   };
 
-  const fetchSuperiorAdmins = async () => {
-    const retrToken = localStorage.getItem("token");
-    if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
-      return;
-    }
 
-    try {
-      const response = await axios.get(`${root}/admin/all-admin`, {
-        headers: { Authorization: `Bearer ${retrToken}` },
-      });
-      setAdmins(response.data.staffList);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const matchAdminNameById = (id) => {
-    const admin = admins.find((admin) => admin.id === id);
-    return admin ? `${admin.firstname} ${admin.lastname}` : "Unknown";
-  };
 
   useEffect(() => {
-    fetchSuperiorAdmins();
+    
     fetchCashManagementLedger();
   }, []);
 
@@ -108,9 +88,9 @@ const CashManagementLedger = () => {
             <Table.ColumnHeaderCell>RECEIVED BY</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>GIVEN TO</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>APPROVED BY</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>CREDIT</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>DEBIT</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>BALANCE</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-green-500">CREDIT(₦)</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-red-500">DEBIT(₦)</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>BALANCE(₦)  </Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
@@ -133,7 +113,7 @@ const CashManagementLedger = () => {
                   {entry.debit > entry.credit && entry.name}
                 </Table.RowHeaderCell>
                 <Table.RowHeaderCell>
-                  {matchAdminNameById(entry.approvedByAdminId)}
+                  {entry.approvedByRole.name || ""}
                 </Table.RowHeaderCell>
                 <Table.RowHeaderCell className="text-green-500">
                   {entry.credit > entry.debit && formatMoney(entry.credit)}

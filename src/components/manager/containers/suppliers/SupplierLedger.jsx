@@ -220,6 +220,7 @@ const SupplierLedger = () => {
           <Table.ColumnHeaderCell>PRODUCT</Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell>UNIT</Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell>QUANTITY</Table.ColumnHeaderCell>
+          <Table.ColumnHeaderCell>UNIT PRICE</Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell className="text-green-500">
             CREDIT(₦)
           </Table.ColumnHeaderCell>
@@ -243,6 +244,7 @@ const SupplierLedger = () => {
                   </Table.Cell>
                   <Table.Cell>{entry.unit}</Table.Cell>
                   <Table.Cell>{entry.quantity}</Table.Cell>
+                  <Table.Cell>{entry.unitPrice ? formatMoney(entry.unitPrice) :""}</Table.Cell>
                   <Table.Cell className="text-green-500">
                     {formatMoney(
                       entry.credit > entry.debit ? entry.credit : ""

@@ -130,7 +130,7 @@ const CreateGatepass = () => {
             <label>Driver's Name</label>
             <input
               type="text"
-              disabled
+              // disabled
               value={entryDetails.order?.authToWeighTickets?.driver || ""}
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
@@ -151,7 +151,7 @@ const CreateGatepass = () => {
             <label>Vehicle No</label>
             <input
               type="text"
-              disabled
+              // disabled
               value={entryDetails.order?.authToWeighTickets?.vehicleNo || ""}
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
@@ -160,7 +160,7 @@ const CreateGatepass = () => {
             <label>Owner of Goods</label>
             <input
               type="text"
-              disabled
+              // disabled
               value={`${
                 entryDetails.ledgerSummary?.ledgerEntries[0]?.customer
                   ?.firstname || ""

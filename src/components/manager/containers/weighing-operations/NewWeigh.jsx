@@ -110,7 +110,11 @@ const NewWeigh = () => {
           },
         }
       );
-      toast.success("New Weigh Successful");
+      toast.success("New Weigh Successful",{
+        style:{
+          padding:"20px"
+        }
+      });
       setButtonLoading(false);
       setFullName("");
       setQuantityNet("");
@@ -123,6 +127,7 @@ const NewWeigh = () => {
       setImageURL("");
     } catch (error) {
       console.error("Submission failed:", error);
+      console.log(error.response.data)
       setButtonLoading(false);
     }
   };
@@ -250,7 +255,7 @@ const NewWeigh = () => {
               placeholder="Show Net"
               className="mt-2"
               disabled
-              value={quantityNet - intialQuantity}
+              value={(quantityNet - intialQuantity).toFixed(4)}
             />
           </div>
         </Grid>

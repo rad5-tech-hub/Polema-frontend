@@ -82,9 +82,7 @@ const ViewSupplierOrder = () => {
       );
 
       const orders = response.data.orders || response.data;
-      orders.length === 0
-        ? setFailedSearch(true)
-        : setOrders(orders);
+      orders.length === 0 ? setFailedSearch(true) : setOrders(orders);
     } catch (error) {
       console.log(error);
       setFailedSearch(true);
@@ -124,9 +122,11 @@ const ViewSupplierOrder = () => {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {failedSearch ? <>
-          <p className="p-4">No records found</p>
-          </> :   orders.length === 0 ? (
+          {failedSearch ? (
+            <>
+              <p className="p-4">No records found</p>
+            </>
+          ) : orders.length === 0 ? (
             <div className="p-4">
               <Spinner />
             </div>
@@ -142,7 +142,7 @@ const ViewSupplierOrder = () => {
                   </Table.Cell>
                   <Table.Cell>{getProductNamebyId(item.productId)}</Table.Cell>
                   <Table.Cell>{formatMoney(item.price)}</Table.Cell>
-                  <Table.Cell>{formatMoney(item.quantity)}</Table.Cell>
+                  <Table.Cell>{item.quantity}</Table.Cell>
                   <Table.Cell>{item.comments}</Table.Cell>
                   <Table.Cell>
                     <DropdownMenu.Root>
@@ -170,7 +170,6 @@ const ViewSupplierOrder = () => {
               );
             })
           )}
-        
         </Table.Body>
       </Table.Root>
       <Toaster position="top-right" />

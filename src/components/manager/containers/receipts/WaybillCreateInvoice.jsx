@@ -171,7 +171,7 @@ const WaybillCreateInvoice = () => {
             <input
               type="text"
               placeholder="Input"
-              disabled
+              // disabled
               value={ledgerEntries?.authToWeighTickets?.driver || ""}
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
@@ -205,7 +205,7 @@ const WaybillCreateInvoice = () => {
             <label>Vehicle No</label>
             <input
               placeholder="Input"
-              disabled
+              // disabled
               value={ledgerEntries?.authToWeighTickets?.vehicleNo || ""}
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
