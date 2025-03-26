@@ -20,6 +20,10 @@ const refractorToTime = (ISO_DATE) => {
 
 // Funciton to format money
 function formatMoney(value) {
+  //checked for null
+  if (value === null || value === undefined) {
+    return "";
+  }
   // Convert to a number if it's a string
   value = typeof value === "string" ? parseFloat(value) : value;
 
