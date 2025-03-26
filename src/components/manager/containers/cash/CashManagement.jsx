@@ -96,7 +96,7 @@ const CashManagement = () => {
         return;
       }
 
-      if (!name || !cashAmount || !adminId || !comment ) {
+      if (!name || !cashAmount || !adminId || !comment) {
         toast.error("Please fill all required fields.");
         setButtonLoading(false);
         return;
@@ -163,9 +163,14 @@ const CashManagement = () => {
         closable={false}
         onCancel={() => setModalOpen(false)}
       >
-        <h1 className="font-space font-bold text-lg">What do you want to do?</h1>
+        <h1 className="font-space font-bold text-lg">
+          What do you want to do?
+        </h1>
         <div className="flex mt-4 justify-between">
-          <AntButton className="bg-green-500 text-white" onClick={handleCollectCash}>
+          <AntButton
+            className="bg-green-500 text-white"
+            onClick={handleCollectCash}
+          >
             Collect Cash
           </AntButton>
           <AntButton className="bg-red-500 text-white" onClick={handleGiveCash}>
@@ -179,8 +184,12 @@ const CashManagement = () => {
           <Heading>Cash Management</Heading>
           {!modalOpen && (
             <AntSelect
-              defaultValue={isCashCollection ? "Cash Collection" : "Cash Disbursement"}
-              onChange={(value) => setIsCashCollection(value === "Cash Collection")}
+              defaultValue={
+                isCashCollection ? "Cash Collection" : "Cash Disbursement"
+              }
+              onChange={(value) =>
+                setIsCashCollection(value === "Cash Collection")
+              }
               style={{ width: 200 }}
               options={[
                 { value: "Cash Collection", label: "Cash Collection" },
@@ -227,7 +236,7 @@ const CashManagement = () => {
                 disabled={dropdownBlur}
                 style={{ width: "100%", marginTop: "8px" }}
                 options={admins.map((admin) => ({
-                  value: admin.id,
+                  value: admin.role.id,
                   label: `${admin.firstname} ${admin.lastname}`,
                 }))}
               />

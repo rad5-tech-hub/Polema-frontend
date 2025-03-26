@@ -227,7 +227,7 @@ const SupplierLedger = () => {
           <Table.ColumnHeaderCell className="text-red-500">
             DEBIT(₦)
           </Table.ColumnHeaderCell>
-          <Table.ColumnHeaderCell>BALANCE</Table.ColumnHeaderCell>
+          <Table.ColumnHeaderCell>BALANCE(₦)</Table.ColumnHeaderCell>
         </Table.Header>
         <Table.Body>
           {ledger.length === 0 ? (
@@ -253,7 +253,7 @@ const SupplierLedger = () => {
                   <Table.Cell className="text-red-500">
                     {formatMoney(entry.debit > entry.credit ? entry.debit : "")}
                   </Table.Cell>
-                  <Table.Cell>{entry.balance}</Table.Cell>
+                  <Table.Cell>{formatMoney(entry.balance)}</Table.Cell>
                 </Table.Row>
               );
             })
