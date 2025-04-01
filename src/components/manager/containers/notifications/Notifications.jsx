@@ -32,6 +32,7 @@ import { Button as AntButton, Switch } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import IndividualInfo from "./IndividualInfo";
+import { DeleteOutlined } from "@ant-design/icons";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -53,6 +54,7 @@ const Notifications = () => {
   const [confirmAuthOpen, setConfirmAuthOpen] = useState({});
   const [confirmBtnLoading, setConfirmBtnLoading] = useState({});
   const [selectedTicket, setSelectedTicket] = useState("");
+  const [selectedNotificationIds, setSelectedNotificationIds] = useState([]);
 
   // State management for SelectAdminSidePane
   const [sidePaneState, setSidePaneState] = useState({
@@ -243,6 +245,31 @@ const Notifications = () => {
       return error.status;
     }
   };
+
+  // Function to delete notifications
+ const deleteNotifications = async () => {
+   const token = localStorage.getItem("token");
+   if (!token) {
+     toast.error("An error occurred, try logging in again");
+     return;
+   }
+
+   try {
+     const response = await axios.delete(`${root}/admin/delete-notifications`, {
+       headers: { Authorization: `Bearer ${token}` },
+       data: { notificationIds: selectedNotificationIds }, // Changed from notificationsIds to notificationIds
+     });
+
+     toast.success("Notifications deleted successfully");
+     fetchNotifications();
+     setSelectedNotificationIds([]); // Clear the selected IDs after successful deletion
+   } catch (error) {
+     console.error("Error deleting notifications:", error);
+     toast.error(
+       error.response?.data?.message || "Error deleting notifications"
+     );
+   }
+ };
 
   const SelectAdminSidePane = ({ type, ticketID, ticketStatus }) => {
     const approveTicket = async (ticketType, ticketId) => {
@@ -564,6 +591,17 @@ const Notifications = () => {
                   <Tabs.Trigger value="inventory">Inventory</Tabs.Trigger>
                 </Tabs.List>
 
+                {selectedNotificationIds.length > 0 && (
+                  <div className="delete-icon flex justify-end mt-2 sticky">
+                    <DeleteOutlined
+                      className="text-red-400 cursor-pointer hover:text-lg"
+                      onClick={() => {
+                        deleteNotifications()
+                      }}
+                    />
+                  </div>
+                )}
+
                 <div
                   className="pt-3 max-h-[100vh] w-full notifications-box"
                   style={{ overflowY: "", overflowX: "" }}
@@ -585,9 +623,41 @@ const Notifications = () => {
                                 // setSelectedTicket(notification);
                                 // setDetailsPageOpen(true);
                               }}
-                              className="mb-3 p-2 rounded cursor-pointer relative"
+                              className={`mb-3 p-2 rounded cursor-pointer relative ${
+                                selectedNotificationIds.includes(
+                                  notification.id
+                                ) && "disabled"
+                              }`}
+                              style={{
+                                opacity: selectedNotificationIds.includes(
+                                  notification.id
+                                )
+                                  ? 0.7
+                                  : 1,
+                                transition: "opacity 0.2s ease-in-out",
+                              }}
                             >
                               <Flex gap="2" align="center" className="relative">
+                                <div className="checkbox-container self-start">
+                                  <input
+                                    type="checkbox"
+                                    name={`checkbox-${notification.id}`}
+                                    id={`checkbox-${notification.id}`}
+                                    checked={selectedNotificationIds.includes(
+                                      notification.id
+                                    )}
+                                    onChange={(e) => {
+                                      e.stopPropagation(); // Prevent triggering the parent div's onClick
+                                      setSelectedNotificationIds((prev) =>
+                                        e.target.checked
+                                          ? [...prev, notification.id]
+                                          : prev.filter(
+                                              (id) => id !== notification.id
+                                            )
+                                      );
+                                    }}
+                                  />
+                                </div>
                                 <div className="self-start">
                                   <Card className="bg-green-400 p-4 w-[40px] h-[40px] flex justify-center items-center">
                                     <FontAwesomeIcon icon={faUser} />

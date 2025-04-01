@@ -127,7 +127,12 @@ const NewWeigh = () => {
       setImageURL("");
     } catch (error) {
       console.error("Submission failed:", error);
-      console.log(error.response.data)
+      toast.error(error.response.data.error || error.response.data.message || "An error occurred", {
+        style: {
+          padding: "20px",
+        },duration: 2500
+      })
+      // console.log(error.response.data)
       setButtonLoading(false);
     }
   };
