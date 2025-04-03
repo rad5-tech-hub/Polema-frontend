@@ -198,7 +198,7 @@ const DepartmentRecordBook = () => {
                 }}>
                   <Table.Cell>{refractor(item.createdAt)}</Table.Cell>
                   <Table.Cell>
-                    {item.departmentStore.product?.name || ""}
+                    {item.departmentStore.product?.name || item.departmentStore.otherRaw ||item.departmentStore.other}
                   </Table.Cell>
                   <Table.Cell>{item.name}</Table.Cell>
 

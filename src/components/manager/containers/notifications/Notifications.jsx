@@ -28,7 +28,6 @@ import {
   faUser,
   faTags,
 } from "@fortawesome/free-solid-svg-icons";
-
 import { Button as AntButton, Switch } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";

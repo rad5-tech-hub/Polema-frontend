@@ -18,12 +18,15 @@ const AllWeigh = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setWeighDetails(response.data.data);
+      if (response.data.data.length === 0) {
+        setFailedSearch(true); // Set failedSearch to true if no data is returned
+      } else {
+        setWeighDetails(response.data.data);
+        setFailedSearch(false);
+      }
     } catch (error) {
       console.log(error);
-      {
-        error.response.status === 404 && setFailedSearch(true);
-      }
+      setFailedSearch(true);
     }
   };
 
