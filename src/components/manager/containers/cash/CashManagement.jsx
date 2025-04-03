@@ -227,7 +227,7 @@ const CashManagement = () => {
                 disabled={dropdownBlur}
                 style={{ width: "100%", marginTop: "8px" }}
                 options={admins.map((admin) => ({
-                  value: admin.id,
+                  value: admin.role.id,
                   label: `${admin.firstname} ${admin.lastname}`,
                 }))}
               />

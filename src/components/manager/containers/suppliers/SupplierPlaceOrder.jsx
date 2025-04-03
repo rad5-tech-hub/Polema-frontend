@@ -3,7 +3,6 @@ import {
   Heading,
   Separator,
   Flex,
-  Select,
   Text,
   TextField,
   Button,
@@ -11,7 +10,9 @@ import {
 } from "@radix-ui/themes";
 import toast, { Toaster, LoaderIcon } from "react-hot-toast";
 import axios from "axios";
-// import { LoaderIcon } from "";
+import { Input, Select } from "antd"; // Import Ant Design Select
+
+const { Option } = Select;
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -23,9 +24,9 @@ const SupplierPlaceOrder = () => {
   const [selectedProductId, setSelectedProductId] = useState("");
   const [comment, setComment] = useState("");
   const [quantity, setQuantity] = useState("");
-  const [selectedUnit, setSelectedUnit] = useState(null); // Use null instead of an empty string
+  const [selectedUnit, setSelectedUnit] = useState(null);
   const [buttonLoading, setButtonLoading] = useState(false);
-  const [subCharge, setSubCharge] = useState();
+  const [subCharge, setSubCharge] = useState("");
 
   // Format number with commas
   const formatNumber = (num) => {
@@ -38,6 +39,14 @@ const SupplierPlaceOrder = () => {
     const value = e.target.value.replace(/,/g, "");
     if (/^\d*$/.test(value)) {
       setBasePrice(value);
+    }
+  };
+
+  // Handle sub charge change
+  const handleSubChargeChange = (e) => {
+    const value = e.target.value.replace(/,/g, "");
+    if (/^\d*$/.test(value)) {
+      setSubCharge(value);
     }
   };
 
@@ -81,7 +90,7 @@ const SupplierPlaceOrder = () => {
       );
       if (selectedProduct) {
         setSelectedUnit(selectedProduct);
-        setBasePrice(selectedProduct.price[0].amount.toString()); // Set base price as a string
+        setBasePrice(selectedProduct.price[0].amount.toString());
       }
     }
   }, [selectedProductId, products]);
@@ -102,9 +111,10 @@ const SupplierPlaceOrder = () => {
       supplierId: selectedCustomerId,
       productId: selectedProductId,
       quantity,
-      price: basePrice.replace(/,/g, ""), // Remove commas before sending
+      price: basePrice.replace(/,/g, ""),
       ...(comment && { comments: comment }),
-      unit: selectedUnit?.price[0]?.unit || "", // Use optional chaining
+      ...(subCharge && { discount: subCharge.replace(/,/g, "") }),
+      unit: selectedUnit?.price[0]?.unit || "",
     };
 
     try {
@@ -115,13 +125,14 @@ const SupplierPlaceOrder = () => {
         style: {
           padding: "20px",
         },
-        duration: 10000,
+        duration: 5000,
       });
       setBasePrice("");
       setSelectedCustomerId("");
       setSelectedProductId("");
       setQuantity("");
       setComment("");
+      setSubCharge("");
       setSelectedUnit(null);
     } catch (error) {
       console.error("Error placing order:", error);
@@ -145,50 +156,54 @@ const SupplierPlaceOrder = () => {
       <Separator className="my-3 w-full" />
       <form onSubmit={handleSubmit}>
         <Grid columns="2" gap={"4"} className="w-full">
-          {/* Supplier Select */}
+          {/* Supplier Select with Ant Design Search */}
           <div className="w-full">
             <Text>Supplier Name</Text>
-            <Select.Root
-              value={selectedCustomerId}
-              onValueChange={setSelectedCustomerId}
+            <Select
+              showSearch
+              placeholder="Select Supplier"
+              optionFilterProp="children"
+              onChange={(value) => setSelectedCustomerId(value)}
+              value={selectedCustomerId || undefined}
+              className="w-full mt-2"
+              filterOption={(input, option) =>
+                option.children.toLowerCase().includes(input.toLowerCase())
+              }
+              disabled={customers.length === 0}
               required
             >
-              <Select.Trigger
-                disabled={customers.length === 0}
-                className="w-full mt-2"
-                placeholder="Select Supplier"
-              />
-              <Select.Content position="popper">
-                {customers.map((customer) => (
-                  <Select.Item key={customer.id} value={customer.id}>
-                    {customer.firstname} {customer.lastname}
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select.Root>
+              {customers.map((customer) => (
+                <Option key={customer.id} value={customer.id}>
+                  {customer.firstname} {customer.lastname}
+                </Option>
+              ))}
+            </Select>
           </div>
-          {/* Product Select */}
+
+          {/* Product Select with Ant Design Search */}
           <div className="w-full">
             <Text>Raw Material</Text>
-            <Select.Root
-              value={selectedProductId}
+            <Select
+              showSearch
+              placeholder="Select Raw Material"
+              optionFilterProp="children"
+              onChange={(value) => setSelectedProductId(value)}
+              value={selectedProductId || undefined}
+              className="w-full mt-2"
+              filterOption={(input, option) =>
+                option.children.toLowerCase().includes(input.toLowerCase())
+              }
+              disabled={products.length === 0}
               required
-              onValueChange={setSelectedProductId}
             >
-              <Select.Trigger
-                disabled={products.length === 0}
-                className="w-full mt-2"
-                placeholder="Select Raw Material"
-              />
-              <Select.Content position="popper">
-                {products.map((product) => (
-                  <Select.Item key={product.id} value={product.id}>
-                    {product.name}
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select.Root>
+              {products.map((product) => (
+                <Option key={product.id} value={product.id}>
+                  {product.name}
+                </Option>
+              ))}
+            </Select>
           </div>
+
           <div className="w-full">
             <Text>Quantity</Text>
             <TextField.Root
@@ -200,6 +215,7 @@ const SupplierPlaceOrder = () => {
               onChange={(e) => setQuantity(e.target.value)}
             />
           </div>
+
           <div className="w-full">
             <Text>Product Unit</Text>
             <TextField.Root
@@ -209,25 +225,29 @@ const SupplierPlaceOrder = () => {
               disabled
             />
           </div>
+
           <div className="w-full">
             <Text>Base Price (₦)</Text>
-            <TextField.Root
-              value={formatNumber(basePrice)} // Display formatted number
+            <Input
+              addonBefore="₦"
+              value={formatNumber(basePrice)}
               onChange={handleBasePriceChange}
               className="mt-2"
               placeholder="Enter Price"
             />
           </div>
+
           <div className="w-full">
             <Text>Sub Charge</Text>
-            <TextField.Root
+            <Input
+              addonBefore="₦"
               className="mt-2"
+              value={formatNumber(subCharge)} // Add comma formatting
+              onChange={handleSubChargeChange}
               placeholder="Enter Supplier Subcharge"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
             />
           </div>
-          
+
           <div className="w-full">
             <Text>Comment</Text>
             <TextField.Root
@@ -260,5 +280,3 @@ const SupplierPlaceOrder = () => {
 };
 
 export default SupplierPlaceOrder;
-
-

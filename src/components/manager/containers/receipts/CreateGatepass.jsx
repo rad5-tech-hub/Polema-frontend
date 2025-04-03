@@ -14,11 +14,9 @@ const CreateGatepass = () => {
   const [destination, setDestination] = useState("");
   const [entryDetails, setEntryDetails] = useState({});
   const [superAdmins, setSuperAdmins] = useState([]);
-  const hours = [...Array(12).keys()].map((h) => (h + 1).toString());
-  const minutes = [...Array(60).keys()].map((m) =>
-    m.toString().padStart(2, "0")
-  );
-  const periods = ["AM", "PM"];
+  const [vehicleNumber, setVehicleNumber] = useState("");
+  const [driverName, setDriverName] = useState("");
+  const [goodsOwner, setGoodsOwner] = useState("");
 
   const fetchDetails = async () => {
     const token = localStorage.getItem("token");
@@ -97,12 +95,12 @@ const CreateGatepass = () => {
       const secondResponse = await axios.post(
         `${root}/customer/send-gate-pass/${passID}`,
         {
-          adminIds:[adminId],
+          adminIds: [adminId],
         }
       );
       toast.success("Successfully sent to admin", {
-        style:{
-          padding:"30px"
+        style: {
+          padding: "30px",
         },
         duration: 10000,
       });
@@ -117,6 +115,16 @@ const CreateGatepass = () => {
   useEffect(() => {
     fetchDetails();
     fetchSuperAdmins();
+
+    setDriverName(entryDetails.order?.authToWeighTickets?.driver || "");
+    setVehicleNumber(entryDetails.order?.authToWeighTickets?.vehicleNo || "")
+    setGoodsOwner(
+      `${
+        entryDetails.ledgerSummary?.ledgerEntries[0]?.customer?.firstname || ""
+      } ${
+        entryDetails.ledgerSummary?.ledgerEntries[0]?.customer?.lastname || ""
+      }`
+    );
   }, []);
 
   return (
@@ -130,8 +138,11 @@ const CreateGatepass = () => {
             <label>Driver's Name</label>
             <input
               type="text"
-              // disabled
-              value={entryDetails.order?.authToWeighTickets?.driver || ""}
+              placeholder="Enter Driver Name"
+              value={driverName}
+              onChange={(e) => {
+                setDriverName(e.target.value);
+              }}
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
@@ -152,7 +163,11 @@ const CreateGatepass = () => {
             <input
               type="text"
               // disabled
-              value={entryDetails.order?.authToWeighTickets?.vehicleNo || ""}
+              placeholder="Enter Vehicle Number"
+              value={vehicleNumber}
+              onChange={(e) => {
+                setVehicleNumber(e.target.value);
+              }}
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
@@ -161,13 +176,11 @@ const CreateGatepass = () => {
             <input
               type="text"
               // disabled
-              value={`${
-                entryDetails.ledgerSummary?.ledgerEntries[0]?.customer
-                  ?.firstname || ""
-              } ${
-                entryDetails.ledgerSummary?.ledgerEntries[0]?.customer
-                  ?.lastname || ""
-              }`}
+              placeholder="Enter Owner of Goods"
+              value={goodsOwner}
+              onChange={(e) => {
+                setGoodsOwner(e.target.value);
+              }}
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>

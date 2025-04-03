@@ -23,6 +23,9 @@ const WaybillCreateInvoice = () => {
   const [invoiceNo, setInvoiceNo] = useState("");
   const [address, setAddress] = useState("");
 
+  const [driverName, setDriverName] = useState("");
+  const [vehicleNo, setVehicleNo] = useState("");
+
   // Function to fetch entry details
   const fetchEntryDetails = async () => {
     const token = localStorage.getItem("token");
@@ -157,6 +160,10 @@ const WaybillCreateInvoice = () => {
   useEffect(() => {
     fetchEntryDetails();
     fetchSuperAdmins();
+
+    //get driver name and vehicle number when page loads
+    setDriverName(ledgerEntries?.authToWeighTickets?.driver || "");
+    setVehicleNo(ledgerEntries?.authToWeighTickets?.vehicleNo || "");
   }, []);
 
   return (
@@ -170,9 +177,9 @@ const WaybillCreateInvoice = () => {
             <label>To (Driver's Name)</label>
             <input
               type="text"
-              placeholder="Input"
-              // disabled
-              value={ledgerEntries?.authToWeighTickets?.driver || ""}
+              placeholder="Enter Driver Name"
+              onChange={(e) => setDriverName(e.target.value)}
+              value={driverName}
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
@@ -204,9 +211,10 @@ const WaybillCreateInvoice = () => {
           <div className="vehicle-no">
             <label>Vehicle No</label>
             <input
-              placeholder="Input"
+              placeholder="Enter Vehicle Number"
               // disabled
-              value={ledgerEntries?.authToWeighTickets?.vehicleNo || ""}
+              value={vehicleNo}
+              onChange={(e) => setVehicleNo(e.target.value)}
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
@@ -225,7 +233,7 @@ const WaybillCreateInvoice = () => {
             <input
               value={invoiceNo}
               onChange={(e) => setInvoiceNo(e.target.value)}
-              placeholder="Input"
+              placeholder="Enter Invoice No"
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
@@ -235,13 +243,13 @@ const WaybillCreateInvoice = () => {
               type="number"
               value={bagNumber}
               onChange={(e) => setBagNumber(e.target.value)}
-              placeholder="Input the No."
+              placeholder="Input number of bags"
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
 
           <div>
-            <label>Send TO:</label>
+            <label>Send To:</label>
             <Select.Root
               size="3"
               value={adminId}

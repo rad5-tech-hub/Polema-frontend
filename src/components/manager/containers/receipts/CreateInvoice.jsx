@@ -12,12 +12,13 @@ const CreateInvoice = () => {
   const [adminId, setAdminId] = useState("");
   const [btnLoading, setBtnLoading] = useState(false);
   const [address, setAddress] = useState("");
+  const [customer, setCustomer] = useState("");
 
   const fetchDetails = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
       toast.error("An error occurred, try logging in again.", {
-        duration: 10000,
+        duration: 5000,
       });
       return;
     }
@@ -74,7 +75,7 @@ const CreateInvoice = () => {
       const secondResponse = await axios.post(
         `${root}/customer/sendInvoice/${invoiceId}`,
         {
-          adminIds:[adminId],
+          adminIds: [adminId],
         },
         {
           headers: {
@@ -88,9 +89,8 @@ const CreateInvoice = () => {
         style: {
           padding: "20px",
         },
-        
       });
-      setAddress("")
+      setAddress("");
       setBtnLoading(false);
     } catch (error) {
       console.log(error);
@@ -104,6 +104,11 @@ const CreateInvoice = () => {
   useEffect(() => {
     fetchAdmins();
     fetchDetails();
+    setCustomer(
+      entry?.ledgerEntries?.[0]?.customer
+        ? `${entry.ledgerEntries[0].customer.firstname} ${entry.ledgerEntries[0].customer.lastname}`
+        : ""
+    );
   }, [id]);
 
   return (
@@ -118,11 +123,11 @@ const CreateInvoice = () => {
             <input
               type="text"
               // disabled
-              value={
-                entry?.ledgerEntries?.[0]?.customer
-                  ? `${entry.ledgerEntries[0].customer.firstname} ${entry.ledgerEntries[0].customer.lastname}`
-                  : ""
-              }
+              onChange={(e) => {
+                setCustomer(e.target.value);
+              }}
+              placeholder="Enter Customer Name"
+              value={customer}
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
@@ -152,7 +157,10 @@ const CreateInvoice = () => {
               />
               <Select.Content position="popper">
                 {superAdmins.map((admin) => (
-                  <Select.Item key={admin.role?.id} value={admin.role?.id || " "}>
+                  <Select.Item
+                    key={admin.role?.id}
+                    value={admin.role?.id || " "}
+                  >
                     {`${admin.firstname} ${admin.lastname}`}
                   </Select.Item>
                 ))}
