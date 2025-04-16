@@ -49,6 +49,7 @@ import {
   CustomerLedger,
   AllWayBill,
   AuthorityToWeigh,
+  NewAuthorityToWeigh,
   AllProducts,
   CreatePharmacyStore,
   IndividualDepartmentLedger,
@@ -261,6 +262,10 @@ const App = () => {
                     element={<ViewAuthorityToWeigh />}
                   />
                   <Route
+                    path="raise-ticket/new-authority-to-weigh"
+                    element={<NewAuthorityToWeigh />}
+                  />
+                  <Route
                     path="raise-ticket/officialLPO/:id"
                     element={<OfficialLPO />}
                   />
@@ -353,6 +358,12 @@ const App = () => {
                     path="/weighing-operations/new-weigh/:id"
                     element={<NewWeigh />}
                   />
+
+                  <Route
+                    path="/weighing-operations/finish-weigh/:id"
+                    element={<NewWeigh />}
+                  />
+
                   <Route path="/weighing-operations/" element={<AllWeigh />} />
 
                   {/* Routes for cashier */}

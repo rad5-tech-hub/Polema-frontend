@@ -34,6 +34,7 @@ import IndividualCustomerLedger from "./customer/IndividualCustomerLedger";
 import ViewSupplierOrder from "./suppliers/ViewSupplierOrder";
 import ViewCustomerOrders from "./customer/ViewCustomerOrders";
 import AuthorityToWeigh from "./raise-tickets/AuthorityToWeigh";
+import NewAuthorityToWeigh from "./raise-tickets/authorityToWeighForSuppliers";
 import AuthorityToLoad from "./raise-tickets/AuthorityToLoad";
 import LocalPurchaseOrder from "./raise-tickets/LocalPurchaseOrder";
 import CreateDepartmentStore from "./department-store/CreateDepartmentStore";
@@ -143,6 +144,7 @@ export {
   IndividualDepartmentLedger,
   GeneralSupplierLedger,
   AuthorityToWeigh,
+  NewAuthorityToWeigh,
   ViewLocalPurchaseOrder,
   ViewAuthorityToWeigh,
   AllWeigh,

@@ -7,7 +7,7 @@ import { useParams } from "react-router-dom";
 
 const CreateInvoice = () => {
   const { id } = useParams();
-  const [entry, setEntry] = useState(null);
+  const [customerData, setCustomerData] = useState(null);
   const [superAdmins, setSuperAdmins] = useState([]);
   const [adminId, setAdminId] = useState("");
   const [btnLoading, setBtnLoading] = useState(false);
@@ -24,10 +24,13 @@ const CreateInvoice = () => {
     }
 
     try {
-      const response = await axios.get(`${root}/customer/get-summary/${id}`, {
+      const response = await axios.get(`${root}/customer/get-customer/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setEntry(response.data.ledgerSummary);
+      const customerInfo = response.data.customer;
+      setCustomerData(customerInfo);
+      setCustomer(`${customerInfo.firstname} ${customerInfo.lastname}`);
+      setAddress(customerInfo.address || "");
     } catch (error) {
       console.log(error);
       toast.error("Failed to fetch customer details.");
@@ -60,13 +63,14 @@ const CreateInvoice = () => {
     const token = localStorage.getItem("token");
     if (!token) {
       toast.error("An error occurred, try logging in again.");
+      setBtnLoading(false);
       return;
     }
 
     try {
       const response = await axios.post(
         `${root}/customer/create-invoice/${id}`,
-        { adminId },
+        { adminId, customerName: customer, address },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -79,8 +83,7 @@ const CreateInvoice = () => {
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
-          },
+            Authorization: `Bearer ${token}` },
         }
       );
 
@@ -90,25 +93,19 @@ const CreateInvoice = () => {
           padding: "20px",
         },
       });
-      setAddress("");
       setBtnLoading(false);
     } catch (error) {
       console.log(error);
       toast.error("An error occurred, please try again", {
         duration: 7000,
       });
-      toast.error("Failed to create invoice.");
+      setBtnLoading(false);
     }
   };
 
   useEffect(() => {
     fetchAdmins();
     fetchDetails();
-    setCustomer(
-      entry?.ledgerEntries?.[0]?.customer
-        ? `${entry.ledgerEntries[0].customer.firstname} ${entry.ledgerEntries[0].customer.lastname}`
-        : ""
-    );
   }, [id]);
 
   return (
@@ -122,25 +119,20 @@ const CreateInvoice = () => {
             <label>Customer Name</label>
             <input
               type="text"
-              // disabled
-              onChange={(e) => {
-                setCustomer(e.target.value);
-              }}
+              disabled
               placeholder="Enter Customer Name"
               value={customer}
-              className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
+              className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full bg-gray-100 cursor-not-allowed"
             />
           </div>
           <div className="customer-address">
             <label>Customer's Address</label>
             <input
               type="text"
+              disabled
               placeholder="Enter Address"
-              className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
               value={address}
-              onChange={(e) => {
-                setAddress(e.target.value);
-              }}
+              className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full bg-gray-100 cursor-not-allowed"
             />
           </div>
           <div>

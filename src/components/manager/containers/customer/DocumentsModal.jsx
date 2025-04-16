@@ -12,6 +12,8 @@ const root = import.meta.env.VITE_ROOT;
 
 const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
   const [entries, setEntries] = useState([]);
+  const [weighImage, setWeighImage] = useState('');
+  const [custId, setCustId] = useState('');
   const [docOrders, setDocOrders] = useState({});
   const [summary, setSummary] = useState({});
   const [failedSearch, setFailedSearch] = useState(false);
@@ -59,6 +61,8 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
         gatepass: data.ledger?.gatepassImage || null,
         waybill: data.ledger?.wayBillImage || null,
       });
+      setWeighImage(data.ledger?.weighImage || null);
+      setCustId(data.ledger?.customerId || null);
       setFailedSearch(false);
     } catch (error) {
       setFailedSearch(true);
@@ -74,14 +78,60 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
   }, [isOpen, customerId]);
 
   const handleFullscreen = (type, imageUrl) => {
-    const imageElement = document.getElementById(`image-${type}`);
-    if (imageUrl && imageElement?.requestFullscreen) {
-      imageElement.requestFullscreen();
-    } else if (!imageUrl) {
+    if (!imageUrl) {
       toast.error("No image available to view.");
-    } else {
-      toast.error("Fullscreen mode is not supported in this browser.");
+      return;
     }
+
+    // Create a temporary image element for fullscreen
+    const img = document.createElement("img");
+    img.src = imageUrl;
+    img.id = `fullscreen-image-${type}`;
+    img.style.position = "fixed";
+    img.style.top = "0";
+    img.style.left = "0";
+    img.style.width = "100vw";
+    img.style.height = "100vh";
+    img.style.objectFit = "contain";
+    img.style.background = "black";
+    img.style.zIndex = "9999";
+    document.body.appendChild(img);
+
+    // Cross-browser fullscreen request
+    const requestFullscreen = () => {
+      if (img.requestFullscreen) {
+        return img.requestFullscreen();
+      } else if (img.webkitRequestFullscreen) { // Safari
+        return img.webkitRequestFullscreen();
+      } else if (img.msRequestFullscreen) { // IE/Edge
+        return img.msRequestFullscreen();
+      } else {
+        toast.error("Fullscreen mode is not supported in this browser.");
+        document.body.removeChild(img);
+        return Promise.reject("Fullscreen not supported");
+      }
+    };
+
+    requestFullscreen()
+      .then(() => {
+        // Listen for fullscreen change to clean up
+        const handleFullscreenChange = () => {
+          if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+            document.body.removeChild(img);
+            document.removeEventListener("fullscreenchange", handleFullscreenChange);
+            document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+            document.removeEventListener("msfullscreenchange", handleFullscreenChange);
+          }
+        };
+        document.addEventListener("fullscreenchange", handleFullscreenChange);
+        document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+        document.addEventListener("msfullscreenchange", handleFullscreenChange);
+      })
+      .catch((err) => {
+        console.error("Error entering fullscreen:", err);
+        toast.error("Failed to enter fullscreen mode.");
+        document.body.removeChild(img);
+      });
   };
 
   const getReceiptBody = (receiptType, imageUrl) => {
@@ -270,11 +320,12 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
             <Text className="font-bold">Weigh Bridge Summary</Text>
             <div
               ref={divRef}
+              id="image-weigh"
               className="w-20 h-20 mt-2 rounded-md bg-gray-400/40 border-2 cursor-pointer"
-              onClick={() => handleFullscreen("weigh", entries[0]?.weighImage)}
+              onClick={() => handleFullscreen("weigh", weighImage)}
               style={{
-                backgroundImage: entries[0]?.weighImage
-                  ? `url(${entries[0].weighImage})`
+                backgroundImage: weighImage
+                  ? `url(${weighImage})`
                   : "none",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
@@ -307,7 +358,7 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
               <Button
                 key={route}
                 onClick={() =>
-                  navigate(`/admin/receipt/create-${route}/${customerId}`)
+                  navigate(`/admin/receipt/create-${route}/${custId}`)
                 }
                 variant="outline"
                 disabled={loading}

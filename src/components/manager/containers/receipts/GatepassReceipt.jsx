@@ -51,7 +51,19 @@ const GatepassReceipt = () => {
 
   return (
     <>
-     
+     <style>
+        {`
+          @media print {
+            .no-print {
+              display: none !important;
+            }
+            *{
+             box-shadow: none !important;
+            }
+          }
+        `}
+      </style>
+
       <div className="bg-gray-50 p-4 sm:p-8">
         {gatePassLoading ? (
           <div className="w-full bg-black/35 flex justify-center items-center h-screen">
@@ -64,7 +76,7 @@ const GatepassReceipt = () => {
         ) : (
           <>
             {/* Header Section */}
-            <div className="intro flex justify-between items-center pb-6 border-b border-[#919191]">
+            <div className="intro flex justify-between items-center no-print pb-6 border-b border-[#919191]">
               <span className="text-sm sm:text-[20px] font-semibold">
                 Approved Gate Pass Note
               </span>
@@ -80,36 +92,38 @@ const GatepassReceipt = () => {
             {/* Main Gatepass Content */}
             <div className="mt-8 bg-white p-4 sm:p-16">
               <div className="heading relative h-fit">
-                {/* Header Title */}
-                <div className="flex flex-col gap-4 sm:gap-28 text-center">
-                  <h1 className="text-[24px] sm:text-[48px] font-bold">
-                    POLEMA INDUSTRIES LIMITED
-                    <br /> ABA
-                  </h1>
-                  <h3 className="text-[#919191] text-[18px] sm:text-[32px] font-bold w-fit mx-auto border-b-2 border-[#919191]">
-                    GATE PASS NOTE
-                  </h3>
-                </div>
+                <div className="flex justify-between items-center">
+                  {/* Logo */}
+                  <div className="">
+                    <img
+                      src={polemaLogo}
+                      alt="polema-logo"
+                      className="h-fit"
+                    />
+                  </div>
 
-                {/* Logo */}
-                <div className="logo absolute top-4 sm:top-8">
-                  <img
-                    src={polemaLogo}
-                    alt="polema-logo"
-                    className="w-16 sm:w-24 h-auto"
-                  />
-                </div>
+                  {/* Header Title */}
+                  <div className="text-center">
+                    <h1 className="text-[23px] sm:text-[32px] font-bold text-[#434343]">
+                      POLEMA INDUSTRIES LIMITED
+                      <br /> ABA
+                    </h1>
+                    <p className="text-[#919191] text-lg font-semibold w-fit mx-auto border-b-2 border-[#919191]">
+                      GATE PASS NOTE
+                    </p>
+                  </div>                  
 
-                {/* RC Information */}
-                <div className="rc flex flex-col absolute right-[5%] sm:right-[15%] top-[5%] sm:top-[10%] gap-4 sm:gap-24">
-                  <p className="w-fit">
-                    <i>RC 131127</i>
-                  </p>
-                  <b>
-                    <i className="text-[#D2D2D2] font-bold text-[18px] sm:text-[32px]">
-                      0818
-                    </i>
-                  </b>
+                  {/* RC Information */}
+                  <div className="">
+                    <p className="w-fit">
+                      <i>RC 131127</i>
+                    </p>
+                    <b>
+                      <i className="text-[#D2D2D2] font-bold text-[18px] sm:text-[32px]">
+                        0818
+                      </i>
+                    </b>
+                  </div>
                 </div>
 
                 {/* Details Section */}

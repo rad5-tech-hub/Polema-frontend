@@ -69,6 +69,11 @@ const navigate = useNavigate()
     }
   };
 
+  const disableDropdown = (arg) => {
+    if (arg === "pending" || arg === "rejected") return true;
+    else return false;
+  };
+
   useEffect(() => {
     fetchWaybills();
   }, []);
@@ -130,28 +135,26 @@ const navigate = useNavigate()
                     {_.upperFirst(item.status) || ""}
                   </>
                 </Table.Cell>
-                <Table.Cell>
-                  {item.status === "approved" && (
+                <Table.Cell>               
                     <div className="r">
-                      <DropdownMenu.Root>
-                        <DropdownMenu.Trigger>
-                          <Button variant="surface" className="cursor-pointer">
-                            <FontAwesomeIcon icon={faEllipsisV} />
-                          </Button>
-                        </DropdownMenu.Trigger>
-                        <DropdownMenu.Content variant="solid">
-                          <DropdownMenu.Item
-                            // shortcut={<FontAwesomeIcon icon={faPen} />} 
-                            onClick={() => 
-                              navigate(`/admin/receipts/waybill-invoice/${item.id}`)
-                            }
-                          >
-                            View Approved Waybill
-                          </DropdownMenu.Item>
-                        </DropdownMenu.Content>
-                      </DropdownMenu.Root>
-                    </div>
-                  )}
+                    <DropdownMenu.Root>
+                      <DropdownMenu.Trigger disabled={disableDropdown(item.status)} >
+                        <Button
+                          variant="surface"
+                          className="cursor-pointer"                          
+                        >
+                          <FontAwesomeIcon icon={faEllipsisV} />
+                        </Button>
+                      </DropdownMenu.Trigger>
+                      <DropdownMenu.Content variant="solid">
+                        <DropdownMenu.Item
+                          onClick={() => navigate(`/admin/receipts/waybill-invoice/${item.id}`)}
+                        >
+                          View Approved Waybill
+                        </DropdownMenu.Item>
+                      </DropdownMenu.Content>
+                    </DropdownMenu.Root>
+                    </div>               
                 </Table.Cell>
               </Table.Row>
             ))

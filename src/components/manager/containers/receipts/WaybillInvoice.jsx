@@ -96,6 +96,9 @@ const WaybillInvoice = () => {
             .no-print {
               display: none !important;
             }
+            *{
+             box-shadow: none !important;
+            }
           }
         `}
       </style>
@@ -107,7 +110,7 @@ const WaybillInvoice = () => {
           {/* Header Section */}
           <div className="intro flex flex-col sm:flex-row justify-between items-center pb-6 border-b border-[#919191] no-print">
             <span className="text-sm sm:text-lg md:text-xl font-semibold text-center">
-              Approved Gate Pass Note
+              Approved WayBill
             </span>
             <button
               onClick={handlePrint}
@@ -121,46 +124,43 @@ const WaybillInvoice = () => {
           {/* Invoice Section */}
           <div className="mt-8 bg-white p-6 sm:p-8 lg:p-14 rounded">
             {/* Header with Logo */}
-            <header className="flex items-center">
+            <div className="flex justify-between">
               <div className="logo">
                 <img
                   src={polemaLogo}
                   alt="Polema Logo"
-                  className="max-md:w-24 max-md:h-[200px]"
+                  className="h-fit"
                 />
               </div>
-              <div className="description w-full">
-                <div className="heading text-center">
-                  <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold">
-                    POLEMA INDUSTRIES LIMITED
-                  </h1>
-                  <p className="rc flex justify-end text-xs sm:text-sm pr-[120px]">
-                    RC 131127
-                  </p>
-                  <p className="text-sm sm:text-base lg:text-lg font-bold text-[#434343]">
-                    A DIVISION OF MOBISON INTER-LINK & ASSOCIATES LTD.
-                  </p>
-                  <small className="font-bold text-[#434343] text-[15px]">
-                    Manufactures' & Exporters of Palm Kernel Oil, Palm Kernel
-                    Cakes and Drugs
-                  </small>
-                </div>
-                <div className="address text-xs sm:text-sm pl-12">
-                  <p>
-                    <b className="italic">FACTORY/OFFICE:</b>
-                    <br /> Osisioma Industry Layout,
-                    <br /> Osisioma L.G.A, Abia State.
-                    <br /> Tel: 08065208084
-                    <br /> Email: polema_@yahoo.com
-                    <br />
-                    <span>onwaobiec@yahoo.com</span>
-                  </p>
-                </div>
+              <div className="heading text-center">
+                <h1
+                  className="text-[25px] sm:text-[32px] font-bold text-[#434343]"                  
+                >
+                  POLEMA INDUSTRIES LIMITED
+                </h1>
+                <p className="text-sm sm:text-base lg:text-lg font-bold text-[#434343]">
+                  A DIVISION OF MOBISON INTER-LINK & ASSOCIATES LTD.
+                </p>
+                <p className="text-sm font-bold text-[#434343]">Manufactures' & Exporters of Palm Kernel Oil, Palm Kernel Cakes and Drugs</p>
               </div>
-            </header>
+              <div className="flex items-end self-end flex-col gap-8 text-xs sm:text-sm">
+                <p className="flex justify-end mb-14 text-xs sm:text-sm">
+                  RC 131127
+                </p>
+                <p>
+                  <b className="italic">FACTORY/OFFICE:</b>
+                  <br /> Osisioma Industry Layout,
+                  <br /> Osisioma L.G.A, Abia State.
+                  <br /> Tel: 08065208084
+                  <br /> Email: polema_@yahoo.com
+                  <br />
+                  <span>onwaobiec@yahoo.com</span>
+                </p>
+              </div>
+            </div>
 
             {/* Title Section */}
-            <div className="title flex justify-center mt-6 sm:mt-8 relative">
+            <div className="flex justify-center mt-6 sm:mt-8 relative">
               <h1 className="border border-b-8 border-[#43434380] px-4 sm:px-8 py-2 text-[#919191] rounded-xl shadow-lg text-lg sm:text-xl lg:text-2xl font-bold">
                 WAYBILL
               </h1>
