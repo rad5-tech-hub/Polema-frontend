@@ -13,7 +13,6 @@ const root = import.meta.env.VITE_ROOT;
 const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
   const [entries, setEntries] = useState([]);
   const [weighImage, setWeighImage] = useState('');
-  const [custId, setCustId] = useState('');
   const [docOrders, setDocOrders] = useState({});
   const [summary, setSummary] = useState({});
   const [failedSearch, setFailedSearch] = useState(false);
@@ -62,7 +61,6 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
         waybill: data.ledger?.wayBillImage || null,
       });
       setWeighImage(data.ledger?.weighImage || null);
-      setCustId(data.ledger?.customerId || null);
       setFailedSearch(false);
     } catch (error) {
       setFailedSearch(true);
@@ -358,7 +356,7 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
               <Button
                 key={route}
                 onClick={() =>
-                  navigate(`/admin/receipt/create-${route}/${custId}`)
+                  navigate(`/admin/receipt/create-${route}/${customerId}`)
                 }
                 variant="outline"
                 disabled={loading}

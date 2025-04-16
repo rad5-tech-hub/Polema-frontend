@@ -17,8 +17,9 @@ const CreateGatepass = () => {
   const [vehicleNumber, setVehicleNumber] = useState("");
   const [driverName, setDriverName] = useState("");
   const [goodsOwner, setGoodsOwner] = useState("");
+  const [customerId, setCustomerId] = useState("");
 
-  const fetchDetails = async () => {
+  const TransDetails = async () => {
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -32,13 +33,35 @@ const CreateGatepass = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setEntryDetails(response.data);
+      const customerInfo = response.data.ledger?.customerId;
+      setCustomerId(customerInfo);    
     } catch (error) {
-      console.error("Error fetching details:", error);
+
       toast.error("Failed to fetch gate pass details");
     }
   };
 
+  const fetchDetails = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("An error occurred, try logging in again.", {
+        duration: 5000,
+      });
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${root}/customer/get-customer/${customerId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const customerInfo = response.data.customer;
+      setDestination(customerInfo.address || "Loading");
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to fetch customer details.");
+    }
+  };
+  
   const fetchSuperAdmins = async () => {
     const token = localStorage.getItem("token");
 
@@ -113,7 +136,6 @@ const CreateGatepass = () => {
   };
 
   useEffect(() => {
-    fetchDetails();
     fetchSuperAdmins();
 
     setDriverName(entryDetails.order?.authToWeighTickets?.driver || "");
@@ -127,10 +149,17 @@ const CreateGatepass = () => {
     );
   }, []);
 
+  useEffect(() => {      
+    TransDetails();
+    if (customerId) {
+      fetchDetails();
+    }
+  }, [id, customerId]);
+
   return (
     <div className="p-6 relative mb-16">
       <div className="invoice py-2">
-        <b className="text-[#434343] font-amsterdam">Gate Pass Note</b>
+        <b className="text-[#434343] font-amsterdam text-lg">Gate Pass Note</b>
       </div>
       <form className="my-8" onSubmit={submitForm}>
         <div className="my-8 grid grid-cols-2 max-sm:grid-cols-1 gap-8 border-t-[1px] border-[#9191914] py-8">
@@ -191,6 +220,7 @@ const CreateGatepass = () => {
               className="mt-2"
               placeholder="Enter Destination"
               value={destination}
+              disabled
               onChange={(e) => {
                 setDestination(e.target.value);
               }}

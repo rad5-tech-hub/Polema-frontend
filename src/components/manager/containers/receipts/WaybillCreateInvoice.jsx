@@ -25,9 +25,9 @@ const WaybillCreateInvoice = () => {
 
   const [driverName, setDriverName] = useState("");
   const [vehicleNo, setVehicleNo] = useState("");
+  const [customerId, setCustomerId] = useState("");
 
-  // Function to fetch entry details
-  const fetchEntryDetails = async () => {
+  const TransDetails = async () => {
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -41,17 +41,34 @@ const WaybillCreateInvoice = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      if (response.data?.order) {
-        setLedgerEntries(response.data.order);
-      } else {
-        throw new Error("Invalid data format received.");
-      }
+      const customerInfo = response.data.ledger?.customerId;
+      setCustomerId(customerInfo);    
     } catch (error) {
-      console.error("Error fetching entry details:", error);
-      toast.error("An error occurred while fetching details.");
+
+      toast.error("Failed to fetch gate pass details");
     }
   };
 
+  const fetchDetails = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("An error occurred, try logging in again.", {
+        duration: 5000,
+      });
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${root}/customer/get-customer/${customerId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const customerInfo = response.data.customer;
+      setAddress(customerInfo.address || "Loading");
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to fetch customer details.");
+    }
+  };
   // Function to fetch super admins
   const fetchSuperAdmins = async () => {
     const token = localStorage.getItem("token");
@@ -158,7 +175,6 @@ const WaybillCreateInvoice = () => {
   };
 
   useEffect(() => {
-    fetchEntryDetails();
     fetchSuperAdmins();
 
     //get driver name and vehicle number when page loads
@@ -166,10 +182,17 @@ const WaybillCreateInvoice = () => {
     setVehicleNo(ledgerEntries?.authToWeighTickets?.vehicleNo || "");
   }, []);
 
+  useEffect(() => {      
+    TransDetails();
+    if (customerId) {
+      fetchDetails();
+    }
+  }, [id, customerId]);
+
   return (
     <div className="p-6 relative mb-16">
       <div className="invoice flex justify-between items-center py-2">
-        <b className="text-[#434343]">Waybill</b>
+        <b className="text-[#434343] text-lg">Waybill</b>
       </div>
       <form className="my-8" onSubmit={handleSubmit}>
         <div className="my-8 grid grid-cols-2 max-sm:grid-cols-1 gap-8 border-t-[1px] border-[#9191914] py-8">
@@ -187,6 +210,7 @@ const WaybillCreateInvoice = () => {
             <label>Address</label>
             <input
               value={address}
+              disabled
               onChange={(e) => setAddress(e.target.value)}
               type="text"
               placeholder="Enter Address"

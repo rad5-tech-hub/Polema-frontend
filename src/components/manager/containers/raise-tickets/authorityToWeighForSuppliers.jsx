@@ -191,14 +191,7 @@ const NewAuthorityToWeigh = () => {
 
   return (
     <>
-      <Heading className="py-4 flex justify-between items-center"><span>New Authority to Weigh</span>  
-        <Button size={"3"}
-            className="cursor-pointer  bg-gray-200 text-black"
-            onClick={() => navigate('/admin/raise-ticket/authority-to-weigh')}
-            disabled={btnLoading}
-          >
-            <ArrowLeftIcon/> Back
-        </Button>
+      <Heading className="py-4 ">New Authority to Weigh
       </Heading>
       <Separator className="my-5 w-full" />
 

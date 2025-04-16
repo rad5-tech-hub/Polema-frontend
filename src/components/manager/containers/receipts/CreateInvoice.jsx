@@ -1,9 +1,10 @@
-import axios from "axios";
-import { Select } from "@radix-ui/themes";
-const root = import.meta.env.VITE_ROOT;
 import React, { useState, useEffect } from "react";
-import toast, { Toaster, LoaderIcon } from "react-hot-toast";
 import { useParams } from "react-router-dom";
+import axios from "axios";
+import toast, { Toaster, LoaderIcon } from "react-hot-toast";
+import { Select } from "@radix-ui/themes";
+
+const root = import.meta.env.VITE_ROOT;
 
 const CreateInvoice = () => {
   const { id } = useParams();
@@ -13,6 +14,28 @@ const CreateInvoice = () => {
   const [btnLoading, setBtnLoading] = useState(false);
   const [address, setAddress] = useState("");
   const [customer, setCustomer] = useState("");
+  const [customerId, setCustomerId] = useState("");
+
+  const TransDetails = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("An error occurred, try logging in again.", {
+        duration: 5000,
+      });
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${root}/customer/get-summary/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const customerInfo = response.data.ledger?.customerId;
+      setCustomerId(customerInfo);
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to fetch customer details.");
+    }
+  };
 
   const fetchDetails = async () => {
     const token = localStorage.getItem("token");
@@ -24,13 +47,13 @@ const CreateInvoice = () => {
     }
 
     try {
-      const response = await axios.get(`${root}/customer/get-customer/${id}`, {
+      const response = await axios.get(`${root}/customer/get-customer/${customerId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const customerInfo = response.data.customer;
       setCustomerData(customerInfo);
       setCustomer(`${customerInfo.firstname} ${customerInfo.lastname}`);
-      setAddress(customerInfo.address || "");
+      setAddress(customerInfo.address || "loading");
     } catch (error) {
       console.log(error);
       toast.error("Failed to fetch customer details.");
@@ -83,7 +106,8 @@ const CreateInvoice = () => {
         },
         {
           headers: {
-            Authorization: `Bearer ${token}` },
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
@@ -105,13 +129,16 @@ const CreateInvoice = () => {
 
   useEffect(() => {
     fetchAdmins();
-    fetchDetails();
-  }, [id]);
+    TransDetails();
+    if (customerId) {
+      fetchDetails();
+    }
+  }, [id, customerId]);
 
   return (
     <div className="p-6 relative mb-16">
       <div className="invoice flex justify-between items-center py-2">
-        <b className="text-[#434343]">Invoice</b>
+        <b className="text-[#434343] text-lg">Invoice</b>
       </div>
       <form className="my-8" onSubmit={handleSubmit}>
         <div className="my-8 grid grid-cols-2 max-sm:grid-cols-1 gap-8 border-y-[1px] border-[#9191914] py-8">

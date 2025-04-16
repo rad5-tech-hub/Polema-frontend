@@ -66,17 +66,24 @@ const Invoice = () => {
             table, th, td {
               border: 1px solid black !important;
             }
+            table th {
+              background-color: #E1E1E1 !important;
+            }
+
             /* Force grid layout during print */
             .customer {
               display: grid;
               grid-template-columns: repeat(2, minmax(0, 1fr));
               gap: 1.5rem;
             }
-            .customer-address,
-            .schedule {
-              width: 100%;
+
+            .customer-address {
+              background-color: #E1E1E1 !important;
             }
-            
+
+            .customer-address .schedule {
+              width: 100%;
+            }          
           }
         `}
       </style>
@@ -99,7 +106,7 @@ const Invoice = () => {
           {/* Invoice Section */}
           <div className="mt-8 bg-white p-6 sm:p-8 lg:p-14 rounded print:block">
             {/* Header with Logo */}
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between gap-4 items-center">
               <div className="logo">
                 <img
                   src={polemaLogo}

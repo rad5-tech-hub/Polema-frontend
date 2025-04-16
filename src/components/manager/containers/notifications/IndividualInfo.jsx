@@ -437,10 +437,14 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                           CUSTOMER NAME
                         </Text>
                         <p className="text-[.9rem]">
-                          {`${ticketDetails.transactions?.corder.firstname} ${ticketDetails.transactions?.corder.lastname}`}
+                          {ticketDetails.supplierId && ticketDetails.supplier
+                          ? `${ticketDetails.supplier.firstname} ${ticketDetails.supplier.lastname}`
+                          : ticketDetails.customerId && ticketDetails.transactions?.corder
+                          ? `${ticketDetails.transactions.corder.firstname} ${ticketDetails.transactions.corder.lastname}`
+                          : "Name not available"}
                         </p>
                       </div>
-                      <div className="flex w-full justify-between items-center p-2">
+                      {ticketDetails.transactions && <div className="flex w-full justify-between items-center p-2">
                         <Text className="text-[.9rem] font-black tracking-wide">
                           QUANTITY
                         </Text>
@@ -449,15 +453,15 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                             ""}{" "}
                           {ticketDetails.transactions?.unit || ""}
                         </p>
-                      </div>
-                      <div className="flex w-full justify-between items-center p-2">
+                      </div>}
+                      {ticketDetails.transactions && <div className="flex w-full justify-between items-center p-2">
                         <Text className="text-[.9rem] font-black tracking-wide">
                           PRODUCT
                         </Text>
                         <p className="text-[.9rem]">
                           {ticketDetails.transactions?.porders.name}
                         </p>
-                      </div>
+                      </div>}
                       <div className="flex w-full justify-between items-center p-2">
                         <Text className="text-[.9rem] font-black tracking-wide">
                           VEHICLE NO
