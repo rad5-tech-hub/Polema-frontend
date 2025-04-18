@@ -1,29 +1,33 @@
-import React, { useState } from "react";
-import { refractor, refractorToTime } from "../../../date";
-import axios from "axios";
-const root = import.meta.env.VITE_ROOT;
-import { faPrint } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Card, Spinner } from "@radix-ui/themes";
-import polemaLogo from "../../../../static/image/polema-logo.png";
+import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
+import { Card, Spinner } from "@radix-ui/themes";
+import { Switch, Dropdown, Menu } from "antd";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPrint } from "@fortawesome/free-solid-svg-icons";
+import polemaLogo from "../../../../static/image/polema-logo.png";
+import mobisonLogo from "../../../../static/image/mob-logo.png"; // Placeholder: Replace with actual Mobison logo path
+import { refractor, refractorToTime } from "../../../date";
+
+const root = import.meta.env.VITE_ROOT;
+
 const GatepassReceipt = () => {
   const { id } = useParams();
   const [gatePassLoading, setGatePassLoading] = useState(true);
   const [passDetails, setPassDetails] = useState({});
   const [failedSearch, setFailedSearch] = useState(false);
+  const [isMobison, setIsMobison] = useState(false); // State for Switch
 
   // Function to view gatepass details
   const viewGatePass = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("An error occurred ,try logging in again", {
+      toast.error("An error occurred, try logging in again", {
         duration: 10000,
-        style: {
-          padding: "20px",
-        },
+        style: { padding: "20px" },
       });
+      return;
     }
 
     try {
@@ -32,33 +36,64 @@ const GatepassReceipt = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setGatePassLoading(false);
-
       setPassDetails(response.data.gatePass);
+      setGatePassLoading(false);
     } catch (error) {
       console.log(error);
-      // setFailedSearch(true);
+      setFailedSearch(true);
+      setGatePassLoading(false);
+      toast.error("Failed to fetch gatepass details", {
+        duration: 5000,
+        style: { padding: "20px" },
+      });
     }
   };
 
-  React.useEffect(() => {
-    viewGatePass();
-  }, []);
-
+  // Handle print action
   const handlePrint = () => {
     window.print();
   };
 
+  // Handle send to print action (placeholder)
+  const handleSendToPrint = () => {
+    console.log("Send to Print selected");
+    toast.success("Send to Print action triggered!", {
+      duration: 5000,
+      style: { padding: "20px" },
+    });
+  };
+
+  // Dropdown menu for print actions
+  const menu = (
+    <Menu
+      onClick={({ key }) => {
+        if (key === "print") {
+          handlePrint();
+        } else if (key === "sendToPrint") {
+          handleSendToPrint();
+        }
+      }}
+      className="no-print"
+    >
+      <Menu.Item key="print">Print</Menu.Item>
+      <Menu.Item key="sendToPrint">Send to Print</Menu.Item>
+    </Menu>
+  );
+
+  useEffect(() => {
+    viewGatePass();
+  }, []);
+
   return (
     <>
-     <style>
+      <style>
         {`
           @media print {
             .no-print {
               display: none !important;
             }
-            *{
-             box-shadow: none !important;
+            * {
+              box-shadow: none !important;
             }
           }
         `}
@@ -68,7 +103,7 @@ const GatepassReceipt = () => {
         {gatePassLoading ? (
           <div className="w-full bg-black/35 flex justify-center items-center h-screen">
             {failedSearch ? (
-              <Card className="bg-red-400">An error occurred ,try again</Card>
+              <Card className="bg-red-400">An error occurred, try again</Card>
             ) : (
               <Spinner />
             )}
@@ -76,28 +111,40 @@ const GatepassReceipt = () => {
         ) : (
           <>
             {/* Header Section */}
-            <div className="intro flex justify-between items-center no-print pb-6 border-b border-[#919191]">
-              <span className="text-sm sm:text-[20px] font-semibold">
-                Approved Gate Pass Note
-              </span>
-              <button
-                onClick={handlePrint}
-                className="rounded-lg h-[40px] border-[1px] border-[#919191] px-4 sm:px-8 shadow-lg text-sm sm:text-base flex gap-2 items-center"
-              >
-                <FontAwesomeIcon icon={faPrint} />
-                Print
-              </button>
+            <div className="flex flex-col md:flex-col lg:flex-row justify-center lg:justify-between items-center gap-5 no-print pb-6 border-b border-[#919191]">
+              <div className="w-full max-w-[300px] lg:w-auto text-center lg:text-left">
+                <h3 className="text-sm sm:text-[20px] font-semibold">
+                  Approved Gate Pass Note
+                </h3>
+              </div>
+              <div className="w-full max-w-[300px] lg:w-auto text-center">
+                <Switch
+                  className="custom-black-switch"
+                  checked={isMobison}
+                  onChange={(checked) => setIsMobison(checked)}
+                />
+                <p className="text-sm font-semibold mt-2 text-[#D2D2D2]">
+                  {isMobison ? "Switch off for Polema" : "Switch on for Mobison"}
+                </p>
+              </div>
+              <div className="min-w-[300px] flex justify-end">
+                <Dropdown overlay={menu} trigger={["click"]} className="justify-center">
+                  <button className="rounded-lg border-[1px] border-[#919191] p-2 shadow-lg text-sm sm:text-base cursor-pointer w-fit lg:w-fit">
+                    Select Action
+                  </button>
+                </Dropdown>
+              </div>
             </div>
 
             {/* Main Gatepass Content */}
             <div className="mt-8 bg-white p-4 sm:p-16">
               <div className="heading relative h-fit">
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center gap-5">
                   {/* Logo */}
-                  <div className="">
+                  <div>
                     <img
-                      src={polemaLogo}
-                      alt="polema-logo"
+                      src={isMobison ? mobisonLogo : polemaLogo}
+                      alt={isMobison ? "mobison-logo" : "polema-logo"}
                       className="h-fit"
                     />
                   </div>
@@ -105,28 +152,27 @@ const GatepassReceipt = () => {
                   {/* Header Title */}
                   <div className="text-center">
                     <h1 className="text-[23px] sm:text-[32px] font-bold text-[#434343]">
-                      POLEMA INDUSTRIES LIMITED
-                      <br /> ABA
+                      {isMobison ? "MAOBISON INTER-LINK ASSOCIATES LTD." : "POLEMA INDUSTRIES LIMITED"}                  
                     </h1>
                     <p className="text-[#919191] text-lg font-semibold w-fit mx-auto border-b-2 border-[#919191]">
                       GATE PASS NOTE
                     </p>
-                  </div>                  
+                  </div>
 
                   {/* RC Information */}
-                  <div className="">
-                    <p className="w-fit">
-                      <i>RC 131127</i>
+                  <div>
+                    <p>
+                      <i>{isMobison ? 'RC 64084' : 'RC 131127'}</i>
                     </p>
                     <b>
                       <i className="text-[#D2D2D2] font-bold text-[18px] sm:text-[32px]">
-                        0818
+                        0{passDetails.transaction.invoice?.invoiceNumber || ""}
                       </i>
                     </b>
                   </div>
                 </div>
-
-                {/* Details Section */}
+             
+                 {/* Details Section */}
                 <div className="details mt-8 sm:mt-12 flex flex-col gap-4 sm:gap-[25px]">
                   {/* Single Detail Template */}
                   {[
@@ -190,8 +236,9 @@ const GatepassReceipt = () => {
               </div>
             </div>
           </>
-        )}
+        )}        
       </div>
+      <Toaster position="top-right" />
     </>
   );
 };

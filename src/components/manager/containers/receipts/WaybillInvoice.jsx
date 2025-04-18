@@ -3,7 +3,9 @@ import { faPrint } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {useParams} from "react-router-dom";
 import polemaLogo from "../../../../static/image/polema-logo.png";
+import mobisonLogo from "../../../../static/image/mob-logo.png";
 import axios from "axios";
+import { Switch, Dropdown, Menu } from "antd";
 import { Spinner } from "@radix-ui/themes";
 import { refractor,formatMoney } from "../../../date";
 const root = import.meta.env.VITE_ROOT
@@ -19,6 +21,7 @@ const WaybillInvoice = () => {
     { item: "5", description: "Blocks", rate: 200, amount: 1000 },
     { item: "6", description: "Water", rate: 150, amount: 300 },
   ]);
+  const [isMobison, setIsMobison] = useState(false); // State for Switch
   const [billDetails, setBillDetails] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -86,6 +89,22 @@ const WaybillInvoice = () => {
     )
   }
 
+   const menu = (
+      <Menu
+        onClick={({ key }) => {
+          if (key === "print") {
+            handlePrint();
+          } else if (key === "sendToPrint") {
+            handleSendToPrint();
+          }
+        }}
+        className="no-print"
+      >
+        <Menu.Item key="print">Print</Menu.Item>
+        <Menu.Item key="sendToPrint">Send to Print</Menu.Item>
+      </Menu>
+    );
+  
   
   return (
     <div className="p-4 sm:p-8">
@@ -108,17 +127,29 @@ const WaybillInvoice = () => {
       ) : (
         <>
           {/* Header Section */}
-          <div className="intro flex flex-col sm:flex-row justify-between items-center pb-6 border-b border-[#919191] no-print">
-            <span className="text-sm sm:text-lg md:text-xl font-semibold text-center">
-              Approved WayBill
-            </span>
-            <button
-              onClick={handlePrint}
-              className="mt-4 sm:mt-0 rounded-lg h-[40px] border-[1px] border-[#919191] px-4 sm:px-8 shadow-lg text-sm sm:text-base flex gap-2 items-center"
-            >
-              <FontAwesomeIcon icon={faPrint} />
-              Print
-            </button>
+          <div className="flex flex-col md:flex-col lg:flex-row justify-center lg:justify-between items-center gap-5 no-print pb-6 border-b border-[#919191]">
+            <div className="w-full max-w-[300px] lg:w-auto text-center lg:text-left">
+              <h3 className="text-sm sm:text-[20px] font-semibold">
+                Approved WayBill
+              </h3>
+            </div>
+            <div className="w-full max-w-[300px] lg:w-auto text-center">
+              <Switch
+                className="custom-black-switch"
+                checked={isMobison}
+                onChange={(checked) => setIsMobison(checked)}
+              />
+              <p className="text-sm font-semibold mt-2 text-[#D2D2D2]">
+                {isMobison ? "Switch off for Polema" : "Switch on for Mobison"}
+              </p>
+            </div>
+            <div className="min-w-[300px] flex justify-end">
+              <Dropdown overlay={menu} trigger={["click"]} className="justify-center">
+                <button className="rounded-lg border-[1px] border-[#919191] p-2 shadow-lg text-sm sm:text-base cursor-pointer w-fit lg:w-fit">
+                  Select Action
+                </button>
+              </Dropdown>
+            </div>
           </div>
 
           {/* Invoice Section */}
@@ -127,26 +158,42 @@ const WaybillInvoice = () => {
             <div className="flex justify-between">
               <div className="logo">
                 <img
-                  src={polemaLogo}
-                  alt="Polema Logo"
+                  src={isMobison ? mobisonLogo : polemaLogo}
+                  alt={isMobison ? "mobison-logo" : "polema-logo"}
                   className="h-fit"
                 />
+                {isMobison && <div>
+                  <p className="text-start italic">
+                    Pharmaceuticals,<br/>
+                    Industrialists,<br/>
+                    Oil Milling and<br/>
+                    General Commerce<br/>
+                  </p>
+                  </div>}
               </div>
               <div className="heading text-center">
-                <h1
-                  className="text-[25px] sm:text-[32px] font-bold text-[#434343]"                  
-                >
-                  POLEMA INDUSTRIES LIMITED
-                </h1>
-                <p className="text-sm sm:text-base lg:text-lg font-bold text-[#434343]">
-                  A DIVISION OF MOBISON INTER-LINK & ASSOCIATES LTD.
-                </p>
-                <p className="text-sm font-bold text-[#434343]">Manufactures' & Exporters of Palm Kernel Oil, Palm Kernel Cakes and Drugs</p>
+                <div>
+                  <p className="flex justify-end mb-14 text-xs sm:text-sm">
+                  <i>{isMobison ? 'RC 64084' : 'RC 131127'}</i>
+                  </p>
+                  <h1
+                    className="text-[25px] sm:text-[32px] font-bold text-[#434343]"                  
+                  >
+                    {isMobison ? "MAOBISON INTER-LINK ASSOCIATES LTD." : "POLEMA INDUSTRIES LIMITED"}                  
+                  </h1>
+                  <p className="text-sm sm:text-base lg:text-lg font-bold text-[#434343]">
+                    A DIVISION OF {!isMobison ? "MAOBISON INTER-LINK ASSOCIATES LTD." : "POLEMA INDUSTRIES LIMITED"}<br/>
+                    <span className="text-sm font-bold text-[#434343]">Manufactures' & Exporters of Palm Kernel Oil, Palm Kernel Cakes and Drugs</span>
+                  </p>
+                </div>
               </div>
-              <div className="flex items-end self-end flex-col gap-8 text-xs sm:text-sm">
-                <p className="flex justify-end mb-14 text-xs sm:text-sm">
-                  RC 131127
-                </p>
+              {isMobison ? (<div className="flex items-center text-xs sm:text-sm justify-end">
+                  <p><b className="italic">HEAD OFFICE:</b> Old Aba-Owerri Road,<br/>
+                  Osisioma Industry Layout, <br/>
+                  Osisioma L.G.A, Abia State. <br/>
+                  Tel: 08065208084<br/>
+                  Email: onwaobiec@yahoo.com<br/></p>
+                </div> ) : (<div className="flex items-center text-xs sm:text-sm justify-end">                
                 <p>
                   <b className="italic">FACTORY/OFFICE:</b>
                   <br /> Osisioma Industry Layout,
@@ -156,7 +203,7 @@ const WaybillInvoice = () => {
                   <br />
                   <span>onwaobiec@yahoo.com</span>
                 </p>
-              </div>
+              </div>)}
             </div>
 
             {/* Title Section */}
