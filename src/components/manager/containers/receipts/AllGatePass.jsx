@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { DropdownMenu } from "@radix-ui/themes";
-import _ from "lodash";
-import { refractor, refractorToTime } from "../../../date";
-import { usePagination } from "../../../../hooks/usePagination";
-import { Table, Flex, Button, Heading, Spinner, Text } from "@radix-ui/themes";
+import { DropdownMenu, Table, Flex, Button, Heading, Spinner, Text } from "@radix-ui/themes";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquare, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
 import toast, { Toaster } from "react-hot-toast";
+import _ from "lodash";
+import { refractor, refractorToTime } from "../../../date";
+import { usePagination } from "../../../../hooks/usePagination";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -17,16 +16,13 @@ const AllGatePass = () => {
   const [passDetails, setPassDetails] = useState([]);
   const [failedSearch, setFailedSearch] = useState(false);
   const [failedText, setFailedText] = useState("");
+  const [loadingId, setLoadingId] = useState(null);
 
   // Fetch gate pass details
   const fetchGatePass = async () => {
     const token = localStorage.getItem("token");
-
     if (!token) {
-      toast.error("An error occurred, try logging in again", {
-        style: { padding: "20px" },
-        duration: 10000,
-      });
+      toast.error("Please log in again.", { style: { padding: "20px" }, duration: 10000 });
       return;
     }
 
@@ -45,14 +41,42 @@ const AllGatePass = () => {
         setFailedSearch(false);
       }
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching gate passes:", error);
       setFailedSearch(true);
       setFailedText("Failed to fetch data.");
+      toast.error("Failed to load gate passes.");
     }
   };
 
-  const getSquareColor = (arg) => {
-    switch (arg) {
+  // Handle sending gate pass to print
+  const handleSendToPrintGatepass = async (id) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Please log in again.", { style: { padding: "20px" }, duration: 10000 });
+      return;
+    }
+
+    setLoadingId(id);
+    try {
+      const response = await axios.post(
+        `${root}/batch/add-gate-pass-to-print/${id}`,
+        {}, // Empty body if no data is required
+        { headers: { Authorization: `Bearer ${token}` } } // Correct headers placement
+      );
+
+      toast.success("Gate pass sent to print successfully!");
+      console.log("Gate Pass Response:", response.data);
+    } catch (error) {
+      console.error("Error sending gate pass to print:", error);
+      toast.error(error.response?.data?.message || "Failed to send gate pass to print.");
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  // Determine square color based on status
+  const getSquareColor = (status) => {
+    switch (status) {
       case "pending":
         return "text-yellow-500";
       case "approved":
@@ -64,8 +88,10 @@ const AllGatePass = () => {
     }
   };
 
-  const disableDropdown = (arg) => arg === "pending" || arg === "rejected";
+  // Check if dropdown should be disabled
+  const isDropdownDisabled = (status) => status === "pending" || status === "rejected";
 
+  // Pagination hook
   const {
     currentData: paginatedInvoices,
     currentPage,
@@ -74,6 +100,7 @@ const AllGatePass = () => {
     goToPreviousPage,
   } = usePagination(passDetails, 15);
 
+  // Fetch data on component mount
   useEffect(() => {
     fetchGatePass();
   }, []);
@@ -99,9 +126,11 @@ const AllGatePass = () => {
         </Table.Header>
         <Table.Body>
           {paginatedInvoices.length === 0 ? (
-            <div className="p-4">
-              {failedSearch ? <Text>{failedText}</Text> : <Spinner />}
-            </div>
+            <Table.Row>
+              <Table.Cell colSpan={9} className="p-4">
+                {failedSearch ? <Text>{failedText}</Text> : <Spinner />}
+              </Table.Cell>
+            </Table.Row>
           ) : (
             paginatedInvoices.map((entry) => (
               <Table.Row key={entry.id}>
@@ -126,30 +155,54 @@ const AllGatePass = () => {
                   <Flex align="center" gap="1">
                     <FontAwesomeIcon
                       icon={faSquare}
-                      className={`${getSquareColor(entry.status)}`}
+                      className={getSquareColor(entry.status)}
                     />
                     {_.upperFirst(entry.status)}
                   </Flex>
                 </Table.Cell>
                 <Table.Cell>
-                  {disableDropdown(entry.status) ? (
-                    <Button variant="soft" disabled>
-                      <FontAwesomeIcon icon={faEllipsisV} />
+                  {isDropdownDisabled(entry.status) ? (
+                    <Button
+                      variant="soft"
+                      disabled={loadingId === entry.id || isDropdownDisabled(entry.status)}
+                    >
+                      {loadingId === entry.id ? (
+                        <Spinner size="1" />
+                      ) : (
+                        <FontAwesomeIcon icon={faEllipsisV} />
+                      )}
                     </Button>
                   ) : (
                     <DropdownMenu.Root>
                       <DropdownMenu.Trigger>
-                        <Button variant="soft">
-                          <FontAwesomeIcon icon={faEllipsisV} />
+                        <Button
+                          variant="soft"
+                          disabled={loadingId === entry.id}
+                        >
+                          {loadingId === entry.id ? (
+                            <Spinner size="1" />
+                          ) : (
+                            <FontAwesomeIcon icon={faEllipsisV} />
+                          )}
                         </Button>
                       </DropdownMenu.Trigger>
                       <DropdownMenu.Content>
                         <DropdownMenu.Item
-                          onClick={() =>
+                          onSelect={() =>
                             navigate(`/admin/receipt/view-gatepass/${entry.id}`)
                           }
                         >
                           View Approved Gate Pass
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Item
+                          onSelect={() => handleSendToPrintGatepass(entry.id)}
+                          disabled={loadingId === entry.id}
+                        >
+                          {loadingId === entry.id ? (
+                            <Spinner size="1" />
+                          ) : (
+                            "Send To Print"
+                          )}
                         </DropdownMenu.Item>
                       </DropdownMenu.Content>
                     </DropdownMenu.Root>

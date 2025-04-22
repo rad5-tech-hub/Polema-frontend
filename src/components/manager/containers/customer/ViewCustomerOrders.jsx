@@ -133,7 +133,7 @@ const ViewCustomerOrders = () => {
                         onClick={() =>
                           navigate(
                             `/admin/customers/customer-ledger/${
-                              getMatchingCustomerById(item.customerId).id
+                              item.customerId
                             }`
                           )
                         }
@@ -144,7 +144,7 @@ const ViewCustomerOrders = () => {
                         onClick={() =>
                           navigate(
                             `/admin/customers/authority-to-weigh/${
-                              getMatchingCustomerById(item.customerId).id
+                              item.customerId
                             }/${item.id}`
                           )
                         }

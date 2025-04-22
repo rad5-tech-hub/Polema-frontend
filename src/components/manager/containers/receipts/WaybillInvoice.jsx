@@ -88,22 +88,6 @@ const WaybillInvoice = () => {
       </>
     )
   }
-
-   const menu = (
-      <Menu
-        onClick={({ key }) => {
-          if (key === "print") {
-            handlePrint();
-          } else if (key === "sendToPrint") {
-            handleSendToPrint();
-          }
-        }}
-        className="no-print"
-      >
-        <Menu.Item key="print">Print</Menu.Item>
-        <Menu.Item key="sendToPrint">Send to Print</Menu.Item>
-      </Menu>
-    );
   
   
   return (
@@ -127,12 +111,15 @@ const WaybillInvoice = () => {
       ) : (
         <>
           {/* Header Section */}
-          <div className="flex flex-col md:flex-col lg:flex-row justify-center lg:justify-between items-center gap-5 no-print pb-6 border-b border-[#919191]">
+          <div className="w-100 flex flex-col md:flex-col lg:flex-row justify-center lg:justify-between items-center gap-5 no-print pb-6 border-b border-[#919191]">
+            {/* Title Section */}
             <div className="w-full max-w-[300px] lg:w-auto text-center lg:text-left">
               <h3 className="text-sm sm:text-[20px] font-semibold">
                 Approved WayBill
               </h3>
             </div>
+
+            {/* Switch Section */}
             <div className="w-full max-w-[300px] lg:w-auto text-center">
               <Switch
                 className="custom-black-switch"
@@ -143,19 +130,22 @@ const WaybillInvoice = () => {
                 {isMobison ? "Switch off for Polema" : "Switch on for Mobison"}
               </p>
             </div>
-            <div className="min-w-[300px] flex justify-end">
-              <Dropdown overlay={menu} trigger={["click"]} className="justify-center">
-                <button className="rounded-lg border-[1px] border-[#919191] p-2 shadow-lg text-sm sm:text-base cursor-pointer w-fit lg:w-fit">
-                  Select Action
-                </button>
-              </Dropdown>
+
+            {/* Print Button Section */}
+            <div className="lg:text-end text-center w-full">
+              <button
+                onClick={() => handlePrint()}
+                className="rounded-lg border-[1px] border-[#919191] p-2 px-8 shadow-lg text-sm sm:text-base cursor-pointer"
+              >
+                Print
+              </button>
             </div>
           </div>
 
           {/* Invoice Section */}
           <div className="mt-8 bg-white p-6 sm:p-8 lg:p-14 rounded">
             {/* Header with Logo */}
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-5">
               <div className="logo">
                 <img
                   src={isMobison ? mobisonLogo : polemaLogo}
