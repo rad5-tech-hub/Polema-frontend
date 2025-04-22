@@ -248,7 +248,7 @@ const Invoice = () => {
                     RATE
                   </th>
                   <th className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                    AMOUNT (#)
+                    AMOUNT (₦)
                   </th>
                 </tr>
               </thead>
@@ -311,10 +311,27 @@ const Invoice = () => {
               </thead>
               <tbody>
                 <tr>
+                  <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm text-center">
+                    {invoice?.role?.admins?.[0]?.signature && (
+                      <img
+                        src={invoice.role.admins[0].signature}
+                        alt="Prepared by signature"
+                        className="w-32 h-auto mx-auto"
+                      />
+                    )}
+                  </td>
                   <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm"></td>
-                  <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm"></td>
-                  <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm"></td>
-                  <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm"></td>
+                  <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm text-center">
+                    {invoice?.approvedByRole?.signature && (
+                      <img
+                        src={invoice.approvedByRole?.signature}
+                        alt="Checked by signature"
+                        className="w-32 h-auto mx-auto"
+                      />)
+                    }
+                  </td>
+                  <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm text-center">                  
+                  </td>
                 </tr>
               </tbody>
             </table>

@@ -64,6 +64,12 @@ const PrintingRecords = () => {
       case "waybill":
         url = `/admin/receipts/waybill-invoice/${id}`;
         break;
+      case "vehicle":
+        url = `/admin/receipt/receipt-dispatchnote/${id}`;
+        break;
+      case "officialReceipt":
+        url = `/admin/receipt/official-receipt/${id}`;
+        break;
       default:
         toast.error("Unknown receipt type.");
         return;

@@ -878,7 +878,7 @@ const NewWeigh = () => {
             className="!bg-theme cursor-pointer"
             type="button"
             onClick={handleSave}
-            disabled={buttonLoadingSaving}
+            disabled={buttonLoadingSaving || buttonLoading}
           >
             {buttonLoadingSaving ? <Spinner /> : "Save"}
           </Button>

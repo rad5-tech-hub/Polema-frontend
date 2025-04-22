@@ -10,6 +10,7 @@ const root = import.meta.env.VITE_ROOT;
 
 const InvoiceAuthorityToWeigh = () => {
   const [authDetails, setAuthDetails] = useState("");
+  const [approvedBy, setApprovedBy] = useState("");
   const { id } = useParams();
 
   // Function to get approved weigh
@@ -23,6 +24,8 @@ const InvoiceAuthorityToWeigh = () => {
         },
       });
       setAuthDetails(response.data.ticket);
+      setApprovedBy(response.data.approvedBy);
+
     } catch (error) {
       console.log(error);
     }
@@ -152,16 +155,32 @@ const InvoiceAuthorityToWeigh = () => {
                   {`${authDetails.transactions?.quantity } ${authDetails.transactions?.unit} of ${authDetails.transactions?.porders.name}`}
                 </p> : ''}
               </div>
-
               <div className="flex justify-between mt-12">
                 {[
-                  "AUTHORISED SIGNATURE",
-                  "CUSTOMER’S SIGNATURE",
-                  "SIGNATURE",
-                ].map((label, idx) => (
+                  {
+                    label: "AUTHORISED SIGNATURE",
+                    signature: approvedBy?.signature, // Use approvedBy.signature
+                  },
+                  {
+                    label: "CUSTOMER’S SIGNATURE",
+                    signature: null, // No signature for customer, keep as placeholder
+                  },
+                  {
+                    label: "SIGNATURE",
+                    signature: authDetails?.role?.admins?.[0]?.signature, // Use role.admin.signature
+                  },
+                ].map((item, idx) => (
                   <div key={idx} className="text-left">
-                    <div className="border-b border-black border-dotted w-32 mx-auto mb-4"></div>
-                    <span className="text-sm sm:text-base">{label}</span>
+                    {item.signature ? (
+                      <img
+                        src={item.signature}
+                        alt={`${item.label} signature`}
+                        className="w-32 h-auto mx-auto mb-4"
+                      />
+                    ) : (
+                      <div className="border-b border-black border-dotted w-32 mx-auto mb-4"></div>
+                    )}
+                    <span className="text-sm sm:text-base">{item.label}</span>
                   </div>
                 ))}
               </div>
