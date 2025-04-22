@@ -1,50 +1,81 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEllipsisV, faSquare } from "@fortawesome/free-solid-svg-icons";
-import { DropdownMenu, Flex } from "@radix-ui/themes";
+import { faSquare, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
+import { DropdownMenu, Flex, Table, Heading, Button, Spinner, Text } from "@radix-ui/themes";
+import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 import _ from "lodash";
 import { refractor, refractorToTime } from "../../../date";
-import { Spinner } from "@radix-ui/themes";
-import toast, { Toaster } from "react-hot-toast";
-import { Table, Heading, Button } from "@radix-ui/themes";
-import axios from "axios";
+
 const root = import.meta.env.VITE_ROOT;
 
 const AllInvoice = () => {
   const navigate = useNavigate();
   const [invoices, setInvoices] = useState([]);
   const [failedSearch, setFailedSearch] = useState(false);
-  // Function to view invoice details
+  const [failedText, setFailedText] = useState("");
+  const [loadingId, setLoadingId] = useState(null);
 
+  // Fetch all invoices
   const fetchDetails = async () => {
     const token = localStorage.getItem("token");
-
     if (!token) {
-      toast.error("an error occurred , try logging in again", {
-        duration: 10000,
-      });
+      toast.error("Please log in again.", { style: { padding: "20px" }, duration: 10000 });
       return;
     }
 
     try {
       const response = await axios.get(`${root}/customer/get-all-invoice`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-      {
-        response.data.invoices.length === 0
-          ? setFailedSearch(true)
-          : setInvoices(response.data.invoices);
+
+      const { invoices } = response.data;
+      setInvoices(invoices);
+
+      if (invoices.length === 0) {
+        setFailedSearch(true);
+        setFailedText("No records found.");
+      } else {
+        setFailedSearch(false);
       }
-    } catch (e) {
-      console.log(e);
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+      setFailedSearch(true);
+      setFailedText("Failed to fetch invoices.");
+      toast.error("Failed to load invoices.");
     }
   };
 
-  const getSquareColor = (arg) => {
-    switch (arg) {
+  // Handle sending invoice to print
+  const handleSendToPrintInvoice = async (id) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Please log in again.", { style: { padding: "20px" }, duration: 10000 });
+      return;
+    }
+
+    setLoadingId(id);
+    try {
+      const response = await axios.post(
+        `${root}/batch/add-invoice-to-print/${id}`, // Adjust endpoint as needed
+        {}, // Empty body if no data is required
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success("Invoice sent to print successfully!");
+      console.log("Invoice Response:", response.data);
+    } catch (error) {
+      console.error("Error sending invoice to print:", error);
+      toast.error(error.response?.data?.message || "Failed to send invoice to print.");
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  // Determine square color based on status
+  const getSquareColor = (status) => {
+    switch (status) {
       case "pending":
         return "text-yellow-500";
       case "approved":
@@ -52,25 +83,24 @@ const AllInvoice = () => {
       case "rejected":
         return "text-red-500";
       default:
-        break;
+        return "";
     }
   };
 
-  // Function to disable dropdown
-  const disableDropdown = (arg) => {
-    if (arg === "pending" || arg === "rejected") return true;
-    else return false;
-  };
-  React.useEffect(() => {
+  // Check if dropdown should be disabled
+  const isDropdownDisabled = (status) => status === "pending" || status === "rejected";
+
+  // Fetch invoices on component mount
+  useEffect(() => {
     fetchDetails();
   }, []);
 
   return (
     <>
-      <Heading>View all Invoice</Heading>
+      <Heading>View All Invoices</Heading>
 
       {/* Table showing invoice details */}
-      <Table.Root variant="surface" className="mt-2">
+      <Table.Root variant="surface" className="mt-3">
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
@@ -84,53 +114,83 @@ const AllInvoice = () => {
         </Table.Header>
         <Table.Body>
           {invoices.length === 0 ? (
-            <div className="p-4">
-              {failedSearch ? "No records found" : <Spinner />}
-            </div>
+            <Table.Row>
+              <Table.Cell colSpan={7} className="p-4">
+                {failedSearch ? <Text>{failedText}</Text> : <Spinner />}
+              </Table.Cell>
+            </Table.Row>
           ) : (
-            invoices.map((invoice, index) => {
-              return (
-                <Table.Row>
-                  <Table.Cell>{refractor(invoice.createdAt)}</Table.Cell>
-                  <Table.Cell>{invoice.invoiceNumber}</Table.Cell>
-                  <Table.Cell>{`${invoice.customer.firstname} ${invoice.customer.lastname}`}</Table.Cell>
-                  <Table.Cell>{invoice.vehicleNo}</Table.Cell>
-                  <Table.Cell>{refractorToTime(invoice.createdAt)}</Table.Cell>
-                  <Table.Cell>
-                    <Flex align={"center"} gap={"1"}>
-                      <FontAwesomeIcon
-                        icon={faSquare}
-                        className={getSquareColor(invoice.status)}
-                      />
-                      {_.upperFirst(invoice.status)}
-                    </Flex>
-                  </Table.Cell>
-                  <Table.Cell>
+            invoices.map((invoice) => (
+              <Table.Row key={invoice.id}>
+                <Table.Cell>{refractor(invoice.createdAt)}</Table.Cell>
+                <Table.Cell>{invoice.invoiceNumber || ""}</Table.Cell>
+                <Table.Cell>
+                  {`${invoice.customer?.firstname || ""} ${invoice.customer?.lastname || ""}`}
+                </Table.Cell>
+                <Table.Cell>{invoice.vehicleNo || ""}</Table.Cell>
+                <Table.Cell>{refractorToTime(invoice.createdAt)}</Table.Cell>
+                <Table.Cell>
+                  <Flex align="center" gap="1">
+                    <FontAwesomeIcon
+                      icon={faSquare}
+                      className={getSquareColor(invoice.status)}
+                    />
+                    {_.upperFirst(invoice.status)}
+                  </Flex>
+                </Table.Cell>
+                <Table.Cell>
+                  {isDropdownDisabled(invoice.status) ? (
+                    <Button
+                      variant="soft"
+                      disabled={loadingId === invoice.id || isDropdownDisabled(invoice.status)}
+                    >
+                      {loadingId === invoice.id ? (
+                        <Spinner size="1" />
+                      ) : (
+                        <FontAwesomeIcon icon={faEllipsisV} />
+                      )}
+                    </Button>
+                  ) : (
                     <DropdownMenu.Root>
-                      <DropdownMenu.Trigger
-                        disabled={disableDropdown(invoice.status)}
-                      >
-                        <Button variant="soft">
-                          <FontAwesomeIcon icon={faEllipsisV} />
+                      <DropdownMenu.Trigger>
+                        <Button
+                          variant="soft"
+                          disabled={loadingId === invoice.id}
+                        >
+                          {loadingId === invoice.id ? (
+                            <Spinner size="1" />
+                          ) : (
+                            <FontAwesomeIcon icon={faEllipsisV} />
+                          )}
                         </Button>
                       </DropdownMenu.Trigger>
                       <DropdownMenu.Content>
                         <DropdownMenu.Item
-                          onClick={() => {
-                            navigate(`/admin/receipts/invoice/${invoice.id}`);
-                          }}
+                          onSelect={() => navigate(`/admin/receipts/invoice/${invoice.id}`)}
                         >
                           View Approved Invoice
                         </DropdownMenu.Item>
+                        <DropdownMenu.Item
+                          onSelect={() => handleSendToPrintInvoice(invoice.id)}
+                          disabled={loadingId === invoice.id}
+                        >
+                          {loadingId === invoice.id ? (
+                            <Spinner size="1" />
+                          ) : (
+                            "Send To Print"
+                          )}
+                        </DropdownMenu.Item>
                       </DropdownMenu.Content>
                     </DropdownMenu.Root>
-                  </Table.Cell>
-                </Table.Row>
-              );
-            })
+                  )}
+                </Table.Cell>
+              </Table.Row>
+            ))
           )}
         </Table.Body>
       </Table.Root>
+
+      <Toaster position="top-right" />
     </>
   );
 };

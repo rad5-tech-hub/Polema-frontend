@@ -88,6 +88,7 @@ import {
   CollectFromGeneralStore,
   ViewDepartmentStore,
   DepartmentLedger,
+  PrintingRecords
 } from "./components/manager/containers";
 
 import PrivateRoute from "./components/PrivateRoute";
@@ -454,7 +455,11 @@ const App = () => {
                     path="/tickets/view-auth-to-weigh/:id"
                     element={<InvoiceAuthorityToWeigh />}
                   />
-                </Routes>
+                  <Route
+                    path="/printing"
+                    element={<PrintingRecords />}
+                  />
+                </Routes>                             
               </DashBoardManager>
             </PrivateRoute>
           }

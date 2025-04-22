@@ -54,32 +54,6 @@ const GatepassReceipt = () => {
     window.print();
   };
 
-  // Handle send to print action (placeholder)
-  const handleSendToPrint = () => {
-    console.log("Send to Print selected");
-    toast.success("Send to Print action triggered!", {
-      duration: 5000,
-      style: { padding: "20px" },
-    });
-  };
-
-  // Dropdown menu for print actions
-  const menu = (
-    <Menu
-      onClick={({ key }) => {
-        if (key === "print") {
-          handlePrint();
-        } else if (key === "sendToPrint") {
-          handleSendToPrint();
-        }
-      }}
-      className="no-print"
-    >
-      <Menu.Item key="print">Print</Menu.Item>
-      <Menu.Item key="sendToPrint">Send to Print</Menu.Item>
-    </Menu>
-  );
-
   useEffect(() => {
     viewGatePass();
   }, []);
@@ -127,12 +101,10 @@ const GatepassReceipt = () => {
                   {isMobison ? "Switch off for Polema" : "Switch on for Mobison"}
                 </p>
               </div>
-              <div className="min-w-[300px] flex justify-end">
-                <Dropdown overlay={menu} trigger={["click"]} className="justify-center">
-                  <button className="rounded-lg border-[1px] border-[#919191] p-2 shadow-lg text-sm sm:text-base cursor-pointer w-fit lg:w-fit">
-                    Select Action
-                  </button>
-                </Dropdown>
+              <div className="lg:text-end text-center w-full">
+                <button onClick={()=> handlePrint()} className="rounded-lg border-[1px] border-[#919191] font-semibold shadow-lg text-sm sm:text-base cursor-pointer p-2 px-8">
+                  Print
+                </button>                
               </div>
             </div>
 
