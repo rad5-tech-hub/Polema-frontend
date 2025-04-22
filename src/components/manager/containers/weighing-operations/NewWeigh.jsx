@@ -875,7 +875,7 @@ const NewWeigh = () => {
         <Flex justify="end" gap="3" className="mt-4">
           <Button
             size="3"
-            className="!bg-theme cursor-pointer"
+            className="!bg-theme text-white cursor-pointer"
             type="button"
             onClick={handleSave}
             disabled={buttonLoadingSaving || buttonLoading}
@@ -884,7 +884,7 @@ const NewWeigh = () => {
           </Button>
           <Button
             size="3"
-            className="!bg-theme cursor-pointer"
+            className="!bg-theme text-white cursor-pointer"
             type="button"
             onClick={handleFinish}
             disabled={buttonLoading || buttonLoadingSaving}

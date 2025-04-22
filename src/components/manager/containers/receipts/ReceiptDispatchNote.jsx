@@ -163,16 +163,12 @@ const ReceiptDispatchNote = () => {
                   }`}
                 >
                   <label
-                    className={`font-semibold truncate ${
-                      label === "Date" ? "w-auto mr-4" : "w-1/3 sm:w-auto"
-                    }`}
+                    className={`font-semibold truncate w-auto mr-4`}
                   >
                     {label}:
                   </label>
                   <p
-                    className={`border-b pl-6 border-black border-dotted flex-grow text-sm sm:text-base ${
-                      label === "Date" ? "w-auto text-right" : ""
-                    }`}
+                    className={`border-b pl-6 border-black border-dotted flex-grow text-sm sm:text-base`}
                   >
                     {value}
                   </p>

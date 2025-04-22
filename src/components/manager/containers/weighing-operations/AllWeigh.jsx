@@ -29,7 +29,7 @@ const CustomDialog = ({ isOpen, onClose, title, children }) => {
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50"
-        onClick={onClose} // Close dialog when clicking backdrop
+        onClick={onClose}
       />
       {/* Dialog Content */}
       <div className="relative bg-white rounded-lg shadow-lg max-w-md w-full p-6 m-4">
@@ -40,10 +40,12 @@ const CustomDialog = ({ isOpen, onClose, title, children }) => {
             className="text-white rounded-md px-2 py-0 text-xl bg-red-500 hover:bg-red-700 hover:text-white"
             aria-label="Close dialog"
           >
-            &times;
+            ×
           </button>
         </div>
-        <div className="space-y-2">{children}</div>      
+        <div className="space-y-2 max-h-[70vh] overflow-y-auto">
+          {children}
+        </div>
       </div>
     </div>
   );
@@ -56,8 +58,8 @@ const AllWeigh = () => {
   const [isFetching, setIsFetching] = React.useState(true);
   const [currentPage, setCurrentPage] = React.useState(1);
   const [filter, setFilter] = React.useState("all");
-  const [selectedWeigh, setSelectedWeigh] = React.useState(null); // State for selected weigh
-  const [isDialogOpen, setIsDialogOpen] = React.useState(false); // State for dialog
+  const [selectedWeigh, setSelectedWeigh] = React.useState(null);
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const itemsPerPage = 10;
 
   // Function to fetch weigh details based on filter
@@ -91,9 +93,11 @@ const AllWeigh = () => {
 
         const completedCustomerWeighs = completedCustomerResponse.data.data || [];
         const uncompletedCustomerWeighs = uncompletedCustomerResponse.data.data || [];
+
+        // Mark completed and uncompleted weighs explicitly
         allWeighs = [
-          ...completedCustomerWeighs,
-          ...uncompletedCustomerWeighs,
+          ...completedCustomerWeighs.map((item) => ({ ...item, status: "completed" })),
+          ...uncompletedCustomerWeighs.map((item) => ({ ...item, status: "uncompleted" })),
         ];
       } else if (filter === "completed") {
         const [customerResponse] = await Promise.all([
@@ -101,14 +105,20 @@ const AllWeigh = () => {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
-        allWeighs = [...(customerResponse.data.data || [])];
+        allWeighs = (customerResponse.data.data || []).map((item) => ({
+          ...item,
+          status: "completed",
+        }));
       } else if (filter === "uncompleted") {
         const [customerResponse] = await Promise.all([
           axios.get(`${root}/customer/view-saved`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
-        allWeighs = [...(customerResponse.data.data || [])];
+        allWeighs = (customerResponse.data.data || []).map((item) => ({
+          ...item,
+          status: "uncompleted",
+        }));
       }
 
       if (allWeighs.length === 0) {
@@ -247,7 +257,7 @@ const AllWeigh = () => {
             paginatedWeighDetails.map((item) => (
               <Table.Row
                 key={item.id}
-                onClick={() => handleRowClick(item)} // Open dialog on row click
+                onClick={() => handleRowClick(item)}
                 className="cursor-pointer hover:bg-gray-100"
               >
                 <Table.Cell>{refractor(item.createdAt)}</Table.Cell>
@@ -269,24 +279,24 @@ const AllWeigh = () => {
                     <FontAwesomeIcon
                       icon={faSquare}
                       className={`${
-                        isUncompleted(item)
+                        item.status === "uncompleted"
                           ? "text-red-500 bg-red-100"
                           : "text-green-500 bg-green-100"
                       } transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-125`}
-                      title={isUncompleted(item) ? "Uncompleted" : "Completed"}
+                      title={item.status === "uncompleted" ? "Uncompleted" : "Completed"}
                     />
-                    {isUncompleted(item) ? (
+                    {item.status === "uncompleted" ? (
                       <Text
                         as="span"
                         className="cursor-pointer flex justify-between items-center gap-5"
-                        title="Uncomplete"
+                        title="Uncompleted"
                       >
                         <span className="text-red-500 hover:text-red-700">Pending</span>
                         <p
                           className="bg-gray-200 px-2 py-1 rounded-md"
                           title="Click to complete"
                           onClick={(e) => {
-                            e.stopPropagation(); // Prevent dialog from opening
+                            e.stopPropagation();
                             navigate(`/admin/weighing-operations/finish-weigh/${item.id}`);
                           }}
                         >
@@ -315,7 +325,27 @@ const AllWeigh = () => {
         {selectedWeigh && (
           <>
             <div className="mb-4">
-              {selectedWeigh.image ? (<img src={selectedWeigh.image} alt="weigh image"/> || 'loading') : ''}
+              {selectedWeigh.image ? (
+                <img
+                  src={selectedWeigh.image}
+                  alt="Weigh image"
+                  style={{
+                    height: "200px",
+                    width: "100%",
+                    objectFit: "contain",
+                  }}
+                  className="w-full"
+                  onError={() => (
+                    <Text as="p" className="text-red-500">
+                      Failed to load image
+                    </Text>
+                  )}
+                />
+              ) : (
+                <Text as="p" className="text-gray-500">
+                  No image available
+                </Text>
+              )}
             </div>
             <Text as="p">
               <strong>Date:</strong> {refractor(selectedWeigh.createdAt)}
@@ -332,35 +362,56 @@ const AllWeigh = () => {
               <strong>Quantity:</strong>{" "}
               {selectedWeigh.transactions?.quantity || 0}
             </Text>
-            {selectedWeigh.gross && <Text as="p">
-              <strong>Gross:</strong> {selectedWeigh.gross || "-"}
-            </Text>}
-            {selectedWeigh.tar && <Text as="p">
-              <strong>Tar:</strong> {selectedWeigh.tar || "-"}
-            </Text>}
-            {selectedWeigh.net && <Text as="p">
-              <strong>Net:</strong> {selectedWeigh.net || "-"}
-            </Text>}
-            {selectedWeigh.extra && <Text as="p">
-              <strong>Extra:</strong> {selectedWeigh.extra || "-"}
-            </Text>}
-            {selectedWeigh.vehicleNo && <Text as="p">
-              <strong>Vehicle Number:</strong> {selectedWeigh.vehicleNo || "-"}
-            </Text>}
+            {selectedWeigh.gross && (
+              <Text as="p">
+                <strong>Gross:</strong> {selectedWeigh.gross || "-"}
+              </Text>
+            )}
+            {selectedWeigh.tar && (
+              <Text as="p">
+                <strong>Tar:</strong> {selectedWeigh.tar || "-"}
+              </Text>
+            )}
+            {selectedWeigh.net && (
+              <Text as="p">
+                <strong>Net:</strong> {selectedWeigh.net || "-"}
+              </Text>
+            )}
+            {selectedWeigh.extra && (
+              <Text as="p">
+                <strong>Extra:</strong> {selectedWeigh.extra || "-"}
+              </Text>
+            )}
+            {selectedWeigh.vehicleNo && (
+              <Text as="p">
+                <strong>Vehicle Number:</strong> {selectedWeigh.vehicleNo || "-"}
+              </Text>
+            )}
             <div className="flex items-end justify-end">
               <div>
-                {selectedWeigh.signInSupervisor && <Text as="p">
-                  <strong className="pe-2">{selectedWeigh.signInSupervisor}:</strong> {selectedWeigh.signIn ? 'Signed In' :  "-"}
-                </Text>}
-                {selectedWeigh.signOutSupervisor && <Text as="p">
-                  <strong className="pe-2">{selectedWeigh.signOutSupervisor}:</strong> {selectedWeigh.signOut ? 'Signed Out' :  "-"}
-                </Text>}
-                <Text as="p" className={`${isUncompleted(selectedWeigh) ? 'text-red-400' : 'text-green-400'}`}>
+                {selectedWeigh.signInSupervisor && (
+                  <Text as="p">
+                    <strong className="pe-2">{selectedWeigh.signInSupervisor}:</strong>{" "}
+                    {selectedWeigh.signIn ? "Signed In" : "-"}
+                  </Text>
+                )}
+                {selectedWeigh.signOutSupervisor && (
+                  <Text as="p">
+                    <strong className="pe-2">{selectedWeigh.signOutSupervisor}:</strong>{" "}
+                    {selectedWeigh.signOut ? "Signed Out" : "-"}
+                  </Text>
+                )}
+                <Text
+                  as="p"
+                  className={`${
+                    selectedWeigh.status === "uncompleted" ? "text-red-400" : "text-green-400"
+                  }`}
+                >
                   <strong>Status:</strong>{" "}
-                  {isUncompleted(selectedWeigh) ? "Pending" : "Completed"}
+                  {selectedWeigh.status === "uncompleted" ? "Pending" : "Completed"}
                 </Text>
-              </div>              
-            </div>          
+              </div>
+            </div>
           </>
         )}
       </CustomDialog>
