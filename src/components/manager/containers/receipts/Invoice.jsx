@@ -312,12 +312,14 @@ const Invoice = () => {
               <tbody>
                 <tr>
                   <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm text-center">
-                    {invoice?.role?.admins?.[0]?.signature && (
+                    {invoice?.role?.admins?.[0]?.signature ? (
                       <img
                         src={invoice.role.admins[0].signature}
                         alt="Prepared by signature"
                         className="w-32 h-auto mx-auto"
                       />
+                    ) : (
+                      invoice.role?.name
                     )}
                   </td>
                   <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm"></td>
