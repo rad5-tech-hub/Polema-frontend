@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import toast, { LoaderIcon, Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import {
   Heading,
   Separator,
@@ -9,6 +9,7 @@ import {
   TextField,
   Button,
   Grid,
+  Spinner as RadixSpinner,
 } from "@radix-ui/themes";
 import { Select as AntSelect } from "antd";
 
@@ -26,85 +27,124 @@ const CustomerPlaceOrder = () => {
   const [buttonLoading, setButtonLoading] = useState(false);
   const [planAmount, setPlanAmount] = useState("");
   const [planAmountValue, setPlanAmountValue] = useState("");
-  const [rawPrice, setRawPrice] = useState("");
 
-  // Function to format the number with commas
-  const formatNumberWithCommas = (value) => {
-    if (!value) return "";
-    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
-
-  // Function to remove commas and store raw number
-  const handlePriceChange = (e) => {
-    const rawValue = e.target.value.replace(/,/g, "");
-    if (!isNaN(rawValue)) {
-      setRawPrice(rawValue);
-      setBasePrice(rawValue);
-    }
-  };
-
+  // Function to fetch customers
   const fetchCustomers = async () => {
-    const retrToken = localStorage.getItem("token");
-    if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Please log in to continue", {
+        style: { background: "#fef2f2", color: "#b91c1c", padding: "16px" },
+      });
       return;
     }
 
     try {
       const response = await axios.get(`${root}/customer/get-customers`, {
-        headers: {
-          Authorization: `Bearer ${retrToken}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-      setCustomers(response.data.customers);
+      setCustomers(response.data.customers || []);
     } catch (error) {
-      console.log(error);
-      toast.error("Failed to fetch customers");
+      console.error("Fetch customers error:", error);
+      toast.error("Failed to fetch customers", {
+        style: { background: "#fef2f2", color: "#b91c1c", padding: "16px" },
+      });
     }
   };
 
+  // Function to fetch products
   const fetchProducts = async () => {
-    const retrToken = localStorage.getItem("token");
-    if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Please log in to continue", {
+        style: { background: "#fef2f2", color: "#b91c1c", padding: "16px" },
+      });
       return;
     }
 
     try {
       const response = await axios.get(`${root}/admin/get-products`, {
-        headers: {
-          Authorization: `Bearer ${retrToken}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-      setProducts(response.data.products);
+      setProducts(response.data.products || []);
     } catch (error) {
-      console.log(error);
-      toast.error("Failed to fetch products");
+      console.error("Fetch products error:", error);
+      toast.error("Failed to fetch products", {
+        style: { background: "#fef2f2", color: "#b91c1c", padding: "16px" },
+      });
     }
   };
 
+  // Get matching product details
+  const getMatchingUnitFromId = (id) => {
+    const product = products.find((product) => product.id === id);
+    return product
+      ? product
+      : { price: [{ unit: "", amount: "" }], department: { name: "" }, pricePlan: [] };
+  };
+
+  // Get matching price plans
+  const getMatchingPlansFromId = (id) => {
+    const product = getMatchingUnitFromId(id);
+    setSelectedProductPlan(Array.isArray(product.pricePlan) ? product.pricePlan : []);
+  };
+
+  // Handle price input change
+  const handlePriceChange = (e) => {
+    const value = e.target.value.replace(/,/g, "");
+    if (!isNaN(value) && value !== "" && Number(value) >= 0) {
+      setBasePrice(value);
+    } else {
+      setBasePrice("");
+    }
+  };
+
+  // Handle custom discount change
+  const handleDiscountChange = (e) => {
+    const value = e.target.value;
+    if (value === "" || (!isNaN(value) && Number(value) >= 0)) {
+      setPlanAmountValue(value);
+    }
+  };
+
+  // Format number with commas for display
+  const formatNumberWithCommas = (value) => {
+    if (!value) return "";
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setButtonLoading(true);
-    const retrToken = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
-    if (!retrToken) {
-      toast.error("An error occurred. Try logging in again", {
+    if (!token) {
+      toast.error("Please log in to continue", {
+        style: { background: "#fef2f2", color: "#b91c1c", padding: "16px" },
         duration: 6500,
-        style: { padding: "30px" },
       });
       setButtonLoading(false);
       return;
     }
 
-    const isCrushing = getMatchingUnitFromId(selectedProductId)?.department?.name === "Crushing";
+    const product = getMatchingUnitFromId(selectedProductId);
+    const isCrushing = product.department?.name === "Crushing";
+
+    if (!selectedProductId || (!isCrushing && !selectedCustomerId) || (isCrushing && !customCustomerName) || !quantity) {
+      toast.error("Please fill all required fields", {
+        style: { background: "#fef2f2", color: "#b91c1c", padding: "16px" },
+        duration: 5000,
+      });
+      setButtonLoading(false);
+      return;
+    }
 
     const body = {
       ...(isCrushing ? { customerName: customCustomerName } : { customerId: selectedCustomerId }),
       productId: selectedProductId,
-      quantity: quantity,
-      unit: getMatchingUnitFromId(selectedProductId).price[0].unit,
-      price: basePrice,
+      quantity: Number(quantity),
+      unit: product.price[0]?.unit || "",
+      price: Number(basePrice) || Number(product.price[0]?.amount) || 0,
       discount: planAmount === "custom" ? Number(planAmountValue) : Number(planAmount) || null,
     };
 
@@ -112,15 +152,10 @@ const CustomerPlaceOrder = () => {
       const response = await axios.post(
         `${root}/customer/raise-customer-order`,
         body,
-        {
-          headers: {
-            Authorization: `Bearer ${retrToken}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      setButtonLoading(false);
       toast.success(response.data.message, {
-        style: { padding: "30px" },
+        style: { background: "#ecfdf5", color: "#047857", padding: "16px" },
         duration: 10000,
       });
 
@@ -134,25 +169,14 @@ const CustomerPlaceOrder = () => {
       setPlanAmount("");
       setPlanAmountValue("");
     } catch (error) {
-      console.log(error);
-      setButtonLoading(false);
-      toast.error("An error occurred, try again", {
-        style: { padding: "30px" },
+      console.error("Submit error:", error);
+      toast.error(error.response?.data?.message || "An error occurred, try again", {
+        style: { background: "#fef2f2", color: "#b91c1c", padding: "16px" },
         duration: 5000,
       });
+    } finally {
+      setButtonLoading(false);
     }
-  };
-
-  const getMatchingUnitFromId = (id) => {
-    const product = products.find((product) => product.id === id);
-    return product ? product : { price: [{ unit: "" }], department: { name: "" } };
-  };
-
-  const getMatchingPlansFromId = (id) => {
-    const product = products.find((product) => product.id === id);
-    Array.isArray(product?.pricePlan)
-      ? setSelectedProductPlan(product.pricePlan)
-      : setSelectedProductPlan([]);
   };
 
   useEffect(() => {
@@ -162,175 +186,203 @@ const CustomerPlaceOrder = () => {
 
   return (
     <>
-      <Heading>Place Order</Heading>
-      <Separator className="my-3 w-full" />
+      <Heading size="6">Place Order</Heading>
+      <Separator className="my-4 w-full" />
       <form onSubmit={handleSubmit}>
-        <Flex className="w-full mb-4" gap="5">
-          <div className="w-full">
-            <Text className="mb-4">
-              Product<span className="text-red-500">*</span>
-            </Text>
-            <AntSelect
-              showSearch
-              className="w-full mt-2"
-              placeholder="Select Product"
-              value={selectedProductId || undefined}
-              onChange={(value) => {
-                setSelectedProductId(value);
-                getMatchingPlansFromId(value);
-                setBasePrice(getMatchingUnitFromId(value).price[0].amount);
-                setSelectedCustomerId("");
-                setCustomCustomerName("");
-                setPlanAmount("");
-                setPlanAmountValue("");
-              }}
-              disabled={products.length === 0}
-              optionFilterProp="children"
-              filterOption={(input, option) =>
-                option.children.toLowerCase().includes(input.toLowerCase())
-              }
-            >
-              {products.map((product) => (
-                <AntSelect.Option key={product.id} value={product.id}>
-                  {product.name}
-                </AntSelect.Option>
-              ))}
-            </AntSelect>
-          </div>
-          <div className="w-full">
-            <Text className="mb-4">
-              Customer Name <span className="text-red-500">*</span>
-            </Text>
-            {getMatchingUnitFromId(selectedProductId)?.department?.name === "Crushing" ? (
-              <TextField.Root
-                className="mt-2"
-                required
-                placeholder="Enter Customer Name"
-                value={customCustomerName}
-                onChange={(e) => setCustomCustomerName(e.target.value)}
-              />
-            ) : (
+        <Flex direction="column" gap="4">
+          {/* Product and Customer */}
+          <Flex gap="4" className="w-full">
+            <div className="w-full">
+              <Text as="label" size="2" weight="medium">
+                Product <span className="text-red-500">*</span>
+              </Text>
               <AntSelect
                 showSearch
-                className="w-full mt-2"
-                placeholder="Select Customer"
-                value={selectedCustomerId || undefined}
-                onChange={setSelectedCustomerId}
-                disabled={customers.length === 0}
-                optionFilterProp="label"
+                className="w-full mt-1"
+                placeholder="Select Product"
+                value={selectedProductId || undefined}
+                onChange={(value) => {
+                  setSelectedProductId(value);
+                  getMatchingPlansFromId(value);
+                  setBasePrice(getMatchingUnitFromId(value).price[0]?.amount || "");
+                  setSelectedCustomerId("");
+                  setCustomCustomerName("");
+                  setPlanAmount("");
+                  setPlanAmountValue("");
+                }}
+                disabled={products.length === 0}
+                optionFilterProp="children"
                 filterOption={(input, option) =>
-                  option.label.toLowerCase().includes(input.toLowerCase())
+                  option.children.toLowerCase().includes(input.toLowerCase())
                 }
               >
-                {customers.map((customer) => (
-                  <AntSelect.Option
-                    key={customer.id}
-                    value={customer.id}
-                    label={`${customer.firstname} ${customer.lastname}`}
-                  >
-                    {customer.firstname} {customer.lastname}
+                {products.map((product) => (
+                  <AntSelect.Option key={product.id} value={product.id}>
+                    {product.name}
                   </AntSelect.Option>
                 ))}
               </AntSelect>
-            )}
-          </div>
-        </Flex>
+            </div>
+            <div className="w-full">
+              <Text as="label" size="2" weight="medium">
+                Customer Name <span className="text-red-500">*</span>
+              </Text>
+              {getMatchingUnitFromId(selectedProductId).department?.name === "Crushing" ? (
+                <TextField.Root
+                  size="2"
+                  className="mt-1 w-full"
+                  required
+                  placeholder="Enter Customer Name"
+                  value={customCustomerName}
+                  onChange={(e) => setCustomCustomerName(e.target.value)}
+                />
+              ) : (
+                <AntSelect
+                  showSearch
+                  className="w-full mt-1"
+                  placeholder="Select Customer"
+                  value={selectedCustomerId || undefined}
+                  onChange={setSelectedCustomerId}
+                  disabled={customers.length === 0}
+                  optionFilterProp="label"
+                  filterOption={(input, option) =>
+                    option.label.toLowerCase().includes(input.toLowerCase())
+                  }
+                >
+                  {customers.map((customer) => (
+                    <AntSelect.Option
+                      key={customer.id}
+                      value={customer.id}
+                      label={`${customer.firstname} ${customer.lastname}`}
+                    >
+                      {customer.firstname} {customer.lastname}
+                    </AntSelect.Option>
+                  ))}
+                </AntSelect>
+              )}
+            </div>
+          </Flex>
 
-        <Flex className="w-full mb-4" gap="5">
-          <div className="w-full">
-            <Text className="mb-4">
-              Quantity<span className="text-red-500">*</span>
-            </Text>
-            <TextField.Root
-              className="mt-2"
-              required
-              placeholder="Input Quantity"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-            />
-          </div>
-          <div className="w-full">
-            <Text className="mb-4">Product Unit</Text>
-            <TextField.Root
-              className="mt-2"
-              disabled
-              value={
-                selectedProductId.length === 0
-                  ? ""
-                  : getMatchingUnitFromId(selectedProductId).price[0].unit
-              }
-              placeholder="Select Product First"
-            />
-          </div>
-        </Flex>
-
-        <Grid className="w-full mb-4" columns="2" gap="4">
-          <div className="w-full">
-            <Text className="mb-4">Price Discount (Optional)</Text>
-            {planAmount === "custom" ? (
+          {/* Quantity and Unit */}
+          <Flex gap="4" className="w-full">
+            <div className="w-full">
+              <Text as="label" size="2" weight="medium">
+                Quantity <span className="text-red-500">*</span>
+              </Text>
               <TextField.Root
-                className="mt-2"
+                size="2"
                 type="number"
-                placeholder="Enter custom discount"
-                value={planAmountValue || ""}
+                className="mt-1 w-full"
+                required
+                placeholder="Input Quantity"
+                value={quantity}
                 onChange={(e) => {
                   const value = e.target.value;
-                  if (!isNaN(value) && value >= 0) {
-                    setPlanAmountValue(value);
+                  if (value === "" || (!isNaN(value) && Number(value) >= 0)) {
+                    setQuantity(value);
                   }
                 }}
               />
-            ) : (
-              <AntSelect
-                className="w-full mt-2"
-                placeholder={
-                  selectedProductPlan.length === 0
-                    ? "Product Selected has no discount"
-                    : "Select plan"
+            </div>
+            <div className="w-full">
+              <Text as="label" size="2" weight="medium">
+                Product Unit
+              </Text>
+              <TextField.Root
+                size="2"
+                className="mt-1 w-full"
+                disabled
+                value={
+                  selectedProductId ? getMatchingUnitFromId(selectedProductId).price[0]?.unit || "" : ""
                 }
-                value={planAmount || undefined}
-                onChange={(value) => {
-                  if (value === "custom") {
-                    setPlanAmount("custom");
-                  } else if (value === "none") {
-                    setPlanAmount("");
-                    setPlanAmountValue("");
-                  } else {
-                    setPlanAmount(value);
-                    setPlanAmountValue("");
-                  }
-                }}
-              >
-                {selectedProductPlan.map((plan) => (
-                  <AntSelect.Option key={plan.category} value={plan.amount}>
-                    {plan.category}
-                  </AntSelect.Option>
-                ))}
-                <AntSelect.Option value="custom">Custom</AntSelect.Option>
-                <AntSelect.Option value="none">None</AntSelect.Option>
-              </AntSelect>
-            )}
-          </div>
-          <div className="w-full">
-            <Text className="mb-4">Product Price</Text>
-            <TextField.Root
-              className="mt-2"
-              placeholder="Select Product First"
-              value={formatNumberWithCommas(basePrice)}
-              onChange={handlePriceChange}
-            />
-          </div>
-        </Grid>
+                placeholder="Select Product First"
+              />
+            </div>
+          </Flex>
 
-        <Flex className="w-full mb-4" gap="5" justify="end">
-          <Button
-            size="3"
-            type="submit"
-            disabled={buttonLoading}
-            className="bg-theme hover:bg-theme/85"
-          >
-            {buttonLoading ? <LoaderIcon /> : "Add"}
-          </Button>
+          {/* Discount and Price */}
+          <Grid columns="2" gap="4" className="w-full">
+            <div className="w-full">
+              <Text as="label" size="2" weight="medium">
+                Price Discount (Optional)
+              </Text>
+              {planAmount === "custom" ? (
+                <TextField.Root
+                    size="2"
+                    type="text" // Use text to allow typing with commas
+                    className="mt-1 w-full"
+                    placeholder="Enter custom discount"
+                    value={formatNumberWithCommas(planAmountValue)} // Format the value with commas
+                    onChange={(e) => {
+                      const rawValue = e.target.value.replace(/,/g, ""); // Remove commas for raw input
+                      if (!isNaN(rawValue) && Number(rawValue) >= 0) {
+                        setPlanAmountValue(rawValue); // Update the raw numeric value
+                      }
+                    }}
+                  />
+              ) : (
+                <AntSelect
+                  className="w-full mt-1"
+                  placeholder={
+                    selectedProductPlan.length === 0
+                      ? "Product selected has no discount"
+                      : "Select discount plan"
+                  }
+                  value={planAmount || undefined}
+                  onChange={(value) => {
+                    if (value === "custom") {
+                      setPlanAmount("custom");
+                    } else if (value === "none") {
+                      setPlanAmount("");
+                      setPlanAmountValue("");
+                    } else {
+                      setPlanAmount(value);
+                      setPlanAmountValue("");
+                    }
+                  }}
+                >
+                  {selectedProductPlan.map((plan) => (
+                    <AntSelect.Option key={plan.category} value={plan.amount}>
+                      {plan.category}
+                    </AntSelect.Option>
+                  ))}
+                  <AntSelect.Option value="custom">Custom</AntSelect.Option>
+                  <AntSelect.Option value="none">None</AntSelect.Option>
+                </AntSelect>
+              )}
+            </div>
+            <div className="w-full">
+              <Text as="label" size="2" weight="medium">
+                Product Price
+              </Text>
+              <TextField.Root
+                size="2"
+                className="mt-1 w-full"
+                placeholder="Select Product First"
+                value={formatNumberWithCommas(basePrice)}
+                onChange={handlePriceChange}
+              />
+            </div>
+          </Grid>
+
+          {/* Submit Button */}
+          <Flex gap="4" justify="end">
+            <Button
+              size="3"
+              type="submit"
+              disabled={buttonLoading}
+              className="!bg-theme !text-white hover:!bg-theme flex items-center gap-2"
+            >
+              {buttonLoading ? (
+                <>
+                  <RadixSpinner className="w-5 h-5 text-white animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                "Add"
+              )}
+            </Button>
+          </Flex>
         </Flex>
       </form>
       <Toaster position="top-right" />

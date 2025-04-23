@@ -1,44 +1,54 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { Select } from "@radix-ui/themes";
-import toast, { Toaster, LoaderIcon } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import {
+  TextField,
+  Select,
+  Button,
+  Heading,
+  Flex,
+  Spinner,
+  Grid,
+  Text,
+} from "@radix-ui/themes";
+import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 
 const root = import.meta.env.VITE_ROOT;
 
 const CreateDispatchNote = () => {
+  const navigate = useNavigate();
   const [buttonLoading, setButtonLoading] = useState(false);
   const [adminId, setAdminId] = useState("");
   const [superAdmins, setSuperAdmins] = useState([]);
-
-  // State management for form details
-  const [driverName, setDriverName] = useState("");
-  const [escortName, setEscortName] = useState("");
-  const [vehicleNumber, setVehicleNumber] = useState("");
-  const [destination, setDestination] = useState("");
-
-  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    driverName: "",
+    escortName: "",
+    vehicleNumber: "",
+    destination: "",
+  });
 
   // Fetch super admins
   const fetchSuperAdmins = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("An error occurred, try logging in again", {
-        duration: 10000,
-      });
+      toast.error("Please log in again.", { style: { padding: "20px" }, duration: 10000 });
       return;
     }
 
     try {
       const response = await axios.get(`${root}/admin/all-admin`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-      setSuperAdmins(response.data.staffList);
+      setSuperAdmins(response.data.staffList || []);
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching super admins:", error);
+      toast.error(error.response?.data?.message || "Failed to load admins.");
     }
+  };
+
+  // Handle form input changes
+  const handleInputChange = (field) => (e) => {
+    setFormData((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
   // Handle form submission
@@ -48,147 +58,168 @@ const CreateDispatchNote = () => {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      toast.error("An error occurred, try logging in again");
+      toast.error("Please log in again.", { style: { padding: "20px" }, duration: 10000 });
+      setButtonLoading(false);
+      return;
+    }
+
+    if (!adminId) {
+      toast.error("Please select an admin to send to.", { style: { padding: "20px" }, duration: 10000 });
+      setButtonLoading(false);
+      return;
+    }
+
+    if (!formData.driverName) {
+      toast.error("Driver's name is required.", { style: { padding: "20px" }, duration: 10000 });
+      setButtonLoading(false);
       return;
     }
 
     const body = {
-      escortName,
-      destination,
-      vehicleNo: vehicleNumber,
-      driversName: driverName,
+      driversName: formData.driverName,
+      escortName: formData.escortName,
+      vehicleNo: formData.vehicleNumber,
+      destination: formData.destination,
     };
 
     try {
-      // FIRST REQUEST
-      const firstRequest = await axios.post(
+      // Create vehicle dispatch
+      const createResponse = await axios.post(
         `${root}/customer/create-vehicle-dispatch`,
         body,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const dispatchId = firstRequest.data.vehicle.id;
+      const dispatchId = createResponse.data.vehicle?.id;
+      if (!dispatchId) {
+        throw new Error("Failed to retrieve dispatch ID.");
+      }
 
-      // SECOND REQUEST
+      // Send dispatch to admin
       await axios.post(
         `${root}/customer/send-vehicle/${dispatchId}`,
-        { adminId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { adminIds: [adminId] },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setButtonLoading(false);
-      toast.success("Dispatch note generated and sent to the admin", {
-        style: { padding: "25px" },
+      toast.success("Dispatch note generated and sent to admin!", {
+        style: { padding: "20px" },
         duration: 10000,
       });
-
-      // Navigate to receipt page under the `/admin` route
-      navigate(`/admin/receipt/receipt-dispatchnote/${dispatchId}`);
+      
     } catch (error) {
-      console.error(error);
+      console.error("Error creating dispatch note:", error);
+      toast.error(error.response?.data?.message || "Failed to create dispatch note.");
+    } finally {
       setButtonLoading(false);
     }
   };
 
+  // Fetch super admins on mount
   useEffect(() => {
     fetchSuperAdmins();
   }, []);
 
   return (
-    <div className="p-6 relative mb-16">
-      <div className="invoice py-2 flex justify-between">
-        <b className="text-[#434343]">Vehicle Dispatch Note</b>
-        <button
-          className="bg-theme px-4 py-2 text-white rounded-lg hover:bg-theme/75"
+    <Flex direction="column" gap="4" className="p-6">
+      <Flex justify="between" align="center" className=" py-4 border-b border-gray-200">
+        <Heading size="5">Create Vehicle Dispatch Note</Heading>
+        <Button       
+          variant="outline"
+          className="px-8 p-5 border-theme text-theme"
           onClick={() => navigate("/admin/receipts/all-dispatchnote")}
         >
           View All
-        </button>
-      </div>
+        </Button>
+      </Flex>
 
-      <form className="my-8" onSubmit={handleSubmit}>
-        <div className="my-8 grid grid-cols-2 max-sm:grid-cols-1 gap-8 border-t-[1px] border-[#9191914] py-8">
-          <div className="drivers-name">
-            <label>Driver's Name</label>
-            <input
-              required
-              value={driverName}
-              onChange={(e) => setDriverName(e.target.value)}
-              type="text"
+      <form onSubmit={handleSubmit}>
+        <Grid
+          columns={{ initial: "1", sm: "2" }}
+          gap="6"
+          className=" pt-6"
+        >
+          <Flex direction="column" gap="2">
+            <Text as="label" size="2" weight="medium">
+              Driver's Name
+            </Text>
+            <TextField.Root
+              size="3"
               placeholder="Enter Driver Name"
-              className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
-            />
-          </div>
-          <div className="escorts-name">
-            <label>Escort's Name</label>
-            <input
-              value={escortName}
-              onChange={(e) => setEscortName(e.target.value)}
-              type="text"
-              placeholder="Enter Escort Name"
-              className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
-            />
-          </div>
-          <div className="vehicle-no">
-            <label>Vehicle No</label>
-            <input
-              value={vehicleNumber}
-              onChange={(e) => setVehicleNumber(e.target.value)}
-              placeholder="Enter Vehicle Number"
-              className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
-            />
-          </div>
-          <div className="destination">
-            <label>Destination</label>
-            <input
-              type="text"
-              value={destination}
-              onChange={(e) => setDestination(e.target.value)}
-              placeholder="Enter Destination"
-              className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
-            />
-          </div>
-          <div className="send-to">
-            <label>Send To:</label>
-            <Select.Root
-              size={"3"}
+              value={formData.driverName}
+              onChange={handleInputChange("driverName")}
               required
+            />
+          </Flex>
+          <Flex direction="column" gap="2">
+            <Text as="label" size="2" weight="medium">
+              Escort's Name
+            </Text>
+            <TextField.Root
+              size="3"
+              placeholder="Enter Escort Name"
+              value={formData.escortName}
+              onChange={handleInputChange("escortName")}
+            />
+          </Flex>
+          <Flex direction="column" gap="2">
+            <Text as="label" size="2" weight="medium">
+              Vehicle No
+            </Text>
+            <TextField.Root
+              size="3"
+              placeholder="Enter Vehicle Number"
+              value={formData.vehicleNumber}
+              onChange={handleInputChange("vehicleNumber")}
+            />
+          </Flex>
+          <Flex direction="column" gap="2">
+            <Text as="label" size="2" weight="medium">
+              Destination
+            </Text>
+            <TextField.Root
+              size="3"
+              placeholder="Enter Destination"
+              value={formData.destination}
+              onChange={handleInputChange("destination")}
+            />
+          </Flex>
+          <Flex direction="column" gap="2">
+            <Text as="label" size="2" weight="medium">
+              Send To
+            </Text>
+            <Select.Root
+              size="3"
+              value={adminId}
+              onValueChange={setAdminId}
               disabled={superAdmins.length === 0}
-              onValueChange={(val) => setAdminId(val)}
+              required
             >
-              <Select.Trigger
-                className="w-full mt-3"
-                placeholder="Select Admin"
-              />
+              <Select.Trigger placeholder="Select Admin" />
               <Select.Content position="popper">
                 {superAdmins.map((admin) => (
-                  <Select.Item key={admin.id} value={admin.id}>
+                  <Select.Item key={admin.id} value={admin.role?.id}>
                     {`${admin.firstname} ${admin.lastname}`}
                   </Select.Item>
                 ))}
               </Select.Content>
             </Select.Root>
-          </div>
-        </div>
-        <div className="btn flex justify-end max-sm:flex-col">
-          <button
+          </Flex>
+        </Grid>
+        <Flex justify="end" className="mt-8">
+          <Button
             type="submit"
-            className="h-[40px] bg-theme hover:bg-theme/85 text-white px-8 rounded-lg shadow-lg my-12"
+            size="3"
+            disabled={buttonLoading}
+            className="!bg-theme cursor-pointer"
           >
-            {buttonLoading ? <LoaderIcon /> : "Send"}
-          </button>
-        </div>
+            {buttonLoading ? <Spinner size="2" /> : "Send"}
+          </Button>
+        </Flex>
       </form>
+
       <Toaster position="top-right" />
-    </div>
+    </Flex>
   );
 };
 

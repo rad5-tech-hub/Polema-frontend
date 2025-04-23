@@ -70,6 +70,7 @@ const NewWeigh = () => {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [webcamError, setWebcamError] = useState(null);
   const [isImageUploading, setIsImageUploading] = useState(false);
+  const [authWeigh, setAuthWeigh] = useState("");
 
   const fileInputRef = useRef(null);
   const webcamRef = useRef(null);
@@ -427,6 +428,13 @@ const NewWeigh = () => {
       return;
     }
 
+    let weighId;
+    if (location.pathname.startsWith("/admin/weighing-operations/finish-weigh")) {
+      weighId = saveAuthId;
+    } else {
+      weighId = id;
+    }
+
     const body = {};
     if (supervisorNameWeighIn) body.signInSupervisor = supervisorNameWeighIn;
     if (supervisorNameWeighOut) body.signOutSupervisor = supervisorNameWeighOut;
@@ -441,7 +449,7 @@ const NewWeigh = () => {
     if (imageURL) body.image = imageURL;
 
     try {
-      const endpoint = `/customer/save-weigh/${id}`;
+      const endpoint = `/customer/save-weigh/${weighId}`;
       await axios.post(`${root}${endpoint}`, body, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -875,16 +883,16 @@ const NewWeigh = () => {
         <Flex justify="end" gap="3" className="mt-4">
           <Button
             size="3"
-            className="!bg-theme cursor-pointer"
+            className="!bg-theme text-white cursor-pointer"
             type="button"
             onClick={handleSave}
-            disabled={buttonLoadingSaving}
+            disabled={buttonLoadingSaving || buttonLoading}
           >
             {buttonLoadingSaving ? <Spinner /> : "Save"}
           </Button>
           <Button
             size="3"
-            className="!bg-theme cursor-pointer"
+            className="!bg-theme text-white cursor-pointer"
             type="button"
             onClick={handleFinish}
             disabled={buttonLoading || buttonLoadingSaving}
