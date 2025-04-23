@@ -106,9 +106,7 @@ const CreateDispatchNote = () => {
         style: { padding: "20px" },
         duration: 10000,
       });
-
-      // Navigate to receipt page
-      navigate(`/admin/receipt/receipt-dispatchnote/${dispatchId}`);
+      
     } catch (error) {
       console.error("Error creating dispatch note:", error);
       toast.error(error.response?.data?.message || "Failed to create dispatch note.");

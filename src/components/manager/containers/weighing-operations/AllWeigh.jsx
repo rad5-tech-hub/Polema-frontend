@@ -21,8 +21,85 @@ import _ from "lodash";
 
 const root = import.meta.env.VITE_ROOT;
 
-// Custom Dialog Component
-const CustomDialog = ({ isOpen, onClose, title, children }) => {
+const SendToAdminDialog = ({
+  isOpen,
+  onClose,
+  admins,
+  selectedRoleId,
+  setSelectedRoleId,
+  handleSendToAdminSubmit,
+  isSending,
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/50" onClick={(e) => { e.stopPropagation(); onClose(); }} />
+      <div className="relative bg-white rounded-lg shadow-lg max-w-md w-full p-6 m-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-bold">Send to Admin</h2>
+          <button
+            onClick={(e) => { e.stopPropagation(); onClose(); }}
+            className="text-white rounded-md px-2 py-0 text-xl bg-red-500 hover:bg-red-700 hover:text-white"
+            aria-label="Close dialog"
+          >
+            ×
+          </button>
+        </div>
+        <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+          {admins.length === 0 ? (
+            <Text as="p" className="text-gray-500">
+              No admins available
+            </Text>
+          ) : (
+            <div className="space-y-3">
+              {admins.map((admin) => (
+                <Flex key={admin.id} align="center" gap="3" className="space-y-3">
+                  <input
+                    type='checkbox'
+                    name="admin"
+                    checked={selectedRoleId === admin.role?.id}
+                    onChange={() => setSelectedRoleId(admin.role?.id)}
+                    className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                  />
+                  <Text as="label" className="cursor-pointer">
+                    {admin.firstname} {admin.lastname} ({admin.role?.name})
+                  </Text>
+                </Flex>
+              ))}
+            </div>
+          )}
+          <Flex justify="end" gap="2" className="mt-4">
+            <Button
+              variant="soft"
+              onClick={(e) => { e.stopPropagation(); onClose(); }}
+              className="!bg-gray-100 hover:!bg-gray-200"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="solid"
+              onClick={handleSendToAdminSubmit}
+              disabled={admins.length === 0 || !selectedRoleId || isSending}
+              className="!bg-blue-600 !text-white hover:!bg-blue-700 flex items-center gap-2"
+            >
+              {isSending ? (
+                <>
+                  <RadixSpinner className="w-5 h-5 text-white animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                "Send"
+              )}
+            </Button>
+          </Flex>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const WeighDetailsDialog = ({ isOpen, onClose, selectedWeigh }) => {
   if (!isOpen) return null;
 
   return (
@@ -30,7 +107,7 @@ const CustomDialog = ({ isOpen, onClose, title, children }) => {
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <div className="relative bg-white rounded-lg shadow-lg max-w-md w-full p-6 m-4">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold">{title}</h2>
+          <h2 className="text-lg font-bold">Weigh Details</h2>
           <button
             onClick={onClose}
             className="text-white rounded-md px-2 py-0 text-xl bg-red-500 hover:bg-red-700 hover:text-white"
@@ -39,7 +116,100 @@ const CustomDialog = ({ isOpen, onClose, title, children }) => {
             ×
           </button>
         </div>
-        <div className="space-y-2 max-h-[70vh] overflow-y-auto">{children}</div>
+        <div className="space-y-2 max-h-[70vh] overflow-y-auto">
+          {selectedWeigh ? (
+            <>
+              <div className="mb-4">
+                {selectedWeigh.image ? (
+                  <img
+                    src={selectedWeigh.image}
+                    alt="Weigh image"
+                    style={{
+                      height: "200px",
+                      width: "100%",
+                      objectFit: "contain",
+                    }}
+                    className="w-full"
+                  />
+                ) : (
+                  <Text as="p" className="text-gray-500">
+                    No image available
+                  </Text>
+                )}
+              </div>
+              <Text as="p">
+                <strong>Date:</strong> {refractor(selectedWeigh.createdAt)}
+              </Text>
+              <Text as="p">
+                <strong>Client Name:</strong>{" "}
+                {selectedWeigh.customer
+                  ? `${selectedWeigh.customer.firstname} ${selectedWeigh.customer.lastname}`
+                  : selectedWeigh.supplier
+                  ? `${selectedWeigh.supplier.firstname} ${selectedWeigh.supplier.lastname}`
+                  : "-"}
+              </Text>
+              <Text as="p">
+                <strong>Quantity:</strong> {selectedWeigh.transactions?.quantity || 0}
+              </Text>
+              {selectedWeigh.gross && (
+                <Text as="p">
+                  <strong>Gross:</strong> {selectedWeigh.gross || "-"}
+                </Text>
+              )}
+              {selectedWeigh.tar && (
+                <Text as="p">
+                  <strong>Tar:</strong> {selectedWeigh.tar || "-"}
+                </Text>
+              )}
+              {selectedWeigh.net && (
+                <Text as="p">
+                  <strong>Net:</strong> {selectedWeigh.net || "-"}
+                </Text>
+              )}
+              {selectedWeigh.extra && (
+                <Text as="p">
+                  <strong>Extra:</strong> {selectedWeigh.extra || "-"}
+                </Text>
+              )}
+              {selectedWeigh.vehicleNo && (
+                <Text as="p">
+                  <strong>Vehicle Number:</strong> {selectedWeigh.vehicleNo || "-"}
+                </Text>
+              )}
+              <div className="flex items-end justify-end">
+                <div>
+                  {selectedWeigh.signInSupervisor && (
+                    <Text as="p">
+                      <strong className="pe-2">{selectedWeigh.signInSupervisor}:</strong>{" "}
+                      {selectedWeigh.signIn ? "Signed In" : "-"}
+                    </Text>
+                  )}
+                  {selectedWeigh.signOutSupervisor && (
+                    <Text as="p">
+                      <strong className="pe-2">{selectedWeigh.signOutSupervisor}:</strong>{" "}
+                      {selectedWeigh.signOut ? "Signed Out" : "-"}
+                    </Text>
+                  )}
+                  <Text
+                    as="p"
+                    className={`${
+                      selectedWeigh.status === "uncompleted"
+                        ? "text-red-400"
+                        : "text-green-400"
+                    }`}
+                  >
+                    <strong>Status:</strong>{" "}
+                    {selectedWeigh.status === "uncompleted" ? "Pending" : "Completed"}
+                  </Text>
+                </div>
+              </div>
+            </>
+          ) : (
+            <Text as="p" className="text-gray-500">
+              No weigh details available.
+            </Text>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -58,6 +228,7 @@ const AllWeigh = ({ onWeighAction }) => {
   const [isSendToAdminDialogOpen, setIsSendToAdminDialogOpen] = useState(false);
   const [selectedRoleId, setSelectedRoleId] = useState(null);
   const [selectedWeighId, setSelectedWeighId] = useState(null);
+  const [isSending, setIsSending] = useState(false);
   const itemsPerPage = 10;
 
   // Helper to determine status class
@@ -77,7 +248,7 @@ const AllWeigh = ({ onWeighAction }) => {
     }
 
     try {
-      const response = await axios.get(`${root}/admin/all-admin`, {
+      const response = await axios.get(`${root}/admin/all-staff`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAdmins(response.data.staffList || []);
@@ -132,7 +303,7 @@ const AllWeigh = ({ onWeighAction }) => {
       } else if (filter === "completed") {
         const [customerResponse] = await Promise.all([
           axios.get(`${root}/customer/view-weighs`, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${filter}` },
           }),
         ]);
         allWeighs = (customerResponse.data.data || []).map((item) => ({
@@ -193,6 +364,7 @@ const AllWeigh = ({ onWeighAction }) => {
     }
 
     try {
+      setIsSending(true);
       await axios.post(
         `${root}/customer/send-supplier-weigh/${weighId}`,
         { adminIds: [roleId] },
@@ -208,12 +380,9 @@ const AllWeigh = ({ onWeighAction }) => {
       toast.error("Failed to send weigh to admin", {
         style: { background: "#fef2f2", color: "#b91c1c" },
       });
+    } finally {
+      setIsSending(false);
     }
-  };
-
-  // Handle radio button change
-  const handleRoleRadioChange = (roleId) => {
-    setSelectedRoleId(roleId);
   };
 
   // Handle send to admin dialog submit
@@ -222,6 +391,7 @@ const AllWeigh = ({ onWeighAction }) => {
       await sendToAdmin(selectedWeighId, selectedRoleId);
       setIsSendToAdminDialogOpen(false);
       setSelectedRoleId(null);
+      setIsDialogOpen(false)
       setSelectedWeighId(null);
     }
   };
@@ -230,6 +400,7 @@ const AllWeigh = ({ onWeighAction }) => {
   const openSendToAdminDialog = (weighId) => {
     setSelectedWeighId(weighId);
     setIsSendToAdminDialogOpen(true);
+    setIsDialogOpen(false)
   };
 
   // Close send to admin dialog
@@ -237,6 +408,7 @@ const AllWeigh = ({ onWeighAction }) => {
     setIsSendToAdminDialogOpen(false);
     setSelectedRoleId(null);
     setSelectedWeighId(null);
+    setIsDialogOpen(false)
   };
 
   // Fetch admins and weigh details on mount
@@ -345,7 +517,7 @@ const AllWeigh = ({ onWeighAction }) => {
                         }
                       />
                       <span className={`${checkStatus(item.status)} text-sm`}>
-                        {item.status === "uncompleted" ? "Uncompleted" : "Completed"}
+                        {item.status === "uncompleted" ? "Pending" : "Completed"}
                       </span>
                     </div>
                     {(item.status === "uncompleted" ||
@@ -381,7 +553,7 @@ const AllWeigh = ({ onWeighAction }) => {
                             <DropdownMenu.Item
                               onSelect={(e) => {
                                 e.preventDefault();
-                                openSendToAdminDialog(item.authToWeighId);
+                                openSendToAdminDialog(item.id);
                               }}
                             >
                               Send to Admin
@@ -398,155 +570,23 @@ const AllWeigh = ({ onWeighAction }) => {
         </Table.Body>
       </Table.Root>
 
-      {/* Custom Dialog for Weigh Details */}
-      <CustomDialog
+      {/* Weigh Details Dialog */}
+      <WeighDetailsDialog
         isOpen={isDialogOpen}
         onClose={closeDialog}
-        title="Weigh Details"
-      >
-        {selectedWeigh && (
-          <>
-            <div className="mb-4">
-              {selectedWeigh.image ? (
-                <img
-                  src={selectedWeigh.image}
-                  alt="Weigh image"
-                  style={{
-                    height: "200px",
-                    width: "100%",
-                    objectFit: "contain",
-                  }}
-                  className="w-full"
-                  onError={() => (
-                    <Text as="p" className="text-red-500">
-                      Failed to load image
-                    </Text>
-                  )}
-                />
-              ) : (
-                <Text as="p" className="text-gray-500">
-                  No image available
-                </Text>
-              )}
-            </div>
-            <Text as="p">
-              <strong>Date:</strong> {refractor(selectedWeigh.createdAt)}
-            </Text>
-            <Text as="p">
-              <strong>Client Name:</strong>{" "}
-              {selectedWeigh.customer
-                ? `${selectedWeigh.customer.firstname} ${selectedWeigh.customer.lastname}`
-                : selectedWeigh.supplier
-                ? `${selectedWeigh.supplier.firstname} ${selectedWeigh.supplier.lastname}`
-                : "-"}
-            </Text>
-            <Text as="p">
-              <strong>Quantity:</strong> {selectedWeigh.transactions?.quantity || 0}
-            </Text>
-            {selectedWeigh.gross && (
-              <Text as="p">
-                <strong>Gross:</strong> {selectedWeigh.gross || "-"}
-              </Text>
-            )}
-            {selectedWeigh.tar && (
-              <Text as="p">
-                <strong>Tar:</strong> {selectedWeigh.tar || "-"}
-              </Text>
-            )}
-            {selectedWeigh.net && (
-              <Text as="p">
-                <strong>Net:</strong> {selectedWeigh.net || "-"}
-              </Text>
-            )}
-            {selectedWeigh.extra && (
-              <Text as="p">
-                <strong>Extra:</strong> {selectedWeigh.extra || "-"}
-              </Text>
-            )}
-            {selectedWeigh.vehicleNo && (
-              <Text as="p">
-                <strong>Vehicle Number:</strong> {selectedWeigh.vehicleNo || "-"}
-              </Text>
-            )}
-            <div className="flex items-end justify-end">
-              <div>
-                {selectedWeigh.signInSupervisor && (
-                  <Text as="p">
-                    <strong className="pe-2">{selectedWeigh.signInSupervisor}:</strong>{" "}
-                    {selectedWeigh.signIn ? "Signed In" : "-"}
-                  </Text>
-                )}
-                {selectedWeigh.signOutSupervisor && (
-                  <Text as="p">
-                    <strong className="pe-2">{selectedWeigh.signOutSupervisor}:</strong>{" "}
-                    {selectedWeigh.signOut ? "Signed Out" : "-"}
-                  </Text>
-                )}
-                <Text
-                  as="p"
-                  className={`${
-                    selectedWeigh.status === "uncompleted"
-                      ? "text-red-400"
-                      : "text-green-400"
-                  }`}
-                >
-                  <strong>Status:</strong>{" "}
-                  {selectedWeigh.status === "uncompleted" ? "Pending" : "Completed"}
-                </Text>
-              </div>
-            </div>
-          </>
-        )}
-      </CustomDialog>
+        selectedWeigh={selectedWeigh}
+      />
 
-      {/* Dialog for Send to Admin */}
-      <CustomDialog
+      {/* Send to Admin Dialog */}
+      <SendToAdminDialog
         isOpen={isSendToAdminDialogOpen}
         onClose={closeSendToAdminDialog}
-        title="Send to Admin"
-      >
-        <div className="space-y-4">
-          {admins.length === 0 ? (
-            <Text as="p" className="text-gray-500">
-              No admins available
-            </Text>
-          ) : (
-            <div className="space-y-2">
-              {admins.map((admin) => (
-                <Flex key={admin.id} align="center" gap="2">
-                  <input
-                    type="radio"
-                    name="admin"
-                    checked={selectedRoleId === admin.role?.id}
-                    onChange={() => handleRoleRadioChange(admin.role?.id)}
-                    className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                  />
-                  <Text as="label" className="cursor-pointer">
-                    {admin.role?.name}
-                  </Text>
-                </Flex>
-              ))}
-            </div>
-          )}
-          <Flex justify="end" gap="2" className="mt-4">
-            <Button
-              variant="soft"
-              onClick={closeSendToAdminDialog}
-              className="!bg-gray-100 hover:!bg-gray-200"
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="solid"
-              onClick={handleSendToAdminSubmit}
-              disabled={admins.length === 0 || !selectedRoleId}
-              className="!bg-blue-600 !text-white hover:!bg-blue-700"
-            >
-              Send
-            </Button>
-          </Flex>
-        </div>
-      </CustomDialog>
+        admins={admins}
+        selectedRoleId={selectedRoleId}
+        setSelectedRoleId={setSelectedRoleId}
+        handleSendToAdminSubmit={handleSendToAdminSubmit}
+        isSending={isSending}
+      />
 
       {/* Pagination Controls */}
       {totalPages > 1 && (

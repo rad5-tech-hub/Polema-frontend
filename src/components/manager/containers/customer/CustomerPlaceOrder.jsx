@@ -272,7 +272,7 @@ const CustomerPlaceOrder = () => {
                 className="mt-2"
                 type="number"
                 placeholder="Enter custom discount"
-                value={planAmountValue || ""}
+                value={formatNumberWithCommas(planAmountValue || "")}
                 onChange={(e) => {
                   const value = e.target.value;
                   if (!isNaN(value) && value >= 0) {
