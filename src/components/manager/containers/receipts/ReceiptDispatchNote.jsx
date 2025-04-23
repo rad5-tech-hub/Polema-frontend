@@ -16,8 +16,11 @@ const ReceiptDispatchNote = () => {
     destination: "",
     approvedBy: "",
     createdAt: "",
+    prepareBy: "",
+    prepareByRoleName: "",
   });
   const [loading, setLoading] = useState(true);
+  const [signatureError, setSignatureError] = useState(false);
 
   // Fetch dispatch note data
   useEffect(() => {
@@ -40,8 +43,10 @@ const ReceiptDispatchNote = () => {
             vehicleNo: data.vehicleNo || "Not Available",
             escortName: data.escortName || "Not Available",
             destination: data.destination || "Not Available",
-            approvedBy: data.approvedBy || "Not Available",
+            approvedBy: data.approvedBy || "Transport Manager",
             createdAt: data.createdAt || "",
+            prepareBy: data.preparedByRole?.admins?.[0]?.signature || "",
+            prepareByRoleName: data.preparedByRole?.name || "",
           });
         } else {
           toast.error("No vehicle data found", {
@@ -68,6 +73,10 @@ const ReceiptDispatchNote = () => {
     window.print();
   };
 
+  // Handle signature image load error
+  const handleSignatureError = () => {
+    setSignatureError(true);
+  };
 
   if (loading) {
     return (
@@ -88,6 +97,10 @@ const ReceiptDispatchNote = () => {
             * {
               box-shadow: none !important;
             }
+            .signature-img {
+              max-width: 150px !important;
+              height: auto !important;
+            }
           }
         `}
       </style>
@@ -99,11 +112,14 @@ const ReceiptDispatchNote = () => {
               Approved Vehicle Dispatch Pass Note
             </h3>
           </div>
-        
-          <div className="w-fit lg:text-end text-center">              
-            <button onClick={()=> handlePrint()} className="rounded-lg border-[1px] border-[#919191]  px-8 shadow-lg text-sm sm:text-base cursor-pointer p-2">
+
+          <div className="w-fit lg:text-end text-center">
+            <button
+              onClick={handlePrint}
+              className="rounded-lg border-[1px] border-[#919191] px-8 shadow-lg text-sm sm:text-base cursor-pointer p-2"
+            >
               Print
-            </button>              
+            </button>
           </div>
         </div>
 
@@ -114,10 +130,9 @@ const ReceiptDispatchNote = () => {
               <div className="flex flex-col items-start">
                 <img
                   src={polemaLogo}
-                  alt={"polema-logo"}
+                  alt="Polema Industries Logo"
                   className="w-16 sm:w-24 h-auto"
                 />
-               
               </div>
 
               {/* Heading and RC Section */}
@@ -137,9 +152,9 @@ const ReceiptDispatchNote = () => {
               <div className="flex flex-col items-end">
                 <p className="text-xs sm:text-sm">
                   <i>RC 131127</i>
-                </p>                            
+                </p>
               </div>
-            </div>         
+            </div>
 
             <div className="details mt-8 sm:mt-12 flex flex-col gap-4 sm:gap-[25px]">
               {[
@@ -150,9 +165,11 @@ const ReceiptDispatchNote = () => {
                 ["Destination", dispatchNote.destination || "Not Available"],
                 [
                   "Time of Departure",
-                  new Date(dispatchNote.createdAt).toLocaleTimeString(),
+                  dispatchNote.createdAt
+                    ? new Date(dispatchNote.createdAt).toLocaleTimeString()
+                    : "Not Available",
                 ],
-                ["Authorized By", dispatchNote.approvedBy || "Not Available"],
+                ["Authorized By", dispatchNote.approvedBy || "Transport Manager"],
               ].map(([label, value], idx) => (
                 <div
                   key={idx}
@@ -162,20 +179,16 @@ const ReceiptDispatchNote = () => {
                       : "justify-between sm:justify-start"
                   }`}
                 >
-                  <label
-                    className={`font-semibold truncate w-auto mr-4`}
-                  >
+                  <label className="font-semibold truncate w-auto mr-4">
                     {label}:
                   </label>
-                  <p
-                    className={`border-b pl-6 border-black border-dotted flex-grow text-sm sm:text-base`}
-                  >
+                  <p className="border-b pl-6 border-black border-dotted flex-grow text-sm sm:text-base">
                     {value}
                   </p>
                 </div>
               ))}
 
-              <div className="owner-of-goods w-full flex justify-between gap-2 sm:gap-4 mt-12 sm:mt-24">
+              <div className="owner-of-goods w-full flex items-end justify-between gap-2 sm:gap-4 mt-12 sm:mt-24">
                 <div className="flex flex-col gap-4">
                   <p className="border-b border-black border-dotted w-[150px] sm:w-[230px]"></p>
                   <label className="w-fit text-sm sm:text-base ml-4">
@@ -183,8 +196,17 @@ const ReceiptDispatchNote = () => {
                   </label>
                 </div>
                 <div className="flex flex-col gap-4">
-                  <p className="border-b border-black border-dotted w-[150px] sm:w-[230px]"></p>
-                  <label className="w-fit text-sm sm:text-base ml-4">
+                  {dispatchNote.prepareBy && !signatureError ? (
+                    <img
+                      src={dispatchNote.prepareBy}
+                      alt={`Signature of ${dispatchNote.prepareByRoleName || "Approving Officer"}`}
+                      className="signature-img w-[100px] h-[100px] object-contain"
+                      onError={handleSignatureError}
+                    />
+                  ) : (
+                    <p className="border-b border-black border-dotted w-[150px] sm:w-[230px] mx-auto"></p>
+                  )}
+                  <label className="w-fit text-sm sm:text-base ml-4 text-center">
                     APPROVING OFFICER’S SIGNATURE
                   </label>
                 </div>
@@ -193,7 +215,7 @@ const ReceiptDispatchNote = () => {
           </div>
         </div>
       </div>
-      <Toaster position="top-right" />
+      <Toaster position="bottom-right" />
     </>
   );
 };

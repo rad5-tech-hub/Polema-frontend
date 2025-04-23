@@ -55,9 +55,8 @@ const Notifications = () => {
   const [confirmBtnLoading, setConfirmBtnLoading] = useState({});
   const [selectedTicket, setSelectedTicket] = useState("");
   const [selectedNotificationIds, setSelectedNotificationIds] = useState([]);
-  const [filterOption, setFilterOption] = useState("all"); // State for select filter
+  const [filterOption, setFilterOption] = useState("all");
 
-  // State management for SelectAdminSidePane
   const [sidePaneState, setSidePaneState] = useState({
     openId: null,
     type: null,
@@ -68,14 +67,13 @@ const Notifications = () => {
   const [approveButtonLoading, setApproveButtonLoading] = useState({});
   const [isSidePaneSubmitting, setIsSidePaneSubmitting] = useState(false);
 
-  // Function to filter notifications based on select option
   const getFilteredNotifications = () => {
     if (filterOption === "unread") {
       return unreadNotifications;
     } else if (filterOption === "read") {
       return allNotifications.filter((n) => n.read);
     } else {
-      return allNotifications; // Default to all notifications
+      return allNotifications;
     }
   };
 
@@ -96,7 +94,7 @@ const Notifications = () => {
 
       setUnreadNotifications(fetchedUnreadNotifications);
       setAllNotifications(generalNotifications);
-      setNotifications(getFilteredNotifications()); // Set initial filtered notifications
+      setNotifications(getFilteredNotifications());
       setFetchLoading(false);
     } catch (error) {
       if (error.status !== 403) {
@@ -257,7 +255,7 @@ const Notifications = () => {
     }
   };
 
-  const deleteNotifications = async () => {
+  const deleteNotifications = async (notificationIds) => {
     const token = localStorage.getItem("token");
     if (!token) {
       toast.error("An error occurred, try logging in again");
@@ -267,16 +265,18 @@ const Notifications = () => {
     try {
       const response = await axios.delete(`${root}/admin/delete-notifications`, {
         headers: { Authorization: `Bearer ${token}` },
-        data: { notificationIds: selectedNotificationIds },
+        data: { notificationIds },
       });
 
-      toast.success("Notifications deleted successfully");
+      toast.success("Notification deleted successfully");
       fetchNotifications();
-      setSelectedNotificationIds([]);
+      setSelectedNotificationIds((prev) =>
+        prev.filter((id) => !notificationIds.includes(id))
+      );
     } catch (error) {
       console.error("Error deleting notifications:", error);
       toast.error(
-        error.response?.data?.message || "Error deleting notifications"
+        error.response?.data?.message || "Error deleting notification"
       );
     }
   };
@@ -527,7 +527,6 @@ const Notifications = () => {
     fetchAdminDetails();
   }, []);
 
-  // Update notifications when filter changes
   useEffect(() => {
     setNotifications(getFilteredNotifications());
   }, [filterOption, unreadNotifications, allNotifications]);
@@ -599,17 +598,6 @@ const Notifications = () => {
                   </select>
                 </div>
 
-                {selectedNotificationIds.length > 0 && (
-                  <div className="delete-icon flex justify-end mt-2 sticky">
-                    <DeleteOutlined
-                      className="text-red-400 cursor-pointer hover:text-lg"
-                      onClick={() => {
-                        deleteNotifications();
-                      }}
-                    />
-                  </div>
-                )}
-
                 <div
                   className="pt-3 max-h-[100vh] w-full notifications-box"
                   style={{ overflowY: "", overflowX: "" }}
@@ -626,10 +614,6 @@ const Notifications = () => {
                         notifications.map((notification) => (
                           <React.Fragment key={notification.id}>
                             <div
-                              onClick={() => {
-                                setSelectedTicket(notification);
-                                setDetailsPageOpen(true);
-                              }}
                               className={`mb-3 p-2 rounded cursor-pointer relative ${
                                 selectedNotificationIds.includes(
                                   notification.id
@@ -670,22 +654,40 @@ const Notifications = () => {
                                     <FontAwesomeIcon icon={faUser} />
                                   </Card>
                                 </div>
-                                <Flex gap={"3"}>
-                                  <div>
-                                    <Text
-                                      className="text-[.85rem] font-medium m-0 p-0 hover:underline"
-                                      style={{ cursor: "pointer" }}
+                                <Flex gap={"3"} className="flex-1">
+                                  <div className="flex-1">
+                                    <Flex
+                                      justify="between"
+                                      align="center"
+                                      className="relative"
                                     >
-                                      {notification.message}
-                                    </Text>
-                                    <br />
+                                      <Text
+                                        className="text-[.85rem] font-medium m-0 p-0 hover:underline flex-1"
+                                        style={{ cursor: "pointer" }}
+                                      >
+                                        {notification.message}
+                                      </Text>
+                                      {selectedNotificationIds.includes(
+                                        notification.id
+                                      ) && (
+                                        <DeleteOutlined
+                                          className="text-red-500 cursor-pointer hover:text-lg hover:bg-gray-100 p-2 rounded-full ml-2"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            deleteNotifications([
+                                              notification.id,
+                                            ]);
+                                          }}
+                                        />
+                                      )}
+                                    </Flex>
                                     <Text className="text-[.5rem] text-gray-500">
                                       <div>
                                         {refractor(notification.createdAt)},{" "}
                                         {refractorToTime(notification.createdAt)}
                                       </div>
                                       <div
-                                        className="mt-2 flex gap-2 items-center bg-[#424242]/10 text-black p-2 w-fit rounded-md"
+                                        className="mt-2 flex gap-2 items-center bg-[#424242]/10 text-black p-2 w-fit rounded-md cursor-pointer"
                                         onClick={() => {
                                           setSelectedTicket(notification);
                                           setDetailsPageOpen(true);

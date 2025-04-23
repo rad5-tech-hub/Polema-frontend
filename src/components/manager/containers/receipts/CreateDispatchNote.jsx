@@ -98,7 +98,7 @@ const CreateDispatchNote = () => {
       // Send dispatch to admin
       await axios.post(
         `${root}/customer/send-vehicle/${dispatchId}`,
-        { adminId },
+        { adminIds: [adminId] },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -200,7 +200,7 @@ const CreateDispatchNote = () => {
               <Select.Trigger placeholder="Select Admin" />
               <Select.Content position="popper">
                 {superAdmins.map((admin) => (
-                  <Select.Item key={admin.id} value={admin.id}>
+                  <Select.Item key={admin.id} value={admin.role?.id}>
                     {`${admin.firstname} ${admin.lastname}`}
                   </Select.Item>
                 ))}

@@ -78,7 +78,7 @@ const OfficialReceipt = () => {
   
         toast.success("Offical Receipt sent to print successfully!", {
           style: { padding: "20px" },
-          duration: 10000,
+          duration: 4000,
         });
       } catch (error) {
         console.error("Error sending official reciept to print:", error);
@@ -242,6 +242,8 @@ const OfficialReceipt = () => {
           </div>
         </div>
       )}
+      <Toaster position="top-right" />
+
     </>
   );
 };
