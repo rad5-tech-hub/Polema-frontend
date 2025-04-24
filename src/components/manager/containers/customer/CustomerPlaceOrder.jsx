@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { refractor, formatMoney } from "../../../date";
 import toast, { LoaderIcon, Toaster } from "react-hot-toast";
 import {
   Heading,
@@ -272,7 +273,7 @@ const CustomerPlaceOrder = () => {
                 className="mt-2"
                 type="number"
                 placeholder="Enter custom discount"
-                value={formatNumberWithCommas(planAmountValue || "")}
+                value={formatMoney(planAmountValue || "")}
                 onChange={(e) => {
                   const value = e.target.value;
                   if (!isNaN(value) && value >= 0) {
