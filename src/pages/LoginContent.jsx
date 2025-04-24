@@ -138,14 +138,16 @@ const LoginContent = () => {
                   </TextField.Slot>
                 </TextField.Root>
 
-                <p
-                  className="text-right mt-[10px] text-[.7rem] cursor-pointer underline"
-                  onClick={() => {
-                    navigate(`/confirm-email`);
-                  }}
-                >
-                  Forgot Password?
-                </p>
+                <div className="flex justify-end mt-4">
+                  <p
+                      className="mt-2 text-[0.8rem] w-fit cursor-pointer underline"
+                      onClick={() => {
+                        navigate(`/confirm-email`);
+                      }}
+                    >
+                      Forgot Password?
+                    </p>
+                </div>
               </div>
 
               <div className="btn w-full">
