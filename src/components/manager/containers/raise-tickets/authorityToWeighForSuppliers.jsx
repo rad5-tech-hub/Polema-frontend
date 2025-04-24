@@ -1,6 +1,7 @@
-import React from "react";
-import { refractor } from "../../../date";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 import {
   Heading,
   Flex,
@@ -13,38 +14,45 @@ import {
   Text,
   Box,
 } from "@radix-ui/themes";
-import toast, { Toaster } from "react-hot-toast";
 import { ArrowLeftIcon, ArrowRightIcon } from "@radix-ui/react-icons";
-import { useNavigate } from "react-router-dom";
 
-const root = import.meta.env.VITE_ROOT;
+// Constants
+const API_ROOT = import.meta.env.VITE_ROOT;
 
+// Utility Functions
+const getAuthToken = () => localStorage.getItem("token");
+
+const getSupplierName = (supplier) =>
+  supplier.firstname && supplier.lastname
+    ? `${supplier.firstname} ${supplier.lastname}`
+    : supplier.name || "Unnamed Supplier";
+
+// Main Component
 const NewAuthorityToWeigh = () => {
-  // State management
-  const [suppliers, setSuppliers] = React.useState([]);
-  const [selectedSupplierId, setSelectedSupplierId] = React.useState("");
-  const [searchTerm, setSearchTerm] = React.useState(""); // For filtering suppliers
-  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false); // Toggle dropdown
-  const [vehicleNumber, setVehicleNumber] = React.useState("");
-  const [driverName, setDriverName] = React.useState("");
-  const [transportedBy, setTransportedBy] = React.useState("");
-  const [admins, setAdmins] = React.useState([]);
-  const [chiefAdminId, setChiefAdminId] = React.useState("");
-  const [adminDropdownDisabled, setAdminDropdownDisabled] = React.useState(true);
-  const [ticketId, setTicketId] = React.useState("");
-  const [btnLoading, setBtnLoading] = React.useState(false);
-  const [isFetchingSuppliers, setIsFetchingSuppliers] = React.useState(true);
+  // State Management
+  const [suppliers, setSuppliers] = useState([]);
+  const [selectedSupplierId, setSelectedSupplierId] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [vehicleNumber, setVehicleNumber] = useState("");
+  const [driverName, setDriverName] = useState("");
+  const [transportedBy, setTransportedBy] = useState("");
+  const [admins, setAdmins] = useState([]);
+  const [chiefAdminId, setChiefAdminId] = useState("");
+  const [products, setProducts] = useState([]);
+  const [selectedProductId, setSelectedProductId] = useState(null);
+  const [isFetchingSuppliers, setIsFetchingSuppliers] = useState(true);
+  const [adminDropdownDisabled, setAdminDropdownDisabled] = useState(true);
+  const [btnLoading, setBtnLoading] = useState(false);
 
-
-  const inputRef = React.useRef(null); // Ref for focusing input
+  const inputRef = useRef(null);
   const navigate = useNavigate();
 
-  // Fetch all suppliers from db
+  // API Calls
   const fetchSuppliers = async () => {
-    const retrToken = localStorage.getItem("token");
-
-    if (!retrToken) {
-      toast.error("An error occurred. Try logging in again", {
+    const token = getAuthToken();
+    if (!token) {
+      toast.error("Session expired. Please log in again.", {
         duration: 6500,
         style: { padding: "30px" },
       });
@@ -54,17 +62,14 @@ const NewAuthorityToWeigh = () => {
 
     try {
       setIsFetchingSuppliers(true);
-      const response = await axios.get(`${root}/customer/get-suppliers`, {
-        headers: { Authorization: `Bearer ${retrToken}` },
+      const response = await axios.get(`${API_ROOT}/customer/get-suppliers`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("Suppliers response:", response.data);
-      const suppliersData = response.data.customers || [];
-      setSuppliers(suppliersData);
-      console.log("Suppliers set to:", suppliersData);
+      setSuppliers(response.data.customers || []);
     } catch (error) {
       console.error("Error fetching suppliers:", error);
       setSuppliers([]);
-      toast.error("Failed to fetch suppliers", {
+      toast.error("Failed to fetch suppliers.", {
         style: { padding: "20px" },
       });
     } finally {
@@ -72,12 +77,10 @@ const NewAuthorityToWeigh = () => {
     }
   };
 
-  // Fetch chief admins from db
   const fetchSuperAdmins = async () => {
-    const retrToken = localStorage.getItem("token");
-
-    if (!retrToken) {
-      toast.error("An error occurred. Try logging in again", {
+    const token = getAuthToken();
+    if (!token) {
+      toast.error("Session expired. Please log in again.", {
         duration: 6500,
         style: { padding: "30px" },
       });
@@ -85,131 +88,148 @@ const NewAuthorityToWeigh = () => {
     }
 
     try {
-      const response = await axios.get(`${root}/admin/all-admin`, {
-        headers: { Authorization: `Bearer ${retrToken}` },
+      const response = await axios.get(`${API_ROOT}/admin/all-admin`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
       setAdmins(response.data.staffList || []);
       setAdminDropdownDisabled(false);
     } catch (error) {
       console.error("Error fetching admins:", error);
       setAdmins([]);
+      toast.error("Failed to fetch admins.", {
+        style: { padding: "20px" },
+      });
     }
   };
 
-  // Filter suppliers based on search term
-  const filteredSuppliers = suppliers.filter((supplier) => {
-    const name = supplier.firstname && supplier.lastname
-      ? `${supplier.firstname} ${supplier.lastname}`
-      : supplier.name || "Unnamed Supplier";
-    return name.toLowerCase().includes(searchTerm.toLowerCase());
-  });
-
-  // Handle supplier selection
-  const handleSelectSupplier = (supplier) => {
-    setSelectedSupplierId(supplier.id);
-    setSearchTerm(
-      supplier.firstname && supplier.lastname
-        ? `${supplier.firstname} ${supplier.lastname}`
-        : supplier.name || "Unnamed Supplier"
-    );
-    setIsDropdownOpen(false);
-  };
-
-  // Submit form
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const retrToken = localStorage.getItem("token");
-    if (!retrToken) {
-      toast.error("An error occurred. Try logging in again", {
+  const fetchProducts = async () => {
+    const token = getAuthToken();
+    if (!token) {
+      toast.error("Session expired. Please log in again.", {
         duration: 6500,
         style: { padding: "30px" },
       });
       return;
     }
 
-    const resetForm = () => {
-      setSelectedSupplierId("");
-      setSearchTerm("");
-      setDriverName("");
-      setChiefAdminId("");
-      setVehicleNumber("");
-      setTransportedBy("");
-    };
+    try {
+      const response = await axios.get(`${API_ROOT}/admin/get-raw-materials`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProducts(response.data.products || []);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      toast.error("Failed to fetch products.", {
+        style: { padding: "20px" },
+      });
+    }
+  };
 
-    const body = {
-      supplierId: selectedSupplierId,
-      vehicleNo: vehicleNumber,
-      driver: driverName,
-      transportedBy,
-    };
+  // Form Handlers
+  const handleSelectSupplier = (supplier) => {
+    setSelectedSupplierId(supplier.id);
+    setSearchTerm(getSupplierName(supplier));
+    setIsDropdownOpen(false);
+  };
+
+  const resetForm = () => {
+    setSelectedSupplierId("");
+    setSearchTerm("");
+    setDriverName("");
+    setChiefAdminId("");
+    setVehicleNumber("");
+    setTransportedBy("");
+    setSelectedProductId(null);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const token = getAuthToken();
+    if (!token) {
+      toast.error("Session expired. Please log in again.", {
+        duration: 6500,
+        style: { padding: "30px" },
+      });
+      return;
+    }
+
     setBtnLoading(true);
-
     try {
       const ticketResponse = await axios.post(
-        `${root}/admin/sup-auth-weigh`,
-        body,
+        `${API_ROOT}/admin/sup-auth-weigh`,
         {
-          headers: { Authorization: `Bearer ${retrToken}` },
-        }
+          supplierId: selectedSupplierId,
+          vehicleNo: vehicleNumber,
+          driver: driverName,
+          transportedBy,
+          productId: selectedProductId,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       const ticketId = ticketResponse.data.data.id;
-      setTicketId(ticketId);
-
       await axios.post(
-        `${root}/admin/send-weigh-auth/${ticketId}`,
+        `${API_ROOT}/admin/send-weigh-auth/${ticketId}`,
         { adminIds: [chiefAdminId] },
-        {
-          headers: { Authorization: `Bearer ${retrToken}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      setBtnLoading(false);
 
       toast.success("Ticket successfully sent!", {
         style: { padding: "20px" },
         duration: 5000,
       });
-
       resetForm();
     } catch (error) {
-      setBtnLoading(false);
       console.error("Submission error:", error);
       toast.error(
-        error.response?.message || error.response?.error || "An error occurred. Please try again later.",
-        {
-          style: { padding: "20px" },
-        }
+        error.response?.data?.message ||
+          error.response?.data?.error ||
+          "An error occurred. Please try again.",
+        { style: { padding: "20px" } }
       );
+    } finally {
+      setBtnLoading(false);
     }
   };
 
-  React.useEffect(() => {
+  // Computed Values
+  const filteredSuppliers = suppliers.filter((supplier) =>
+    getSupplierName(supplier).toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Effects
+  useEffect(() => {
     fetchSuppliers();
     fetchSuperAdmins();
+    fetchProducts();
   }, []);
 
   return (
     <>
-      <Heading className="py-4 ">New Authority to Weigh
+      <Heading size="6" className="py-4">
+        New Authority to Weigh
       </Heading>
-      <Separator className="my-5 w-full" />
+      <Separator size="4" className="my-5" />
 
-      <form action="" onSubmit={handleSubmit}>
-        <Grid columns={"2"} gap={"4"}>
-          <div className="w-full">
-            <Text>
+      <form onSubmit={handleSubmit}>
+        <Grid columns={{ initial: "1", sm: "2" }} gap="4">
+          {/* Vehicle Number */}
+          <Box>
+            <Text as="label" size="2" weight="medium">
               Vehicle Number<span className="text-red-500">*</span>
             </Text>
             <TextField.Root
               placeholder="Enter Vehicle Number"
-              onChange={(e) => setVehicleNumber(e.target.value)}
               value={vehicleNumber}
+              onChange={(e) => setVehicleNumber(e.target.value)}
               className="mt-2"
+              required
             />
-          </div>
-          <div className="w-full relative">
-            <Text>
+          </Box>
+
+          {/* Supplier Name */}
+          <Box className="relative">
+            <Text as="label" size="2" weight="medium">
               Supplier Name<span className="text-red-500">*</span>
             </Text>
             <TextField.Root
@@ -233,59 +253,74 @@ const NewAuthorityToWeigh = () => {
             />
             {isDropdownOpen && filteredSuppliers.length > 0 && (
               <Box
-                style={{
-                  position: "absolute",
-                  top: "100%",
-                  left: 0,
-                  right: 0,
-                  maxHeight: "200px",
-                  overflowY: "auto",
-                  background: "white",
-                  border: "1px solid #ccc",
-                  borderRadius: "4px",
-                  zIndex: 10,
-                }}
+                className="absolute top-full left-0 right-0 max-h-48 overflow-y-auto bg-white border border-gray-300 rounded-md z-10"
               >
                 {filteredSuppliers.map((supplier) => (
                   <Box
                     key={supplier.id}
                     onClick={() => handleSelectSupplier(supplier)}
-                    style={{
-                      padding: "8px",
-                      cursor: "pointer",
-                      background:
-                        selectedSupplierId === supplier.id ? "#e0e0e0" : "white",
-                    }}
-                    onMouseDown={(e) => e.preventDefault()} // Prevent blur before click
+                    className={`p-2 cursor-pointer ${
+                      selectedSupplierId === supplier.id
+                        ? "bg-gray-100"
+                        : "bg-white"
+                    } hover:bg-gray-100`}
+                    onMouseDown={(e) => e.preventDefault()}
                   >
-                    {supplier.firstname && supplier.lastname
-                      ? `${supplier.firstname} ${supplier.lastname}`
-                      : supplier.name || "Unnamed Supplier"}
+                    {getSupplierName(supplier)}
                   </Box>
                 ))}
               </Box>
             )}
-          </div>
-          <div className="w-full">
-            <Text>
+          </Box>
+
+          {/* Driver's Name */}
+          <Box>
+            <Text as="label" size="2" weight="medium">
               Driver's Name<span className="text-red-500">*</span>
             </Text>
             <TextField.Root
               placeholder="Enter Driver's Name"
               value={driverName}
+              onChange={(e) => setDriverName(e.target.value)}
               className="mt-2"
               required
-              onChange={(e) => setDriverName(e.target.value)}
             />
-          </div>
-          <div className="w-full">
-            <Text>
+          </Box>
+
+          {/* Raw Material */}
+          <Box>
+            <Text as="label" size="2" weight="medium">
+              Raw Material<span className="text-red-500">*</span>
+            </Text>
+            <Select.Root
+              value={selectedProductId || undefined}
+              onValueChange={(value) => setSelectedProductId(value)}
+              disabled={products.length === 0}
+              required
+            >
+              <Select.Trigger
+                placeholder="Select Raw Material"
+                className="w-full mt-2"
+              />
+              <Select.Content position="popper">
+                {products.map((product) => (
+                  <Select.Item key={product.id} value={product.id}>
+                    {product.name}
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select.Root>
+          </Box>
+
+          {/* Transport Carried Out By */}
+          <Box>
+            <Text as="label" size="2" weight="medium">
               Transport Carried Out By<span className="text-red-500">*</span>
             </Text>
             <Select.Root
-              required
               value={transportedBy}
               onValueChange={(value) => setTransportedBy(value)}
+              required
             >
               <Select.Trigger
                 placeholder="Select Transport Option"
@@ -296,42 +331,50 @@ const NewAuthorityToWeigh = () => {
                 <Select.Item value="Supplier">Supplier</Select.Item>
               </Select.Content>
             </Select.Root>
-          </div>
-          <div className="w-full">
-            <Text>
+          </Box>
+
+          {/* Send To */}
+          <Box>
+            <Text as="label" size="2" weight="medium">
               Send To<span className="text-red-500">*</span>
             </Text>
             <Select.Root
-              required
-              disabled={adminDropdownDisabled}
               value={chiefAdminId}
               onValueChange={(value) => setChiefAdminId(value)}
+              disabled={adminDropdownDisabled}
+              required
             >
               <Select.Trigger
                 placeholder="Select Admin"
                 className="w-full mt-2"
               />
               <Select.Content position="popper">
-                {admins.map((item) => (
-                  <Select.Item key={item.role?.id} value={item.role?.id || " "}>
-                    {item.firstname} {item.lastname}
+                {admins.map((admin) => (
+                  <Select.Item
+                    key={admin.role?.id || admin.id}
+                    value={admin.role?.id || admin.id}
+                  >
+                    {admin.firstname} {admin.lastname}
                   </Select.Item>
                 ))}
               </Select.Content>
             </Select.Root>
-          </div>
+          </Box>
         </Grid>
 
-        <Flex justify={"end"}>
+        {/* Submit Button */}
+        <Flex justify="end" className="mt-5">
           <Button
-            size={"3"}
-            className="cursor-pointer mt-5 px-5 !bg-theme"
+            size="3"
+            type="submit"
+            className="cursor-pointer px-5 mt-5 !bg-theme"
             disabled={btnLoading}
           >
             {btnLoading ? <Spinner /> : "Send"}
           </Button>
         </Flex>
       </form>
+
       <Toaster position="top-right" />
     </>
   );

@@ -180,7 +180,7 @@ const App = () => {
                     element={<AllSuppliers />}
                   />
                   <Route
-                    path="suppliers/place-supplier-order"
+                    path="suppliers/place-supplier-order/:id"
                     element={<SupplierPlaceOrder />}
                   />
                   <Route

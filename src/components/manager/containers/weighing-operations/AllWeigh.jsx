@@ -626,7 +626,7 @@ const AllWeigh = ({ onWeighAction }) => {
         </Flex>
       )}
 
-      <Toaster position="bottom-right" />
+      <Toaster position="top-right" />
     </>
   );
 };

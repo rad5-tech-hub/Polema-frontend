@@ -33,6 +33,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import IndividualInfo from "./IndividualInfo";
 import { DeleteOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -56,6 +57,7 @@ const Notifications = () => {
   const [selectedTicket, setSelectedTicket] = useState("");
   const [selectedNotificationIds, setSelectedNotificationIds] = useState([]);
   const [filterOption, setFilterOption] = useState("all");
+  const navigate = useNavigate();
 
   const [sidePaneState, setSidePaneState] = useState({
     openId: null,
@@ -683,20 +685,21 @@ const Notifications = () => {
                                     </Flex>
                                     <Text className="text-[.5rem] text-gray-500">
                                       <div>
-                                        {refractor(notification.createdAt)},{" "}
-                                        {refractorToTime(notification.createdAt)}
+                                        {refractor(notification.createdAt)}, {refractorToTime(notification.createdAt)}
                                       </div>
                                       <div
                                         className="mt-2 flex gap-2 items-center bg-[#424242]/10 text-black p-2 w-fit rounded-md cursor-pointer"
                                         onClick={() => {
-                                          setSelectedTicket(notification);
-                                          setDetailsPageOpen(true);
+                                          if (notification.type === "supplier-weigh") {
+                                            navigate(`/admin/suppliers/place-supplier-order/${notification.ticketId}`);
+                                          } else {                                                                                        
+                                            setSelectedTicket(notification);
+                                            setDetailsPageOpen(true);
+                                          }
                                         }}
                                       >
                                         <FontAwesomeIcon icon={faTags} />
-                                        <span>
-                                          {_.upperFirst(notification.type)}
-                                        </span>
+                                        <span>{_.upperFirst(notification.type)}</span>
                                       </div>
                                     </Text>
 
