@@ -102,6 +102,12 @@ const CreateDispatchNote = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
+      setFormData({        
+        driverName: "",
+        escortName: "",
+        vehicleNumber: "",
+        destination: "",
+      })
       toast.success("Dispatch note generated and sent to admin!", {
         style: { padding: "20px" },
         duration: 10000,

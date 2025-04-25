@@ -75,6 +75,7 @@ import {
   AllInvoice,
   CreateDispatchNote,
   CreateGatepass,
+  CreateGatepassForSupplier,
   CreateInvoice,
   GatepassReceipt,
   Invoice,
@@ -184,6 +185,10 @@ const App = () => {
                     element={<SupplierPlaceOrder />}
                   />
                   <Route
+                    path="suppliers/place-supplier-order/:id"
+                    element={<SupplierPlaceOrder />}
+                  />
+                  <Route
                     path="suppliers/view-order"
                     element={<ViewSupplierOrder />}
                   />
@@ -195,6 +200,11 @@ const App = () => {
                   <Route
                     path="supplier/supplier-ledger/:id"
                     element={<SupplierLedger />}
+                  />
+
+                  <Route
+                    path="suppliers/create-gatepass"
+                    element={<CreateGatepassForSupplier/>}
                   />
 
                   {/* Product Routes */}

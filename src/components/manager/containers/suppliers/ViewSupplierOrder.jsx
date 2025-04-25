@@ -141,7 +141,21 @@ const ViewSupplierOrder = () => {
                     }`}
                   </Table.Cell>
                   <Table.Cell>{getProductNamebyId(item.productId)}</Table.Cell>
-                  <Table.Cell>{formatMoney(item.price)}</Table.Cell>
+                  <Table.Cell>
+                    {item.price === item.initialTotalPrice ? (
+                      <>
+                        <span className="text-">{formatMoney(item.price)}</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-[.7rem] line-through text-red-500">
+                          {item.initialTotalPrice && formatMoney(item.initialTotalPrice)}
+                        </span>{" "}
+                        <br />
+                        <span>{formatMoney(item.price)}</span>
+                      </>
+                    )}
+                  </Table.Cell>
                   <Table.Cell>{item.quantity}</Table.Cell>
                   <Table.Cell>{item.comments}</Table.Cell>
                   <Table.Cell>

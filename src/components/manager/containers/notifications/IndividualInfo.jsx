@@ -15,6 +15,8 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
   const [approveLoading, setApproveLoading] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
 
+  console.log(selectedTicket + 'id');
+
   // --------------------State management for opening and closing the dialog------------------
   const [dialogOpen, setDialogOpen] = useState(false);
   const [storeDetails, setStoreDetails] = useState([]);
@@ -434,7 +436,7 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                       </div>
                       <div className="flex w-full justify-between items-center p-2">
                         <Text className="text-[.9rem] font-black tracking-wide">
-                          CUSTOMER NAME
+                        {ticketDetails.supplierId ? 'SUPPLIER': 'CUSTOMER'} NAME
                         </Text>
                         <p className="text-[.9rem]">
                           {ticketDetails.supplierId && ticketDetails.supplier

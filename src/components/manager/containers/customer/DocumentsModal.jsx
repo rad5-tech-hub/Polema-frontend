@@ -352,7 +352,7 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
         </div>
         <Flex justify="end" className="mt-5">
           <Flex gap="2">
-            {["invoice", "gatepass", "waybill-invoice"].map((route) => (
+            {["invoice", "gatepass", "waybill"].map((route) => (
               <Button
                 key={route}
                 onClick={() =>
