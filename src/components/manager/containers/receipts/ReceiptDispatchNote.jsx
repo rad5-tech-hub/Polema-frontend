@@ -18,9 +18,17 @@ const ReceiptDispatchNote = () => {
     createdAt: "",
     prepareBy: "",
     prepareByRoleName: "",
+    prepareByRoleFirstName: "",
+    prepareByRoleLastName: "",
+    approvedByRoleSignature: "",
+    approvedByRoleFirstName: "",
+    approvedByRoleLastName: "",
   });
   const [loading, setLoading] = useState(true);
-  const [signatureError, setSignatureError] = useState(false);
+  const [signatureError, setSignatureError] = useState({
+    prepareBy: false,
+    approvedBy: false,
+  });
 
   // Fetch dispatch note data
   useEffect(() => {
@@ -47,6 +55,11 @@ const ReceiptDispatchNote = () => {
             createdAt: data.createdAt || "",
             prepareBy: data.preparedByRole?.admins?.[0]?.signature || "",
             prepareByRoleName: data.preparedByRole?.name || "",
+            prepareByRoleFirstName: data.preparedByRole?.admins?.[0]?.firstname || "",
+            prepareByRoleLastName: data.preparedByRole?.admins?.[0]?.lastname || "",
+            approvedByRoleSignature: data.approvedByRole?.admins?.[0]?.signature || "",
+            approvedByRoleFirstName: data.approvedByRole?.admins?.[0]?.firstname || "",
+            approvedByRoleLastName: data.approvedByRole?.admins?.[0]?.lastname || "",
           });
         } else {
           toast.error("No vehicle data found", {
@@ -74,8 +87,8 @@ const ReceiptDispatchNote = () => {
   };
 
   // Handle signature image load error
-  const handleSignatureError = () => {
-    setSignatureError(true);
+  const handleSignatureError = (type) => {
+    setSignatureError((prev) => ({ ...prev, [type]: true }));
   };
 
   if (loading) {
@@ -106,7 +119,7 @@ const ReceiptDispatchNote = () => {
       </style>
 
       <div className="bg-gray-50 p-4 sm:p-8">
-        <div className="intro flex flex-col md:flex-col lg:flex-row justify-center lg:justify-between items-center gap-5 no-print pb-6 border-b border-[#919191]">
+        <div className="intro flex flex-row justify-center lg:justify-between items-center gap-5 no-print pb-6 border-b border-[#919191]">
           <div className="w-full max-w-[300px] lg:w-auto text-center lg:text-left">
             <h3 className="text-sm sm:text-[20px] font-semibold text-[#434343]">
               Approved Vehicle Dispatch Pass Note
@@ -169,7 +182,7 @@ const ReceiptDispatchNote = () => {
                     ? new Date(dispatchNote.createdAt).toLocaleTimeString()
                     : "Not Available",
                 ],
-                ["Authorized By", dispatchNote.approvedBy || "Transport Manager"],
+                ["Authorized By", "Transport Manager"],
               ].map(([label, value], idx) => (
                 <div
                   key={idx}
@@ -188,25 +201,34 @@ const ReceiptDispatchNote = () => {
                 </div>
               ))}
 
-              <div className="owner-of-goods w-full flex items-end justify-between gap-2 sm:gap-4 mt-12 sm:mt-24">
+              <div className="signatures w-full flex flex-col sm:flex-row justify-between gap-8 sm:gap-4 mt-12 sm:mt-24">
+                {/* Driver's Signature */}
                 <div className="flex flex-col gap-4">
                   <p className="border-b border-black border-dotted w-[150px] sm:w-[230px]"></p>
                   <label className="w-fit text-sm sm:text-base ml-4">
                     DRIVER’S SIGNATURE
                   </label>
                 </div>
-                <div className="flex flex-col gap-4">
-                  {dispatchNote.prepareBy && !signatureError ? (
-                    <img
-                      src={dispatchNote.prepareBy}
-                      alt={`Signature of ${dispatchNote.prepareByRoleName || "Approving Officer"}`}
-                      className="signature-img w-[100px] h-[100px] object-contain"
-                      onError={handleSignatureError}
-                    />
+
+                {/* Approved By Signature */}
+                <div className="flex flex-col gap-4 items-center">
+                  {dispatchNote.approvedByRoleSignature && !signatureError.approvedBy ? (
+                    <>
+                      <img
+                        src={dispatchNote.approvedByRoleSignature}
+                        alt={`Signature of ${dispatchNote.approvedByRoleFirstName || "Approving Officer"}`}
+                        className="signature-img w-[150px] sm:w-[230px] h-auto object-contain"
+                        onError={() => handleSignatureError("approvedBy")}
+                      />
+                      <span>
+                        {dispatchNote.approvedByRoleFirstName}{" "}
+                        {dispatchNote.approvedByRoleLastName}
+                      </span>
+                    </>
                   ) : (
                     <p className="border-b border-black border-dotted w-[150px] sm:w-[230px] mx-auto"></p>
                   )}
-                  <label className="w-fit text-sm sm:text-base ml-4 text-center">
+                  <label className="w-fit text-sm sm:text-base text-center">
                     APPROVING OFFICER’S SIGNATURE
                   </label>
                 </div>

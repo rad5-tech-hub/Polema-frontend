@@ -111,7 +111,7 @@ const WaybillInvoice = () => {
       ) : (
         <>
           {/* Header Section */}
-          <div className="w-100 flex flex-col md:flex-col lg:flex-row justify-center lg:justify-between items-center gap-5 no-print pb-6 border-b border-[#919191]">
+          <div className="w-100 flex flex-row justify-center lg:justify-between items-center gap-5 no-print pb-6 border-b border-[#919191]">
             {/* Title Section */}
             <div className="w-full max-w-[300px] lg:w-auto text-center lg:text-left">
               <h3 className="text-sm sm:text-[20px] font-semibold">

@@ -47,6 +47,7 @@ const Notifications = () => {
   const [fetchLoading, setFetchLoading] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadNotifications, setUnreadNotifications] = useState([]);
+  const [readNotifications, setReadNotifications] = useState([]);
   const [allNotifications, setAllNotifications] = useState([]);
   const [detailsPageOpen, setDetailsPageOpen] = useState(false);
   const [admins, setAdmins] = useState([]);
@@ -55,6 +56,7 @@ const Notifications = () => {
   const [confirmBtnLoading, setConfirmBtnLoading] = useState({});
   const [selectedTicket, setSelectedTicket] = useState("");
   const [selectedNotificationIds, setSelectedNotificationIds] = useState([]);
+  const [filterOption, setFilterOption] = useState("unread"); // New state for select option
 
   // State management for SelectAdminSidePane
   const [sidePaneState, setSidePaneState] = useState({
@@ -77,15 +79,26 @@ const Notifications = () => {
 
       const fetchedUnreadNotifications =
         response.data.data.unreadNotifications || [];
+      const fetchedReadNotifications =
+        response.data.data.readNotifications || [];
       const generalNotifications = [
-        ...response.data.data.unreadNotifications,
-        ...response.data.data.readNotifications,
+        ...fetchedUnreadNotifications,
+        ...fetchedReadNotifications,
       ];
 
-      setNotifications(response.data.data.unreadNotifications);
-      // Let the notifications that come in be unread by default
-      setAllNotifications(response.data.data.unreadNotifications);
       setUnreadNotifications(fetchedUnreadNotifications);
+      setReadNotifications(fetchedReadNotifications);
+      setAllNotifications(generalNotifications);
+
+      // Set notifications based on filterOption
+      if (filterOption === "unread") {
+        setNotifications(fetchedUnreadNotifications);
+      } else if (filterOption === "read") {
+        setNotifications(fetchedReadNotifications);
+      } else {
+        setNotifications(generalNotifications);
+      }
+
       setFetchLoading(false);
     } catch (error) {
       if (error.status != 403) {
@@ -212,7 +225,7 @@ const Notifications = () => {
   };
 
   const decodeToken = () => {
-    return jwtDecode(localStorage.getItem("token")); // Fixed typo from decode BOTHtoken
+    return jwtDecode(localStorage.getItem("token"));
   };
 
   const confirmCashTicket = async (ticketId) => {
@@ -274,29 +287,42 @@ const Notifications = () => {
   };
 
   // Function to delete notifications
- const deleteNotifications = async () => {
-   const token = localStorage.getItem("token");
-   if (!token) {
-     toast.error("An error occurred, try logging in again");
-     return;
-   }
+  const deleteNotifications = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("An error occurred, try logging in again");
+      return;
+    }
 
-   try {
-     const response = await axios.delete(`${root}/admin/delete-notifications`, {
-       headers: { Authorization: `Bearer ${token}` },
-       data: { notificationIds: selectedNotificationIds }, // Changed from notificationsIds to notificationIds
-     });
+    try {
+      const response = await axios.delete(`${root}/admin/delete-notifications`, {
+        headers: { Authorization: `Bearer ${token}` },
+        data: { notificationIds: selectedNotificationIds },
+      });
 
-     toast.success("Notifications deleted successfully");
-     fetchNotifications();
-     setSelectedNotificationIds([]); // Clear the selected IDs after successful deletion
-   } catch (error) {
-     console.error("Error deleting notifications:", error);
-     toast.error(
-       error.response?.data?.message || "Error deleting notifications"
-     );
-   }
- };
+      toast.success("Notifications deleted successfully");
+      fetchNotifications();
+      setSelectedNotificationIds([]);
+    } catch (error) {
+      console.error("Error deleting notifications:", error);
+      toast.error(
+        error.response?.data?.message || "Error deleting notifications"
+      );
+    }
+  };
+
+  // Handle filter option change
+  const handleFilterChange = (e) => {
+    const value = e.target.value;
+    setFilterOption(value);
+    if (value === "unread") {
+      setNotifications(unreadNotifications);
+    } else if (value === "read") {
+      setNotifications(readNotifications);
+    } else {
+      setNotifications(allNotifications);
+    }
+  };
 
   const SelectAdminSidePane = ({ type, ticketID, ticketStatus }) => {
     const approveTicket = async (ticketType, ticketId) => {
@@ -390,57 +416,57 @@ const Notifications = () => {
     };
 
     return (
-    <div className="absolute z-[60] -translate-x-[300px] top-0 mb-20 bg-white min-w-[300px] min-h-[300px] p-4 shadow-md">
-      <h1 className="font-space font-bold text-[1.1rem]">Approve To</h1>
-      <p
-        className="absolute right-[10px] cursor-pointer top-[5px]"
-        onClick={() =>
-          setSidePaneState({
-            openId: null,
-            type: null,
-            ticketId: null,
-            ticketStatus: null,
-          })
-        }
-      >
-        <FontAwesomeIcon icon={faClose} />
-      </p>
-      <form action="" onSubmit={handleSubmit}>
-        <div className="my-2 h-[180px] overflow-scroll overflow-x-hidden">
-          {admins.map((admin) => (
-            <label
-              key={admin.id}
-              className="flex items-center flex-row-reverse cursor-pointer gap-2"
+      <div className="absolute z-[60] -translate-x-[300px] top-0 mb-20 bg-white min-w-[300px] min-h-[300px] p-4 shadow-md">
+        <h1 className="font-space font-bold text-[1.1rem]">Approve To</h1>
+        <p
+          className="absolute right-[10px] cursor-pointer top-[5px]"
+          onClick={() =>
+            setSidePaneState({
+              openId: null,
+              type: null,
+              ticketId: null,
+              ticketStatus: null,
+            })
+          }
+        >
+          <FontAwesomeIcon icon={faClose} />
+        </p>
+        <form action="" onSubmit={handleSubmit}>
+          <div className="my-2 h-[180px] overflow-scroll overflow-x-hidden">
+            {admins.map((admin) => (
+              <label
+                key={admin.id}
+                className="flex items-center flex-row-reverse cursor-pointer gap-2"
+              >
+                <input
+                  type="checkbox"
+                  className=""
+                  value={admin.id}
+                  checked={selectedAdmins.includes(admin.roleId)}
+                  onChange={() => handleCheckboxChange(admin.roleId)}
+                />
+                <span className="w-full p-2 gap-2">
+                  {`${admin.firstname} ${admin.lastname} (${
+                    admin.role?.name || ""
+                  })`}
+                </span>
+              </label>
+            ))}
+          </div>
+          <div className="flex justify-end mt-4 mb-15">
+            <button
+              className={`px-4 py-2 rounded ${
+                selectedAdmins.length === 0
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-theme text-white"
+              }`}
+              disabled={selectedAdmins.length === 0 || isSidePaneSubmitting}
             >
-              <input
-                type="checkbox"
-                className=""
-                value={admin.id}
-                checked={selectedAdmins.includes(admin.roleId)}
-                onChange={() => handleCheckboxChange(admin.roleId)}
-              />
-              <span className="w-full p-2 gap-2">
-                {`${admin.firstname} ${admin.lastname} (${
-                  admin.role?.name || ""
-                })`}
-              </span>
-            </label>
-          ))}
-        </div>
-        <div className="flex justify-end mt-4 mb-15">
-          <button
-            className={`px-4 py-2 rounded ${
-              selectedAdmins.length === 0
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-theme text-white"
-            }`}
-            disabled={selectedAdmins.length === 0 || isSidePaneSubmitting}
-          >
-            {isSidePaneSubmitting ? <Spinner /> : "Submit"}
-          </button>
-        </div>
-      </form>
-    </div>
+              {isSidePaneSubmitting ? <Spinner /> : "Submit"}
+            </button>
+          </div>
+        </form>
+      </div>
     );
   };
 
@@ -545,7 +571,6 @@ const Notifications = () => {
 
   useEffect(() => {
     fetchNotifications();
-
     fetchAdminDetails();
   }, []);
 
@@ -561,10 +586,10 @@ const Notifications = () => {
           }}
         >
           <BellIcon />
-          {notifications.length > 0 && (
+          {unreadNotifications.length > 0 && (
             <div className="absolute right-[-5px] top-[-3px] bg-red-500 w-[15px] h-[15px] rounded-full">
               <span className="text-white flex justify-center items-center text-[.6rem] font-bold">
-                {notifications.length}
+                {unreadNotifications.length}
               </span>
             </div>
           )}
@@ -598,22 +623,17 @@ const Notifications = () => {
                   setOpen={setDetailsPageOpen}
                 />
               )}
-              {/* <div className="absolute right-[10px] mt-3 flex gap-1 items-center">
-                <label htmlFor="switch" className="text-sm cursor-pointer font-amsterdam">
-                  Unread
-                </label>
-                <Switch
-                  id="switch"
-                  size="small"
-                  onChange={(val) => {
-                    if (val) {
-                      setNotifications(unreadNotifications);
-                    } else {
-                      setNotifications(allNotifications);
-                    }
-                  }}
-                />
-              </div> */}
+              <div className="absolute right-[10px] mt-3 flex gap-2 items-center">
+                <select
+                  value={filterOption}
+                  onChange={handleFilterChange}
+                  className="border border-gray-300 rounded-md p-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="unread">Unread</option>
+                  <option value="read">Read</option>
+                  <option value="all">All</option>
+                </select>
+              </div>
 
               <Tabs.Root defaultValue="all" className="!overflow-visible">
                 <Tabs.List>
@@ -627,7 +647,7 @@ const Notifications = () => {
                     <DeleteOutlined
                       className="text-red-400 cursor-pointer hover:text-lg"
                       onClick={() => {
-                        deleteNotifications()
+                        deleteNotifications();
                       }}
                     />
                   </div>
@@ -678,7 +698,7 @@ const Notifications = () => {
                                       notification.id
                                     )}
                                     onChange={(e) => {
-                                      e.stopPropagation(); // Prevent triggering the parent div's onClick
+                                      e.stopPropagation();
                                       setSelectedNotificationIds((prev) =>
                                         e.target.checked
                                           ? [...prev, notification.id]

@@ -17,7 +17,7 @@ const GatepassReceipt = () => {
   const [gatePassLoading, setGatePassLoading] = useState(true);
   const [passDetails, setPassDetails] = useState({});
   const [failedSearch, setFailedSearch] = useState(false);
-  const [isMobison, setIsMobison] = useState(false); // State for Switch
+  const [isMobison, setIsMobison] = useState(false);
 
   // Function to view gatepass details
   const viewGatePass = async () => {
@@ -85,7 +85,7 @@ const GatepassReceipt = () => {
         ) : (
           <>
             {/* Header Section */}
-            <div className="flex flex-col md:flex-col lg:flex-row justify-center lg:justify-between items-center gap-5 no-print pb-6 border-b border-[#919191]">
+            <div className="flex flex-row justify-center lg:justify-between items-center gap-5 no-print pb-6 border-b border-[#919191]">
               <div className="w-full max-w-[300px] lg:w-auto text-center lg:text-left">
                 <h3 className="text-sm sm:text-[20px] font-semibold">
                   Approved Gate Pass Note
@@ -151,7 +151,6 @@ const GatepassReceipt = () => {
 
                 {/* Details Section */}
                 <div className="details mt-8 sm:mt-12 flex flex-col gap-4 sm:gap-[25px]">
-                  {/* Single Detail Template */}
                   {[
                     ["Date", refractor(passDetails.createdAt) || "-"],
                     [
@@ -193,8 +192,8 @@ const GatepassReceipt = () => {
                     ],
                     [
                       "Authorized By",
-                      passDetails.approvedByRole?.admins?.[0]
-                        ? `${passDetails.approvedByRole.admins[0].firstname} ${passDetails.approvedByRole.admins[0].lastname}`
+                      passDetails.preparedByRole?.admins?.[0]
+                        ? `${passDetails.preparedByRole.admins[0].firstname} ${passDetails.preparedByRole.admins[0].lastname}`
                         : "-",
                     ],
                   ].map(([label, value], idx) => (
@@ -211,20 +210,51 @@ const GatepassReceipt = () => {
                     </div>
                   ))}
 
-                  {/* Admin Officer's Signature */}
-                  <div className="owner-of-goods w-full flex flex-col gap-2 sm:gap-4 items-end mt-12 sm:mt-24">
-                    {passDetails.approvedByRole?.admins?.[0]?.signature ? (
-                      <img
-                        src={passDetails.approvedByRole.admins[0].signature}
-                        alt="Admin Officer Signature"
-                        className="w-[150px] sm:w-[230px] h-auto"
-                      />
-                    ) : (
-                      <p className="border-b border-black border-dotted w-[150px] sm:w-[230px]"></p>
-                    )}
-                    <label className="w-fit text-sm sm:text-base">
-                      ADMIN OFFICER’S SIGNATURE
-                    </label>
+                  {/* Signatures Section */}
+                  <div className="signatures w-full flex flex-col sm:flex-row justify-between gap-8 sm:gap-4 mt-12 sm:mt-24">
+                    {/* Prepared By Signature */}
+                    <div className="prepared-by flex flex-col gap-2 sm:gap-4 items-start">
+                      {passDetails.preparedByRole?.admins?.[0]?.signature ? (
+                        <>
+                          <img
+                            src={passDetails.preparedByRole.admins[0].signature}
+                            alt="Prepared By Signature"
+                            className="w-[150px] sm:w-[230px] h-auto"
+                          />
+                          <span>
+                            {passDetails.preparedByRole?.admins?.[0]?.firstname}{" "}
+                            {passDetails.preparedByRole?.admins?.[0]?.lastname}
+                          </span>
+                        </>
+                      ) : (
+                        <p className="border-b border-black border-dotted w-[150px] sm:w-[230px]"></p>
+                      )}
+                      <label className="w-fit text-sm sm:text-base">
+                        AUTHORIZED BY SIGNATURE
+                      </label>
+                    </div>
+
+                    {/* Approved By Signature */}
+                    <div className="approved-by flex flex-col gap-2 sm:gap-4 items-end">
+                      {passDetails.approvedByRole?.admins?.[0]?.signature ? (
+                        <>
+                          <img
+                            src={passDetails.approvedByRole.admins[0].signature}
+                            alt="Approved By Signature"
+                            className="w-[150px] sm:w-[230px] h-auto"
+                          />
+                          <span>
+                            {passDetails.approvedByRole?.admins?.[0]?.firstname}{" "}
+                            {passDetails.approvedByRole?.admins?.[0]?.lastname}
+                          </span>
+                        </>
+                      ) : (
+                        <p className="border-b border-black border-dotted w-[150px] sm:w-[230px]"></p>
+                      )}
+                      <label className="w-fit text-sm sm:text-base">
+                        ADMIN OFFICER’S SIGNATURE
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
