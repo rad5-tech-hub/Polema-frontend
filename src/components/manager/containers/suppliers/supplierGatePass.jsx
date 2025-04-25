@@ -66,22 +66,23 @@ const CreateGatepassForSupplier = () => {
     e.preventDefault();
     const token = localStorage.getItem("token");
     setButtonLoading(true);
+  
     if (!token) {
       toast.error("An error occurred, try logging in again");
       setButtonLoading(false);
       return;
     }
-
+  
     const resetForm = () => {
       setDriverName("");
       setEscort("");
       setVehicleNumber("");
       setGoodsOwner("");
       setDestination("");
-      setAdminId("");
-      setSelectedProductId("");
+      setAdminId(""); // Clear the "Send To" field
+      setSelectedProductId(""); // Clear the "Raw Material" field
     };
-
+  
     const body = {
       escortName: escort,
       destination,
@@ -90,7 +91,7 @@ const CreateGatepassForSupplier = () => {
       owner: goodsOwner,
       productId: selectedProductId,
     };
-
+  
     try {
       const response = await axios.post(
         `${root}/customer/create-supplier-gatepass`,
@@ -101,10 +102,10 @@ const CreateGatepassForSupplier = () => {
           },
         }
       );
-
+  
       // Second API request to send gate pass to admin
       const passID = response.data.gatepass.id;
-      const secondResponse = await axios.post(
+      await axios.post(
         `${root}/customer/send-gate-pass/${passID}`,
         {
           adminIds: [adminId],
@@ -115,22 +116,24 @@ const CreateGatepassForSupplier = () => {
           },
         }
       );
-
+  
       toast.success("Successfully sent to admin", {
         style: {
           padding: "30px",
         },
         duration: 10000,
       });
-      setButtonLoading(false);
-      resetForm();
+      resetForm(); // Reset the form after successful submission
     } catch (error) {
-      console.log(error);
-      toast.error("Failed to create gate pass.");
+      console.error(error);
+      // Display the error message directly in the toast
+      toast.error(error.response?.data?.message || "Failed to create gate pass.", {
+        duration: 10000,
+      });
+    } finally {
       setButtonLoading(false);
     }
   };
-
   // Fetch data on mount
   useEffect(() => {
     fetchSuperAdmins();
@@ -140,7 +143,7 @@ const CreateGatepassForSupplier = () => {
   return (
     <div className="p-6 relative mb-16">
       <div className="invoice py-2">
-        <h3 className="text-[#434343] text-lg">Supplier Gate Pass Note</h3>
+        <h3 className="text-[#434343] text-lg font-semibold">Supplier Gate Pass Note</h3>
       </div>
       <form className="my-8" onSubmit={submitForm}>
         <div className="my-8 grid grid-cols-2 max-sm:grid-cols-1 gap-8 border-t-[1px] border-[#9191914] py-8">
@@ -199,6 +202,7 @@ const CreateGatepassForSupplier = () => {
             <Select.Root
               size={"3"}
               disabled={rawMaterials.length === 0}
+              value={selectedProductId} // Bind the value to the state
               onValueChange={(value) => setSelectedProductId(value)}
             >
               <Select.Trigger
@@ -219,6 +223,7 @@ const CreateGatepassForSupplier = () => {
             <Select.Root
               size={"3"}
               disabled={superAdmins.length === 0}
+              value={adminId} // Bind the value to the state
               onValueChange={(value) => setAdminId(value)}
             >
               <Select.Trigger

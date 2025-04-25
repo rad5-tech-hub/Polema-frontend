@@ -125,7 +125,7 @@ const AllGatePass = () => {
           <Table.Row>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>DRIVER NAME</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>CUSTOMER NAME</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>OWNER NAME</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>GOODS</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>VEHICLE NO.</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>DESTINATION</Table.ColumnHeaderCell>
@@ -146,20 +146,18 @@ const AllGatePass = () => {
               <Table.Row key={entry.id}>
                 <Table.Cell>{refractor(entry.createdAt)}</Table.Cell>
                 <Table.Cell>
-                  {entry?.transaction?.authToWeighTickets?.driver || "N/A"}
+                  {entry?.driver? (entry.driver) : (entry?.transaction?.authToWeighTickets?.driver) }
                 </Table.Cell>
                 <Table.Cell>
-                  {`${entry?.transaction?.corder?.firstname || ""} ${
-                    entry?.transaction?.corder?.lastname || ""
-                  }`}
+                  {entry.owner}
                 </Table.Cell>
                 <Table.Cell>
-                  {entry?.transaction?.porders?.name || "N/A"}
+                  {entry?.transaction?.porders?.name || entry?.rawMaterial?.name}
                 </Table.Cell>
                 <Table.Cell>
-                  {entry?.transaction?.authToWeighTickets?.vehicleNo || "N/A"}
+                  {entry?.transaction?.authToWeighTickets?.vehicleNo || entry?.vehicleNo}
                 </Table.Cell>
-                <Table.Cell>{entry.destination || "N/A"}</Table.Cell>
+                <Table.Cell>{entry.destination || "-"}</Table.Cell>
                 <Table.Cell>{refractorToTime(entry.createdAt)}</Table.Cell>
                 <Table.Cell>
                   <Flex align="center" gap="1">

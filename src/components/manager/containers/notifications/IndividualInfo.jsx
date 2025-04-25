@@ -15,8 +15,6 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
   const [approveLoading, setApproveLoading] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
 
-  console.log(selectedTicket + 'id');
-
   // --------------------State management for opening and closing the dialog------------------
   const [dialogOpen, setDialogOpen] = useState(false);
   const [storeDetails, setStoreDetails] = useState([]);
@@ -295,10 +293,10 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                       </div>
                       <div>
                         <Text className="text-[.56rem] font-black tracking-wide">
-                          CUSTOMER
+                        OWNER OF GOODS
                         </Text>
                         <p className="text-[.7rem]">
-                          {`${ticketDetails.transaction?.corder.firstname} ${ticketDetails.transaction?.corder.lastname}`}
+                          {ticketDetails.owner || '-'}
                         </p>
                       </div>
                       <div>
@@ -314,7 +312,7 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                           PRODUCT NAME
                         </Text>
                         <p className="text-[.7rem]">
-                          {ticketDetails.transaction?.porders?.name}
+                          {ticketDetails.transaction?.porders?.name  || ticketDetails?.rawMaterial?.name}
                         </p>
                       </div>
                     </>
