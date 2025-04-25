@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faStop, faRedo } from "@fortawesome/free-solid-svg-icons";
 import DocumentsModal from "./DocumentsModal";
 import toast, { Toaster } from "react-hot-toast";
 import { refractor, formatMoney } from "../../../date";
@@ -11,9 +11,12 @@ import {
   Heading,
   Spinner,
   Flex,
+  Button,
   TextField,
 } from "@radix-ui/themes";
 import axios from "axios";
+import { StopOutlined } from "@ant-design/icons";
+
 const root = import.meta.env.VITE_ROOT;
 
 const IndividualCustomerLedger = () => {
@@ -26,9 +29,9 @@ const IndividualCustomerLedger = () => {
   const [products, setProducts] = useState([]);
   const [isModalOpen, setModalOpen] = useState(false);
   const [transactionId, setTransactionId] = useState("");
-
   const [searchInput, setSearchInput] = useState("");
   const [filteredCustomers, setFilteredCustomers] = useState([]);
+  const [loadingStates, setLoadingStates] = useState({}); // Track loading per transaction
 
   const searchInputRef = useRef(null);
 
@@ -79,9 +82,64 @@ const IndividualCustomerLedger = () => {
         { headers: { Authorization: `Bearer ${retrToken}` } }
       );
       setEntries(data.ledgerEntries);
+      setFailedSearch(false);
     } catch (error) {
       setFailedSearch(true);
       console.error("Error fetching customer ledger:", error);
+    }
+  };
+
+  // End transaction
+  const handleEndTransaction = async (tranxId) => {
+    const retrToken = localStorage.getItem("token");
+    if (!retrToken) {
+      toast.error("An error occurred. Try logging in again");
+      return;
+    }
+
+    setLoadingStates((prev) => ({ ...prev, [tranxId]: true }));
+    try {
+      await axios.patch(
+        `${root}/customer/end-transaction/${tranxId}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${retrToken}` },
+        }
+      );
+      toast.success("Transaction ended successfully", { duration: 5000 });
+      getCustomerLedger(); // Refresh ledger
+    } catch (error) {
+      console.error("Error ending transaction:", error);
+      toast.error("Failed to end transaction");
+    } finally {
+      setLoadingStates((prev) => ({ ...prev, [tranxId]: false }));
+    }
+  };
+
+  // Restart transaction
+  const handleRestartTransaction = async (tranxId) => {
+    const retrToken = localStorage.getItem("token");
+    if (!retrToken) {
+      toast.error("An error occurred. Try logging in again");
+      return;
+    }
+
+    setLoadingStates((prev) => ({ ...prev, [tranxId]: true }));
+    try {
+      await axios.patch(
+        `${root}/customer/reopen-transaction/${tranxId}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${retrToken}` },
+        }
+      );
+      toast.success("Transaction restarted successfully", { duration: 5000 });
+      getCustomerLedger(); // Refresh ledger
+    } catch (error) {
+      console.error("Error restarting transaction:", error);
+      toast.error("Failed to restart transaction");
+    } finally {
+      setLoadingStates((prev) => ({ ...prev, [tranxId]: false }));
     }
   };
 
@@ -191,7 +249,6 @@ const IndividualCustomerLedger = () => {
             <Table.ColumnHeaderCell>UNIT</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>QUANTITY</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>UNIT PRICE</Table.ColumnHeaderCell>
-
             <Table.ColumnHeaderCell className="text-green-500">
               CREDIT(₦)
             </Table.ColumnHeaderCell>
@@ -199,13 +256,16 @@ const IndividualCustomerLedger = () => {
               DEBIT(₦)
             </Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>BALANCE(₦)</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>ACTION</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
           {!entries.length ? (
-            <div className="p-4">
-              {failedSearch ? "No records found" : <Spinner />}
-            </div>
+            <Table.Row>
+              <Table.Cell colSpan={9} className="p-4 text-center">
+                {failedSearch ? "No records found" : <Spinner />}
+              </Table.Cell>
+            </Table.Row>
           ) : (
             entries.map((entry, index) => (
               <Table.Row
@@ -217,8 +277,9 @@ const IndividualCustomerLedger = () => {
                 <Table.Cell>{getProductByID(entry.productId)}</Table.Cell>
                 <Table.Cell>{entry.unit}</Table.Cell>
                 <Table.Cell>{entry.quantity}</Table.Cell>
-                <Table.Cell>{entry.unitPrice ? formatMoney(entry.unitPrice) :""}</Table.Cell>
-
+                <Table.Cell>
+                  {entry.unitPrice ? formatMoney(entry.unitPrice) : ""}
+                </Table.Cell>
                 <Table.Cell className="text-green-500 font-bold">
                   {formatMoney(entry.credit > entry.debit ? entry.credit : " ")}
                 </Table.Cell>
@@ -226,6 +287,45 @@ const IndividualCustomerLedger = () => {
                   {formatMoney(entry.debit > entry.credit ? entry.debit : " ")}
                 </Table.Cell>
                 <Table.Cell>{formatMoney(entry.balance)}</Table.Cell>
+                <Table.Cell>
+                  {entry.isEnd ? (
+                    <Button
+                      variant="soft"
+                      color="blue"
+                      title="Restart Transaction"
+                      size="2"
+                      disabled={loadingStates[entry.id]}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRestartTransaction(entry.id);
+                      }}
+                    >
+                      {loadingStates[entry.id] ? (
+                        <Spinner size="1" />
+                      ) : (
+                        <FontAwesomeIcon icon={faRedo} />
+                      )}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="soft"
+                      color="red"
+                      title="End Transaction"
+                      size="2"
+                      disabled={loadingStates[entry.id]}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEndTransaction(entry.id);
+                      }}
+                    >
+                      {loadingStates[entry.id] ? (
+                        <Spinner size="1" />
+                      ) : (
+                        <StopOutlined  StopOutlinedColor="#ff4d4f" style={{ fontSize: "20px" }} />
+                      )}
+                    </Button>
+                  )}
+                </Table.Cell>
               </Table.Row>
             ))
           )}

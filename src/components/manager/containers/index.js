@@ -61,6 +61,7 @@ import AllDepartments from "./department/AllDepartments";
 import AllCustomers from "./customer/AllCustomers";
 import AddSuppliers from "./suppliers/AddSuppliers";
 import SupplierPlaceOrder from "./suppliers/SupplierPlaceOrder";
+import CreateGatepassForSupplier from "./suppliers/supplierGatePass";
 import CreateRole from "./roles/CreateRole";
 import AllProducts from "./products/AllProducts";
 import InvoiceAuthorityToWeigh from "./raise-tickets/InvoiceAuthorityToWeigh";
@@ -153,6 +154,7 @@ export {
   AllGatePass,
   CreateDispatchNote,
   CreateGatepass,
+  CreateGatepassForSupplier,
   CreateInvoice,
   EditRole,
   GatepassReceipt,

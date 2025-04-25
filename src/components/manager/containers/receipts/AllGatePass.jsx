@@ -107,7 +107,17 @@ const AllGatePass = () => {
 
   return (
     <>
+    <div className="flex justify-between items-center my-5 gap-4">
       <Heading>View All Gate Pass Note</Heading>
+      <Button
+        size="3"     
+        title="Create New Gate Pass For Supplier"   
+        className="cursor-pointer px-5 !bg-theme"
+        onClick={() => navigate("/admin/suppliers/create-gatepass")}
+      >
+        Create New Gate Pass
+      </Button>
+    </div>
 
       {/* Table */}
       <Table.Root variant="surface" className="mt-3">
