@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom"; // Add useNavigate for navigation
 import {
   rejectTicket,
   acceptTicket,
@@ -37,6 +38,7 @@ import { DeleteOutlined } from "@ant-design/icons";
 const root = import.meta.env.VITE_ROOT;
 
 const Notifications = () => {
+  const navigate = useNavigate(); // Initialize navigate hook
   const getToken = () => {
     const token = localStorage.getItem("token");
     return jwtDecode(token);
@@ -56,9 +58,8 @@ const Notifications = () => {
   const [confirmBtnLoading, setConfirmBtnLoading] = useState({});
   const [selectedTicket, setSelectedTicket] = useState("");
   const [selectedNotificationIds, setSelectedNotificationIds] = useState([]);
-  const [filterOption, setFilterOption] = useState("unread"); // New state for select option
+  const [filterOption, setFilterOption] = useState("unread");
 
-  // State management for SelectAdminSidePane
   const [sidePaneState, setSidePaneState] = useState({
     openId: null,
     type: null,
@@ -90,7 +91,6 @@ const Notifications = () => {
       setReadNotifications(fetchedReadNotifications);
       setAllNotifications(generalNotifications);
 
-      // Set notifications based on filterOption
       if (filterOption === "unread") {
         setNotifications(fetchedUnreadNotifications);
       } else if (filterOption === "read") {
@@ -116,7 +116,6 @@ const Notifications = () => {
     }
   };
 
-  // Mark notification as read
   const markAsRead = async (notificationId) => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -286,7 +285,6 @@ const Notifications = () => {
     }
   };
 
-  // Function to delete notifications
   const deleteNotifications = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -311,7 +309,6 @@ const Notifications = () => {
     }
   };
 
-  // Handle filter option change
   const handleFilterChange = (e) => {
     const value = e.target.value;
     setFilterOption(value);
@@ -741,15 +738,19 @@ const Notifications = () => {
                                             notification.type ===
                                             "supplier-weigh"
                                           ) {
-                                            const success = await markAsRead(
-                                              notification.id
+                                            // Navigate immediately for supplier-weigh type
+                                            navigate(
+                                              `/admin/suppliers/place-supplier-order/${notification.ticketId}`
                                             );
-                                            if (success) {
-                                              fetchNotifications();
-                                              navigate(
-                                                `/admin/suppliers/place-supplier-order/${notification.ticketId}`
-                                              );
-                                            }
+                                            // Mark as read in the background, but don't block navigation
+                                            markAsRead(notification.id).catch(
+                                              (err) => {
+                                                console.error(
+                                                  "Failed to mark as read in background:",
+                                                  err
+                                                );
+                                              }
+                                            );
                                           } else {
                                             setSelectedTicket(notification);
                                             setDetailsPageOpen(true);
@@ -871,7 +872,6 @@ const Notifications = () => {
                       </Text>
                     </Tabs.Content>
                   </div>
-                  {/* Render side panes outside the scrolling container */}
                   {sidePaneState.openId && (
                     <div className="top-0 left-0 z-[100] w-full h-full">
                       <SelectAdminSidePane
