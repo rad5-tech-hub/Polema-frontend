@@ -15,8 +15,10 @@ import {
 import axios from "axios";
 const root = import.meta.env.VITE_ROOT;
 import toast, { Toaster } from "react-hot-toast";
+import useToast from "../../../../hooks/useToast";
 
 const DepartementStorePlaceOrder = () => {
+  const showToast = useToast();
   const [rawMaterials, setRawMaterials] = useState([]);
   const [btnLoading, setBtnLoading] = useState(false);
   const [dept, setDept] = useState([]);
@@ -135,12 +137,12 @@ const DepartementStorePlaceOrder = () => {
         }
       );
       setBtnLoading(false);
-      toast.success("Order placed successfully", {
-        style: {
-          padding: "20px",
-        },
-        duration: 10000,
+      showToast({
+        message: "Order placed successfully",
+        type: "success",
+        duration: 6000,
       });
+      
 
       // Clear the form by resetting the 'plans' state
       setPlans([

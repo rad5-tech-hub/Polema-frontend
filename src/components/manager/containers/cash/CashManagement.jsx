@@ -12,6 +12,7 @@ import {
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import { Modal, Button as AntButton, Select as AntSelect } from "antd";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -28,6 +29,7 @@ const CashManagement = () => {
   const [name, setName] = useState("");
   const [comment, setComment] = useState("");
   const [amount, setAmount] = useState("");
+  const showToast = useToast();
 
   const fetchAdmins = async () => {
     const retrToken = localStorage.getItem("token");
@@ -118,11 +120,12 @@ const CashManagement = () => {
             headers: { Authorization: `Bearer ${retrToken}` },
           }
         );
-        toast.success(response.data.message, {
-          style: { padding: "30px" },
-          duration: 5500,
-        });
-
+        
+        showToast({
+          message: response.data.message,
+          type: "success",
+          duration: 4000,
+          })
         setAdminId(undefined); // Reset to undefined
         setDepartmentId(undefined); // Reset to undefined
         setCashAmount("");

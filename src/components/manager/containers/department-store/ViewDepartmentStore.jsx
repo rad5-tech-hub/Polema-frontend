@@ -21,10 +21,12 @@ import { faEllipsisV, faSquare } from "@fortawesome/free-solid-svg-icons";
 
 import axios from "axios";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 
 const ViewDepartmentStore = () => {
+  const showToast = useToast();
   const [isProductActive, setIsProductActive] = useState(true);
   const [failedSearch, setFailedSearch] = useState(false);
   const [store, setStore] = useState([]);
@@ -171,7 +173,11 @@ const ViewDepartmentStore = () => {
       setStore((prevStore) =>
         prevStore.filter((item) => item.id !== selectedProduct.id)
       );
-      toast.success("Product deleted successfully");
+      showToast({
+        message: "Product Deleted Successfully",
+        type: "success",
+        duration: 4000,
+      })
     } catch (error) {
       console.error("Error deleting product:", error);
       toast.error("Failed to delete product");

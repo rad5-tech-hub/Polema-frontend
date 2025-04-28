@@ -2,6 +2,8 @@ import axios from "axios";
 import React from "react";
 import toast, { LoaderIcon, Toaster } from "react-hot-toast";
 const root = import.meta.env.VITE_ROOT;
+import useToast from "../../../../hooks/useToast";
+const showToast = useToast();
 const EditProductModal = ({ closeModal, product, runFetch }) => {
   const [quantity, setQuantity] = React.useState("");
   const [thresholdVal, setThresholdVal] = React.useState("");
@@ -31,9 +33,11 @@ const EditProductModal = ({ closeModal, product, runFetch }) => {
           },
         }
       );
-      toast.success("Successfully edited", {
+      showToast({
+        message: "Successfully edited",
+        type: "success",
         duration: 4000,
-      });
+      })
       setButtonLoading(false);
       closeModal();
       runFetch();

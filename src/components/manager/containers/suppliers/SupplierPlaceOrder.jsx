@@ -1,3 +1,4 @@
+import useToast from "../../../../hooks/useToast";
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import {
@@ -17,6 +18,7 @@ const { Option } = Select;
 const API_ROOT = import.meta.env.VITE_ROOT;
 
 const SupplierPlaceOrder = () => {
+  const showToast = useToast()
   const { id } = useParams(); // Get ticket ID from URL params
   const [basePrice, setBasePrice] = useState("");
   const [customers, setCustomers] = useState([]);
@@ -162,10 +164,12 @@ const SupplierPlaceOrder = () => {
       await axios.post(`${API_ROOT}/customer/raise-supplier-order`, orderData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success("Order placed successfully!", {
-        style: { padding: "20px" },
-        duration: 5000,
-      });
+      showToast({
+        message:"Order Placed Successfully",
+        type:"success",
+        duration:5000
+      })
+      
       setBasePrice("");
       setSelectedCustomerId("");
       setSelectedProductId("");

@@ -36,9 +36,10 @@ import IndividualInfo from "./IndividualInfo";
 import { DeleteOutlined } from "@ant-design/icons";
 
 const root = import.meta.env.VITE_ROOT;
-
+import useToast from "../../../../hooks/useToast";
 const Notifications = () => {
   const navigate = useNavigate(); // Initialize navigate hook
+  const showToast = useToast()
   const getToken = () => {
     const token = localStorage.getItem("token");
     return jwtDecode(token);
@@ -131,7 +132,12 @@ const Notifications = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      toast.success("Notification marked as read", { duration: 3000 });
+      showToast({
+        message:"Notification marked as read",
+        duration:3000,
+        type:"success"
+      })
+      
       return true;
     } catch (error) {
       console.error("Error marking notification as read:", error);
@@ -188,7 +194,11 @@ const Notifications = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      toast.success("Ticket Denied Successfully", { duration: 3500 });
+      showToast({
+        message:"Ticket Denied Successfully",
+        duration:3000,
+        type:"sucess"
+      })
       fetchNotifications();
     } catch (e) {
       console.log(e);
@@ -243,6 +253,7 @@ const Notifications = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      
       toast.success(
         response.data.message || "Cash ticket confirmed successfully",
         { duration: 4500 }
@@ -297,7 +308,9 @@ const Notifications = () => {
         headers: { Authorization: `Bearer ${token}` },
         data: { notificationIds: selectedNotificationIds },
       });
-
+        showToast({
+          message:""
+        })
       toast.success("Notifications deleted successfully");
       fetchNotifications();
       setSelectedNotificationIds([]);

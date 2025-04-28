@@ -16,12 +16,14 @@ import {
 } from "@radix-ui/themes";
 import axios from "axios";
 import { StopOutlined } from "@ant-design/icons";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 
 const IndividualCustomerLedger = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const showToast = useToast()
 
   const [failedSearch, setFailedSearch] = useState(false);
   const [customer, setCustomers] = useState([]);
@@ -106,7 +108,12 @@ const IndividualCustomerLedger = () => {
           headers: { Authorization: `Bearer ${retrToken}` },
         }
       );
-      toast.success("Transaction ended successfully", { duration: 5000 });
+      showToast({
+        message: "Transaction ended successfully",
+        type: "success",
+        duration: 5000,
+      })
+      
       getCustomerLedger(); // Refresh ledger
     } catch (error) {
       console.error("Error ending transaction:", error);
@@ -133,7 +140,12 @@ const IndividualCustomerLedger = () => {
           headers: { Authorization: `Bearer ${retrToken}` },
         }
       );
-      toast.success("Transaction restarted successfully", { duration: 5000 });
+      
+      showToast({
+        message: "Transaction restarted successfully",
+        type: "success",
+        duration: 5000,
+      })
       getCustomerLedger(); // Refresh ledger
     } catch (error) {
       console.error("Error restarting transaction:", error);
@@ -340,7 +352,7 @@ const IndividualCustomerLedger = () => {
           getCustomerByID(id).lastname
         }`}
       />
-      <Toaster />
+      {/* <Toaster /> */}
     </>
   );
 };
