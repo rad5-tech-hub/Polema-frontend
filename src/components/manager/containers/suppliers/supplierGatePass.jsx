@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { TextField, Select, Flex, Button, Spinner } from "@radix-ui/themes";
 import toast, { Toaster, LoaderIcon } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -16,6 +17,7 @@ const CreateGatepassForSupplier = () => {
   const [goodsOwner, setGoodsOwner] = useState("");
   const [rawMaterials, setRawMaterials] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState("");
+  const navigate= useNavigate();
 
   // Fetch super admins
   const fetchSuperAdmins = async () => {
@@ -121,9 +123,12 @@ const CreateGatepassForSupplier = () => {
         style: {
           padding: "30px",
         },
-        duration: 10000,
+        duration: 3000,
       });
       resetForm(); // Reset the form after successful submission
+     setTimeout(() => {
+      navigate("/admin/receipts/gate-pass-note");
+     }, 2500); // Optional: Delay before navigating
     } catch (error) {
       console.error(error);
       // Display the error message directly in the toast

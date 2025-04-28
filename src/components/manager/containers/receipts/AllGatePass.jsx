@@ -228,7 +228,7 @@ const AllGatePass = () => {
           Previous
         </Button>
         <Text size="2">
-          Page {currentPage} of {totalPages}
+          Page {currentPage} {totalPages > 0 && `of ${totalPages}`}
         </Text>
         <Button disabled={currentPage === totalPages} onClick={goToNextPage}>
           Next
