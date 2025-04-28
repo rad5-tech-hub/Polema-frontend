@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom"; // Add useNavigate for navigation
 import {
   rejectTicket,
   acceptTicket,
@@ -33,11 +34,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import IndividualInfo from "./IndividualInfo";
 import { DeleteOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
 
 const root = import.meta.env.VITE_ROOT;
 
 const Notifications = () => {
+  const navigate = useNavigate(); // Initialize navigate hook
   const getToken = () => {
     const token = localStorage.getItem("token");
     return jwtDecode(token);
@@ -48,6 +49,7 @@ const Notifications = () => {
   const [fetchLoading, setFetchLoading] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadNotifications, setUnreadNotifications] = useState([]);
+  const [readNotifications, setReadNotifications] = useState([]);
   const [allNotifications, setAllNotifications] = useState([]);
   const [detailsPageOpen, setDetailsPageOpen] = useState(false);
   const [admins, setAdmins] = useState([]);
@@ -56,8 +58,7 @@ const Notifications = () => {
   const [confirmBtnLoading, setConfirmBtnLoading] = useState({});
   const [selectedTicket, setSelectedTicket] = useState("");
   const [selectedNotificationIds, setSelectedNotificationIds] = useState([]);
-  const [filterOption, setFilterOption] = useState("all");
-  const navigate = useNavigate();
+  const [filterOption, setFilterOption] = useState("unread");
 
   const [sidePaneState, setSidePaneState] = useState({
     openId: null,
@@ -69,16 +70,6 @@ const Notifications = () => {
   const [approveButtonLoading, setApproveButtonLoading] = useState({});
   const [isSidePaneSubmitting, setIsSidePaneSubmitting] = useState(false);
 
-  const getFilteredNotifications = () => {
-    if (filterOption === "unread") {
-      return unreadNotifications;
-    } else if (filterOption === "read") {
-      return allNotifications.filter((n) => n.read);
-    } else {
-      return allNotifications;
-    }
-  };
-
   const fetchNotifications = async () => {
     const token = localStorage.getItem("token");
     setFetchLoading(true);
@@ -89,17 +80,28 @@ const Notifications = () => {
 
       const fetchedUnreadNotifications =
         response.data.data.unreadNotifications || [];
+      const fetchedReadNotifications =
+        response.data.data.readNotifications || [];
       const generalNotifications = [
-        ...response.data.data.unreadNotifications,
-        ...response.data.data.readNotifications,
+        ...fetchedUnreadNotifications,
+        ...fetchedReadNotifications,
       ];
 
       setUnreadNotifications(fetchedUnreadNotifications);
+      setReadNotifications(fetchedReadNotifications);
       setAllNotifications(generalNotifications);
-      setNotifications(getFilteredNotifications());
+
+      if (filterOption === "unread") {
+        setNotifications(fetchedUnreadNotifications);
+      } else if (filterOption === "read") {
+        setNotifications(fetchedReadNotifications);
+      } else {
+        setNotifications(generalNotifications);
+      }
+
       setFetchLoading(false);
     } catch (error) {
-      if (error.status !== 403) {
+      if (error.status != 403) {
         console.error("Error fetching notifications:", error);
       }
       setFetchLoading(false);
@@ -111,6 +113,32 @@ const Notifications = () => {
       slideOutNotifications();
     } else {
       setIsNotificationsOpen(true);
+    }
+  };
+
+  const markAsRead = async (notificationId) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("An error occurred, try logging in again");
+      return false;
+    }
+
+    try {
+      await axios.patch(
+        `${root}/admin/read-notification/${notificationId}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      toast.success("Notification marked as read", { duration: 3000 });
+      return true;
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      toast.error(
+        error.response?.data?.message || "Failed to mark notification as read"
+      );
+      return false;
     }
   };
 
@@ -147,13 +175,13 @@ const Notifications = () => {
       return;
     }
 
-    if (!endpoint) {
+    if (!endpoint || endpoint === null || endpoint === undefined) {
       toast.error("ticket type does not exist");
       return;
     }
 
     try {
-      await axios.patch(
+      const response = await axios.patch(
         `${root}/${endpoint}/${ticketId}`,
         {},
         {
@@ -257,7 +285,7 @@ const Notifications = () => {
     }
   };
 
-  const deleteNotifications = async (notificationIds) => {
+  const deleteNotifications = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
       toast.error("An error occurred, try logging in again");
@@ -267,19 +295,29 @@ const Notifications = () => {
     try {
       const response = await axios.delete(`${root}/admin/delete-notifications`, {
         headers: { Authorization: `Bearer ${token}` },
-        data: { notificationIds },
+        data: { notificationIds: selectedNotificationIds },
       });
 
-      toast.success("Notification deleted successfully");
+      toast.success("Notifications deleted successfully");
       fetchNotifications();
-      setSelectedNotificationIds((prev) =>
-        prev.filter((id) => !notificationIds.includes(id))
-      );
+      setSelectedNotificationIds([]);
     } catch (error) {
       console.error("Error deleting notifications:", error);
       toast.error(
-        error.response?.data?.message || "Error deleting notification"
+        error.response?.data?.message || "Error deleting notifications"
       );
+    }
+  };
+
+  const handleFilterChange = (e) => {
+    const value = e.target.value;
+    setFilterOption(value);
+    if (value === "unread") {
+      setNotifications(unreadNotifications);
+    } else if (value === "read") {
+      setNotifications(readNotifications);
+    } else {
+      setNotifications(allNotifications);
     }
   };
 
@@ -404,7 +442,7 @@ const Notifications = () => {
                   checked={selectedAdmins.includes(admin.roleId)}
                   onChange={() => handleCheckboxChange(admin.roleId)}
                 />
-                <span className="w-full p-2">
+                <span className="w-full p-2 gap-2">
                   {`${admin.firstname} ${admin.lastname} (${
                     admin.role?.name || ""
                   })`}
@@ -414,8 +452,12 @@ const Notifications = () => {
           </div>
           <div className="flex justify-end mt-4 mb-15">
             <button
-              className="bg-theme px-4 py-2 text-white rounded"
-              disabled={isSidePaneSubmitting}
+              className={`px-4 py-2 rounded ${
+                selectedAdmins.length === 0
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-theme text-white"
+              }`}
+              disabled={selectedAdmins.length === 0 || isSidePaneSubmitting}
             >
               {isSidePaneSubmitting ? <Spinner /> : "Submit"}
             </button>
@@ -529,10 +571,6 @@ const Notifications = () => {
     fetchAdminDetails();
   }, []);
 
-  useEffect(() => {
-    setNotifications(getFilteredNotifications());
-  }, [filterOption, unreadNotifications, allNotifications]);
-
   return (
     <>
       <div className="relative" ref={notificationRef}>
@@ -545,10 +583,10 @@ const Notifications = () => {
           }}
         >
           <BellIcon />
-          {notifications.length > 0 && (
+          {unreadNotifications.length > 0 && (
             <div className="absolute right-[-5px] top-[-3px] bg-red-500 w-[15px] h-[15px] rounded-full">
               <span className="text-white flex justify-center items-center text-[.6rem] font-bold">
-                {notifications.length}
+                {unreadNotifications.length}
               </span>
             </div>
           )}
@@ -582,23 +620,35 @@ const Notifications = () => {
                   setOpen={setDetailsPageOpen}
                 />
               )}
+              <div className="absolute right-[10px] mt-3 flex gap-2 items-center">
+                <select
+                  value={filterOption}
+                  onChange={handleFilterChange}
+                  className="border border-gray-300 rounded-md p-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="unread">Unread</option>
+                  <option value="read">Read</option>
+                  <option value="all">All</option>
+                </select>
+              </div>
+
               <Tabs.Root defaultValue="all" className="!overflow-visible">
-                <div className="flex justify-between items-center mb-4">
-                  <Tabs.List>
-                    <Tabs.Trigger value="all">All</Tabs.Trigger>
-                    <Tabs.Trigger value="tickets">Tickets</Tabs.Trigger>
-                    <Tabs.Trigger value="inventory">Inventory</Tabs.Trigger>
-                  </Tabs.List>
-                  <select
-                    value={filterOption}
-                    onChange={(e) => setFilterOption(e.target.value)}
-                    className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none"
-                  >
-                    <option value="all">All</option>
-                    <option value="unread">Unread</option>
-                    <option value="read">Read</option>
-                  </select>
-                </div>
+                <Tabs.List>
+                  <Tabs.Trigger value="all">All</Tabs.Trigger>
+                  <Tabs.Trigger value="tickets">Tickets</Tabs.Trigger>
+                  <Tabs.Trigger value="inventory">Inventory</Tabs.Trigger>
+                </Tabs.List>
+
+                {selectedNotificationIds.length > 0 && (
+                  <div className="delete-icon flex justify-end mt-2 sticky">
+                    <DeleteOutlined
+                      className="text-red-400 cursor-pointer hover:text-lg"
+                      onClick={() => {
+                        deleteNotifications();
+                      }}
+                    />
+                  </div>
+                )}
 
                 <div
                   className="pt-3 max-h-[100vh] w-full notifications-box"
@@ -614,8 +664,13 @@ const Notifications = () => {
                     <Tabs.Content value="all">
                       {notifications.length > 0 ? (
                         notifications.map((notification) => (
-                          <React.Fragment key={notification.id}>
+                          <>
                             <div
+                              key={notification.id}
+                              onClick={() => {
+                                // setSelectedTicket(notification);
+                                // setDetailsPageOpen(true);
+                              }}
                               className={`mb-3 p-2 rounded cursor-pointer relative ${
                                 selectedNotificationIds.includes(
                                   notification.id
@@ -656,55 +711,62 @@ const Notifications = () => {
                                     <FontAwesomeIcon icon={faUser} />
                                   </Card>
                                 </div>
-                                <Flex gap={"3"} className="flex-1">
-                                  <div className="flex-1">
-                                    <Flex
-                                      justify="between"
-                                      align="center"
-                                      className="relative"
+                                <Flex gap={"3"}>
+                                  <div>
+                                    <Text
+                                      className="text-[.85rem] font-medium m-0 p-0 hover:underline"
+                                      style={{ cursor: "pointer" }}
+                                      onClick={() => {
+                                        setSelectedTicket(notification);
+                                        setDetailsPageOpen(true);
+                                      }}
                                     >
-                                      <Text
-                                        className="text-[.85rem] font-medium m-0 p-0 hover:underline flex-1"
-                                        style={{ cursor: "pointer" }}
-                                      >
-                                        {notification.message}
-                                      </Text>
-                                      {selectedNotificationIds.includes(
-                                        notification.id
-                                      ) && (
-                                        <DeleteOutlined
-                                          className="text-red-500 cursor-pointer hover:text-lg hover:bg-gray-100 p-2 rounded-full ml-2"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            deleteNotifications([
-                                              notification.id,
-                                            ]);
-                                          }}
-                                        />
-                                      )}
-                                    </Flex>
+                                      {notification.message}
+                                    </Text>
+                                    <br />
                                     <Text className="text-[.5rem] text-gray-500">
                                       <div>
-                                        {refractor(notification.createdAt)}, {refractorToTime(notification.createdAt)}
+                                        {refractor(notification.createdAt)},{" "}
+                                        {refractorToTime(
+                                          notification.createdAt
+                                        )}
                                       </div>
                                       <div
                                         className="mt-2 flex gap-2 items-center bg-[#424242]/10 text-black p-2 w-fit rounded-md cursor-pointer"
-                                        onClick={() => {
-                                          if (notification.type === "supplier-weigh") {
-                                            navigate(`/admin/suppliers/place-supplier-order/${notification.ticketId}`);
-                                          } else {                                                                                        
+                                        onClick={async () => {
+                                          if (
+                                            notification.type ===
+                                            "supplier-weigh"
+                                          ) {
+                                            // Navigate immediately for supplier-weigh type
+                                            navigate(
+                                              `/admin/suppliers/place-supplier-order/${notification.ticketId}`
+                                            );
+                                            // Mark as read in the background, but don't block navigation
+                                            markAsRead(notification.id).catch(
+                                              (err) => {
+                                                console.error(
+                                                  "Failed to mark as read in background:",
+                                                  err
+                                                );
+                                              }
+                                            );
+                                          } else {
                                             setSelectedTicket(notification);
                                             setDetailsPageOpen(true);
                                           }
                                         }}
                                       >
                                         <FontAwesomeIcon icon={faTags} />
-                                        <span>{_.upperFirst(notification.type)}</span>
+                                        <span>
+                                          {_.upperFirst(notification.type)}
+                                        </span>
                                       </div>
                                     </Text>
 
                                     {decodeToken().isAdmin &&
-                                      notification.ticketStatus === "pending" && (
+                                      notification.ticketStatus ==
+                                        "pending" && (
                                         <div className="button-groups flex gap-4 mt-4">
                                           <AntButton
                                             className="bg-theme text-white hover:!bg-theme hover:text-white"
@@ -742,7 +804,7 @@ const Notifications = () => {
                                       )}
 
                                     {notification.type === "cash" &&
-                                      notification.ticketStatus ===
+                                      notification.ticketStatus ==
                                         "approved" && (
                                         <div className="button-groups flex gap-4 mt-4">
                                           <AntButton
@@ -792,7 +854,7 @@ const Notifications = () => {
                             {notifications.length > 1 && (
                               <Separator className="w-full" />
                             )}
-                          </React.Fragment>
+                          </>
                         ))
                       ) : (
                         <Text className="text-gray-500">No notifications</Text>

@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { Card, Spinner } from "@radix-ui/themes";
-import { Switch, Dropdown, Menu } from "antd";
+import { Switch } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPrint } from "@fortawesome/free-solid-svg-icons";
 import polemaLogo from "../../../../static/image/polema-logo.png";
@@ -17,7 +17,7 @@ const GatepassReceipt = () => {
   const [gatePassLoading, setGatePassLoading] = useState(true);
   const [passDetails, setPassDetails] = useState({});
   const [failedSearch, setFailedSearch] = useState(false);
-  const [isMobison, setIsMobison] = useState(false); // State for Switch
+  const [isMobison, setIsMobison] = useState(false);
 
   // Function to view gatepass details
   const viewGatePass = async () => {
@@ -85,7 +85,7 @@ const GatepassReceipt = () => {
         ) : (
           <>
             {/* Header Section */}
-            <div className="flex flex-col md:flex-col lg:flex-row justify-center lg:justify-between items-center gap-5 no-print pb-6 border-b border-[#919191]">
+            <div className="flex flex-row justify-center lg:justify-between items-center gap-5 no-print pb-6 border-b border-[#919191]">
               <div className="w-full max-w-[300px] lg:w-auto text-center lg:text-left">
                 <h3 className="text-sm sm:text-[20px] font-semibold">
                   Approved Gate Pass Note
@@ -102,9 +102,12 @@ const GatepassReceipt = () => {
                 </p>
               </div>
               <div className="lg:text-end text-center w-full">
-                <button onClick={()=> handlePrint()} className="rounded-lg border-[1px] border-[#919191] font-semibold shadow-lg text-sm sm:text-base cursor-pointer p-2 px-8">
+                <button
+                  onClick={() => handlePrint()}
+                  className="rounded-lg border-[1px] border-[#919191] font-semibold shadow-lg text-sm sm:text-base cursor-pointer p-2 px-8"
+                >
                   Print
-                </button>                
+                </button>
               </div>
             </div>
 
@@ -124,7 +127,9 @@ const GatepassReceipt = () => {
                   {/* Header Title */}
                   <div className="text-center">
                     <h1 className="text-[23px] sm:text-[32px] font-bold text-[#434343]">
-                      {isMobison ? "MAOBISON INTER-LINK ASSOCIATES LTD." : "POLEMA INDUSTRIES LIMITED"}                  
+                      {isMobison
+                        ? "MAOBISON INTER-LINK ASSOCIATES LTD."
+                        : "POLEMA INDUSTRIES LIMITED"}
                     </h1>
                     <p className="text-[#919191] text-lg font-semibold w-fit mx-auto border-b-2 border-[#919191]">
                       GATE PASS NOTE
@@ -134,55 +139,63 @@ const GatepassReceipt = () => {
                   {/* RC Information */}
                   <div>
                     <p>
-                      <i>{isMobison ? 'RC 64084' : 'RC 131127'}</i>
+                      <i>{isMobison ? "RC 64084" : "RC 131127"}</i>
                     </p>
                     <b>
                       <i className="text-[#D2D2D2] font-bold text-[18px] sm:text-[32px]">
-                        0{passDetails.transaction.invoice?.invoiceNumber || ""}
+                        0818
                       </i>
                     </b>
                   </div>
                 </div>
-             
-                 {/* Details Section */}
+
+                {/* Details Section */}
                 <div className="details mt-8 sm:mt-12 flex flex-col gap-4 sm:gap-[25px]">
-                  {/* Single Detail Template */}
                   {[
-                    ["Date", refractor(passDetails.createdAt)],
+                    ["Date", refractor(passDetails.createdAt) || "-"],
                     [
                       "Driver's Name",
-                      passDetails.transaction.authToWeighTickets === null
-                        ? ""
-                        : passDetails.transaction?.authToWeighTickets?.driver ||
-                          "",
+                      passDetails.transaction?.authToWeighTickets?.driver ||
+                        passDetails.driver ||
+                        "-",
                     ],
-                    ["Escort's Name", passDetails.escortName],
+                    ["Escort's Name", passDetails.escortName || "-"],
                     [
                       "Vehicle No",
-                      passDetails.transaction.authToWeighTickets === null
-                        ? ""
-                        : passDetails.transaction?.authToWeighTickets
-                            ?.vehicleNo || "",
+                      passDetails.transaction?.authToWeighTickets?.vehicleNo ||
+                        passDetails.vehicleNo ||
+                        "-",
                     ],
                     [
                       "Goods/Invoice No",
-                      passDetails?.transaction?.waybill === null
-                        ? ""
-                        : `${passDetails?.transaction?.porders?.name || ""} / ${
-                            passDetails?.transaction?.invoice
-                              ?.invoiceNumber || ""
-                          }`,
+                      passDetails.transaction
+                        ? `${
+                            passDetails.transaction.porders?.name || "-"
+                          } / ${
+                            passDetails.transaction.invoice?.invoiceNumber ||
+                            "-"
+                          }`
+                        : passDetails.rawMaterial?.name || "-",
                     ],
                     [
                       "Owner of Goods",
-                      `${passDetails.transaction.corder.firstname} ${passDetails.transaction.corder.lastname}`,
+                      passDetails.transaction
+                        ? `${passDetails.transaction.corder?.firstname || ""} ${
+                            passDetails.transaction.corder?.lastname || ""
+                          }`.trim() || "-"
+                        : passDetails.owner || "-",
                     ],
-                    ["Destination", passDetails.destination],
+                    ["Destination", passDetails.destination || "-"],
                     [
                       "Time of Departure",
-                      refractorToTime(passDetails.createdAt),
+                      refractorToTime(passDetails.createdAt) || "-",
                     ],
-                    ["Authorized By", ""],
+                    [
+                      "Authorized By",
+                      passDetails.preparedByRole?.admins?.[0]
+                        ? `${passDetails.preparedByRole.admins[0].firstname} ${passDetails.preparedByRole.admins[0].lastname}`
+                        : "-",
+                    ],
                   ].map(([label, value], idx) => (
                     <div
                       key={idx}
@@ -197,18 +210,57 @@ const GatepassReceipt = () => {
                     </div>
                   ))}
 
-                  {/* Admin Officer's Signature */}
-                  <div className="owner-of-goods w-full flex flex-col gap-2 sm:gap-4 items-end mt-12 sm:mt-24">
-                    <p className="border-b border-black border-dotted w-[150px] sm:w-[230px]"></p>
-                    <label className="w-fit text-sm sm:text-base">
-                      ADMIN OFFICER’S SIGNATURE
-                    </label>
+                  {/* Signatures Section */}
+                  <div className="signatures w-full flex flex-col sm:flex-row justify-between gap-8 sm:gap-4 mt-12 sm:mt-24">
+                    {/* Prepared By Signature */}
+                    <div className="prepared-by flex flex-col gap-2 sm:gap-4 items-start">
+                      {passDetails.preparedByRole?.admins?.[0]?.signature ? (
+                        <>
+                          <img
+                            src={passDetails.preparedByRole.admins[0].signature}
+                            alt="Prepared By Signature"
+                            className="w-[150px] sm:w-[230px] h-auto"
+                          />
+                          <span>
+                            {passDetails.preparedByRole?.admins?.[0]?.firstname}{" "}
+                            {passDetails.preparedByRole?.admins?.[0]?.lastname}
+                          </span>
+                        </>
+                      ) : (
+                        <p className="border-b border-black border-dotted w-[150px] sm:w-[230px]"></p>
+                      )}
+                      <label className="w-fit text-sm sm:text-base">
+                        AUTHORIZED BY SIGNATURE
+                      </label>
+                    </div>
+
+                    {/* Approved By Signature */}
+                    <div className="approved-by flex flex-col gap-2 sm:gap-4 items-end">
+                      {passDetails.approvedByRole?.admins?.[0]?.signature ? (
+                        <>
+                          <img
+                            src={passDetails.approvedByRole.admins[0].signature}
+                            alt="Approved By Signature"
+                            className="w-[150px] sm:w-[230px] h-auto"
+                          />
+                          <span>
+                            {passDetails.approvedByRole?.admins?.[0]?.firstname}{" "}
+                            {passDetails.approvedByRole?.admins?.[0]?.lastname}
+                          </span>
+                        </>
+                      ) : (
+                        <p className="border-b border-black border-dotted w-[150px] sm:w-[230px]"></p>
+                      )}
+                      <label className="w-fit text-sm sm:text-base">
+                        ADMIN OFFICER’S SIGNATURE
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </>
-        )}        
+        )}
       </div>
       <Toaster position="top-right" />
     </>

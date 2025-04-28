@@ -107,7 +107,17 @@ const AllGatePass = () => {
 
   return (
     <>
+    <div className="flex justify-between items-center my-5 gap-4">
       <Heading>View All Gate Pass Note</Heading>
+      <Button
+        size="3"     
+        title="Create New Gate Pass For Supplier"   
+        className="cursor-pointer px-5 !bg-theme"
+        onClick={() => navigate("/admin/suppliers/create-gatepass")}
+      >
+        Create New Gate Pass
+      </Button>
+    </div>
 
       {/* Table */}
       <Table.Root variant="surface" className="mt-3">
@@ -115,7 +125,7 @@ const AllGatePass = () => {
           <Table.Row>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>DRIVER NAME</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>CUSTOMER NAME</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>OWNER NAME</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>GOODS</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>VEHICLE NO.</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>DESTINATION</Table.ColumnHeaderCell>
@@ -136,20 +146,18 @@ const AllGatePass = () => {
               <Table.Row key={entry.id}>
                 <Table.Cell>{refractor(entry.createdAt)}</Table.Cell>
                 <Table.Cell>
-                  {entry?.transaction?.authToWeighTickets?.driver || "N/A"}
+                  {entry?.driver? (entry.driver) : (entry?.transaction?.authToWeighTickets?.driver) }
                 </Table.Cell>
                 <Table.Cell>
-                  {`${entry?.transaction?.corder?.firstname || ""} ${
-                    entry?.transaction?.corder?.lastname || ""
-                  }`}
+                  {entry.owner}
                 </Table.Cell>
                 <Table.Cell>
-                  {entry?.transaction?.porders?.name || "N/A"}
+                  {entry?.transaction?.porders?.name || entry?.rawMaterial?.name}
                 </Table.Cell>
                 <Table.Cell>
-                  {entry?.transaction?.authToWeighTickets?.vehicleNo || "N/A"}
+                  {entry?.transaction?.authToWeighTickets?.vehicleNo || entry?.vehicleNo}
                 </Table.Cell>
-                <Table.Cell>{entry.destination || "N/A"}</Table.Cell>
+                <Table.Cell>{entry.destination || "-"}</Table.Cell>
                 <Table.Cell>{refractorToTime(entry.createdAt)}</Table.Cell>
                 <Table.Cell>
                   <Flex align="center" gap="1">
@@ -220,7 +228,7 @@ const AllGatePass = () => {
           Previous
         </Button>
         <Text size="2">
-          Page {currentPage} of {totalPages}
+          Page {currentPage} {totalPages > 0 && `of ${totalPages}`}
         </Text>
         <Button disabled={currentPage === totalPages} onClick={goToNextPage}>
           Next

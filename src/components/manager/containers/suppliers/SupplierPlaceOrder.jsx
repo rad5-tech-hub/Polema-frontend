@@ -196,18 +196,20 @@ const SupplierPlaceOrder = () => {
           <Grid columns="2" gap="4" className="w-full">
             {/* Supplier Select */}
             <div className="w-full">
-              <Text>Supplier Name</Text>
+              <Text className="font-bold">Supplier Name</Text>
               <Select
-                showSearch
+                showSearch                
                 placeholder="Select Supplier"
                 optionFilterProp="children"
                 onChange={(value) => setSelectedCustomerId(value)}
                 value={selectedCustomerId || undefined}
-                className="w-full mt-2"
+                className={`w-full mt-2 text-bold text-lg disabled:text-gray-800 ${
+                  customers.length === 0 || !!id ? "bg-gray-100 text-black font-bold" : ""
+                }`}
                 filterOption={(input, option) =>
                   option.children.toLowerCase().includes(input.toLowerCase())
                 }
-                disabled={customers.length === 0 || !!id} // Disable if id exists
+                disabled={customers.length === 0 || !!id} // Disable if no customers or id exists
                 required
               >
                 {customers.map((customer) => (
@@ -220,18 +222,20 @@ const SupplierPlaceOrder = () => {
 
             {/* Product Select */}
             <div className="w-full">
-              <Text>Raw Material</Text>
+              <Text className="font-bold">Raw Material</Text>
               <Select
                 showSearch
                 placeholder="Select Raw Material"
                 optionFilterProp="children"
                 onChange={(value) => setSelectedProductId(value)}
                 value={selectedProductId || undefined}
-                className="w-full mt-2"
+                className={`w-full mt-2 placeholder:text-black ${
+                  products.length === 0 || !!id ? "bg-gray-100 text-black font-bold" : ""
+                }`}
                 filterOption={(input, option) =>
                   option.children.toLowerCase().includes(input.toLowerCase())
                 }
-                disabled={products.length === 0 || !!id} // Disable if id exists
+                disabled={products.length === 0 || !!id} // Disable if no products or id exists
                 required
               >
                 {products.map((product) => (

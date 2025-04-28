@@ -15,8 +15,6 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
   const [approveLoading, setApproveLoading] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
 
-  console.log(selectedTicket + 'id');
-
   // --------------------State management for opening and closing the dialog------------------
   const [dialogOpen, setDialogOpen] = useState(false);
   const [storeDetails, setStoreDetails] = useState([]);
@@ -60,6 +58,8 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
         return "customer/view-gatepass";
       case "invoice":
         return "customer/invoice-pdf";
+      case "supplier-weigh":
+        return "/customer/view-weigh/";
       case "weigh":
         return "admin/view-auth-weigh";
         case "waybill":
@@ -140,6 +140,9 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
           break;
         case "weigh":
           setTicketDetails(response.data.ticket);
+          break;
+        case "supplier-weigh":
+          setTicketDetails(response.data.data);
           break;
         case "gatepass":
           setTicketDetails(response.data.gatePass);
@@ -295,10 +298,10 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                       </div>
                       <div>
                         <Text className="text-[.56rem] font-black tracking-wide">
-                          CUSTOMER
+                        OWNER OF GOODS
                         </Text>
                         <p className="text-[.7rem]">
-                          {`${ticketDetails.transaction?.corder.firstname} ${ticketDetails.transaction?.corder.lastname}`}
+                          {ticketDetails.owner || '-'}
                         </p>
                       </div>
                       <div>
@@ -314,7 +317,7 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                           PRODUCT NAME
                         </Text>
                         <p className="text-[.7rem]">
-                          {ticketDetails.transaction?.porders?.name}
+                          {ticketDetails.transaction?.porders?.name  || ticketDetails?.rawMaterial?.name}
                         </p>
                       </div>
                     </>
@@ -475,6 +478,50 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                     </>
                   )}
 
+                    {/* Weigh Ticket Example */}
+                  {selectedTicket.type === "supplier-weigh" && (
+                    <>                     
+                      <div className="flex w-full justify-between items-center p-2">
+                        <Text className="text-[.9rem] font-black tracking-wide">
+                        {ticketDetails?.authToWeigh?.supplierId ? 'SUPPLIER': 'CUSTOMER'} NAME
+                        </Text>
+                        <p className="text-[.9rem]">
+                          {ticketDetails?.authToWeigh?.supplierId && ticketDetails?.authToWeigh?.supplier
+                          ? `${ticketDetails?.authToWeigh?.supplier.firstname} ${ticketDetails?.authToWeigh?.supplier.lastname}`                         
+                          : "Name not available"}
+                        </p>
+                      </div>                      
+                      {ticketDetails?.authToWeigh?.rawMaterial && <div className="flex w-full justify-between items-center p-2">
+                        <Text className="text-[.9rem] font-black tracking-wide">
+                          PRODUCT
+                        </Text>
+                        <p className="text-[.9rem]">
+                          {ticketDetails.authToWeigh?.rawMaterial.name}
+                        </p>
+                      </div>}
+                      <div className="flex w-full justify-between items-center p-2">
+                        <Text className="text-[.9rem] font-black tracking-wide">
+                          VEHICLE NO
+                        </Text>
+                        <p className="text-[.9rem]">
+                          {ticketDetails.vehicleNo}
+                        </p>
+                      </div>
+                      <div className="flex w-full justify-between items-center p-2">
+                        <Text className="text-[.9rem] font-black tracking-wide">
+                          SUPERVISIOR-SIGNIN
+                        </Text>
+                        <p className="text-[.9rem]">{ticketDetails.signInSupervisor}</p>
+                      </div>
+                      <div className="flex w-full justify-between items-center p-2">
+                        <Text className="text-[.9rem] font-black tracking-wide">
+                          SUPERVISIOR-SIGNOUT
+                        </Text>
+                        <p className="text-[.9rem]">{ticketDetails.signOutSupervisor}</p>
+                      </div>
+                    </>
+                  )}
+
                   {/* LPO DETAILS */}
                   {selectedTicket.type === "lpo" && (
                     <>
@@ -601,23 +648,12 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                         </Text>
                         <p className="text-[.9rem]">{ticketDetails.comments}</p>
                       </div>
-                      <div className="flex items-center gap-6 justify-between">
+                      {/* <div className="flex items-center gap-6 justify-between">
                         <Text className="text-[1rem] font-bold tracking-wide">
                           ITEMS
                         </Text>
-                        {ticketDetails.items &&
-                          Object.entries(ticketDetails.items).map(
-                            ([goodsName, quantity]) => (
-                              <>
-                                <p key={goodsName} className="text-[.9rem]">
-                                  {fetchStoreNameByID(goodsName).name}:{" "}
-                                  {quantity}{" "}
-                                  {fetchStoreNameByID(goodsName).unit}
-                                </p>
-                              </>
-                            )
-                          )}
-                      </div>
+                        
+                      </div> */}
                     </>
                   )}
 
