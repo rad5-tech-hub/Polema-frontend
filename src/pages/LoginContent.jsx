@@ -24,12 +24,13 @@ const LoginContent = () => {
     e.preventDefault();
     setLoading(true); // Show spinner
 
+
     try {
       const response = await axios.post(`${root}/admin/login`, {
         email: email,
         password: e.target[1].value,
       });
-        console.log(response.data);
+        
 
       const adminData = {
         firstname: response.data.admin.lastname,
