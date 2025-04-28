@@ -253,11 +253,10 @@ const Notifications = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      
-      toast.success(
-        response.data.message || "Cash ticket confirmed successfully",
-        { duration: 4500 }
-      );
+      showToast({
+        message:response.data.message || "Cash ticket confirmed successfully",
+        type:"success"
+      })
       fetchNotifications();
       setConfirmBtnLoading((prev) => ({ ...prev, [ticketId]: false }));
     } catch (error) {
@@ -308,10 +307,12 @@ const Notifications = () => {
         headers: { Authorization: `Bearer ${token}` },
         data: { notificationIds: selectedNotificationIds },
       });
-        showToast({
-          message:""
-        })
-      toast.success("Notifications deleted successfully");
+      showToast({
+        message: "Notifications deleted Successfully",
+        type:"success"
+      })
+        
+      
       fetchNotifications();
       setSelectedNotificationIds([]);
     } catch (error) {
@@ -386,18 +387,22 @@ const Notifications = () => {
       try {
         if (ticketStatus === "approved") {
           await sendApprovedTicket(type, ticketID, selectedAdmins);
-          toast.success("Ticket already approved, sending details...", {
-            duration: 3000,
-            style: { padding: "30px" },
-          });
+          showToast({
+            message: "Ticket already approved, sending details",
+            duration:3000,
+            type:"success"
+          })
+          
         } else {
           const firstRequest = await approveTicket(type, ticketID);
           if (firstRequest === 200) {
             await sendApprovedTicket(type, ticketID, selectedAdmins);
-            toast.success("Ticket approved and sent successfully", {
-              duration: 3000,
-              style: { padding: "30px" },
+            showToast({
+              message: "Ticket approved and sent successfully",
+              type:"success",
+              duration:3000
             });
+            
           } else {
             throw new Error("Error occurred in approving ticket");
           }
@@ -508,10 +513,12 @@ const Notifications = () => {
         const response = await axios.post(`${root}/admin/load/${id}`, body, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        toast.success("Ticket Sent Successfully", {
-          duration: 3000,
-          style: { padding: "20px" },
-        });
+        showToast({
+          message: "Ticket Sent Successfully",
+          type: "success",
+          duration:3000
+        })
+        
         fetchNotifications();
         setButtonLoading(false);
         setQuantity("");

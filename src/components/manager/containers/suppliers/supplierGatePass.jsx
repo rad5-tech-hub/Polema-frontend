@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import useToast from "../../../../hooks/useToast";
 import axios from "axios";
 import { TextField, Select, Flex, Button, Spinner } from "@radix-ui/themes";
 import toast, { Toaster, LoaderIcon } from "react-hot-toast";
@@ -7,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 const root = import.meta.env.VITE_ROOT;
 
 const CreateGatepassForSupplier = () => {
+  const showToast = useToast();
   const [escort, setEscort] = useState("");
   const [buttonLoading, setButtonLoading] = useState(false);
   const [adminId, setAdminId] = useState("");
@@ -118,13 +120,12 @@ const CreateGatepassForSupplier = () => {
           },
         }
       );
-  
-      toast.success("Successfully sent to admin", {
-        style: {
-          padding: "30px",
-        },
-        duration: 3000,
-      });
+      showToast({
+    message:"Successfully Sent to Admin",
+    type:"success",
+    duration:3000
+  })
+      
       resetForm(); // Reset the form after successful submission
      setTimeout(() => {
       navigate("/admin/receipts/gate-pass-note");
@@ -132,9 +133,12 @@ const CreateGatepassForSupplier = () => {
     } catch (error) {
       console.error(error);
       // Display the error message directly in the toast
-      toast.error(error.response?.data?.message || "Failed to create gate pass.", {
-        duration: 10000,
-      });
+      showToast({
+        message: error.response?.data?.message || "Failed to create gate pass.",
+        duration:4500,
+        type:"error"
+      })
+      
     } finally {
       setButtonLoading(false);
     }

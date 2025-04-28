@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import useToast from "../../../../hooks/useToast";
 import { useNavigate } from "react-router-dom";
 import {
   TextField,
@@ -17,6 +18,7 @@ const root = import.meta.env.VITE_ROOT;
 
 const CreateDispatchNote = () => {
   const navigate = useNavigate();
+  const showToast =  useToast()
   const [buttonLoading, setButtonLoading] = useState(false);
   const [adminId, setAdminId] = useState("");
   const [superAdmins, setSuperAdmins] = useState([]);
@@ -102,14 +104,21 @@ const CreateDispatchNote = () => {
         vehicleNumber: "",
         destination: "",
       })
-      toast.success("Dispatch note generated and sent to admin!", {
-        style: { padding: "20px" },
-        duration: 10000,
-      });
+      showToast({
+        message: "Dispatch note generated and sent to admin!",
+        duration: 5000,
+        type: "success",
+      })
+    
       
     } catch (error) {
       console.error("Error creating dispatch note:", error);
-      toast.error(error.response?.data?.message || "Failed to create dispatch note.");
+      showToast({
+        type: "error",
+        message: error.response?.data?.message || "Failed to create dispatch note.",
+        duration: 5000,
+      })
+      
     } finally {
       setButtonLoading(false);
     }

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import useToast from "../../../../hooks/useToast";
 import axios from "axios";
 import { Spinner } from "@radix-ui/themes";
 import toast from "react-hot-toast";
@@ -8,6 +9,7 @@ import { faClose } from "@fortawesome/free-solid-svg-icons";
 const root = import.meta.env.VITE_ROOT;
 
 const DeleteDialog = ({ isOpen, onClose, runFetch, id }) => {
+  const showToast = useToast()
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const deleteProduct = async (id) => {
@@ -27,18 +29,20 @@ const DeleteDialog = ({ isOpen, onClose, runFetch, id }) => {
       );
 
       setDeleteLoading(false);
-
-      toast.success("Deleted Successfully", {
-        style: {
-          padding: "30px",
-        },
-        duration: 5000,
-      });
+      showToast({
+        type:"success",
+        message:"Deleted Successfully"
+      })
+     
       onClose();
       runFetch();
     } catch (error) {
       setDeleteLoading(false);
-      toast.error(error.message);
+      showToast({
+        message: error.message || "An error occurred",
+        type:"error"
+      })
+      
       onClose();
     }
   };

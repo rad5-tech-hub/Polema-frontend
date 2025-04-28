@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
+import useToast from "../../../../hooks/useToast";
 import {
   Card,
   Button,
@@ -13,6 +14,7 @@ import {
 } from "@radix-ui/themes";
 
 const CreateRole = () => {
+  const showToast = useToast();
   const root = import.meta.env.VITE_ROOT;
   const [isLoading, setIsLoading] = useState(false);
   const [permissionsLoading, setPermissionsLoading] = useState(true);
@@ -112,12 +114,7 @@ const CreateRole = () => {
   //         Authorization: `Bearer ${token}`,
   //       },
   //     });
-  //     toast.success("Role created successfully", {
-  //       style: {
-  //         padding: "30px",
-  //       },
-  //       duration: 6500, // 6.5 seconds
-  //     });
+  //     
   //   } catch (err) {
   //     toast.error("Error creating role");
   //   }
@@ -155,17 +152,23 @@ const handleSubmit = async () => {
       },
     });
 
-    toast.success("Role created successfully", {
-      style: { padding: "30px" },
-      duration: 7500,
-    });
+    showToast({
+      message:"Role Created Successfully",
+      type: "success",
+      duration:5000
+    })
 
     // ✅ Clear form after success
     setRoleName("");
     setSelectedCheckboxes({});
     setSelectAll(false);
   } catch (err) {
-    toast.error("Error creating role");
+      showToast({
+      message:"Error creating role",
+      type: "error",
+      duration:5000
+    })
+    
   }
 
   setIsLoading(false);

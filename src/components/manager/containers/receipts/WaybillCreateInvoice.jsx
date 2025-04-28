@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import useToast from "../../../../hooks/useToast";
 import { LoaderIcon } from "react-hot-toast";
 import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "react-router-dom";
@@ -8,6 +9,7 @@ import axios from "axios";
 const root = import.meta.env.VITE_ROOT;
 
 const WaybillCreateInvoice = () => {
+  const showToast = useToast()
   const { id } = useParams();
   const [buttonLoading, setButtonLoading] = useState(false);
   const [ledgerEntries, setLedgerEntries] = useState(null); // Initialize as `null` for type safety.
@@ -156,20 +158,21 @@ const WaybillCreateInvoice = () => {
       setInvoiceNo("");
 
       setButtonLoading(false);
-      toast.success("Waybill created and sent successfully!", {
-        style: {
-          padding: "20px",
-        },
-        duration: 10000,
+      showToast({
+        message: "Waybill created and sent successfully!",
+        duration: 4000,
+        type: "success",
       });
+     
     } catch (error) {
       console.error("Error during request:", error);
       setButtonLoading(false);
-      toast.error("An error occurred, please try again later", {
-        style: {
-          padding: "20px",
-        },
-      });
+      showToast({
+        message:"An error occurred , please try again later",
+        duration:5000,
+        type:"error"
+      })
+      
     }
   };
 

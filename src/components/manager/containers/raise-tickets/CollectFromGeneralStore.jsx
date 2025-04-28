@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import useToast from "../../../../hooks/useToast";
 import {
   Heading,
   Separator,
@@ -17,6 +18,7 @@ import toast, { Toaster } from "react-hot-toast";
 const root = import.meta.env.VITE_ROOT;
 
 const CollectFromGeneralStore = () => {
+  const showToast =useToast()
   const [buttonLoading, setButtonLoading] = React.useState(false);
   const [toName, setToName] = useState("");
   const [comments, setComments] = useState("");
@@ -184,17 +186,22 @@ const CollectFromGeneralStore = () => {
       );
 
       // Success toast
-      toast.success("Form submitted and sent successfully!", {
-        duration: 10000,
-        style: {
-          padding: "20px",
-        },
-      });
+      showToast({
+        message: "Form submitted and sent successfully!",
+        type:"success",
+        duration:5000
+      })
+      
       // Optionally clear form here
       clearForm();
     } catch (e) {
       console.error(e);
-      toast.error("An error occurred while submitting the form.");
+      showToast({
+        type: "error",
+        message: "An error occurred while submitting the form.",,
+        duration:5000
+      });
+      
     } finally {
       // Reset button loading state
       setButtonLoading(false);

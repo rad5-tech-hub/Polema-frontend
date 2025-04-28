@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import useToast from "../../../../hooks/useToast";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquare, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
@@ -20,6 +21,7 @@ const root = import.meta.env.VITE_ROOT;
 
 const AllDispatchNote = () => {
   const navigate = useNavigate();
+  const showToast = useToast()
   const [dispatchNotes, setDispatchNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [failedSearch, setFailedSearch] = useState(false);
@@ -78,14 +80,23 @@ const AllDispatchNote = () => {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      showToast({
+        message:"Dispatch note sent to print successfully!",
+        type:"success",
+        duration:5000
+      })
 
-      toast.success("Dispatch note sent to print successfully!", {
-        style: { padding: "20px" },
-        duration: 10000,
-      });
+  
     } catch (error) {
       console.error("Error sending dispatch note to print:", error);
-      toast.error(error.response?.data?.message || "Failed to send dispatch note to print.");
+      showToast({
+        message:
+          error.response?.data?.message ||
+          "Failed to send dispatch note to print.",
+        type:"error",
+        duration:5000
+      });
+      
     } finally {
       setLoadingId(null);
     }

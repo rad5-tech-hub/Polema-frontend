@@ -39,15 +39,6 @@ const LoginContent = () => {
       }; 
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("adminData", JSON.stringify(adminData));
-
-        
-
-      // toast.success("Login Successful", {
-      //   style: {
-      //     padding: "30px",
-      //   },
-      //   duration: 6000,
-      // });
       navigate("/admin");
     } catch (error) {
       
