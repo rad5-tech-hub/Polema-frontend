@@ -655,6 +655,7 @@ const AllAdmins = () => {
                 <Table.ColumnHeaderCell>NAME</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell>EMAIL</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell>ROLE</Table.ColumnHeaderCell>
+                <Table.ColumnHeaderCell>SIGNATURE</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
               </Table.Row>
             </Table.Header>
@@ -683,6 +684,13 @@ const AllAdmins = () => {
                     </Table.RowHeaderCell>
                     <Table.Cell>{staff.email}</Table.Cell>
                     <Table.Cell>{getRoleNameById(staff.roleId)}</Table.Cell>
+                    <Table.Cell
+                      className={`${
+                        staff.signature ? "text-green-500" : "text-yellow-500"
+                      }`}
+                    >
+                      {staff.signature ? "Signed" : "Pending"}
+                    </Table.Cell>
                     <Table.Cell>
                       <DropdownMenu.Root>
                         <DropdownMenu.Trigger>

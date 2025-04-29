@@ -120,17 +120,20 @@ const GatepassReceipt = () => {
                     <img
                       src={isMobison ? mobisonLogo : polemaLogo}
                       alt={isMobison ? "mobison-logo" : "polema-logo"}
-                      className="h-fit"
+                      className="object-contain"
+                      style={{                        
+                        height: "100px",
+                      }}
                     />
                   </div>
 
                   {/* Header Title */}
                   <div className="text-center">
-                    <h1 className="text-[23px] sm:text-[32px] font-bold text-[#434343]">
+                    <h3 className="text-[23px] font-bold text-[#434343]">
                       {isMobison
                         ? "MAOBISON INTER-LINK ASSOCIATES LTD."
                         : "POLEMA INDUSTRIES LIMITED"}
-                    </h1>
+                    </h3>
                     <p className="text-[#919191] text-lg font-semibold w-fit mx-auto border-b-2 border-[#919191]">
                       GATE PASS NOTE
                     </p>
@@ -150,7 +153,7 @@ const GatepassReceipt = () => {
                 </div>
 
                 {/* Details Section */}
-                <div className="details mt-8 sm:mt-12 flex flex-col gap-4 sm:gap-[25px]">
+                <div className="details mt-8  flex flex-col gap-4 sm:gap-[25px]">
                   {[
                     ["Date", refractor(passDetails.createdAt) || "-"],
                     [
@@ -171,9 +174,11 @@ const GatepassReceipt = () => {
                       passDetails.transaction
                         ? `${
                             passDetails.transaction.porders?.name || "-"
-                          } / ${
-                            passDetails.transaction.invoice?.invoiceNumber ||
-                            "-"
+                          } / 
+                          ${
+                            passDetails.transaction.invoice?.invoiceNumber
+                              ? `000${passDetails.transaction.invoice.invoiceNumber}`
+                              : "-"
                           }`
                         : passDetails.rawMaterial?.name || "-",
                     ],
@@ -211,7 +216,7 @@ const GatepassReceipt = () => {
                   ))}
 
                   {/* Signatures Section */}
-                  <div className="signatures w-full flex flex-col sm:flex-row justify-between gap-8 sm:gap-4 mt-12 sm:mt-24">
+                  <div className="signatures w-full flex flex-col sm:flex-row justify-between gap-8 sm:gap-4 mt-5">
                     {/* Prepared By Signature */}
                     <div className="prepared-by flex flex-col gap-2 sm:gap-4 items-start">
                       {passDetails.preparedByRole?.admins?.[0]?.signature ? (
@@ -219,7 +224,11 @@ const GatepassReceipt = () => {
                           <img
                             src={passDetails.preparedByRole.admins[0].signature}
                             alt="Prepared By Signature"
-                            className="w-[150px] sm:w-[230px] h-auto"
+                            className="object-contain"
+                            style={{
+                              width: "50px",
+                              height: "50px",
+                            }}
                           />
                           <span>
                             {passDetails.preparedByRole?.admins?.[0]?.firstname}{" "}
@@ -235,13 +244,17 @@ const GatepassReceipt = () => {
                     </div>
 
                     {/* Approved By Signature */}
-                    <div className="approved-by flex flex-col gap-2 sm:gap-4 items-end">
+                    <div className="approved-by flex flex-col gap-2 items-end">
                       {passDetails.approvedByRole?.admins?.[0]?.signature ? (
                         <>
                           <img
                             src={passDetails.approvedByRole.admins[0].signature}
                             alt="Approved By Signature"
-                            className="w-[150px] sm:w-[230px] h-auto"
+                            className="object-contain"
+                            style={{
+                              width: "50px",
+                              height: "50px",
+                            }}
                           />
                           <span>
                             {passDetails.approvedByRole?.admins?.[0]?.firstname}{" "}

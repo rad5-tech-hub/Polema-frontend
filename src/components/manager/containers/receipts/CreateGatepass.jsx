@@ -71,7 +71,7 @@ const CreateGatepass = () => {
       });
     }
     try {
-      const response = await axios.get(`${root}/admin/all-admin`, {
+      const response = await axios.get(`${root}/admin/all-staff`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -244,7 +244,7 @@ const CreateGatepass = () => {
                   return (
                     <Select.Item
                       value={admin.role?.id || " "}
-                    >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
+                    >{`${admin.firstname} ${admin.lastname}`} ({admin.role?.name})</Select.Item>
                   );
                 })}
               </Select.Content>
