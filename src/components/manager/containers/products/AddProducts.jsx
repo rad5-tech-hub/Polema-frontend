@@ -161,7 +161,7 @@ const AddProducts = () => {
               ? "Product Created Successfully"
               : "Raw Material Created Successfully",
           type: "success",
-          duration: 500,
+          duration: 4000,
         });
       }, 2000);
 
