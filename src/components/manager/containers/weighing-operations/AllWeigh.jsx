@@ -18,7 +18,7 @@ import {
 } from "@radix-ui/themes";
 import axios from "axios";
 import _ from "lodash";
-
+import useToast from "../../../../hooks/useToast";
 const root = import.meta.env.VITE_ROOT;
 
 const WeighDetailsDialog = ({ isOpen, onClose, selectedWeigh }) => {
@@ -71,7 +71,8 @@ const WeighDetailsDialog = ({ isOpen, onClose, selectedWeigh }) => {
                   : "-"}
               </Text>
               <Text as="p">
-                <strong>Quantity:</strong> {selectedWeigh.transactions?.quantity || 0}
+                <strong>Quantity:</strong>{" "}
+                {selectedWeigh.transactions?.quantity || 0}
               </Text>
               {selectedWeigh.gross && (
                 <Text as="p">
@@ -95,20 +96,25 @@ const WeighDetailsDialog = ({ isOpen, onClose, selectedWeigh }) => {
               )}
               {selectedWeigh.vehicleNo && (
                 <Text as="p">
-                  <strong>Vehicle Number:</strong> {selectedWeigh.vehicleNo || "-"}
+                  <strong>Vehicle Number:</strong>{" "}
+                  {selectedWeigh.vehicleNo || "-"}
                 </Text>
               )}
               <div className="flex items-end justify-end">
                 <div>
                   {selectedWeigh.signInSupervisor && (
                     <Text as="p">
-                      <strong className="pe-2">{selectedWeigh.signInSupervisor}:</strong>{" "}
+                      <strong className="pe-2">
+                        {selectedWeigh.signInSupervisor}:
+                      </strong>{" "}
                       {selectedWeigh.signIn ? "Signed In" : "-"}
                     </Text>
                   )}
                   {selectedWeigh.signOutSupervisor && (
                     <Text as="p">
-                      <strong className="pe-2">{selectedWeigh.signOutSupervisor}:</strong>{" "}
+                      <strong className="pe-2">
+                        {selectedWeigh.signOutSupervisor}:
+                      </strong>{" "}
                       {selectedWeigh.signOut ? "Signed Out" : "-"}
                     </Text>
                   )}
@@ -121,7 +127,9 @@ const WeighDetailsDialog = ({ isOpen, onClose, selectedWeigh }) => {
                     }`}
                   >
                     <strong>Status:</strong>{" "}
-                    {selectedWeigh.status === "uncompleted" ? "Pending" : "Completed"}
+                    {selectedWeigh.status === "uncompleted"
+                      ? "Pending"
+                      : "Completed"}
                   </Text>
                 </div>
               </div>
@@ -139,6 +147,7 @@ const WeighDetailsDialog = ({ isOpen, onClose, selectedWeigh }) => {
 
 const AllWeigh = ({ onWeighAction }) => {
   const navigate = useNavigate();
+  const showToast = useToast();
   const [weighDetails, setWeighDetails] = useState([]);
   const [failedSearch, setFailedSearch] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
@@ -156,14 +165,15 @@ const AllWeigh = ({ onWeighAction }) => {
       ? "text-red-500 bg-red-100"
       : "text-green-500 bg-green-100";
 
-
   // Fetch weigh details based on filter
   const fetchWeighDetails = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("Please log in to continue", {
-        style: { background: "#fef2f2", color: "#b91c1c" },
+      showToast({
+        message: "Please log in to continue",
+        type: "error",
       });
+
       setIsFetching(false);
       return;
     }
@@ -183,7 +193,8 @@ const AllWeigh = ({ onWeighAction }) => {
             }),
           ]);
 
-        const completedCustomerWeighs = completedCustomerResponse.data.data || [];
+        const completedCustomerWeighs =
+          completedCustomerResponse.data.data || [];
         const uncompletedCustomerWeighs =
           uncompletedCustomerResponse.data.data || [];
 
@@ -249,7 +260,7 @@ const AllWeigh = ({ onWeighAction }) => {
       await sendToAdmin(selectedWeighId, selectedRoleId);
       setIsSendToAdminDialogOpen(false);
       setSelectedRoleId(null);
-      setIsDialogOpen(false)
+      setIsDialogOpen(false);
       setSelectedWeighId(null);
     }
   };
@@ -355,11 +366,15 @@ const AllWeigh = ({ onWeighAction }) => {
                         icon={faSquare}
                         className={`${checkStatus(item.status)} p-1 rounded`}
                         title={
-                          item.status === "uncompleted" ? "Uncompleted" : "Completed"
+                          item.status === "uncompleted"
+                            ? "Uncompleted"
+                            : "Completed"
                         }
                       />
                       <span className={`${checkStatus(item.status)} text-sm`}>
-                        {item.status === "uncompleted" ? "Pending" : "Completed"}
+                        {item.status === "uncompleted"
+                          ? "Pending"
+                          : "Completed"}
                       </span>
                     </div>
                     {item.status === "uncompleted" && (
@@ -408,7 +423,6 @@ const AllWeigh = ({ onWeighAction }) => {
         onClose={closeDialog}
         selectedWeigh={selectedWeigh}
       />
-
 
       {/* Pagination Controls */}
       {totalPages > 1 && (

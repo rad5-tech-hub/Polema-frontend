@@ -29,7 +29,11 @@ const showToast = useToast()
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      toast.error("Passwords do not match!");
+      showToast({
+        type: "error",
+        message:"Passwords do not mathc!"
+      })
+      
       return;
     }
 
@@ -55,7 +59,11 @@ const showToast = useToast()
       }, 6000);
     } catch (error) {
       console.log(error);
-      toast.error("Failed to update password, please try again.");
+      showToast({
+        message: "Failed to update password ,please try again",
+        type:"error"
+      })
+      
     } finally {
       setLoading(false);
     }

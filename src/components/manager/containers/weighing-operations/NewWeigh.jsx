@@ -79,7 +79,11 @@ const showToast = useToast()
   const fetchSavedWeigh = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("No token found. Please log in.");
+      showToast({
+        message:"No token found , Please log in",
+        type:"error"
+      })
+      
       return;
     }
 
@@ -120,17 +124,24 @@ const showToast = useToast()
       setSignatureWeighOut(ticket.signOut || "");
     } catch (error) {
       console.error("Fetch saved weigh error:", error);
-      toast.error("Failed to fetch saved weigh details", {
-        style: { padding: "20px" },
-        duration: 3000,
-      });
+      showToast({
+        message: "Failed to fetch saved weigh details",
+        type: "success",
+        duration:4000
+      })
+      
     }
   };
 
   const fetchIndividualWeigh = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("No token found. Please log in.");
+      showToast({
+        message: "No token found , Please log in",
+        type: "error",
+        duration:4000
+      })
+      
       return;
     }
 
@@ -170,10 +181,12 @@ const showToast = useToast()
       setSignatureWeighOut("");
     } catch (error) {
       console.error("Fetch weigh error:", error);
-      toast.error("Failed to fetch weigh details", {
-        style: { padding: "20px" },
-        duration: 3000,
-      });
+      showToast({
+        message: "Failed to fetch weigh details",
+        type: "error",
+        duration:5000
+      })
+    
     }
   };
 
@@ -299,10 +312,12 @@ const showToast = useToast()
       setImageURL(null);
       setIsImageUploading(false);
       URL.revokeObjectURL(previewUrl);
-      toast.error("Failed to upload image.", {
-        style: { padding: "20px" },
-        duration: 3000,
-      });
+      showToast({
+        message: "Failed to upload image",
+        type: "error",
+        duration:5000
+      })
+      
     }
   };
 
@@ -325,10 +340,12 @@ const showToast = useToast()
       validImageTypes.includes(file.type) ||
       /\.(jpe?g|png|gif|bmp|webp|svg|tiff?|heic)$/i.test(file.name);
     if (!isImage) {
-      toast.error("Please upload a valid image file", {
-        style: { padding: "20px" },
-        duration: 3000,
-      });
+      showToast({
+        message: "Please upload a valid image file",
+        type:"error",
+        duration:3000
+      })
+     
       return;
     }
 
@@ -352,10 +369,12 @@ const showToast = useToast()
     if (imageSrc) {
       setCapturedImage(imageSrc);
     } else {
-      toast.error("Failed to capture photo. Please ensure webcam access is granted.", {
-        style: { padding: "20px" },
-        duration: 3000,
-      });
+      showToast({
+        message: "Failed to capture photo. Please ensure webcam access is granted.",
+        type:"error",
+        duration:3000
+      })
+     
     }
   };
 
@@ -365,10 +384,12 @@ const showToast = useToast()
 
   const handleSaveCroppedImage = async () => {
     if (!capturedImage || !croppedAreaPixels) {
-      toast.error("No image to save", {
-        style: { padding: "20px" },
-        duration: 3000,
-      });
+      showToast({
+        message: "No image to save",
+        type: "error",
+        duration:3000
+      })
+    
       return;
     }
 
@@ -383,10 +404,12 @@ const showToast = useToast()
       setCroppedAreaPixels(null);
     } catch (error) {
       console.error("Save cropped image failed:", error);
-      toast.error("Failed to save cropped image", {
-        style: { padding: "20px" },
-        duration: 3000,
-      });
+      showToast({
+        type: "error",
+        message: "Failed to save cropped image",
+        duration:3000
+      })
+    
     }
   };
 
@@ -423,10 +446,12 @@ const showToast = useToast()
 
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("No token found. Please log in.", {
-        style: { padding: "20px" },
-        duration: 3000,
-      });
+      showToast({
+        message: "No token found , Please Log in",
+        type:"error",
+        duration:3000
+      })
+      
       setButtonLoadingSaving(false);
       return;
     }
@@ -464,15 +489,16 @@ const showToast = useToast()
       })
           } catch (error) {
       console.error("Save failed:", error);
-      toast.error(
-        error.response?.data?.error ||
-        error.response?.data?.message ||
-        "Failed to save draft",
-        {
-          style: { padding: "20px" },
-          duration: 2500,
-        }
-      );
+
+      showToast({
+        message:
+          error.response?.data?.error ||
+          error.response?.data?.message ||
+          "Failed to save draft",
+        type: "error",
+        
+      });
+      
     } finally {
       setButtonLoadingSaving(false);
     }
@@ -493,17 +519,23 @@ const showToast = useToast()
       !imageURL || 
       !bagNumber
     ) {
-      toast.error("Please fill all required fields", {
-        style: { padding: "20px" },
-        duration: 5000,
-      });
+      showToast({
+        message: "Please fill all required fields",
+        type: "error",
+        duration:4000
+      })
+      
       setButtonLoading(false);
       return;
     }
 
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("No token found. Please log in.");
+      showToast({
+        message: "No token found . Please log in",
+        type:"error"
+      })
+      
       setButtonLoading(false);
       return;
     }
@@ -516,10 +548,11 @@ const showToast = useToast()
     }
 
     if (!weighId) {
-      toast.error("Invalid weigh ID. Please try again.", {
-        style: { padding: "20px" },
-        duration: 3000,
+      showToast({
+        message: "Invalid weigh ID. Please try again.",
+        type:"error"
       });
+     
       setButtonLoadingSaving(false);
       return;
     }
@@ -551,15 +584,13 @@ const showToast = useToast()
       navigate("/admin/raise-ticket/authority-to-weigh");
     } catch (error) {
       console.error("Submission failed:", error);
-      toast.error(
-        error.response?.data?.error ||
+      showToast({
+        message: error.response?.data?.error ||
         error.response?.data?.message ||
-        "An error occurred",
-        {
-          style: { padding: "20px" },
-          duration: 2500,
-        }
-      );
+          "An error occurred",
+        type: "error",
+        duration:35000
+      })
       setButtonLoading(false);
     }
   };
@@ -577,10 +608,11 @@ const showToast = useToast()
   const handleWebcamError = (error) => {
     console.error("Webcam error:", error);
     setWebcamError(error.message || "Failed to access webcam");
-    toast.error("Webcam access denied or unavailable. Please check permissions.", {
-      style: { padding: "20px" },
-      duration: 3000,
+    showToast({
+      message: "Webcam access denied or unavailable. Please check permissions.",
+      type: "error",
     });
+ 
   };
 
   return (

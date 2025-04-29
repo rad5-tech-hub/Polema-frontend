@@ -33,11 +33,12 @@ const SignatureCanvas = ({ onSave }) => {
         duration: 4000,
       });
     } else {
-      toast.error("Please provide a signature first.", {
-        style: {
-          padding:"30px"
-        },duration:2000
-      });
+      showToast({
+        message: "Please provide a signature first",
+        type:"error",
+        duration:5000
+      })
+   
     }
   };
 
