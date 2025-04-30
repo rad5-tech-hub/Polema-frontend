@@ -152,28 +152,28 @@ const OfficialReceipt = () => {
           </div>
 
           {/* Details Section */}
-          <div className="details bg-white mt-8 rounded p-8 sm:p-16">
+          <div className="details bg-white mt-8 rounded p-6">
             {/* Logo, RC, and Company Info */}
             <div className="relative">
-              <h1 className="text-[25px] sm:text-[32px] font-bold text-[#434343] text-center">
+              <h5 className="text-[24px] font-bold text-[#434343] text-center">
                 POLEMA INDUSTRIES LIMITED
-              </h1>
+              </h5>
               {/* <div className="absolute right-[10%] text-[12px] sm:text-[16px] font-semibold italic">
                 RC 131127
               </div> */}
-              <p className="font-bold text-center text-sm sm:text-base">
+              <p className="font-semibold text-center text-sm">
                 Manufacturers & Exporters of Palm Kernel Oil, Palm Kernel Cakes,
                 and Drugs
               </p>
 
               {/* Logo and Addresses */}
-              <div className="flex items-center justify-center">
+              <div className="flex gap-4 items-center justify-center">
                 <img
                   src={polemaLogo}
                   alt="Polema-logo"
-                  className="w-[100px] sm:w-[150px]"
+                  className="h-[120px] object-contain"
                 />
-                <div className="text-sm sm:text-base flex items-center gap-4 px-4">
+                <div className="text-sm  flex items-center gap-3">
                   <div className="sm:w-1/2">
                     <b>FACTORY/OFFICE:</b>
                     <br /> Osisioma Industry Layout,
@@ -193,19 +193,19 @@ const OfficialReceipt = () => {
               </div>
 
               {/* Receipt Title */}
-              <h4 className="font-bold text-[20px] sm:text-[32px] text-[#919191] mt-4 border-b-2 border-[#D2D2D2] mx-auto w-fit">
+              <h4 className="font-semibold text-[18px] text-[#919191] mt-4 border-b-2 border-[#D2D2D2] mx-auto w-fit">
                 OFFICIAL RECEIPT
               </h4>
 
               {/* Receipt Number */}
-              <div className="receiptNo absolute top-[320px] sm:top-[355px] right-[10%] italic rotate-6 font-bold text-[24px] sm:text-[32px] text-[#D2D2D2]">
+              <div className="receiptNo absolute top-[320px] right-[10%] italic rotate-6 font-bold text-[24px] sm:text-[32px] text-[#D2D2D2]">
                 0818
               </div>
             </div>
 
             {/* Receipt Details */}
-            <div className="descriptions mt-8">
-              <div className="w-full details mt-8 sm:mt-12 flex flex-col gap-2 sm:gap-4">
+            <div className="descriptions">
+              <div className="w-full details mt-6 flex flex-col gap-2 sm:gap-4">
                 {[
                   ["Date", refractor(receiptDetails.createdAt)],
                   ["Received from", receiptDetails.cashier.name],
@@ -226,9 +226,9 @@ const OfficialReceipt = () => {
             </div>
 
             {/* Amount and Receiver's Signature */}
-            <div className="footerMoney mt-12 sm:mt-24 flex flex-col print:flex-col sm:flex-row justify-between items-center gap-8">
-              <div className="amount w-full sm:w-auto">
-                <button className="border-[1px] border-[#919191] text-[#919191] rounded-lg h-[44px] bg-[#F9F9F9] w-full sm:w-[191px] text-start px-4 print-hidden">
+            <div className="footerMoney mt-12 sm:mt-20 flex justify-between items-center gap-8">
+              <div className="amount ">
+                <button className="border-[1px] border-[#919191] text-[#919191] h-fit rounded-lg bg-[#F9F9F9] w-fit text-start px-4 py-3">
                   ₦ {formatMoney(receiptDetails.cashier.credit)}
                 </button>
               </div>

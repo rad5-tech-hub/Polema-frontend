@@ -21,84 +21,6 @@ import _ from "lodash";
 
 const root = import.meta.env.VITE_ROOT;
 
-const SendToAdminDialog = ({
-  isOpen,
-  onClose,
-  admins,
-  selectedRoleId,
-  setSelectedRoleId,
-  handleSendToAdminSubmit,
-  isSending,
-}) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50" onClick={(e) => { e.stopPropagation(); onClose(); }} />
-      <div className="relative bg-white rounded-lg shadow-lg max-w-md w-full p-6 m-4">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold">Send to Admin</h2>
-          <button
-            onClick={(e) => { e.stopPropagation(); onClose(); }}
-            className="text-white rounded-md px-2 py-0 text-xl bg-red-500 hover:bg-red-700 hover:text-white"
-            aria-label="Close dialog"
-          >
-            ×
-          </button>
-        </div>
-        <div className="space-y-4 max-h-[70vh] overflow-y-auto">
-          {admins.length === 0 ? (
-            <Text as="p" className="text-gray-500">
-              No admins available
-            </Text>
-          ) : (
-            <div className="space-y-3">
-              {admins.map((admin) => (
-                <Flex key={admin.id} align="center" gap="3" className="space-y-3">
-                  <input
-                    type='checkbox'
-                    name="admin"
-                    checked={selectedRoleId === admin.role?.id}
-                    onChange={() => setSelectedRoleId(admin.role?.id)}
-                    className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                  />
-                  <Text as="label" className="cursor-pointer">
-                    {admin.firstname} {admin.lastname} ({admin.role?.name})
-                  </Text>
-                </Flex>
-              ))}
-            </div>
-          )}
-          <Flex justify="end" gap="2" className="mt-4">
-            <Button
-              variant="soft"
-              onClick={(e) => { e.stopPropagation(); onClose(); }}
-              className="!bg-gray-100 hover:!bg-gray-200"
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="solid"
-              onClick={handleSendToAdminSubmit}
-              disabled={admins.length === 0 || !selectedRoleId || isSending}
-              className="!bg-blue-600 !text-white hover:!bg-blue-700 flex items-center gap-2"
-            >
-              {isSending ? (
-                <>
-                  <RadixSpinner className="w-5 h-5 text-white animate-spin" />
-                  Sending...
-                </>
-              ) : (
-                "Send"
-              )}
-            </Button>
-          </Flex>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const WeighDetailsDialog = ({ isOpen, onClose, selectedWeigh }) => {
   if (!isOpen) return null;
 
@@ -224,11 +146,8 @@ const AllWeigh = ({ onWeighAction }) => {
   const [filter, setFilter] = useState("all");
   const [selectedWeigh, setSelectedWeigh] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [admins, setAdmins] = useState([]);
-  const [isSendToAdminDialogOpen, setIsSendToAdminDialogOpen] = useState(false);
   const [selectedRoleId, setSelectedRoleId] = useState(null);
   const [selectedWeighId, setSelectedWeighId] = useState(null);
-  const [isSending, setIsSending] = useState(false);
   const itemsPerPage = 10;
 
   // Helper to determine status class
@@ -237,28 +156,6 @@ const AllWeigh = ({ onWeighAction }) => {
       ? "text-red-500 bg-red-100"
       : "text-green-500 bg-green-100";
 
-  // Fetch admins
-  const fetchAdmins = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error("Please log in to continue", {
-        style: { background: "#fef2f2", color: "#b91c1c" },
-      });
-      return;
-    }
-
-    try {
-      const response = await axios.get(`${root}/admin/all-staff`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setAdmins(response.data.staffList || []);
-    } catch (error) {
-      console.error("Fetch admins error:", error);
-      toast.error("Failed to fetch admins", {
-        style: { background: "#fef2f2", color: "#b91c1c" },
-      });
-    }
-  };
 
   // Fetch weigh details based on filter
   const fetchWeighDetails = async () => {
@@ -346,45 +243,6 @@ const AllWeigh = ({ onWeighAction }) => {
     }
   };
 
-  // Send to admin
-  const sendToAdmin = async (weighId, roleId) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error("Please log in to continue", {
-        style: { background: "#fef2f2", color: "#b91c1c" },
-      });
-      return;
-    }
-
-    if (!roleId) {
-      toast.error("Please select an admin", {
-        style: { background: "#fef2f2", color: "#b91c1c" },
-      });
-      return;
-    }
-
-    try {
-      setIsSending(true);
-      await axios.post(
-        `${root}/customer/send-supplier-weigh/${weighId}`,
-        { adminIds: [roleId] },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      toast.success("Weigh sent to selected admin", {
-        style: { background: "#ecfdf5", color: "#047857" },
-      });
-      await fetchWeighDetails();
-      onWeighAction?.();
-    } catch (error) {
-      console.error("Send to admin error:", error);
-      toast.error("Failed to send weigh to admin", {
-        style: { background: "#fef2f2", color: "#b91c1c" },
-      });
-    } finally {
-      setIsSending(false);
-    }
-  };
-
   // Handle send to admin dialog submit
   const handleSendToAdminSubmit = async () => {
     if (selectedWeighId && selectedRoleId) {
@@ -396,24 +254,8 @@ const AllWeigh = ({ onWeighAction }) => {
     }
   };
 
-  // Open send to admin dialog
-  const openSendToAdminDialog = (weighId) => {
-    setSelectedWeighId(weighId);
-    setIsSendToAdminDialogOpen(true);
-    setIsDialogOpen(false)
-  };
-
-  // Close send to admin dialog
-  const closeSendToAdminDialog = () => {
-    setIsSendToAdminDialogOpen(false);
-    setSelectedRoleId(null);
-    setSelectedWeighId(null);
-    setIsDialogOpen(false)
-  };
-
   // Fetch admins and weigh details on mount
   useEffect(() => {
-    fetchAdmins();
     setCurrentPage(1);
     fetchWeighDetails();
   }, [filter]);
@@ -520,8 +362,7 @@ const AllWeigh = ({ onWeighAction }) => {
                         {item.status === "uncompleted" ? "Pending" : "Completed"}
                       </span>
                     </div>
-                    {(item.status === "uncompleted" ||
-                      (item.status === "completed" && !item.customer)) && (
+                    {item.status === "uncompleted" && (
                       <DropdownMenu.Root>
                         <DropdownMenu.Trigger>
                           <Button
@@ -538,7 +379,7 @@ const AllWeigh = ({ onWeighAction }) => {
                           </Button>
                         </DropdownMenu.Trigger>
                         <DropdownMenu.Content>
-                          {item.status === "uncompleted" ? (
+                          {item.status === "uncompleted" && (
                             <DropdownMenu.Item
                               onSelect={(e) => {
                                 e.preventDefault();
@@ -548,15 +389,6 @@ const AllWeigh = ({ onWeighAction }) => {
                               }}
                             >
                               Complete Weigh
-                            </DropdownMenu.Item>
-                          ) : (
-                            <DropdownMenu.Item
-                              onSelect={(e) => {
-                                e.preventDefault();
-                                openSendToAdminDialog(item.id);
-                              }}
-                            >
-                              Send to Admin
                             </DropdownMenu.Item>
                           )}
                         </DropdownMenu.Content>
@@ -577,16 +409,6 @@ const AllWeigh = ({ onWeighAction }) => {
         selectedWeigh={selectedWeigh}
       />
 
-      {/* Send to Admin Dialog */}
-      <SendToAdminDialog
-        isOpen={isSendToAdminDialogOpen}
-        onClose={closeSendToAdminDialog}
-        admins={admins}
-        selectedRoleId={selectedRoleId}
-        setSelectedRoleId={setSelectedRoleId}
-        handleSendToAdminSubmit={handleSendToAdminSubmit}
-        isSending={isSending}
-      />
 
       {/* Pagination Controls */}
       {totalPages > 1 && (

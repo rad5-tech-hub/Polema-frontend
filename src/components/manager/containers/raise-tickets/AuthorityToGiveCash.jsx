@@ -144,6 +144,7 @@ const AuthorityToGiveCash = () => {
       setSelectedCustomer("");
       setSelectedProduct("");
       setComments("");
+      setAuthorityType('');
     };
 
     const body = {
@@ -205,9 +206,12 @@ const AuthorityToGiveCash = () => {
       setStaffName("");
       setItemName("");
       setComments("");
+      setAuthorityType('');
+      setDepartmentId('');
     };
 
     const body = {
+      staffName,
       amount: Number(staffAmount),
       item: itemName,
       creditOrDebit: authorityType,
@@ -296,7 +300,7 @@ const AuthorityToGiveCash = () => {
           <form onSubmit={handleCustomersSubmit} className="mt-6">
             <div className="flex w-full justify-between gap-8">
               <div className="w-full">
-                <Text size={"4"}>
+                <Text >
                   Customer Name <span className="text-red-500">*</span>
                 </Text>
                 <Select.Root
@@ -338,7 +342,7 @@ const AuthorityToGiveCash = () => {
               </div>
 
               <div className="w-full">
-                <Text size={"4"}>
+                <Text>
                   Select Product <span className="text-red-500">*</span>
                 </Text>
                 <Select.Root
@@ -387,9 +391,13 @@ const AuthorityToGiveCash = () => {
                   className="mt-3"
                   value={amount}
                   onChange={(e) => {
-                    const formattedAmount = formatWithCommas(e.target.value);
-                    setOriginalAmount(e.target.value);
-                    setAmount(formattedAmount);
+                    const rawValue = e.target.value.replace(/,/g, ''); // Remove commas
+                    if (rawValue === '') {
+                      setAmount(''); // Clear the input if the value is empty
+                    } else if (!isNaN(rawValue)) {
+                      const formattedValue = Number(rawValue).toLocaleString(); // Format with commas
+                      setAmount(formattedValue);
+                    }
                   }}
                   placeholder="Enter Amount in Naira (₦)"
                 />
@@ -429,7 +437,7 @@ const AuthorityToGiveCash = () => {
             </div>
 
             <Flex justify={"end"} className="mt-4">
-              <Button size={"2"} disabled={loading} type="submit">
+              <Button size={"3"} disabled={loading} type="submit" className="!bg-theme">  
                 {loading ? <Spinner /> : "Send"}
               </Button>
             </Flex>
@@ -467,15 +475,21 @@ const AuthorityToGiveCash = () => {
               <div className="w-full">
                 <Text>Price</Text>
                 <TextField.Root
-                  className="mt-2"
-                  value={staffAmount}
-                  placeholder="Enter Price"
-                  onChange={(e) => {
-                    setStaffAmount(e.target.value);
-                  }}
-                >
-                  <TextField.Slot>₦</TextField.Slot>
-                </TextField.Root>
+                className="mt-2"
+                value={staffAmount}
+                placeholder="Enter Price"
+                onChange={(e) => {
+                  const rawValue = e.target.value.replace(/,/g, ''); // Remove commas
+                  if (rawValue === '') {
+                    setStaffAmount(''); // Clear the input if the value is empty
+                  } else if (!isNaN(rawValue)) {
+                    const formattedValue = Number(rawValue).toLocaleString(); // Format with commas
+                    setStaffAmount(formattedValue);
+                  }
+                }}
+              >
+                <TextField.Slot>₦</TextField.Slot>
+              </TextField.Root>
               </div>
               <div className="w-full">
                 <Text>Select Department</Text>
@@ -501,7 +515,9 @@ const AuthorityToGiveCash = () => {
               </div>
               <div className="w-full">
                 <Text>Comments </Text>
-                <TextField.Root className="mt-2" placeholder="Enter Comments" />
+                <TextField.Root className="mt-2" value={comments} onChange={(e)=>{
+                  setComments(e.target.value);
+                }} placeholder="Enter Comments" />
               </div>
               <div className="w-full">
                 <Text>Send To</Text>
@@ -528,8 +544,8 @@ const AuthorityToGiveCash = () => {
               </div>
             </Grid>
 
-            <Flex justify={"end"} className="mt-4">
-              <Button size={"2"} disabled={othersLoading} type="submit">
+            <Flex justify={"end"} className="mt-5">
+              <Button size={"3"} disabled={othersLoading} type="submit" className="!bg-theme">
                 {othersLoading ? <Spinner /> : "Send"}
               </Button>
             </Flex>

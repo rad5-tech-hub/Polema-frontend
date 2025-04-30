@@ -19,7 +19,6 @@ const WaybillCreateInvoice = () => {
   const [bagNumber, setBagNumber] = useState("");
   const [carriedByWho, setCarriedByWho] = useState("");
   const [adminId, setAdminId] = useState("");
-  const [wayBillId, setWayBillId] = useState("");
   const [invoiceNo, setInvoiceNo] = useState("");
   const [address, setAddress] = useState("");
 

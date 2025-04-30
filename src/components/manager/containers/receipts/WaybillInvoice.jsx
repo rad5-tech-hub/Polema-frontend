@@ -305,11 +305,11 @@ const WaybillInvoice = () => {
                     </td>
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                       {`${formatMoney(row.quantity)}  ${row.unit} of ${
-                        row.product?.name || ""
+                        row.product?.name || "PKC"
                       }`}
                     </td>
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                      {row.order?.rate || ""}
+                      {formatMoney(row.order?.rate) || ""}
                     </td>
 
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
@@ -353,9 +353,21 @@ const WaybillInvoice = () => {
               <tbody>
                 <tr>
                   <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm">
-                    {/* <p>Name: John Doe</p>
-                <p className="mt-2">Sign: ___________</p>
-                <p className="mt-2">Date: 06-12-24</p> */}
+                      {billDetails?.preparedByRole?.admins?.[0]?.signature ? (
+                        <>
+                          <img
+                            src={billDetails.preparedByRole.admins[0].signature}
+                            alt="Checked by signature"
+                            className="object-contain mx-auto"
+                            style={{ height: "50px", width: "50px" }}
+                          />
+                          {billDetails?.preparedByRole?.admins?.[0]?.firstname} {billDetails?.preparedByRole?.admins?.[0]?.lastname}
+                        </>
+                      ) : (
+                        <>
+                          {billDetails?.preparedByRole?.admins?.[0]?.firstname} {billDetails?.preparedByRole?.admins?.[0]?.lastname}
+                        </>
+                      )}
                   </td>
                   <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm">
                     {/* <p>Name: Michael Smith</p>

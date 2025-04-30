@@ -70,7 +70,7 @@ const NewWeigh = () => {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [webcamError, setWebcamError] = useState(null);
   const [isImageUploading, setIsImageUploading] = useState(false);
-  const [authWeigh, setAuthWeigh] = useState("");
+  const [bagNumber, setBagNumber] = useState("");
 
   const fileInputRef = useRef(null);
   const webcamRef = useRef(null);
@@ -447,6 +447,7 @@ const NewWeigh = () => {
       body.extra = parseFloat(quantityNet) - initialQuantity;
     }
     if (imageURL) body.image = imageURL;
+    if (bagNumber) body.bags = parseInt(bagNumber, 10); // Add bagNumber to the body
 
     try {
       const endpoint = `/customer/save-weigh/${weighId}`;
@@ -484,7 +485,8 @@ const NewWeigh = () => {
       !tar ||
       !gross ||
       !quantityNet ||
-      !imageURL
+      !imageURL || 
+      !bagNumber
     ) {
       toast.error("Please fill all required fields", {
         style: { padding: "20px" },
@@ -525,6 +527,7 @@ const NewWeigh = () => {
       tar: parseFloat(tar),
       gross: parseFloat(gross),
       image: imageURL,
+      bags: bagNumber
     };
 
     try {
@@ -767,6 +770,16 @@ const NewWeigh = () => {
                 setQuantityNet((grossVal - tarVal).toFixed(4));
               }}
               disabled={isGrossDisabled}
+            />
+          </div>
+          <div className="w-full">
+            <Text>No. of Bags (Applicable only for PKC)</Text>
+            <TextField.Root
+              type="number"
+              className="mt-2"
+              value={bagNumber}
+              onChange={(e) => setBagNumber(e.target.value)}
+              placeholder="Input number of bags"              
             />
           </div>
           <div className="w-full">

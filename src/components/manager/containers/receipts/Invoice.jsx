@@ -271,7 +271,7 @@ const Invoice = () => {
                       {`${row.productName} ${row.credit > row.debit ? "returned" : ""}`}
                     </td>
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                      {row?.order?.rate || ""}
+                      {formatMoney(row?.order?.rate) || ""}
                     </td>
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                       {row.debit > row.credit
@@ -314,12 +314,14 @@ const Invoice = () => {
                   {/* PREPARED BY */}
                   <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm text-center">
                     {invoice?.role?.admins?.[0]?.signature ? (
-                      <img
+                      <><img
                         src={invoice.role.admins[0].signature}
                         alt="Prepared by signature"
                         className="object-contain mx-auto"
                         style={{ height: "50px", width: "50px" }}
                       />
+                      {invoice?.role?.admins?.[0]?.firstname} {invoice?.role?.admins?.[0]?.lastname}
+                      </>
                     ) : (
                       <>
                         {invoice?.role?.admins?.[0]?.firstname} {invoice?.role?.admins?.[0]?.lastname}
@@ -330,12 +332,14 @@ const Invoice = () => {
                   {/* DELIVERED BY */}
                   <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm">
                     {invoice?.role?.admins?.[0]?.signature ? (
-                      <img
+                      <><img
                         src={invoice.role.admins[0].signature}
                         alt="Prepared by signature"
                         className="object-contain mx-auto"
                         style={{ height: "50px", width: "50px" }}
                       />
+                      {invoice?.role?.admins?.[0]?.firstname} {invoice?.role?.admins?.[0]?.lastname}
+                    </>
                     ) : (
                       <>
                         {invoice?.role?.admins?.[0]?.firstname} {invoice?.role?.admins?.[0]?.lastname}
@@ -346,12 +350,15 @@ const Invoice = () => {
                   {/* CHECKED BY */}
                   <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm text-center">
                     {invoice?.approvedByRole?.admins?.[0]?.signature ? (
-                      <img
-                        src={invoice.approvedByRole.admins[0].signature}
-                        alt="Checked by signature"
-                        className="object-contain mx-auto"
-                        style={{ height: "50px", width: "50px" }}
-                      />
+                      <>
+                        <img
+                          src={invoice.approvedByRole.admins[0].signature}
+                          alt="Checked by signature"
+                          className="object-contain mx-auto"
+                          style={{ height: "50px", width: "50px" }}
+                        />
+                        {invoice?.approvedByRole?.admins?.[0]?.firstname} {invoice?.approvedByRole?.admins?.[0]?.lastname}
+                      </>
                     ) : (
                       <>
                         {invoice?.approvedByRole?.admins?.[0]?.firstname} {invoice?.approvedByRole?.admins?.[0]?.lastname}

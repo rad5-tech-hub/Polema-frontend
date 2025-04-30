@@ -151,6 +151,7 @@ const ViewAccountBook = () => {
             <Table.ColumnHeaderCell>RAW MATERIALS</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell className="text-green-500">CREDIT(₦)</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell className="text-red-500">DEBIT(₦)</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell >BALANCE</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
 
@@ -195,6 +196,9 @@ const ViewAccountBook = () => {
                 </Table.Cell>
                 <Table.Cell>
                   {formatMoney(details.credit > details.debit ? details.credit : "")}
+                </Table.Cell>
+                <Table.Cell>
+                  {formatMoney(details.debit > details.credit ? details.debit : "")}
                 </Table.Cell>
                 <Table.Cell>
                   {formatMoney(details.debit > details.credit ? details.debit : "")}

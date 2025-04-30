@@ -198,7 +198,7 @@ const SupplierPlaceOrder = () => {
             <div className="w-full">
               <Text className="font-bold">Supplier Name</Text>
               <Select
-                showSearch                
+                showSearch
                 placeholder="Select Supplier"
                 optionFilterProp="children"
                 onChange={(value) => setSelectedCustomerId(value)}
@@ -207,14 +207,14 @@ const SupplierPlaceOrder = () => {
                   customers.length === 0 || !!id ? "bg-gray-100 text-black font-bold" : ""
                 }`}
                 filterOption={(input, option) =>
-                  option.children.toLowerCase().includes(input.toLowerCase())
+                  option?.children?.toString().toLowerCase().includes(input.toLowerCase())
                 }
                 disabled={customers.length === 0 || !!id} // Disable if no customers or id exists
                 required
               >
                 {customers.map((customer) => (
                   <Option key={customer.id} value={customer.id}>
-                    {customer.firstname} {customer.lastname}
+                    {`${customer.firstname} ${customer.lastname}`}
                   </Option>
                 ))}
               </Select>

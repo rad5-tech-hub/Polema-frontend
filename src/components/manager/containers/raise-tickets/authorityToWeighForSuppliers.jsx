@@ -139,7 +139,7 @@ const NewAuthorityToWeigh = () => {
     setChiefAdminId("");
     setVehicleNumber("");
     setTransportedBy("");
-    setSelectedProductId(null);
+    setSelectedProductId('');
   };
 
   const handleSubmit = async (e) => {

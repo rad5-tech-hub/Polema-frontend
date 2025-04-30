@@ -95,12 +95,12 @@ const CreateDispatchNote = () => {
         throw new Error("Failed to retrieve dispatch ID.");
       }
 
-      // Send dispatch to admin
-      await axios.post(
-        `${root}/customer/send-vehicle/${dispatchId}`,
-        { adminIds: [adminId] },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      // // Send dispatch to admin
+      // await axios.post(
+      //   `${root}/customer/send-vehicle/${dispatchId}`,
+      //   { adminIds: [adminId] },
+      //   { headers: { Authorization: `Bearer ${token}` } }
+      // );
 
       setFormData({        
         driverName: "",
@@ -190,7 +190,7 @@ const CreateDispatchNote = () => {
               onChange={handleInputChange("destination")}
             />
           </Flex>
-          <Flex direction="column" gap="2">
+          {/* <Flex direction="column" gap="2">
             <Text as="label" size="2" weight="medium">
               Send To
             </Text>
@@ -210,7 +210,7 @@ const CreateDispatchNote = () => {
                 ))}
               </Select.Content>
             </Select.Root>
-          </Flex>
+          </Flex> */}
         </Grid>
         <Flex justify="end" className="mt-8">
           <Button
@@ -219,7 +219,7 @@ const CreateDispatchNote = () => {
             disabled={buttonLoading}
             className="!bg-theme cursor-pointer"
           >
-            {buttonLoading ? <Spinner size="2" /> : "Send"}
+            {buttonLoading ? <Spinner size="2" /> : "Create"}
           </Button>
         </Flex>
       </form>

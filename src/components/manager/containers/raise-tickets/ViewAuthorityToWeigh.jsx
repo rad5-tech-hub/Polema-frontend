@@ -27,6 +27,7 @@ const ViewAuthorityToWeigh = () => {
   const [supplierFailedSearch, setSupplierFailedSearch] = React.useState(false);
   const [isFetching, setIsFetching] = React.useState(false);
   const [hasFetched, setHasFetched] = React.useState(false);
+  const [decodedToken, setDecodedToken] = React.useState('');
 
   // Fetch all auth weigh details
   const fetchWeighDetails = async () => {
@@ -90,12 +91,36 @@ const ViewAuthorityToWeigh = () => {
   const customerRecords = weighDetails.filter((item) => item.supplierId === null);
   const supplierRecords = weighDetails.filter((item) => item.customerId === null);
 
+  const retrToken = localStorage.getItem("token");
+
   // Fetch weigh details on mount
   React.useEffect(() => {
     if (!hasFetched && !isFetching) {
       fetchWeighDetails();
     }
+  
+    const retrToken = localStorage.getItem("token");
+  
+    if (retrToken) {
+      try {
+        // Split the token to get the payload (second part of the JWT)
+        const payload = retrToken.split(".")[1];
+        // Decode the Base64 payload
+        const decodedPayload = JSON.parse(atob(payload));
+        // Check if roleName includes "weighbridge" (case-insensitive)
+        if (decodedPayload.roleName?.toLowerCase().includes("weighbridge")) {
+          setDecodedToken(decodedPayload.roleName);         
+        } else {
+         setDecodedToken('');
+        }
+      } catch (error) {
+        console.error("Failed to decode token:", error);
+      }
+    } else {
+      console.error("Token not found in localStorage");
+    }
   }, [hasFetched, isFetching]);
+
 
   return (
     <>
@@ -257,13 +282,22 @@ const ViewAuthorityToWeigh = () => {
                             </Button>
                           </DropdownMenu.Trigger>
                           <DropdownMenu.Content>
-                            <DropdownMenu.Item
+                          {decodedToken || (item.status === 'approved' && decodedToken) && (<DropdownMenu.Item
                               onClick={() =>
                                 navigate(`/admin/weighing-operations/new-weigh/${item.id}`)
                               }
                             >
                               New Weigh
-                            </DropdownMenu.Item>
+                            </DropdownMenu.Item>)}
+                            
+                            {!decodedToken || (item.status === 'completed' && !decodedToken) && (<DropdownMenu.Item
+                                onClick={() =>
+                                  navigate(`/admin/weighing-operations/raise-order/${item.id}`)
+                                }
+                              >
+                                Raise Order
+                              </DropdownMenu.Item>
+                            )}
                             {item.status === "approved" && (
                               <DropdownMenu.Item
                                 onClick={() =>
