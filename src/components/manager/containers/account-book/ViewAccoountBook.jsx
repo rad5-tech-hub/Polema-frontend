@@ -201,7 +201,7 @@ const ViewAccountBook = () => {
                   {formatMoney(details.debit > details.credit ? details.debit : "")}
                 </Table.Cell>
                 <Table.Cell>
-                  {formatMoney(details.debit > details.credit ? details.debit : "")}
+                  {formatMoney(details.balance || "")}
                 </Table.Cell>
               </Table.Row>
             ))
