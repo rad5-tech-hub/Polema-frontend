@@ -228,248 +228,246 @@ const CustomerPlaceOrder = () => {
       </Flex>
       <Separator className="my-4 w-full" />
       <form onSubmit={handleSubmit}>
-        <Flex direction="column" gap="4">
-          {/* Product and Customer */}
-          <Flex gap="4" className="w-full">
+        <Grid columns="2" gap="4" className="w-full">
+          {/* Product */}
+          <div className="w-full">
+            <Text as="label" size="2" weight="medium">
+              Product <span className="text-red-500">*</span>
+            </Text>
+            <AntSelect
+              showSearch
+              className="w-full mt-1"
+              placeholder="Select Product"
+              value={selectedProductId || undefined}
+              onChange={handleProductChange}
+              disabled={products.length === 0}
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                option.children.toLowerCase().includes(input.toLowerCase())
+              }
+            >
+              {products.map((product) => (
+                <AntSelect.Option key={product.id} value={product.id}>
+                  {product.name}
+                </AntSelect.Option>
+              ))}
+            </AntSelect>
+          </div>
+
+          {/* Customer Category */}
+          {getMatchingUnitFromId(selectedProductId).department?.name === "Crushing" && (
             <div className="w-full">
               <Text as="label" size="2" weight="medium">
-                Product <span className="text-red-500">*</span>
+                Customer Category <span className="text-red-500">*</span>
               </Text>
               <AntSelect
-                showSearch
                 className="w-full mt-1"
-                placeholder="Select Product"
-                value={selectedProductId || undefined}
-                onChange={handleProductChange}
-                disabled={products.length === 0}
-                optionFilterProp="children"
-                filterOption={(input, option) =>
-                  option.children.toLowerCase().includes(input.toLowerCase())
-                }
-              >
-                {products.map((product) => (
-                  <AntSelect.Option key={product.id} value={product.id}>
-                    {product.name}
-                  </AntSelect.Option>
-                ))}
-              </AntSelect>
-            </div>                       
-              {getMatchingUnitFromId(selectedProductId).department?.name === "Crushing" && (
-                <div className="w-full">  
-                  <Text as="label" size="2" weight="medium">
-                    Customer Category <span className="text-red-500">*</span>
-                  </Text>
-                  <AntSelect
-                    className="w-full mt-1"
-                    value={customerType}
-                    onChange={(value) => {
-                      setCustomerType(value);
-                      setSelectedCustomerId("");
-                      setWalkInFirstName("");
-                      setWalkInLastName("");
-                      setWalkInPhoneNumber("");
-                    }}
-                  >
-                    <AntSelect.Option value="regular">Regular</AntSelect.Option>
-                    <AntSelect.Option value="walkin">Walk In</AntSelect.Option>
-                  </AntSelect>
-                </div>
-              )}            
-          </Flex>
-
-          {/* Quantity and Unit */}
-          <Flex gap="4" className="w-full">
-            <div className="w-full">
-              <Text as="label" size="2" weight="medium">
-                {customerType !== 'walkin' ? 'Customer Name' : 'Walk In Details' }<span className="text-red-500">*</span>
-              </Text>
-              {getMatchingUnitFromId(selectedProductId).department?.name === "Crushing" &&
-              customerType === "walkin" ? (
-                <Flex direction="column" gap="2" className="mt-1 border p-4 rounded-md">
-                  <TextField.Root
-                    size="2"
-                    required
-                    placeholder="Enter First Name"
-                    value={walkInFirstName}
-                    onChange={(e) => setWalkInFirstName(e.target.value)}
-                  />
-                  <TextField.Root
-                    size="2"
-                    required
-                    placeholder="Enter Last Name"
-                    value={walkInLastName}
-                    onChange={(e) => setWalkInLastName(e.target.value)}
-                  />
-                  <TextField.Root
-                    size="2"
-                    required
-                    placeholder="Enter Phone Number"
-                    value={walkInPhoneNumber}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value === "" || /^[0-9]{0,15}$/.test(value)) {
-                        setWalkInPhoneNumber(value);
-                      }
-                    }}
-                  />
-                </Flex>
-              ) : (
-                <AntSelect
-                  showSearch
-                  className="w-full mt-1"
-                  placeholder="Select Customer"
-                  value={selectedCustomerId || undefined}
-                  onChange={setSelectedCustomerId}
-                  disabled={customers.length === 0}
-                  optionFilterProp="label"
-                  filterOption={(input, option) => {
-                    const customer = customers.find((c) => c.id === option.value);
-                    const fullName = `${customer.firstname} ${customer.lastname}`.toLowerCase();
-                    const phoneNumbers = customer.phoneNumber || [];
-                    return (
-                      fullName.includes(input.toLowerCase()) ||
-                      phoneNumbers.some((phone) => phone.includes(input))
-                    );
-                  }}
-                >
-                  {customers.map((customer) => (
-                    <AntSelect.Option
-                      key={customer.id}
-                      value={customer.id}
-                      label={`${customer.firstname} ${customer.lastname}`}
-                    >
-                      {customer.firstname} {customer.lastname} (
-                      {customer.phoneNumber?.join(", ") || "No phone"})
-                    </AntSelect.Option>
-                  ))}
-                </AntSelect>
-              )}
-            </div>
-            <div className="w-full">
-              <Text as="label" size="2" weight="medium">
-                Quantity <span className="text-red-500">*</span>
-              </Text>
-              <TextField.Root
-                size="2"
-                type="number"
-                className="mt-1 w-full"
-                required
-                placeholder="Input Quantity"
-                value={quantity}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === "" || (!isNaN(value) && Number(value) >= 0)) {
-                    setQuantity(value);
-                  }
+                value={customerType}
+                onChange={(value) => {
+                  setCustomerType(value);
+                  setSelectedCustomerId("");
+                  setWalkInFirstName("");
+                  setWalkInLastName("");
+                  setWalkInPhoneNumber("");
                 }}
-              />
+              >
+                <AntSelect.Option value="regular">Regular</AntSelect.Option>
+                <AntSelect.Option value="walkin">Walk In</AntSelect.Option>
+              </AntSelect>
             </div>
-           
-          </Flex>
+          )}
 
-          {/* Discount and Price */}
-          <Grid columns="2" gap="4" className="w-full">
-            <div className="w-full">
-              <Text as="label" size="2" weight="medium">
-                Product Unit
-              </Text>
-              <TextField.Root
-                כמו
-                size="2"
-                className="mt-1 w-full"
-                disabled
-                value={
-                  selectedProductId
-                    ? getMatchingUnitFromId(selectedProductId).price[0]?.unit || ""
-                    : ""
-                }
-                placeholder="Select Product First"
-              />
-            </div>
-            <div className="w-full">
-              <Text as="label" size="2" weight="medium">
-                Price Discount (Optional)
-              </Text>
-              {planAmount === "custom" ? (
+          {/* Customer Name or Walk-In Details */}
+          <div className="w-full">
+            <Text as="label" size="2" weight="medium">
+              {customerType !== "walkin" ? "Customer Name" : "Walk In Details"}
+              <span className="text-red-500">*</span>
+            </Text>
+            {getMatchingUnitFromId(selectedProductId).department?.name === "Crushing" &&
+            customerType === "walkin" ? (
+              <Flex direction="column" gap="2" className="mt-1 border p-4 rounded-md">
                 <TextField.Root
                   size="2"
-                  type="text"
-                  className="mt-1 w-full"
-                  placeholder="Enter custom discount"
-                  value={formatNumberWithCommas(planAmountValue)}
+                  required
+                  placeholder="Enter First Name"
+                  value={walkInFirstName}
+                  onChange={(e) => setWalkInFirstName(e.target.value)}
+                />
+                <TextField.Root
+                  size="2"
+                  required
+                  placeholder="Enter Last Name"
+                  value={walkInLastName}
+                  onChange={(e) => setWalkInLastName(e.target.value)}
+                />
+                <TextField.Root
+                  size="2"
+                  required
+                  placeholder="Enter Phone Number"
+                  value={walkInPhoneNumber}
                   onChange={(e) => {
-                    const rawValue = e.target.value.replace(/,/g, "");
-                    if (!isNaN(rawValue) && Number(rawValue) >= 0) {
-                      setPlanAmountValue(rawValue);
+                    const value = e.target.value;
+                    if (value === "" || /^[0-9]{0,15}$/.test(value)) {
+                      setWalkInPhoneNumber(value);
                     }
                   }}
                 />
-              ) : (
-                <AntSelect
-                  className="w-full mt-1"
-                  placeholder={
-                    selectedProductPlan.length === 0
-                      ? "Product selected has no discount"
-                      : "Select discount plan"
-                  }
-                  value={planAmount || undefined}
-                  onChange={(value) => {
-                    if (value === "custom") {
-                      setPlanAmount("custom");
-                    } else if (value === "none") {
-                      setPlanAmount("");
-                      setPlanAmountValue("");
-                    } else {
-                      setPlanAmount(value);
-                      setPlanAmountValue("");
-                    }
-                  }}
-                >
-                  {selectedProductPlan.map((plan) => (
-                    <AntSelect.Option key={plan.category} value={plan.amount}>
-                      {plan.category}
-                    </AntSelect.Option>
-                  ))}
-                  <AntSelect.Option value="custom">Custom</AntSelect.Option>
-                  <AntSelect.Option value="none">None</AntSelect.Option>
-                </AntSelect>
-              )}
-            </div>
-          </Grid>
+              </Flex>
+            ) : (
+              <AntSelect
+                showSearch
+                className="w-full mt-1"
+                placeholder="Select Customer"
+                value={selectedCustomerId || undefined}
+                onChange={setSelectedCustomerId}
+                disabled={customers.length === 0}
+                optionFilterProp="label"
+                filterOption={(input, option) => {
+                  const customer = customers.find((c) => c.id === option.value);
+                  const fullName = `${customer.firstname} ${customer.lastname}`.toLowerCase();
+                  const phoneNumbers = customer.phoneNumber || [];
+                  return (
+                    fullName.includes(input.toLowerCase()) ||
+                    phoneNumbers.some((phone) => phone.includes(input))
+                  );
+                }}
+              >
+                {customers.map((customer) => (
+                  <AntSelect.Option
+                    key={customer.id}
+                    value={customer.id}
+                    label={`${customer.firstname} ${customer.lastname}`}
+                  >
+                    {customer.firstname} {customer.lastname} (
+                    {customer.phoneNumber?.join(", ") || "No phone"})
+                  </AntSelect.Option>
+                ))}
+              </AntSelect>
+            )}
+          </div>
 
-          <Flex gap="4" columns="2" className="w-full">
-            <div className="w-full">
-              <Text as="label" size="2" weight="medium">
-                Product Price
-              </Text>
+          {/* Quantity */}
+          <div className="w-full">
+            <Text as="label" size="2" weight="medium">
+              Quantity <span className="text-red-500">*</span>
+            </Text>
+            <TextField.Root
+              size="2"
+              type="number"
+              className="mt-1 w-full"
+              required
+              placeholder="Input Quantity"
+              value={quantity}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === "" || (!isNaN(value) && Number(value) >= 0)) {
+                  setQuantity(value);
+                }
+              }}
+            />
+          </div>
+
+          {/* Product Unit */}
+          <div className="w-full">
+            <Text as="label" size="2" weight="medium">
+              Product Unit
+            </Text>
+            <TextField.Root
+              size="2"
+              className="mt-1 w-full"
+              disabled
+              value={
+                selectedProductId
+                  ? getMatchingUnitFromId(selectedProductId).price[0]?.unit || ""
+                  : ""
+              }
+              placeholder="Select Product First"
+            />
+          </div>
+
+          {/* Price Discount */}
+          <div className="w-full">
+            <Text as="label" size="2" weight="medium">
+              Price Discount (Optional)
+            </Text>
+            {planAmount === "custom" ? (
               <TextField.Root
                 size="2"
+                type="text"
                 className="mt-1 w-full"
-                placeholder="Select Product First"
-                value={formatNumberWithCommas(basePrice)}
-                onChange={handlePriceChange}
+                placeholder="Enter custom discount"
+                value={formatNumberWithCommas(planAmountValue)}
+                onChange={(e) => {
+                  const rawValue = e.target.value.replace(/,/g, "");
+                  if (!isNaN(rawValue) && Number(rawValue) >= 0) {
+                    setPlanAmountValue(rawValue);
+                  }
+                }}
               />
-            </div>
-            </Flex>
+            ) : (
+              <AntSelect
+                className="w-full mt-1"
+                placeholder={
+                  selectedProductPlan.length === 0
+                    ? "Product selected has no discount"
+                    : "Select discount plan"
+                }
+                value={planAmount || undefined}
+                onChange={(value) => {
+                  if (value === "custom") {
+                    setPlanAmount("custom");
+                  } else if (value === "none") {
+                    setPlanAmount("");
+                    setPlanAmountValue("");
+                  } else {
+                    setPlanAmount(value);
+                    setPlanAmountValue("");
+                  }
+                }}
+              >
+                {selectedProductPlan.map((plan) => (
+                  <AntSelect.Option key={plan.category} value={plan.amount}>
+                    {plan.category}
+                  </AntSelect.Option>
+                ))}
+                <AntSelect.Option value="custom">Custom</AntSelect.Option>
+                <AntSelect.Option value="none">None</AntSelect.Option>
+              </AntSelect>
+            )}
+          </div>
 
-          {/* Submit Button */}
-          <Flex gap="4" justify="end" className="mt-4">
-            <Button
-              size="3"
-              type="submit"
-              disabled={buttonLoading}
-              className="!bg-theme !text-white hover:!bg-theme flex items-center gap-2"
-            >
-              {buttonLoading ? (
-                <>
-                  <RadixSpinner className="w-5 h-5 text-white animate-spin" />
-                  Adding...
-                </>
-              ) : (
-                "Add"
-              )}
-            </Button>
-          </Flex>
+          {/* Product Price */}
+          <div className="w-full">
+            <Text as="label" size="2" weight="medium">
+              Product Price
+            </Text>
+            <TextField.Root
+              size="2"
+              className="mt-1 w-full"
+              placeholder="Select Product First"
+              value={formatNumberWithCommas(basePrice)}
+              onChange={handlePriceChange}
+            />
+          </div>
+        </Grid>
+
+        {/* Submit Button */}
+        <Flex justify="end" className="mt-8">
+          <Button
+            size="3"
+            type="submit"
+            disabled={buttonLoading}
+            className="!bg-theme !text-white hover:!bg-theme flex items-center gap-2"
+          >
+            {buttonLoading ? (
+              <>
+                <RadixSpinner className="w-5 h-5 text-white animate-spin" />
+                Adding...
+              </>
+            ) : (
+              "Add"
+            )}
+          </Button>
         </Flex>
       </form>
       <Toaster position="top-right" />
