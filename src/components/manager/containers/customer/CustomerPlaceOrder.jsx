@@ -12,6 +12,7 @@ import {
   Spinner as RadixSpinner,
 } from "@radix-ui/themes";
 import { Select as AntSelect } from "antd";
+import { useNavigate } from "react-router-dom";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -20,13 +21,17 @@ const CustomerPlaceOrder = () => {
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
-  const [customCustomerName, setCustomCustomerName] = useState("");
+  const [walkInFirstName, setWalkInFirstName] = useState("");
+  const [walkInLastName, setWalkInLastName] = useState("");
+  const [walkInPhoneNumber, setWalkInPhoneNumber] = useState("");
   const [selectedProductId, setSelectedProductId] = useState("");
   const [selectedProductPlan, setSelectedProductPlan] = useState([]);
   const [quantity, setQuantity] = useState("");
   const [buttonLoading, setButtonLoading] = useState(false);
   const [planAmount, setPlanAmount] = useState("");
   const [planAmountValue, setPlanAmountValue] = useState("");
+  const [customerType, setCustomerType] = useState("regular");
+  const navigate = useNavigate();
 
   // Function to fetch customers
   const fetchCustomers = async () => {
@@ -112,6 +117,20 @@ const CustomerPlaceOrder = () => {
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
+  // Handle product change
+  const handleProductChange = (value) => {
+    setSelectedProductId(value);
+    getMatchingPlansFromId(value);
+    setBasePrice(getMatchingUnitFromId(value).price[0]?.amount || "");
+    setSelectedCustomerId("");
+    setWalkInFirstName("");
+    setWalkInLastName("");
+    setWalkInPhoneNumber("");
+    setPlanAmount("");
+    setPlanAmountValue("");
+    setCustomerType("regular");
+  };
+
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -130,7 +149,14 @@ const CustomerPlaceOrder = () => {
     const product = getMatchingUnitFromId(selectedProductId);
     const isCrushing = product.department?.name === "Crushing";
 
-    if (!selectedProductId || (!isCrushing && !selectedCustomerId) || (isCrushing && !customCustomerName) || !quantity) {
+    if (
+      !selectedProductId ||
+      (!isCrushing && !selectedCustomerId) ||
+      (isCrushing && customerType === "regular" && !selectedCustomerId) ||
+      (isCrushing &&
+        customerType === "walkin" &&
+        (!walkInFirstName || !walkInLastName || !walkInPhoneNumber))
+    ) {
       toast.error("Please fill all required fields", {
         style: { background: "#fef2f2", color: "#b91c1c", padding: "16px" },
         duration: 5000,
@@ -140,7 +166,12 @@ const CustomerPlaceOrder = () => {
     }
 
     const body = {
-      ...(isCrushing ? { customerName: customCustomerName } : { customerId: selectedCustomerId }),
+      ...(isCrushing && customerType === "walkin"
+        ? {
+            customerName: `${walkInFirstName} ${walkInLastName}`.trim(),
+            phoneNumber: [walkInPhoneNumber],
+          }
+        : { customerId: selectedCustomerId }),
       productId: selectedProductId,
       quantity: Number(quantity),
       unit: product.price[0]?.unit || "",
@@ -161,13 +192,19 @@ const CustomerPlaceOrder = () => {
 
       // Reset form fields
       setSelectedCustomerId("");
-      setCustomCustomerName("");
+      setWalkInFirstName("");
+      setWalkInLastName("");
+      setWalkInPhoneNumber("");
       setSelectedProductId("");
       setSelectedProductPlan([]);
       setQuantity("");
       setBasePrice("");
       setPlanAmount("");
       setPlanAmountValue("");
+      setCustomerType("regular");
+      setTimeout(() => {
+        navigate('/admin/customers/order');
+      }, 2000);
     } catch (error) {
       console.error("Submit error:", error);
       toast.error(error.response?.data?.message || "An error occurred, try again", {
@@ -186,7 +223,9 @@ const CustomerPlaceOrder = () => {
 
   return (
     <>
-      <Heading size="6">Place Order</Heading>
+      <Flex className="mb-4">
+        <Heading size="6">Place Order</Heading>
+      </Flex>
       <Separator className="my-4 w-full" />
       <form onSubmit={handleSubmit}>
         <Flex direction="column" gap="4">
@@ -201,15 +240,7 @@ const CustomerPlaceOrder = () => {
                 className="w-full mt-1"
                 placeholder="Select Product"
                 value={selectedProductId || undefined}
-                onChange={(value) => {
-                  setSelectedProductId(value);
-                  getMatchingPlansFromId(value);
-                  setBasePrice(getMatchingUnitFromId(value).price[0]?.amount || "");
-                  setSelectedCustomerId("");
-                  setCustomCustomerName("");
-                  setPlanAmount("");
-                  setPlanAmountValue("");
-                }}
+                onChange={handleProductChange}
                 disabled={products.length === 0}
                 optionFilterProp="children"
                 filterOption={(input, option) =>
@@ -222,20 +253,66 @@ const CustomerPlaceOrder = () => {
                   </AntSelect.Option>
                 ))}
               </AntSelect>
-            </div>
+            </div>                       
+              {getMatchingUnitFromId(selectedProductId).department?.name === "Crushing" && (
+                <div className="w-full">  
+                  <Text as="label" size="2" weight="medium">
+                    Customer Category <span className="text-red-500">*</span>
+                  </Text>
+                  <AntSelect
+                    className="w-full mt-1"
+                    value={customerType}
+                    onChange={(value) => {
+                      setCustomerType(value);
+                      setSelectedCustomerId("");
+                      setWalkInFirstName("");
+                      setWalkInLastName("");
+                      setWalkInPhoneNumber("");
+                    }}
+                  >
+                    <AntSelect.Option value="regular">Regular</AntSelect.Option>
+                    <AntSelect.Option value="walkin">Walk In</AntSelect.Option>
+                  </AntSelect>
+                </div>
+              )}            
+          </Flex>
+
+          {/* Quantity and Unit */}
+          <Flex gap="4" className="w-full">
             <div className="w-full">
               <Text as="label" size="2" weight="medium">
-                Customer Name <span className="text-red-500">*</span>
+                {customerType !== 'walkin' ? 'Customer Name' : 'Walk In Details' }<span className="text-red-500">*</span>
               </Text>
-              {getMatchingUnitFromId(selectedProductId).department?.name === "Crushing" ? (
-                <TextField.Root
-                  size="2"
-                  className="mt-1 w-full"
-                  required
-                  placeholder="Enter Customer Name"
-                  value={customCustomerName}
-                  onChange={(e) => setCustomCustomerName(e.target.value)}
-                />
+              {getMatchingUnitFromId(selectedProductId).department?.name === "Crushing" &&
+              customerType === "walkin" ? (
+                <Flex direction="column" gap="2" className="mt-1 border p-4 rounded-md">
+                  <TextField.Root
+                    size="2"
+                    required
+                    placeholder="Enter First Name"
+                    value={walkInFirstName}
+                    onChange={(e) => setWalkInFirstName(e.target.value)}
+                  />
+                  <TextField.Root
+                    size="2"
+                    required
+                    placeholder="Enter Last Name"
+                    value={walkInLastName}
+                    onChange={(e) => setWalkInLastName(e.target.value)}
+                  />
+                  <TextField.Root
+                    size="2"
+                    required
+                    placeholder="Enter Phone Number"
+                    value={walkInPhoneNumber}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === "" || /^[0-9]{0,15}$/.test(value)) {
+                        setWalkInPhoneNumber(value);
+                      }
+                    }}
+                  />
+                </Flex>
               ) : (
                 <AntSelect
                   showSearch
@@ -245,9 +322,15 @@ const CustomerPlaceOrder = () => {
                   onChange={setSelectedCustomerId}
                   disabled={customers.length === 0}
                   optionFilterProp="label"
-                  filterOption={(input, option) =>
-                    option.label.toLowerCase().includes(input.toLowerCase())
-                  }
+                  filterOption={(input, option) => {
+                    const customer = customers.find((c) => c.id === option.value);
+                    const fullName = `${customer.firstname} ${customer.lastname}`.toLowerCase();
+                    const phoneNumbers = customer.phoneNumber || [];
+                    return (
+                      fullName.includes(input.toLowerCase()) ||
+                      phoneNumbers.some((phone) => phone.includes(input))
+                    );
+                  }}
                 >
                   {customers.map((customer) => (
                     <AntSelect.Option
@@ -255,16 +338,13 @@ const CustomerPlaceOrder = () => {
                       value={customer.id}
                       label={`${customer.firstname} ${customer.lastname}`}
                     >
-                      {customer.firstname} {customer.lastname}
+                      {customer.firstname} {customer.lastname} (
+                      {customer.phoneNumber?.join(", ") || "No phone"})
                     </AntSelect.Option>
                   ))}
                 </AntSelect>
               )}
             </div>
-          </Flex>
-
-          {/* Quantity and Unit */}
-          <Flex gap="4" className="w-full">
             <div className="w-full">
               <Text as="label" size="2" weight="medium">
                 Quantity <span className="text-red-500">*</span>
@@ -284,42 +364,46 @@ const CustomerPlaceOrder = () => {
                 }}
               />
             </div>
-            <div className="w-full">
-              <Text as="label" size="2" weight="medium">
-                Product Unit
-              </Text>
-              <TextField.Root
-                size="2"
-                className="mt-1 w-full"
-                disabled
-                value={
-                  selectedProductId ? getMatchingUnitFromId(selectedProductId).price[0]?.unit || "" : ""
-                }
-                placeholder="Select Product First"
-              />
-            </div>
+           
           </Flex>
 
           {/* Discount and Price */}
           <Grid columns="2" gap="4" className="w-full">
             <div className="w-full">
               <Text as="label" size="2" weight="medium">
+                Product Unit
+              </Text>
+              <TextField.Root
+                כמו
+                size="2"
+                className="mt-1 w-full"
+                disabled
+                value={
+                  selectedProductId
+                    ? getMatchingUnitFromId(selectedProductId).price[0]?.unit || ""
+                    : ""
+                }
+                placeholder="Select Product First"
+              />
+            </div>
+            <div className="w-full">
+              <Text as="label" size="2" weight="medium">
                 Price Discount (Optional)
               </Text>
               {planAmount === "custom" ? (
                 <TextField.Root
-                    size="2"
-                    type="text" // Use text to allow typing with commas
-                    className="mt-1 w-full"
-                    placeholder="Enter custom discount"
-                    value={formatNumberWithCommas(planAmountValue)} // Format the value with commas
-                    onChange={(e) => {
-                      const rawValue = e.target.value.replace(/,/g, ""); // Remove commas for raw input
-                      if (!isNaN(rawValue) && Number(rawValue) >= 0) {
-                        setPlanAmountValue(rawValue); // Update the raw numeric value
-                      }
-                    }}
-                  />
+                  size="2"
+                  type="text"
+                  className="mt-1 w-full"
+                  placeholder="Enter custom discount"
+                  value={formatNumberWithCommas(planAmountValue)}
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/,/g, "");
+                    if (!isNaN(rawValue) && Number(rawValue) >= 0) {
+                      setPlanAmountValue(rawValue);
+                    }
+                  }}
+                />
               ) : (
                 <AntSelect
                   className="w-full mt-1"
@@ -351,6 +435,9 @@ const CustomerPlaceOrder = () => {
                 </AntSelect>
               )}
             </div>
+          </Grid>
+
+          <Flex gap="4" columns="2" className="w-full">
             <div className="w-full">
               <Text as="label" size="2" weight="medium">
                 Product Price
@@ -363,10 +450,10 @@ const CustomerPlaceOrder = () => {
                 onChange={handlePriceChange}
               />
             </div>
-          </Grid>
+            </Flex>
 
           {/* Submit Button */}
-          <Flex gap="4" justify="end">
+          <Flex gap="4" justify="end" className="mt-4">
             <Button
               size="3"
               type="submit"

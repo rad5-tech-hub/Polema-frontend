@@ -63,12 +63,6 @@ const CreateDispatchNote = () => {
       return;
     }
 
-    if (!adminId) {
-      toast.error("Please select an admin to send to.", { style: { padding: "20px" }, duration: 10000 });
-      setButtonLoading(false);
-      return;
-    }
-
     if (!formData.driverName) {
       toast.error("Driver's name is required.", { style: { padding: "20px" }, duration: 10000 });
       setButtonLoading(false);

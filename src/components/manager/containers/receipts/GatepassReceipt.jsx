@@ -179,7 +179,7 @@ const GatepassReceipt = () => {
                             passDetails.transaction.invoice?.invoiceNumber
                               ? `000${passDetails.transaction.invoice.invoiceNumber}`
                               : "-"
-                          }`
+                          } / Quantity Loaded ${passDetails.transaction?.quantityloaded?.quantityLoaded}`
                         : passDetails.rawMaterial?.name || "-",
                     ],
                     [

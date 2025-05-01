@@ -8,7 +8,8 @@ import { Modal } from "antd";
 const root = import.meta.env.VITE_ROOT;
 
 const ViewAccountBook = () => {
-  const [accountBook, setAccountBook] = useState([]);
+  const [rawAccountBook, setRawAccountBook] = useState([]); // Store unfiltered data
+  const [accountBook, setAccountBook] = useState([]); // Filtered data for display
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,16 +17,40 @@ const ViewAccountBook = () => {
   const [department, setDepartments] = useState([]);
   const [accountRecepient, setAccountRecepient] = useState("customers");
   const [failedSearch, setFailedSearch] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility state
-  const [selectedRow, setSelectedRow] = useState(null); // Selected row data
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [bankDetails, setBankDetails] = useState([]);
+  const [selectedBank, setSelectedBank] = useState("all");
 
-  // Fetch Details of account book
+  // Fetch Bank Details
+  const fetchBankDetails = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("An error occurred, try logging in again");
+      return;
+    }
+    try {
+      const response = await axios.get(`${root}/admin/get-banks`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log("Fetched banks:", response.data.banks); // Debug log
+      setBankDetails(response.data.banks || []);
+    } catch (error) {
+      console.error("Error fetching banks:", error);
+      toast.error("Error: Error in getting bank details");
+    }
+  };
+
+  // Fetch Account Book Details
   const fetchAccountBookDetails = async () => {
+    setLoading(true);
+    setRawAccountBook([]);
     setAccountBook([]);
+    setFailedSearch(false);
     const retrToken = localStorage.getItem("token");
-
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
+      setLoading(false);
       return;
     }
 
@@ -39,15 +64,24 @@ const ViewAccountBook = () => {
     };
 
     try {
-      const response = await axios.get(
-        `${root}/customer/${changeURLByRecepient(accountRecepient)}`,
-        { headers: { Authorization: `Bearer ${retrToken}` } }
-      );
-      response.data.acct.length === 0
-        ? setFailedSearch(true)
-        : setAccountBook(response.data.acct);
+      const url = `${root}/customer/${changeURLByRecepient(accountRecepient)}`;
+      console.log("Fetching account book with URL:", url); // Debug log
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${retrToken}` },
+      });
+      console.log("Account book response:", response.data.acct); // Debug log
+      if (response.data.acct.length === 0) {
+        setFailedSearch(true);
+        setRawAccountBook([]);
+        setAccountBook([]);
+      } else {
+        setRawAccountBook(response.data.acct);
+        setAccountBook(response.data.acct); // Initially show all records
+        setFailedSearch(false);
+      }
+      setLoading(false);
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching account book:", error);
       setLoading(false);
       toast.error("An error occurred, try again later", {
         style: { padding: "20px" },
@@ -57,7 +91,7 @@ const ViewAccountBook = () => {
     }
   };
 
-  // Fetch Customer details from backend
+  // Fetch Customer details
   const fetchCustomers = async () => {
     const retrToken = localStorage.getItem("token");
     if (!retrToken) {
@@ -74,6 +108,7 @@ const ViewAccountBook = () => {
     }
   };
 
+  // Fetch Products
   const fetchProducts = async () => {
     const retrToken = localStorage.getItem("token");
     if (!retrToken) {
@@ -86,11 +121,12 @@ const ViewAccountBook = () => {
       });
       setProducts(response.data.length === 0 ? [] : response.data.products);
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching products:", error);
       toast.error(error.message);
     }
   };
 
+  // Fetch Departments
   const fetchDepartments = async () => {
     const retrToken = localStorage.getItem("token");
     if (!retrToken) {
@@ -103,7 +139,7 @@ const ViewAccountBook = () => {
       });
       setDepartments(response.data.departments);
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching departments:", error);
     }
   };
 
@@ -124,21 +160,64 @@ const ViewAccountBook = () => {
     setSelectedRow(null);
   };
 
+  // Handle bank selection
+  const handleBankChange = (value) => {
+    console.log("Selected bank:", value); // Debug log
+    setSelectedBank(value);
+  };
+
+  // Filter accountBook based on selectedBank
+  useEffect(() => {
+    if (selectedBank === "all") {
+      setAccountBook(rawAccountBook);
+      setFailedSearch(rawAccountBook.length === 0);
+    } else {
+      const filtered = rawAccountBook.filter(
+        (details) => details.bank?.name?.toString() === selectedBank
+      );
+      console.log("Filtered account book:", filtered); // Debug log
+      setAccountBook(filtered);
+      setFailedSearch(filtered.length === 0);
+    }
+  }, [selectedBank, rawAccountBook]);
+
   useEffect(() => {
     fetchCustomers();
     fetchProducts();
     fetchDepartments();
+    fetchBankDetails();
     fetchAccountBookDetails();
   }, []);
 
   useEffect(() => {
     fetchAccountBookDetails();
-  }, [accountRecepient]);
+  }, [accountRecepient]); // Only refetch on recipient change
 
   return (
     <>
-      <Flex justify={"between"}>
-        <Heading className="mb-4">Account Book</Heading>
+      <Flex justify="between" align="center" className="mb-4">
+        <Heading>Account Book</Heading>
+        <Select.Root
+          value={selectedBank}
+          onValueChange={handleBankChange}
+          size="2"
+        >
+          <Select.Trigger placeholder="Filter by Bank" />
+          <Select.Content>
+            <Select.Item value="all">All Banks</Select.Item>
+            {bankDetails.length === 0 ? (
+              <Select.Item value="no-banks" disabled>
+                No Banks Available
+              </Select.Item>
+            ) : (
+              bankDetails.map((bank) => (
+                <Select.Item key={bank.id} value={bank.name.toString()}>
+                  {bank.name}
+                </Select.Item>
+              ))
+            )}
+          </Select.Content>
+        </Select.Root>
       </Flex>
       <Table.Root variant="surface">
         <Table.Header>
@@ -151,15 +230,23 @@ const ViewAccountBook = () => {
             <Table.ColumnHeaderCell>RAW MATERIALS</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell className="text-green-500">CREDIT(₦)</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell className="text-red-500">DEBIT(₦)</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell >BALANCE</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>
+              {selectedBank === "all" ? "BALANCE" : "BANK BALANCE"}
+            </Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
 
         <Table.Body>
-          {accountBook.length === 0 ? (
+          {loading ? (
             <Table.Row>
-              <Table.Cell colSpan="8">
-                {failedSearch ? "No Records Found" : <Spinner />}
+              <Table.Cell colSpan="9">
+                <Spinner />
+              </Table.Cell>
+            </Table.Row>
+          ) : accountBook.length === 0 ? (
+            <Table.Row>
+              <Table.Cell colSpan="9">
+                {failedSearch ? "No Records Found" : "No Data Available"}
               </Table.Cell>
             </Table.Row>
           ) : (
@@ -167,8 +254,8 @@ const ViewAccountBook = () => {
               <Table.Row
                 key={details.id}
                 className="hover:bg-gray-600/10"
-                onClick={() => handleRowClick(details)} // Add click handler
-                style={{ cursor: "pointer" }} // Indicate clickable row
+                onClick={() => handleRowClick(details)}
+                style={{ cursor: "pointer" }}
               >
                 <Table.Cell>{refractor(details.createdAt)}</Table.Cell>
                 <Table.Cell>
@@ -201,7 +288,7 @@ const ViewAccountBook = () => {
                   {formatMoney(details.debit > details.credit ? details.debit : "")}
                 </Table.Cell>
                 <Table.Cell>
-                  {formatMoney(details.balance || "")}
+                  {formatMoney(selectedBank === "all" ? details.balance : details.bankBalance || "")}
                 </Table.Cell>
               </Table.Row>
             ))
@@ -217,21 +304,22 @@ const ViewAccountBook = () => {
         footer={null}
       >
         {selectedRow && (
-         <div>
-         <p style={{ padding: "8px 0" }}><strong>Date:</strong> {refractor(selectedRow.createdAt)}</p>
-         <p style={{ padding: "8px 0" }}><strong>Name:</strong> 
-           {selectedRow.other === null
-             ? selectedRow.credit > selectedRow.debit
-               ? `${selectedRow.theCustomer.firstname} ${selectedRow.theCustomer.lastname}`
-               : `${selectedRow.theSupplier.firstname} ${selectedRow.theSupplier.lastname}`
-             : selectedRow.other}
-         </p>
-         <p style={{ padding: "8px 0" }}><strong>Bank Name:</strong> {selectedRow.bank?.name || "No bank provided"}</p>
-         <p style={{ padding: "8px 0" }}><strong>Department:</strong> {matchDepartmentNameById(selectedRow.departmentId)}</p>
-         <p style={{ padding: "8px 0" }}><strong>Credit (₦):</strong> {formatMoney(selectedRow.credit > selectedRow.debit ? selectedRow.credit : 0)}</p>
-         <p style={{ padding: "8px 0" }}><strong>Debit (₦):</strong> {formatMoney(selectedRow.debit > selectedRow.credit ? selectedRow.debit : 0)}</p>
-         <p style={{ padding: "8px 0" }}><strong>Comment:</strong> {selectedRow.comments}</p>
-       </div>
+          <div>
+            <p style={{ padding: "8px 0" }}><strong>Date:</strong> {refractor(selectedRow.createdAt)}</p>
+            <p style={{ padding: "8px 0" }}><strong>Name:</strong>
+              {selectedRow.other === null
+                ? selectedRow.credit > selectedRow.debit
+                  ? `${selectedRow.theCustomer.firstname} ${selectedRow.theCustomer.lastname}`
+                  : `${selectedRow.theSupplier.firstname} ${selectedRow.theSupplier.lastname}`
+                : selectedRow.other}
+            </p>
+            <p style={{ padding: "8px 0" }}><strong>Bank Name:</strong> {selectedRow.bank?.name || "No bank provided"}</p>
+            <p style={{ padding: "8px 0" }}><strong>Department:</strong> {matchDepartmentNameById(selectedRow.departmentId)}</p>
+            <p style={{ padding: "8px 0" }}><strong>Credit (₦):</strong> {formatMoney(selectedRow.credit > selectedRow.debit ? selectedRow.credit : 0)}</p>
+            <p style={{ padding: "8px 0" }}><strong>Debit (₦):</strong> {formatMoney(selectedRow.debit > selectedRow.credit ? selectedRow.debit : 0)}</p>
+            <p style={{ padding: "8px 0" }}><strong>{selectedBank === "all" ? "Balance" : "Bank Balance"} (₦):</strong> {formatMoney(selectedBank === "all" ? selectedRow.balance : selectedRow.bankBalance || 0)}</p>
+            <p style={{ padding: "8px 0" }}><strong>Comment:</strong> {selectedRow.comments}</p>
+          </div>
         )}
       </Modal>
 
