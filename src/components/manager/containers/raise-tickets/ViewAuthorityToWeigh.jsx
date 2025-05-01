@@ -108,10 +108,13 @@ const ViewAuthorityToWeigh = () => {
         // Decode the Base64 payload
         const decodedPayload = JSON.parse(atob(payload));
         // Check if roleName includes "weighbridge" (case-insensitive)
-        if (decodedPayload.roleName?.toLowerCase().includes("weighbridge")) {
-          setDecodedToken(decodedPayload.roleName);         
+        if (
+          decodedPayload.roleName?.toLowerCase().includes("weighbridge") || 
+          decodedPayload.isAdmin
+        ) {
+          setDecodedToken(decodedPayload.roleName);
         } else {
-         setDecodedToken('');
+          setDecodedToken("");
         }
       } catch (error) {
         console.error("Failed to decode token:", error);
@@ -282,13 +285,15 @@ const ViewAuthorityToWeigh = () => {
                             </Button>
                           </DropdownMenu.Trigger>
                           <DropdownMenu.Content>
-                          {decodedToken || (item.status === 'approved' && decodedToken) && (<DropdownMenu.Item
+                          {decodedToken || (item.status === "approved" && decodedToken) ? (
+                            <DropdownMenu.Item
                               onClick={() =>
                                 navigate(`/admin/weighing-operations/new-weigh/${item.id}`)
                               }
                             >
                               New Weigh
-                            </DropdownMenu.Item>)}
+                            </DropdownMenu.Item>
+                          ) : null}
                             
                             {!decodedToken || (item.status === 'completed' && !decodedToken) && (<DropdownMenu.Item
                                 onClick={() =>
