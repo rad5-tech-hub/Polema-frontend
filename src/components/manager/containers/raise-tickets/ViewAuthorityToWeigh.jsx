@@ -180,23 +180,6 @@ const ViewAuthorityToWeigh = () => {
                           </DropdownMenu.Trigger>
                           <DropdownMenu.Content>
                             {/* 
-           Always show "View Approved" to everyone 
-          if status is "approved" or "completed"
-        */}
-                            {(item.status === "approved" ||
-                              item.status === "completed") && (
-                              <DropdownMenu.Item
-                                onClick={() =>
-                                  navigate(
-                                    `/admin/tickets/view-auth-to-weigh/${item.id}`
-                                  )
-                                }
-                              >
-                                View Approved
-                              </DropdownMenu.Item>
-                            )}
-
-                            {/* 
            Show "New Weigh" ONLY if:
           - status is "approved"
           - user is either isAdmin and Weighbridge
