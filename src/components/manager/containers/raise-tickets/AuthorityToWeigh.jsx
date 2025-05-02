@@ -134,6 +134,7 @@ const AuthorityToWeigh = () => {
       setDriverName("");
       setChiefAdminId("")
       setVehicleNumber("");
+      
     };
 
     const body = {
