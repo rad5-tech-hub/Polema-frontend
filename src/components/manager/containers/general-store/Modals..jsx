@@ -1,10 +1,12 @@
 import React from "react";
+import useToast from "../../../../hooks/useToast";
 import { Text, TextField } from "@radix-ui/themes";
 import axios from "axios";
 const root = import.meta.env.VITE_ROOT;
 import toast, { Toaster, LoaderIcon } from "react-hot-toast";
 
 const AddModal = ({ isOpen, onClose, item, runFetch }) => {
+  const showToast = useToast()
   if (!isOpen) return null;
   const [addQuantity, setAddQuantity] = React.useState("");
   const [butonLoading, setButtonLoading] = React.useState(false);
@@ -32,11 +34,12 @@ const AddModal = ({ isOpen, onClose, item, runFetch }) => {
         }
       );
       setButtonLoading(false);
-      toast.success("Added successfully", {
-        style: {
-          padding: "20px",
-        },
-      });
+      showToast({
+        message:"Added Successfully",
+        duration: 4000,
+        type:"success"
+      })
+    
       setTimeout(() => {
         onClose();
       }, 2000);
@@ -118,7 +121,7 @@ const AddModal = ({ isOpen, onClose, item, runFetch }) => {
 
 const EditModal = ({ isOpen, onClose, item, runFetch }) => {
   if (!isOpen) return null;
-
+const showToast = useToast();
   const [buttonLoading, setButtonLoading] = React.useState(false);
   // State management for form details
   const [shelfName, setShelfName] = React.useState(item.name);
@@ -149,7 +152,12 @@ const EditModal = ({ isOpen, onClose, item, runFetch }) => {
           },
         }
       );
-      toast.success("Shelf details updated");
+      showToast({
+        message: "Shelf Details Updated",
+        type:"success",
+        duration:4000
+      })
+      
       setButtonLoading(false);
       setTimeout(() => {
         onClose();
@@ -230,6 +238,7 @@ const EditModal = ({ isOpen, onClose, item, runFetch }) => {
 
 const RemoveModal = ({ isOpen, onClose, item, runFetch }) => {
   if (!isOpen) return null;
+  const showToast = useToast()
 
   const [buttonLoading, setButtonLoading] = React.useState(false);
   const [quantity, setQuantity] = React.useState("");
@@ -256,7 +265,11 @@ const RemoveModal = ({ isOpen, onClose, item, runFetch }) => {
         }
       );
       setButtonLoading(false);
-      toast.success("Removed Succesfully");
+      showToast({
+        message: "Removed Successfully",
+        tupe:"success",
+        duration:4000
+      })
       setTimeout(() => {
         onClose();
       }, 2000);

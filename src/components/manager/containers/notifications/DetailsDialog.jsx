@@ -5,9 +5,11 @@ import Image from "../../../../static/image/polema-logo.png";
 import * as Dialog from "@radix-ui/react-dialog";
 import _ from "lodash";
 import { Text } from "@radix-ui/themes";
+import useToast from "../../../../hooks/useToast";
 
 const DetailsDialog = ({ isOpen, selectedTicket, ticketDetails }) => {
   // State management for component UI
+  const showToast = useToast();
   const [rejectLoading, setRejectLoading] = useState(false);
   const [approveLoading, setApproveLoading] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
@@ -31,9 +33,12 @@ const DetailsDialog = ({ isOpen, selectedTicket, ticketDetails }) => {
           },
         }
       );
-      toast.success("Ticket Confimed", {
-        duration: 6500,
+      showToast({
+        message: "Ticket Confirmed",
+        type: "success",
+        duration: 6000,
       });
+
       setConfirmLoading(false);
     } catch (error) {
       console.log(error);

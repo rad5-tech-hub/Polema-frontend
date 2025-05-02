@@ -24,12 +24,13 @@ const LoginContent = () => {
     e.preventDefault();
     setLoading(true); // Show spinner
 
+
     try {
       const response = await axios.post(`${root}/admin/login`, {
         email: email,
         password: e.target[1].value,
       });
-        console.log(response.data);
+        
 
       const adminData = {
         firstname: response.data.admin.lastname,
@@ -38,15 +39,6 @@ const LoginContent = () => {
       }; 
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("adminData", JSON.stringify(adminData));
-
-        
-
-      // toast.success("Login Successful", {
-      //   style: {
-      //     padding: "30px",
-      //   },
-      //   duration: 6000,
-      // });
       navigate("/admin");
     } catch (error) {
       

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import useToast from "../../../../hooks/useToast";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
@@ -29,6 +30,7 @@ const getSupplierName = (supplier) =>
 // Main Component
 const NewAuthorityToWeigh = () => {
   // State Management
+  const showToast = useToast()
   const [suppliers, setSuppliers] = useState([]);
   const [selectedSupplierId, setSelectedSupplierId] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -193,23 +195,23 @@ const NewAuthorityToWeigh = () => {
         { adminIds: [chiefAdminId] },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      toast.success("Ticket successfully sent!", {
-        style: { background: "#ecfdf5", color: "#047857", padding: "16px" },
-        duration: 5000,
-      });
+      showToast({
+        message:"Ticket sent successfully",
+        type: "success",
+        duration:5000
+      })
+ 
       resetForm();
     } catch (error) {
       console.error("Submission error:", error);
-      toast.error(
-        error.response?.data?.message ||
+      showToast({
+        message:  error.response?.data?.message ||
           error.response?.data?.error ||
           "An error occurred. Please try again.",
-        {
-          style: { background: "#fef2f2", color: "#b91c1c", padding: "16px" },
-          duration: 5000,
-        }
-      );
+          type:"error",
+          duration:5000
+      })
+      
     } finally {
       setBtnLoading(false);
     }

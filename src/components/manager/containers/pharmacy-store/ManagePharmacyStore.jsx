@@ -19,8 +19,10 @@ import {
 import _ from "lodash";
 import { Modal, Button as AntButton } from "antd";
 const root = import.meta.env.VITE_ROOT;
+import useToast from "../../../../hooks/useToast";
 
 const ManagePharmacyStore = () => {
+  const showToast = useToast();
   const [storeAction, setStoreAction] = useState("add");
   const [suppliers, setSuppliers] = useState([]);
   const [storeItems, setStoreItems] = useState([]);
@@ -155,12 +157,12 @@ const ManagePharmacyStore = () => {
       );
       setLoading(false);
       resetForm();
-      toast.success(response.data.message, {
-        style: {
-          padding: "30px",
-        },
-        duration: 6000,
-      });
+      showToast({
+        message: response.data.message,
+        type: "success",
+        duration:5000
+      })
+      
     } catch (error) {
       console.log(error);
       setLoading(false);

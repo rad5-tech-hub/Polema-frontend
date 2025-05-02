@@ -1,4 +1,5 @@
 import React from "react";
+import useToast from "../../../../hooks/useToast";
 import { refractor } from "../../../date";
 import {
   Heading,
@@ -41,7 +42,7 @@ const usePagination = (data, itemsPerPage) => {
 
 const AuthorityToLoad = () => {
   const [viewPageOpen, setViewPageOpen] = React.useState(false);
-
+  const showToast = useToast();
   const [isLoading, setIsLoading] = React.useState(false);
   const [customers, setCustomers] = React.useState([]);
   const [customerId, setCustomerId] = React.useState("");
@@ -108,8 +109,11 @@ const AuthorityToLoad = () => {
         { adminId },
         { headers: { Authorization: `Bearer ${retrToken}` } }
       );
-
-      toast.success("Authority sent successfully!");
+      showToast({
+        type: "success",
+        message: "Authority sent successfully!",
+        duration:5000
+      });
 
       // Clear form fields after successful submission
       setVehicleNumber("");
@@ -119,7 +123,11 @@ const AuthorityToLoad = () => {
       setTicketId("");
     } catch (error) {
       console.error("Error during submission:", error);
-      toast.error("Submission failed. Please try again.");
+      showToast({
+        message: "Submission failed , please try again",
+        duration: 5000,
+        type: "error",
+      });
     } finally {
       setIsLoading(false);
     }

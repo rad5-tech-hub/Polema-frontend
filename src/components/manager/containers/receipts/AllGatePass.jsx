@@ -8,11 +8,12 @@ import toast, { Toaster } from "react-hot-toast";
 import _ from "lodash";
 import { refractor, refractorToTime } from "../../../date";
 import { usePagination } from "../../../../hooks/usePagination";
-
+import useToast from "../../../../hooks/useToast";
 const root = import.meta.env.VITE_ROOT;
 
 const AllGatePass = () => {
   const navigate = useNavigate();
+  const showToast = useToast();
   const [passDetails, setPassDetails] = useState([]);
   const [failedSearch, setFailedSearch] = useState(false);
   const [failedText, setFailedText] = useState("");
@@ -63,11 +64,21 @@ const AllGatePass = () => {
         {}, // Empty body if no data is required
         { headers: { Authorization: `Bearer ${token}` } } // Correct headers placement
       );
-
-      toast.success("Gate pass sent to print successfully!");
+      showToast({
+        message: "Gate pass sent to print successfully!",
+        duration: 5000,
+        type:"success"
+      })
+      
       console.log("Gate Pass Response:", response.data);
     } catch (error) {
       console.error("Error sending gate pass to print:", error);
+      showToast({
+        message:error.response?.data?.message || "Failed to send gate pass to print.",
+        duration: 5000,
+        type: "error",
+      });
+      
       toast.error(error.response?.data?.message || "Failed to send gate pass to print.");
     } finally {
       setLoadingId(null);

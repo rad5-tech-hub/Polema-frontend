@@ -16,11 +16,14 @@ import { faClose } from "@fortawesome/free-solid-svg-icons";
 import toast, { LoaderIcon, Toaster } from "react-hot-toast";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 
+import useToast from "../../../../hooks/useToast";
+
 const root = import.meta.env.VITE_ROOT;
 
 //Edit Dialog Box $//
 const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const showToast = useToast();
   const [changedFirstName, setChangedFirstName] = useState(id.firstname);
   const [changedLastName, setChangesLastName] = useState(id.lastname);
   const [changedPhone, setChangedPhone] = useState(id.phoneNumber);
@@ -41,7 +44,7 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
       lastname: changedLastName,
       address: changedAddress,
       ...(changedEmail && { email: changedEmail }),
-      phoneNumber: changedPhone,
+      phoneNumber: [changedPhone],
     };
 
     try {
@@ -56,10 +59,12 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
       );
       setDeleteLoading(false);
       onClose();
-      toast.success(response.data.message, {
+      showToast({
+        message: response.data.message,
+        type: "success",
         duration: 6500,
-        style: { padding: "30px" },
-      });
+      })
+      
       fetchCustomers();
     } catch (error) {
       console.log(error);

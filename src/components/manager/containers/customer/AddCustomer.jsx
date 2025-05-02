@@ -13,10 +13,11 @@ import {
 } from "@radix-ui/themes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClose, faPlus } from "@fortawesome/free-solid-svg-icons";
-
+import useToast from "../../../../hooks/useToast";
 const root = import.meta.env.VITE_ROOT;
 
 const AddCustomer = () => {
+  const showToast = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [imageURL, setImageURL] = useState("");
   const [firstname, setFirstName] = useState("");
@@ -78,7 +79,12 @@ const AddCustomer = () => {
         }
       );
       setIsLoading(false);
-      toast.success(response.data.message, { duration: 6500 });
+      showToast({
+        message: response.data.message,
+        type: "success",
+        duration: 6500, 
+      })
+      
       resetForm();
     } catch (error) {
       console.error(error);

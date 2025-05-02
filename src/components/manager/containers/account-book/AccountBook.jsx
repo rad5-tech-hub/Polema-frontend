@@ -16,10 +16,12 @@ import {
   Heading,
 } from "@radix-ui/themes";
 import axios from "axios";
+import useToast from "../../../../hooks/useToast";
 const root = import.meta.env.VITE_ROOT;
 
 const AccountBook = () => {
   const navigate = useNavigate();
+  
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
@@ -41,6 +43,8 @@ const AccountBook = () => {
 
   // Check if dialog is open
   const [dialogOpen, setDialogOpen] = useState(true);
+
+  const showToast = useToast();
 
   // Function to reset form
   const resetForm = () => {
@@ -204,11 +208,10 @@ const AccountBook = () => {
         submissionData,
         { headers: { Authorization: `Bearer ${retrToken}` } }
       );
-      toast.success(response.data.message, {
-        style: {
-          padding: "20px",
-        },
-        duration: 5500,
+      showToast({
+        message: response.data.message,
+        type: "success",
+        duration: 5000,
       });
       resetForm();
     } catch (error) {

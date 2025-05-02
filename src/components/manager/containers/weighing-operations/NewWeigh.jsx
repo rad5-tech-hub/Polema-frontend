@@ -17,6 +17,7 @@ import {
 } from "@radix-ui/themes";
 import { ArrowLeftIcon, UploadIcon, CameraIcon } from "@radix-ui/react-icons";
 import { formatMoney } from "../../../date";
+import useToast from "../../../../hooks/useToast";
 import SignatureCanvas from "../../../signature-pad/SignatureCanvas";
 
 const root = import.meta.env.VITE_ROOT;
@@ -40,7 +41,7 @@ const NewWeigh = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-
+const showToast = useToast()
   const [fullName, setFullName] = useState("");
   const [isSupplier, setIsSupplier] = useState(false);
   const [vehicleNumber, setVehicleNumber] = useState("");
@@ -286,10 +287,12 @@ const NewWeigh = () => {
       });
       setImageURL(request.data.imageUrl);
       setIsImageUploading(false);
-      toast.success("Image Uploaded Successfully", {
-        style: { padding: "20px" },
-        duration: 3000,
-      });
+      showToast({
+        message:"Image Uploaded Successfully",
+        duration:4000,
+        type:"success"
+      })
+      
     } catch (error) {
       console.error("Upload failed:", error);
       setImagePreview(null);
@@ -454,9 +457,14 @@ const NewWeigh = () => {
       await axios.post(`${root}${endpoint}`, body, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success("Weigh Draft Saved Successfully", {
-        style: { padding: "20px" },
-      });
+      showToast({
+        message:"Weigh Draft Successfully",
+        type:"success",
+        duration:4000
+      })
+      setTimeout(() => {
+        navigate('/admin/weighing-operations');
+      }, 2000);
     } catch (error) {
       console.error("Save failed:", error);
       toast.error(
@@ -535,12 +543,19 @@ const NewWeigh = () => {
       await axios.post(`${root}${endpoint}`, body, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success("New Weigh Successful", {
-        style: { padding: "20px" },
-      });
+      showToast({
+        message:"New Weigh Successful",
+        type:"success",
+        duration:4000
+      })
+      
       setButtonLoading(false);
       resetForm();
-      navigate("/admin/raise-ticket/authority-to-weigh");
+
+      setTimeout(() => {
+        navigate('/admin/weighing-operations');
+      }, 2000);
+
     } catch (error) {
       console.error("Submission failed:", error);
       toast.error(

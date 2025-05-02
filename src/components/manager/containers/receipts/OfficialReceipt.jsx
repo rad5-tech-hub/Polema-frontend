@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { refractor } from "../../../date";
+import useToast from "../../../../hooks/useToast";
 import { Spinner } from "@radix-ui/themes";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -10,6 +11,7 @@ import toast, { Toaster } from "react-hot-toast";
 
 const OfficialReceipt = () => {
   const { id } = useParams();
+  const showToast = useToast();
 
   const [fetchComplete, setFetchComplete] = useState(false);
   const [loadingId, setLoadingId] = useState(null); 
@@ -75,14 +77,19 @@ const OfficialReceipt = () => {
           {},
           { headers: { Authorization: `Bearer ${token}` } }
         );
-  
-        toast.success("Offical Receipt sent to print successfully!", {
-          style: { padding: "20px" },
+        showToast({
+          message: "Offical Receipt sent to print successfully!",
           duration: 4000,
+          type:"success"
         });
+        
       } catch (error) {
         console.error("Error sending official reciept to print:", error);
-        toast.error(error.response?.data?.message || "Failed to send dispatch note to print.");
+        showToast({
+          message: error.response?.data?.message || "Failed to send dispatch note to print.",
+          type: "error",
+          duration: 4000,
+        })
       } finally {
         setLoadingId(null);
       }

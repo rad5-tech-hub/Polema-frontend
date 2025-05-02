@@ -14,12 +14,13 @@ import {
 import { Modal } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquare, faClose } from "@fortawesome/free-solid-svg-icons";
-
+import useToast from "../../../../hooks/useToast";
 const root = import.meta.env.VITE_ROOT;
 
 const GeneralRecordBook = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const showToast = useToast()
 
   const [details, setDetails] = useState(null);
   const [recordBookDetails, setRecordBookDetails] = useState([]);
@@ -61,6 +62,7 @@ const GeneralRecordBook = () => {
     const token = localStorage.getItem("token");
     if (!token) {
       toast.error("An error occurred, try logging in again", {
+     
         style: { padding: "20px" },
         duration: 500,
       });
@@ -97,7 +99,11 @@ const GeneralRecordBook = () => {
     setFilterLoading(true);
     try {
       await getRecordDetails(startDate, endDate);
-      toast.success("Records filtered successfully.");
+      showToast({
+        message: "Records filtered successfully.",
+        type:"success"
+    })
+     
     } catch (error) {
       console.error(error);
       toast.error("Failed to filter records.");

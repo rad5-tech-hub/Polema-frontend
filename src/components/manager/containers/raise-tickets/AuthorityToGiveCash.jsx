@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import useToast from "../../../../hooks/useToast"
 import {
   Tabs,
   Heading,
@@ -18,6 +19,7 @@ const root = import.meta.env.VITE_ROOT;
 const AuthorityToGiveCash = () => {
   const [customers, setCustomers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const showToast = useToast()
   const [products, setProducts] = useState([]);
   const [searchProductQuery, setSearchProductQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -175,16 +177,20 @@ const AuthorityToGiveCash = () => {
         }
       );
       resetForm();
-      toast.success("Ticket created and sent successfully!", {
-        style: {
-          padding: "20px",
-        },
-        duration: 5500,
-      });
+      showToast({
+        message: "Ticket created and sent successfully!",
+        type:"success",
+        duration:5000
+      })
+      
       setLoading(false);
     } catch (error) {
       console.error("Error during submission:", error);
-      toast.error("Failed to submit the form. Please try again.");
+        showToast({
+        message: "Failed to submit the form. Please try again.",
+        type:"error",
+        duration:5000
+      })
       setLoading(false);
     }
   };
@@ -246,15 +252,18 @@ const AuthorityToGiveCash = () => {
         }
       );
       resetForm();
-      toast.success("Ticket processed successfully!", {
-        style: {
-          padding: "20px",
-        },
-        duration: 5500,
-      });
+      showToast({
+        message:"Ticket Processed Successfully",
+        type:"success"
+      })
+      
     } catch (error) {
       console.error(error);
-      toast.error("An error occurred while processing the ticket.");
+      showToast({
+        message: "An error occurred while processing the ticket.",
+        type: "error",
+      });
+      
     } finally {
       setOthersLoading(false);
     }

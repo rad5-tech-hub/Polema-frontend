@@ -7,10 +7,12 @@ import {refractor,formatMoney} from "../../../date"
 import { Modal } from "antd";
 import Image from "../../../../static/image/polema-logo.png";
 import { Toaster, toast, LoaderIcon } from "react-hot-toast";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
   const [ticketDetails, setTicketDetails] = useState();
+  const showToast = useToast()
   const [rejectLoading, setRejectLoading] = useState(false);
   const [approveLoading, setApproveLoading] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
@@ -58,8 +60,6 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
         return "customer/view-gatepass";
       case "invoice":
         return "customer/invoice-pdf";
-      case "supplier-weigh":
-        return "/customer/view-weigh/";
       case "weigh":
         return "admin/view-auth-weigh";
         case "waybill":
@@ -141,9 +141,6 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
         case "weigh":
           setTicketDetails(response.data.ticket);
           break;
-        case "supplier-weigh":
-          setTicketDetails(response.data.data);
-          break;
         case "gatepass":
           setTicketDetails(response.data.gatePass);
           break;
@@ -177,10 +174,12 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
       setApproveLoading(false);
       setOpen(false);
       setTimeout(() => {
-        toast.success("Ticket Approved", {
-          style: { padding: "20px" },
-          duration: 3000,
-        });
+        showToast({
+          message:"Ticket Approved",
+          duration:4000,
+          type:"success"
+        })
+        
       }, 1000);
     } catch (error) {
       console.log(error);
@@ -203,7 +202,12 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
         }
       );
       setRejectLoading(false);
-      toast.success("Ticket Disapproved");
+      showToast({
+        message:"Ticket Disapproved",
+        duration:4000,
+        type:"success"
+      })
+      
     } catch (error) {
       console.log(error);
       setRejectLoading(false);
@@ -232,9 +236,12 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
           },
         }
       );
-      toast.success("Ticket Confimed", {
-        duration: 6500,
-      });
+      showToast({
+        message:"Ticket Confirmed",
+        duration:5000,
+        type:"success"
+      })
+      
       setConfirmLoading(false);
     } catch (error) {
       console.log(error);
@@ -431,93 +438,49 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                   {/* Weigh Ticket Example */}
                   {selectedTicket.type === "weigh" && (
                     <>
+                      {/* Driver */}
                       <div className="flex w-full justify-between items-center p-2">
-                        <Text className="text-[.9rem] font-black tracking-wide">
-                          DRIVER
-                        </Text>
-                        <p className="text-[.9rem]">{ticketDetails.driver}</p>
+                        <Text className="text-[.9rem] font-black tracking-wide">DRIVER</Text>
+                        <p className="text-[.9rem]">{ticketDetails.driver || "N/A"}</p>
                       </div>
-                      <div className="flex w-full justify-between items-center p-2">
-                        <Text className="text-[.9rem] font-black tracking-wide">
-                        {ticketDetails.supplierId ? 'SUPPLIER': 'CUSTOMER'} NAME
-                        </Text>
-                        <p className="text-[.9rem]">
-                          {ticketDetails.supplierId && ticketDetails.supplier
-                          ? `${ticketDetails.supplier.firstname} ${ticketDetails.supplier.lastname}`
-                          : ticketDetails.customerId && ticketDetails.transactions?.corder
-                          ? `${ticketDetails.transactions.corder.firstname} ${ticketDetails.transactions.corder.lastname}`
-                          : "Name not available"}
-                        </p>
-                      </div>
-                      {ticketDetails.transactions && <div className="flex w-full justify-between items-center p-2">
-                        <Text className="text-[.9rem] font-black tracking-wide">
-                          QUANTITY
-                        </Text>
-                        <p className="text-[.9rem]">
-                          {formatMoney(ticketDetails.transactions?.quantity) ||
-                            ""}{" "}
-                          {ticketDetails.transactions?.unit || ""}
-                        </p>
-                      </div>}
-                      {ticketDetails.transactions && <div className="flex w-full justify-between items-center p-2">
-                        <Text className="text-[.9rem] font-black tracking-wide">
-                          PRODUCT
-                        </Text>
-                        <p className="text-[.9rem]">
-                          {ticketDetails.transactions?.porders.name}
-                        </p>
-                      </div>}
-                      <div className="flex w-full justify-between items-center p-2">
-                        <Text className="text-[.9rem] font-black tracking-wide">
-                          VEHICLE NO
-                        </Text>
-                        <p className="text-[.9rem]">
-                          {ticketDetails.vehicleNo}
-                        </p>
-                      </div>
-                    </>
-                  )}
 
-                    {/* Weigh Ticket Example */}
-                  {selectedTicket.type === "supplier-weigh" && (
-                    <>                     
+                      {/* Customer or Supplier Name */}
                       <div className="flex w-full justify-between items-center p-2">
                         <Text className="text-[.9rem] font-black tracking-wide">
-                        {ticketDetails?.authToWeigh?.supplierId ? 'SUPPLIER': 'CUSTOMER'} NAME
+                          {ticketDetails.customerId ? "CUSTOMER NAME" : "SUPPLIER NAME"}
                         </Text>
                         <p className="text-[.9rem]">
-                          {ticketDetails?.authToWeigh?.supplierId && ticketDetails?.authToWeigh?.supplier
-                          ? `${ticketDetails?.authToWeigh?.supplier.firstname} ${ticketDetails?.authToWeigh?.supplier.lastname}`                         
-                          : "Name not available"}
-                        </p>
-                      </div>                      
-                      {ticketDetails?.authToWeigh?.rawMaterial && <div className="flex w-full justify-between items-center p-2">
-                        <Text className="text-[.9rem] font-black tracking-wide">
-                          PRODUCT
-                        </Text>
-                        <p className="text-[.9rem]">
-                          {ticketDetails.authToWeigh?.rawMaterial.name}
-                        </p>
-                      </div>}
-                      <div className="flex w-full justify-between items-center p-2">
-                        <Text className="text-[.9rem] font-black tracking-wide">
-                          VEHICLE NO
-                        </Text>
-                        <p className="text-[.9rem]">
-                          {ticketDetails.vehicleNo}
+                          {ticketDetails.customerId && ticketDetails.transactions?.corder
+                            ? `${ticketDetails.transactions.corder.firstname} ${ticketDetails.transactions.corder.lastname}`
+                            : ticketDetails?.authToWeigh?.supplierId && ticketDetails?.authToWeigh?.supplier
+                            ? `${ticketDetails.authToWeigh.supplier.firstname} ${ticketDetails.authToWeigh.supplier.lastname}`
+                            : "Name not available"}
                         </p>
                       </div>
+
+                      {/* Quantity */}
+                      {ticketDetails.transactions && (
+                        <div className="flex w-full justify-between items-center p-2">
+                          <Text className="text-[.9rem] font-black tracking-wide">QUANTITY</Text>
+                          <p className="text-[.9rem]">
+                            {formatMoney(ticketDetails.transactions?.quantity) || ""}{" "}
+                            {ticketDetails.transactions?.unit || ""}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Product */}
                       <div className="flex w-full justify-between items-center p-2">
-                        <Text className="text-[.9rem] font-black tracking-wide">
-                          SUPERVISIOR-SIGNIN
-                        </Text>
-                        <p className="text-[.9rem]">{ticketDetails.signInSupervisor}</p>
+                        <Text className="text-[.9rem] font-black tracking-wide">PRODUCT</Text>
+                        <p className="text-[.9rem]">
+                          {ticketDetails.transactions?.porders?.name || ticketDetails.rawMaterial?.name || "N/A"}
+                        </p>
                       </div>
+
+                      {/* Vehicle Number */}
                       <div className="flex w-full justify-between items-center p-2">
-                        <Text className="text-[.9rem] font-black tracking-wide">
-                          SUPERVISIOR-SIGNOUT
-                        </Text>
-                        <p className="text-[.9rem]">{ticketDetails.signOutSupervisor}</p>
+                        <Text className="text-[.9rem] font-black tracking-wide">VEHICLE NO</Text>
+                        <p className="text-[.9rem]">{ticketDetails.vehicleNo || "N/A"}</p>
                       </div>
                     </>
                   )}

@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast, { Toaster, LoaderIcon } from "react-hot-toast";
 import { Select } from "@radix-ui/themes";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 
 const CreateInvoice = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const showToast = useToast();
+
+  // State variables
   const [customerData, setCustomerData] = useState(null);
   const [superAdmins, setSuperAdmins] = useState([]);
   const [adminId, setAdminId] = useState("");
@@ -16,12 +21,11 @@ const CreateInvoice = () => {
   const [customer, setCustomer] = useState("");
   const [customerId, setCustomerId] = useState("");
 
+  // Fetch transaction details
   const TransDetails = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("An error occurred, try logging in again.", {
-        duration: 5000,
-      });
+      toast.error("An error occurred, try logging in again.", { duration: 5000 });
       return;
     }
 
@@ -32,17 +36,16 @@ const CreateInvoice = () => {
       const customerInfo = response.data.ledger?.customerId;
       setCustomerId(customerInfo);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("Failed to fetch customer details.");
     }
   };
 
+  // Fetch customer details
   const fetchDetails = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("An error occurred, try logging in again.", {
-        duration: 5000,
-      });
+      toast.error("An error occurred, try logging in again.", { duration: 5000 });
       return;
     }
 
@@ -55,17 +58,16 @@ const CreateInvoice = () => {
       setCustomer(`${customerInfo.firstname} ${customerInfo.lastname}`);
       setAddress(customerInfo.address || "loading");
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("Failed to fetch customer details.");
     }
   };
 
+  // Fetch admin list
   const fetchAdmins = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("An error occurred, try logging in again.", {
-        duration: 10000,
-      });
+      toast.error("An error occurred, try logging in again.", { duration: 10000 });
       return;
     }
 
@@ -75,14 +77,16 @@ const CreateInvoice = () => {
       });
       setSuperAdmins(response.data.staffList);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("Failed to fetch admins.");
     }
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setBtnLoading(true);
+
     const token = localStorage.getItem("token");
     if (!token) {
       toast.error("An error occurred, try logging in again.");
@@ -99,34 +103,43 @@ const CreateInvoice = () => {
 
       const invoiceId = response.data.invoice.id;
 
-      const secondResponse = await axios.post(
+      await axios.post(
         `${root}/customer/sendInvoice/${invoiceId}`,
-        {
-          adminIds: [adminId],
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { adminIds: [adminId] },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      toast.success("Invoice created and sent successfully.", {
-        duration: 10000,
-        style: {
-          padding: "20px",
-        },
+      showToast({
+        message: "Invoice created and sent successfully",
+        duration: 5000,
+        type: "success",
       });
+
+      // Clear form state
+      setAdminId("");
+      setAddress("");
+      setCustomer("");
+      setCustomerId("");
+
+      // Navigate to the provided route
+      setTimeout(() => {
+        navigate("/admin/receipts/invoice"); // Replace with the actual route
+      }, 2000);
+
       setBtnLoading(false);
     } catch (error) {
-      console.log(error);
-      toast.error("An error occurred, please try again", {
-        duration: 7000,
+      console.error(error);
+      showToast({
+        message: error.response?.data?.error || "An error occurred, try again",
+        type: "error",
+        duration: 5000,
       });
+
       setBtnLoading(false);
     }
   };
 
+  // Fetch data on component mount
   useEffect(() => {
     fetchAdmins();
     TransDetails();
@@ -168,23 +181,18 @@ const CreateInvoice = () => {
               size={"3"}
               required
               disabled={superAdmins.length === 0}
-              onValueChange={(val) => setAdminId(val)}
+              value={adminId} // Bind the value to adminId state
+              onValueChange={(val) => setAdminId(val)} // Update adminId on change
             >
-              <Select.Trigger
-                className="w-full mt-2"
-                placeholder="Select Admin"
-              />
+              <Select.Trigger className="w-full mt-2" placeholder="Select Admin" />
               <Select.Content position="popper">
                 {superAdmins.map((admin) => (
-                  <Select.Item
-                    key={admin.role?.id}
-                    value={admin.role?.id || " "}
-                  >
+                  <Select.Item key={admin.role?.id} value={admin.role?.id || " "}>
                     {`${admin.firstname} ${admin.lastname}`}
                   </Select.Item>
                 ))}
               </Select.Content>
-            </Select.Root>
+            </Select.Root> 
           </div>
         </div>
         <div className="btn flex justify-end max-sm:flex-col">

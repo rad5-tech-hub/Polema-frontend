@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import useToast from "../../../../hooks/useToast";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
@@ -7,6 +8,7 @@ import toast, { LoaderIcon } from "react-hot-toast";
 const root = import.meta.env.VITE_ROOT;
 
 const EditSuppliers = ({ isOpen, onClose, fetchSuppliers, id }) => {
+  const showToast = useToast()
   const [suspendLoading, setSuspendLoading] = useState(false);
   const [changedFirstName, setChangedFirstName] = useState(id.firstname);
   const [changedLastName, setChangedLastName] = useState(id.lastname);
@@ -37,14 +39,24 @@ const EditSuppliers = ({ isOpen, onClose, fetchSuppliers, id }) => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      toast.success("Supplier edited successfully", {
-        duration: 6500,
-        style: { padding: "30px" },
-      });
+      showToast({
+        message:"Supplier Details Edited Successfully",
+        duration:5000,
+        type:"success"
+      })
+      
       fetchSuppliers();
       onClose();
     } catch (error) {
-      toast.error(error.response?.data?.error || error.message);
+      showToast({
+        message:
+          error.response?.data?.error ||
+          error.message ||
+          "An error occurred while editing supplier details",
+        type:"error",
+        duration:5000,
+      });
+      
     } finally {
       setSuspendLoading(false);
     }

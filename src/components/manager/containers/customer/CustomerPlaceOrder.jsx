@@ -13,10 +13,11 @@ import {
 } from "@radix-ui/themes";
 import { Select as AntSelect } from "antd";
 import { useNavigate } from "react-router-dom";
-
+import useToast from "../../../../hooks/useToast";
 const root = import.meta.env.VITE_ROOT;
 
 const CustomerPlaceOrder = () => {
+  const showToast = useToast();
   const [basePrice, setBasePrice] = useState("");
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
@@ -185,10 +186,12 @@ const CustomerPlaceOrder = () => {
         body,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success(response.data.message, {
-        style: { background: "#ecfdf5", color: "#047857", padding: "16px" },
-        duration: 10000,
-      });
+      showToast({
+        message: response.data.message,
+        type: "success",
+        duration: 7000,
+      })
+     
 
       // Reset form fields
       setSelectedCustomerId("");
@@ -457,7 +460,7 @@ const CustomerPlaceOrder = () => {
             size="3"
             type="submit"
             disabled={buttonLoading}
-            className="!bg-theme !text-white hover:!bg-theme flex items-center gap-2"
+            className="!bg-theme !text-white hover:!bg-theme flex items-center gap-2 cursor-pointer"
           >
             {buttonLoading ? (
               <>

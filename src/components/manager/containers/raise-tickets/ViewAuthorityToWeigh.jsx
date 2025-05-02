@@ -21,21 +21,17 @@ const root = import.meta.env.VITE_ROOT;
 const ViewAuthorityToWeigh = () => {
   const navigate = useNavigate();
 
-  // State for ATW
   const [weighDetails, setWeighDetails] = React.useState([]);
   const [customerFailedSearch, setCustomerFailedSearch] = React.useState(false);
   const [supplierFailedSearch, setSupplierFailedSearch] = React.useState(false);
   const [isFetching, setIsFetching] = React.useState(false);
   const [hasFetched, setHasFetched] = React.useState(false);
-  const [decodedToken, setDecodedToken] = React.useState('');
+  const [decodedToken, setDecodedToken] = React.useState(null);
 
-  // Fetch all auth weigh details
   const fetchWeighDetails = async () => {
     const retrToken = localStorage.getItem("token");
-
     if (!retrToken) {
-      console.error("An error occurred. Try logging in again");
-      setIsFetching(false);
+      toast.error("Token missing. Please log in again.");
       return;
     }
 
@@ -44,26 +40,24 @@ const ViewAuthorityToWeigh = () => {
       const response = await axios.get(`${root}/admin/view-all-auth-weigh`, {
         headers: { Authorization: `Bearer ${retrToken}` },
       });
-      setWeighDetails(response.data.records || []);
-      // Check if customer or supplier records exist
-      const customerRecords = response.data.records.filter(
-        (item) => item.supplierId === null
+
+      const records = response.data.records || [];
+      setWeighDetails(records);
+      setCustomerFailedSearch(
+        records.filter((r) => r.supplierId === null).length === 0
       );
-      const supplierRecords = response.data.records.filter(
-        (item) => item.customerId === null
+      setSupplierFailedSearch(
+        records.filter((r) => r.customerId === null).length === 0
       );
-      setCustomerFailedSearch(customerRecords.length === 0);
-      setSupplierFailedSearch(supplierRecords.length === 0);
       setHasFetched(true);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("An error occurred fetching ATW");
     } finally {
       setIsFetching(false);
     }
   };
 
-  // Check status color
   const checkStatus = (arg) => {
     switch (arg) {
       case "pending":
@@ -77,7 +71,6 @@ const ViewAuthorityToWeigh = () => {
     }
   };
 
-  // Get client name from customer or supplier
   const getClientName = (item) => {
     if (item.customer) {
       return `${item.customer.firstname} ${item.customer.lastname}`;
@@ -87,80 +80,60 @@ const ViewAuthorityToWeigh = () => {
     return "Name not available";
   };
 
-  // Filter customer and supplier records
-  const customerRecords = weighDetails.filter((item) => item.supplierId === null);
-  const supplierRecords = weighDetails.filter((item) => item.customerId === null);
-
-  const retrToken = localStorage.getItem("token");
-
-  // Fetch weigh details on mount
+  const customerRecords = weighDetails.filter(
+    (item) => item.supplierId === null
+  );
+  const supplierRecords = weighDetails.filter(
+    (item) => item.customerId === null
+  );
+  //console.log("supplierRecord", supplierRecords);
   React.useEffect(() => {
     if (!hasFetched && !isFetching) {
       fetchWeighDetails();
     }
-  
+
     const retrToken = localStorage.getItem("token");
-  
     if (retrToken) {
       try {
-        // Split the token to get the payload (second part of the JWT)
         const payload = retrToken.split(".")[1];
-        // Decode the Base64 payload
-        const decodedPayload = JSON.parse(atob(payload));
-        // Check if roleName includes "weighbridge" (case-insensitive)
-        if (
-          decodedPayload.roleName?.toLowerCase().includes("weighbridge") || 
-          decodedPayload.isAdmin
-        ) {
-          setDecodedToken(decodedPayload.roleName);
-        } else {
-          setDecodedToken("");
-        }
+        const decoded = JSON.parse(atob(payload));
+        setDecodedToken(decoded);
       } catch (error) {
-        console.error("Failed to decode token:", error);
+        console.error("Token decode error:", error);
       }
-    } else {
-      console.error("Token not found in localStorage");
     }
   }, [hasFetched, isFetching]);
 
+  const isWeighbridge = decodedToken?.roleName
+    ?.toLowerCase()
+    .replace(/[^a-z]/g, "") // remove spaces, dashes, etc.
+    .includes("weighbridge");
+  const isAdmin = decodedToken?.isAdmin == true;
 
   return (
     <>
-      <Flex justify={"between"} gap={"5"} className="mb-4 mt-2">
+      <Toaster position="top-right" />
+      <Flex justify="between" gap="5" className="mb-4 mt-2">
         <Heading>Authority to Weigh</Heading>
         <Button
-          size={"3"}
-          title="New Authority to Weigh"
+          size="3"
           className="!bg-theme cursor-pointer"
-          type="button"
           onClick={() => navigate("/admin/raise-ticket/new-authority-to-weigh")}
         >
           <span className="text-white">New Authority</span>
         </Button>
       </Flex>
 
-      <Tabs.Root defaultValue="customer-atw" className="border-none">
-        <div className="flex items-center justify-center mb-4">
-          <Tabs.List className="border-none flex w-fit gap-2">
-            <Tabs.Trigger
-              value="customer-atw"
-              className="data-[state=active]:border-b-2 data-[state=active]:border-theme data-[state=active]:text-theme data-[state=inactive]:text-gray-500 px-4 py-2 bg-transparent focus:outline-none"
-            >
-              Customer ATW
-            </Tabs.Trigger>
-            <Tabs.Trigger
-              value="supplier-atw"
-              className="data-[state=active]:border-b-2 data-[state=active]:border-theme data-[state=active]:text-theme data-[state=inactive]:text-gray-500 px-4 py-2 bg-transparent focus:outline-none"
-            >
-              Supplier ATW
-            </Tabs.Trigger>
+      <Tabs.Root defaultValue="customer-atw">
+        <div className="flex justify-center mb-4">
+          <Tabs.List className="flex gap-2">
+            <Tabs.Trigger value="customer-atw">Customer ATW</Tabs.Trigger>
+            <Tabs.Trigger value="supplier-atw">Supplier ATW</Tabs.Trigger>
           </Tabs.List>
         </div>
 
-        {/* Customer ATW Tab */}
         <Tabs.Content value="customer-atw">
-          <Table.Root className="mt-4" variant="surface">
+          <Table.Root variant="surface">
             <Table.Header>
               <Table.Row>
                 <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
@@ -194,12 +167,12 @@ const ViewAuthorityToWeigh = () => {
                     <Table.Cell>
                       <FontAwesomeIcon
                         icon={faSquare}
-                        className={`${checkStatus(item.status)}`}
+                        className={checkStatus(item.status)}
                       />{" "}
                       {_.upperFirst(item.status)}
                     </Table.Cell>
-                    {item.status !== "pending" && (
-                      <Table.Cell>
+                    <Table.Cell>
+                      {item.status !== "pending" && (
                         <DropdownMenu.Root>
                           <DropdownMenu.Trigger>
                             <Button variant="soft">
@@ -207,17 +180,34 @@ const ViewAuthorityToWeigh = () => {
                             </Button>
                           </DropdownMenu.Trigger>
                           <DropdownMenu.Content>
-                            <DropdownMenu.Item
-                              onClick={() =>
-                                navigate(`/admin/weighing-operations/new-weigh/${item.id}`)
-                              }
-                            >
-                              New Weigh
-                            </DropdownMenu.Item>
-                            {item.status === "approved" && (
+                            {/* 
+           Show "New Weigh" ONLY if:
+          - status is "approved"
+          - user is either isAdmin and Weighbridge
+        */}
+                            {item.status == "approved" &&
+                              (isAdmin || isWeighbridge) && (
+                                <DropdownMenu.Item
+                                  onClick={() =>
+                                    navigate(
+                                      `/admin/weighing-operations/new-weigh/${item.id}`
+                                    )
+                                  }
+                                >
+                                  New Weigh
+                                </DropdownMenu.Item>
+                              )}
+                            {/* 
+           Always show "View Approved" to everyone 
+          if status is "approved" or "completed"
+        */}
+                            {(item.status === "approved" ||
+                              item.status === "completed") && (
                               <DropdownMenu.Item
                                 onClick={() =>
-                                  navigate(`/admin/tickets/view-auth-to-weigh/${item.id}`)
+                                  navigate(
+                                    `/admin/tickets/view-auth-to-weigh/${item.id}`
+                                  )
                                 }
                               >
                                 View Approved
@@ -225,8 +215,8 @@ const ViewAuthorityToWeigh = () => {
                             )}
                           </DropdownMenu.Content>
                         </DropdownMenu.Root>
-                      </Table.Cell>
-                    )}
+                      )}
+                    </Table.Cell>
                   </Table.Row>
                 ))
               )}
@@ -234,16 +224,17 @@ const ViewAuthorityToWeigh = () => {
           </Table.Root>
         </Tabs.Content>
 
-        {/* Supplier ATW Tab */}
         <Tabs.Content value="supplier-atw">
-          <Table.Root className="mt-4" variant="surface">
+          <Table.Root variant="surface">
             <Table.Header>
               <Table.Row>
                 <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell>VEHICLE NUMBER</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell>SUPPLIER NAME</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell>DRIVER NAME</Table.ColumnHeaderCell>
-                <Table.ColumnHeaderCell>TRANSPORT CARRIED BY</Table.ColumnHeaderCell>
+                <Table.ColumnHeaderCell>
+                  TRANSPORT CARRIED BY
+                </Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell>TICKET STATUS</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
               </Table.Row>
@@ -272,12 +263,12 @@ const ViewAuthorityToWeigh = () => {
                     <Table.Cell>
                       <FontAwesomeIcon
                         icon={faSquare}
-                        className={`${checkStatus(item.status)}`}
+                        className={checkStatus(item.status)}
                       />{" "}
                       {_.upperFirst(item.status)}
                     </Table.Cell>
-                    {item.status !== "pending" && (
-                      <Table.Cell>
+                    <Table.Cell>
+                      {item.status !== "pending" && (
                         <DropdownMenu.Root>
                           <DropdownMenu.Trigger>
                             <Button variant="soft">
@@ -285,28 +276,38 @@ const ViewAuthorityToWeigh = () => {
                             </Button>
                           </DropdownMenu.Trigger>
                           <DropdownMenu.Content>
-                          {decodedToken || (item.status === "approved" && decodedToken) ? (
-                            <DropdownMenu.Item
-                              onClick={() =>
-                                navigate(`/admin/weighing-operations/new-weigh/${item.id}`)
-                              }
-                            >
-                              New Weigh
-                            </DropdownMenu.Item>
-                          ) : null}
-                            
-                            {!decodedToken || (item.status === 'completed' && !decodedToken) && (<DropdownMenu.Item
-                                onClick={() =>
-                                  navigate(`/admin/weighing-operations/raise-order/${item.id}`)
-                                }
-                              >
-                                Raise Order
-                              </DropdownMenu.Item>
-                            )}
-                            {item.status === "approved" && (
+                            {item.status === "approved" &&
+                              (isAdmin || isWeighbridge) && (
+                                <DropdownMenu.Item
+                                  onClick={() =>
+                                    navigate(
+                                      `/admin/weighing-operations/new-weigh/${item.id}`
+                                    )
+                                  }
+                                >
+                                  New Weigh
+                                </DropdownMenu.Item>
+                              )}
+
+                            {item.status === "completed" && !isWeighbridge && (
                               <DropdownMenu.Item
                                 onClick={() =>
-                                  navigate(`/admin/tickets/view-auth-to-weigh/${item.id}`)
+                                  navigate(
+                                    `/admin/suppliers/place-supplier-order/${item.weigh.id}`
+                                  )
+                                }
+                              >
+                                Raise Supplier Order
+                              </DropdownMenu.Item>
+                            )}
+
+                            {(item.status === "approved" ||
+                              item.status === "completed") && (
+                              <DropdownMenu.Item
+                                onClick={() =>
+                                  navigate(
+                                    `/admin/tickets/view-auth-to-weigh/${item.id}`
+                                  )
                                 }
                               >
                                 View Approved
@@ -314,8 +315,8 @@ const ViewAuthorityToWeigh = () => {
                             )}
                           </DropdownMenu.Content>
                         </DropdownMenu.Root>
-                      </Table.Cell>
-                    )}
+                      )}
+                    </Table.Cell>
                   </Table.Row>
                 ))
               )}
@@ -323,7 +324,6 @@ const ViewAuthorityToWeigh = () => {
           </Table.Root>
         </Tabs.Content>
       </Tabs.Root>
-      <Toaster position="top-right" />
     </>
   );
 };

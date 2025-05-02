@@ -1,4 +1,5 @@
 import React from "react";
+import useToast from "../../../../hooks/useToast";
 import { refractor } from "../../../date";
 import axios from "axios";
 import {
@@ -21,7 +22,7 @@ import { SendOutlined } from "@ant-design/icons";
 
 const AuthorityToWeigh = () => {
   const { customerId, orderId } = useParams();
-
+const showToast = useToast()
   // State management for Switching between pages
   const [viewPageOpen, setViewPageOpen] = React.useState(false);
 
@@ -178,11 +179,11 @@ const AuthorityToWeigh = () => {
       setBtnLoading(false)
 
       // Success Toast
-      toast.success("Ticket successfully sent!",{
-        style:{
-          padding:"20px"
-        },duration:5000
-      });
+      showToast({
+        message: "Ticket Successfully sent!",
+        duration: 5000,
+        type:"success"
+      })
 
       // Reset form fields
       resetForm();
@@ -190,9 +191,12 @@ const AuthorityToWeigh = () => {
       // Error Toast
       setBtnLoading(false)
       console.error(error);
-      toast.error(error.response.message || error.response.error || "An error occurred. Please try again later.", {
-        style: { padding: "20px" },
-      });
+      showToast({
+        message:error.response.message || error.response.error || "An error occurred. Please try again later.",
+        type:"error",
+        duration:5000
+      })
+     
     }
   };
 

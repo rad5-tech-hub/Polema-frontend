@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import useToast from "../../../../hooks/useToast";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquare, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
@@ -13,6 +14,7 @@ const root = import.meta.env.VITE_ROOT;
 const AllWayBill = () => {
   const navigate = useNavigate();
   const [billDetails, setBillDetails] = useState([]);
+  const showToast = useToast();
   const [failedSearch, setFailedSearch] = useState(false);
   const [failedText, setFailedText] = useState("");
   const [loading, setLoading] = useState(true);
@@ -65,12 +67,21 @@ const AllWayBill = () => {
         {}, // Empty body if no data is required
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      toast.success("Waybill sent to print successfully!");
+      showToast({
+        message: "Waybill sent to print successfully!",
+        type:"success",
+        duration:4000
+      })
+      
       console.log("Waybill Response:", response.data);
     } catch (error) {
       console.error("Error sending waybill to print:", error);
-      toast.error(error.response?.data?.message || "Failed to send waybill to print.");
+      showToast({
+        type: "error",
+        message: error.response?.data?.message || "Failed to send waybill to print.",
+        duration: 4000,
+      })
+      
     } finally {
       setLoadingId(null);
     }

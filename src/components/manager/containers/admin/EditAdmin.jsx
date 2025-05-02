@@ -20,6 +20,7 @@ import { LoaderIcon } from "react-hot-toast";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import toast, { Toaster } from "react-hot-toast";
+import useToast from "../../../../hooks/useToast";
 import SignatureCanvas from "../../../signature-pad/SignatureCanvas";
 
 const root = import.meta.env.VITE_ROOT;
@@ -46,6 +47,7 @@ const EditAdmin = () => {
    const [canvasVisible, setCanvasVisible] = useState(false);
     const [signatureImage, setSignatureImage] = useState(null);
 
+  const showToast = useToast()
   // Fetch departments
   const fetchDept = async () => {
     const token = localStorage.getItem("token");
@@ -186,12 +188,12 @@ const EditAdmin = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      toast.success(response.data.message, {
-        duration: 6000,
-        style: {
-          padding: "20px",
-        },
-      });
+    
+      showToast({
+        message: response.data.message,
+        type: "success",
+        duration: 5000,
+      })
       setIsLoading(false);
 
       // Reset form

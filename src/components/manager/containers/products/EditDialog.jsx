@@ -15,10 +15,11 @@ import {
 } from "@radix-ui/themes";
 
 import toast, { Toaster } from "react-hot-toast";
-
+import useToast from "../../../../hooks/useToast";
 const root = import.meta.env.VITE_ROOT;
 
 const EditDialog = ({ product, onClose }) => {
+  const showToast = useToast()
   const [isLoading, setIsLoading] = useState(false);
   // const [pricePlan, setPricePlan] = useState(
   //   typeof product.pricePlan === "string"
@@ -183,13 +184,11 @@ const EditDialog = ({ product, onClose }) => {
         }
       );
       setIsLoading(false);
-      toast.success(response.data.message, {
-        duration: 6500,
-        style: {
-          padding: "30px",
-        },
-      });
-
+      showToast({
+        message: response.data.message,
+        type: "success",
+        duration:6500,
+      })
       setProductName("");
       setBasePrice("");
       setUnit("");
