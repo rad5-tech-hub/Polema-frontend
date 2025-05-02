@@ -7,10 +7,12 @@ import {refractor,formatMoney} from "../../../date"
 import { Modal } from "antd";
 import Image from "../../../../static/image/polema-logo.png";
 import { Toaster, toast, LoaderIcon } from "react-hot-toast";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
   const [ticketDetails, setTicketDetails] = useState();
+  const showToast = useToast()
   const [rejectLoading, setRejectLoading] = useState(false);
   const [approveLoading, setApproveLoading] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
@@ -177,10 +179,12 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
       setApproveLoading(false);
       setOpen(false);
       setTimeout(() => {
-        toast.success("Ticket Approved", {
-          style: { padding: "20px" },
-          duration: 3000,
-        });
+        showToast({
+          message:"Ticket Approved",
+          duration:4000,
+          type:"success"
+        })
+        
       }, 1000);
     } catch (error) {
       console.log(error);
@@ -203,7 +207,12 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
         }
       );
       setRejectLoading(false);
-      toast.success("Ticket Disapproved");
+      showToast({
+        message:"Ticket Disapproved",
+        duration:4000,
+        type:"success"
+      })
+      
     } catch (error) {
       console.log(error);
       setRejectLoading(false);
@@ -232,9 +241,12 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
           },
         }
       );
-      toast.success("Ticket Confimed", {
-        duration: 6500,
-      });
+      showToast({
+        message:"Ticket Confirmed",
+        duration:5000,
+        type:"success"
+      })
+      
       setConfirmLoading(false);
     } catch (error) {
       console.log(error);

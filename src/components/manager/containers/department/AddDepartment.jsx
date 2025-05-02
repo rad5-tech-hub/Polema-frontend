@@ -15,11 +15,13 @@ import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBoxArchive } from "@fortawesome/free-solid-svg-icons";
 import toast, { Toaster } from "react-hot-toast";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 
 const AddDepartment = () => {
   const [departmentName, setDepartmentName] = useState("");
+  const showToast = useToast();
 
   // State management for checking loading status
   const [loading, setLoading] = useState(false);
@@ -62,12 +64,11 @@ const AddDepartment = () => {
       );
       setLoading(false);
       setDepartmentName("");
-      toast.success(response.data.message, {
+      showToast({
+        message: response.data.message,
+        type: "success",
         duration: 6000,
-        style: {
-          padding: "30px",
-        },
-      });
+      })
     } catch (error) {
       setLoading(false);
       console.log(error);

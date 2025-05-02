@@ -3,11 +3,12 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import toast, { Toaster, LoaderIcon } from "react-hot-toast";
 import { Select } from "@radix-ui/themes";
-
+import useToast from "../../../../hooks/useToast";
 const root = import.meta.env.VITE_ROOT;
 
 const CreateInvoice = () => {
   const { id } = useParams();
+  const showToast = useToast();
   const [customerData, setCustomerData] = useState(null);
   const [superAdmins, setSuperAdmins] = useState([]);
   const [adminId, setAdminId] = useState("");
@@ -110,19 +111,21 @@ const CreateInvoice = () => {
           },
         }
       );
-
-      toast.success("Invoice created and sent successfully.", {
-        duration: 10000,
-        style: {
-          padding: "20px",
-        },
-      });
+      showToast({
+        message:"Invoice created and sent successfully",
+        duration:5000,
+        type:"success"
+      })
+      
       setBtnLoading(false);
     } catch (error) {
       console.log(error);
-      toast.error("An error occurred, please try again", {
-        duration: 7000,
-      });
+      showToast({
+        message: error.response?.data?.error || "An error occurred, try again",
+        type:"error",
+        duration:5000
+      })
+      
       setBtnLoading(false);
     }
   };

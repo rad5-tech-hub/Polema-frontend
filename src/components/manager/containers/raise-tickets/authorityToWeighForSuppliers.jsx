@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import useToast from "../../../../hooks/useToast";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
@@ -14,7 +15,6 @@ import {
   Text,
   Box,
 } from "@radix-ui/themes";
-import { ArrowLeftIcon, ArrowRightIcon } from "@radix-ui/react-icons";
 
 // Constants
 const API_ROOT = import.meta.env.VITE_ROOT;
@@ -30,6 +30,7 @@ const getSupplierName = (supplier) =>
 // Main Component
 const NewAuthorityToWeigh = () => {
   // State Management
+  const showToast = useToast()
   const [suppliers, setSuppliers] = useState([]);
   const [selectedSupplierId, setSelectedSupplierId] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -40,7 +41,7 @@ const NewAuthorityToWeigh = () => {
   const [admins, setAdmins] = useState([]);
   const [chiefAdminId, setChiefAdminId] = useState("");
   const [products, setProducts] = useState([]);
-  const [selectedProductId, setSelectedProductId] = useState(null);
+  const [selectedProductId, setSelectedProductId] = useState("");
   const [isFetchingSuppliers, setIsFetchingSuppliers] = useState(true);
   const [adminDropdownDisabled, setAdminDropdownDisabled] = useState(true);
   const [btnLoading, setBtnLoading] = useState(false);
@@ -53,8 +54,8 @@ const NewAuthorityToWeigh = () => {
     const token = getAuthToken();
     if (!token) {
       toast.error("Session expired. Please log in again.", {
+        style: { background: "#fef2f2", color: "#b91c1c", padding: "16px" },
         duration: 6500,
-        style: { padding: "30px" },
       });
       setIsFetchingSuppliers(false);
       return;
@@ -70,7 +71,8 @@ const NewAuthorityToWeigh = () => {
       console.error("Error fetching suppliers:", error);
       setSuppliers([]);
       toast.error("Failed to fetch suppliers.", {
-        style: { padding: "20px" },
+        style: { background: "#fef2f2", color: "#b91c1c", padding: "16px" },
+        duration: 5000,
       });
     } finally {
       setIsFetchingSuppliers(false);
@@ -81,8 +83,8 @@ const NewAuthorityToWeigh = () => {
     const token = getAuthToken();
     if (!token) {
       toast.error("Session expired. Please log in again.", {
+        style: { background: "#fef2f2", color: "#b91c1c", padding: "16px" },
         duration: 6500,
-        style: { padding: "30px" },
       });
       return;
     }
@@ -97,7 +99,8 @@ const NewAuthorityToWeigh = () => {
       console.error("Error fetching admins:", error);
       setAdmins([]);
       toast.error("Failed to fetch admins.", {
-        style: { padding: "20px" },
+        style: { background: "#fef2f2", color: "#b91c1c", padding: "16px" },
+        duration: 5000,
       });
     }
   };
@@ -106,8 +109,8 @@ const NewAuthorityToWeigh = () => {
     const token = getAuthToken();
     if (!token) {
       toast.error("Session expired. Please log in again.", {
+        style: { background: "#fef2f2", color: "#b91c1c", padding: "16px" },
         duration: 6500,
-        style: { padding: "30px" },
       });
       return;
     }
@@ -120,7 +123,8 @@ const NewAuthorityToWeigh = () => {
     } catch (error) {
       console.error("Error fetching products:", error);
       toast.error("Failed to fetch products.", {
-        style: { padding: "20px" },
+        style: { background: "#fef2f2", color: "#b91c1c", padding: "16px" },
+        duration: 5000,
       });
     }
   };
@@ -139,7 +143,8 @@ const NewAuthorityToWeigh = () => {
     setChiefAdminId("");
     setVehicleNumber("");
     setTransportedBy("");
-    setSelectedProductId(null);
+    setSelectedProductId("");
+    setIsDropdownOpen(false);
   };
 
   const handleSubmit = async (e) => {
@@ -147,9 +152,26 @@ const NewAuthorityToWeigh = () => {
     const token = getAuthToken();
     if (!token) {
       toast.error("Session expired. Please log in again.", {
+        style: { background: "#fef2f2", color: "#b91c1c", padding: "16px" },
         duration: 6500,
-        style: { padding: "30px" },
       });
+      setBtnLoading(false);
+      return;
+    }
+
+    if (
+      !selectedSupplierId ||
+      !vehicleNumber ||
+      !driverName ||
+      !transportedBy ||
+      !chiefAdminId ||
+      !selectedProductId
+    ) {
+      toast.error("Please fill all required fields.", {
+        style: { background: "#fef2f2", color: "#b91c1c", padding: "16px" },
+        duration: 5000,
+      });
+      setBtnLoading(false);
       return;
     }
 
@@ -173,20 +195,23 @@ const NewAuthorityToWeigh = () => {
         { adminIds: [chiefAdminId] },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      toast.success("Ticket successfully sent!", {
-        style: { padding: "20px" },
-        duration: 5000,
-      });
+      showToast({
+        message:"Ticket sent successfully",
+        type: "success",
+        duration:5000
+      })
+ 
       resetForm();
     } catch (error) {
       console.error("Submission error:", error);
-      toast.error(
-        error.response?.data?.message ||
+      showToast({
+        message:  error.response?.data?.message ||
           error.response?.data?.error ||
           "An error occurred. Please try again.",
-        { style: { padding: "20px" } }
-      );
+          type:"error",
+          duration:5000
+      })
+      
     } finally {
       setBtnLoading(false);
     }
@@ -260,9 +285,7 @@ const NewAuthorityToWeigh = () => {
                     key={supplier.id}
                     onClick={() => handleSelectSupplier(supplier)}
                     className={`p-2 cursor-pointer ${
-                      selectedSupplierId === supplier.id
-                        ? "bg-gray-100"
-                        : "bg-white"
+                      selectedSupplierId === supplier.id ? "bg-gray-100" : "bg-white"
                     } hover:bg-gray-100`}
                     onMouseDown={(e) => e.preventDefault()}
                   >
@@ -293,15 +316,12 @@ const NewAuthorityToWeigh = () => {
               Raw Material<span className="text-red-500">*</span>
             </Text>
             <Select.Root
-              value={selectedProductId || undefined}
+              value={selectedProductId || ''}
               onValueChange={(value) => setSelectedProductId(value)}
               disabled={products.length === 0}
               required
             >
-              <Select.Trigger
-                placeholder="Select Raw Material"
-                className="w-full mt-2"
-              />
+              <Select.Trigger placeholder="Select Raw Material" className="w-full mt-2" />
               <Select.Content position="popper">
                 {products.map((product) => (
                   <Select.Item key={product.id} value={product.id}>
@@ -322,10 +342,7 @@ const NewAuthorityToWeigh = () => {
               onValueChange={(value) => setTransportedBy(value)}
               required
             >
-              <Select.Trigger
-                placeholder="Select Transport Option"
-                className="w-full mt-2"
-              />
+              <Select.Trigger placeholder="Select Transport Option" className="w-full mt-2" />
               <Select.Content position="popper">
                 <Select.Item value="Company">Company</Select.Item>
                 <Select.Item value="Supplier">Supplier</Select.Item>
@@ -344,16 +361,10 @@ const NewAuthorityToWeigh = () => {
               disabled={adminDropdownDisabled}
               required
             >
-              <Select.Trigger
-                placeholder="Select Admin"
-                className="w-full mt-2"
-              />
+              <Select.Trigger placeholder="Select Admin" className="w-full mt-2" />
               <Select.Content position="popper">
                 {admins.map((admin) => (
-                  <Select.Item
-                    key={admin.role?.id || admin.id}
-                    value={admin.role?.id || admin.id}
-                  >
+                  <Select.Item key={admin.role?.id || admin.id} value={admin.role?.id || admin.id}>
                     {admin.firstname} {admin.lastname}
                   </Select.Item>
                 ))}
@@ -367,7 +378,7 @@ const NewAuthorityToWeigh = () => {
           <Button
             size="3"
             type="submit"
-            className="cursor-pointer px-5 mt-5 !bg-theme"
+            className="cursor-pointer px-5 mt-5 !bg-theme !text-white"
             disabled={btnLoading}
           >
             {btnLoading ? <Spinner /> : "Send"}

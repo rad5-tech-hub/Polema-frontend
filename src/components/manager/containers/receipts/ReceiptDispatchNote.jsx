@@ -201,33 +201,18 @@ const ReceiptDispatchNote = () => {
                 </div>
               ))}
 
-              <div className="signatures w-full flex flex-col sm:flex-row justify-between gap-8 sm:gap-4 mt-12 sm:mt-24">
+              <div className="signatures w-full flex flex-row justify-between gap-4 mt-12 sm:mt-24">
                 {/* Driver's Signature */}
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col">
                   <p className="border-b border-black border-dotted w-[150px] sm:w-[230px]"></p>
-                  <label className="w-fit text-sm sm:text-base ml-4">
+                  <label className="w-fit text-sm sm:text-base">
                     DRIVER’S SIGNATURE
                   </label>
                 </div>
 
                 {/* Approved By Signature */}
-                <div className="flex flex-col gap-4 items-center">
-                  {dispatchNote.approvedByRoleSignature && !signatureError.approvedBy ? (
-                    <>
-                      <img
-                        src={dispatchNote.approvedByRoleSignature}
-                        alt={`Signature of ${dispatchNote.approvedByRoleFirstName || "Approving Officer"}`}
-                        className="signature-img w-[150px] sm:w-[230px] h-auto object-contain"
-                        onError={() => handleSignatureError("approvedBy")}
-                      />
-                      <span>
-                        {dispatchNote.approvedByRoleFirstName}{" "}
-                        {dispatchNote.approvedByRoleLastName}
-                      </span>
-                    </>
-                  ) : (
-                    <p className="border-b border-black border-dotted w-[150px] sm:w-[230px] mx-auto"></p>
-                  )}
+                <div className="flex flex-col items-center">
+                  <p className="border-b border-black border-dotted w-[150px] sm:w-[230px]"></p>
                   <label className="w-fit text-sm sm:text-base text-center">
                     APPROVING OFFICER’S SIGNATURE
                   </label>

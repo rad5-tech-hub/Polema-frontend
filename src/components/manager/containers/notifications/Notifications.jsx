@@ -36,9 +36,10 @@ import IndividualInfo from "./IndividualInfo";
 import { DeleteOutlined } from "@ant-design/icons";
 
 const root = import.meta.env.VITE_ROOT;
-
+import useToast from "../../../../hooks/useToast";
 const Notifications = () => {
   const navigate = useNavigate(); // Initialize navigate hook
+  const showToast = useToast()
   const getToken = () => {
     const token = localStorage.getItem("token");
     return jwtDecode(token);
@@ -131,7 +132,12 @@ const Notifications = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      toast.success("Notification marked as read", { duration: 3000 });
+      showToast({
+        message:"Notification marked as read",
+        duration:3000,
+        type:"success"
+      })
+      
       return true;
     } catch (error) {
       console.error("Error marking notification as read:", error);
@@ -188,7 +194,11 @@ const Notifications = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      toast.success("Ticket Denied Successfully", { duration: 3500 });
+      showToast({
+        message:"Ticket Denied Successfully",
+        duration:3000,
+        type:"sucess"
+      })
       fetchNotifications();
     } catch (e) {
       console.log(e);
@@ -243,10 +253,10 @@ const Notifications = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      toast.success(
-        response.data.message || "Cash ticket confirmed successfully",
-        { duration: 4500 }
-      );
+      showToast({
+        message:response.data.message || "Cash ticket confirmed successfully",
+        type:"success"
+      })
       fetchNotifications();
       setConfirmBtnLoading((prev) => ({ ...prev, [ticketId]: false }));
     } catch (error) {
@@ -297,8 +307,12 @@ const Notifications = () => {
         headers: { Authorization: `Bearer ${token}` },
         data: { notificationIds: selectedNotificationIds },
       });
-
-      toast.success("Notifications deleted successfully");
+      showToast({
+        message: "Notifications deleted Successfully",
+        type:"success"
+      })
+        
+      
       fetchNotifications();
       setSelectedNotificationIds([]);
     } catch (error) {
@@ -373,18 +387,22 @@ const Notifications = () => {
       try {
         if (ticketStatus === "approved") {
           await sendApprovedTicket(type, ticketID, selectedAdmins);
-          toast.success("Ticket already approved, sending details...", {
-            duration: 3000,
-            style: { padding: "30px" },
-          });
+          showToast({
+            message: "Ticket already approved, sending details",
+            duration:3000,
+            type:"success"
+          })
+          
         } else {
           const firstRequest = await approveTicket(type, ticketID);
           if (firstRequest === 200) {
             await sendApprovedTicket(type, ticketID, selectedAdmins);
-            toast.success("Ticket approved and sent successfully", {
-              duration: 3000,
-              style: { padding: "30px" },
+            showToast({
+              message: "Ticket approved and sent successfully",
+              type:"success",
+              duration:3000
             });
+            
           } else {
             throw new Error("Error occurred in approving ticket");
           }
@@ -495,10 +513,12 @@ const Notifications = () => {
         const response = await axios.post(`${root}/admin/load/${id}`, body, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        toast.success("Ticket Sent Successfully", {
-          duration: 3000,
-          style: { padding: "20px" },
-        });
+        showToast({
+          message: "Ticket Sent Successfully",
+          type: "success",
+          duration:3000
+        })
+        
         fetchNotifications();
         setButtonLoading(false);
         setQuantity("");

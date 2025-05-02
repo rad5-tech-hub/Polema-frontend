@@ -17,11 +17,13 @@ import {
   Text,
 } from "@radix-ui/themes";
 import { Modal, Input } from "antd";
+import useToast from "../../../../hooks/useToast";
 import _ from "lodash";
 const root = import.meta.env.VITE_ROOT;
 
 const ManageGenStore = () => {
   const [storeAction, setStoreAction] = useState("add");
+  const showToast = useToast()
   const [suppliers, setSuppliers] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [storeItems, setStoreItems] = useState([]);
@@ -194,19 +196,22 @@ const ManageGenStore = () => {
       );
       setLoading(false);
       resetForm();
-      toast.success(response.data.message, {
-        style: {
-          padding: "30px",
-        },
-        duration: 6000,
+      showToast({
+        message: response.data.message,
+        duration:5000,
+        type:"success"
       });
+      
     } catch (error) {
       console.log(error);
       setLoading(false);
-      toast.error(
-        error.response.data.message ||
-          "An error occurred, check your details and try again later"
-      );
+      showToast({
+        message:
+          error.response.data.message ||
+          "An error occurred, check your details and try again later",
+        type:"error",
+        duration:5000
+      });
     }
   };
 

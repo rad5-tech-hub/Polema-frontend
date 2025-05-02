@@ -7,10 +7,12 @@ import { formatMoney } from "../../../date";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import { CameraFilled } from "@ant-design/icons";
 import { Flex, Button, Separator, Spinner, Grid, Text } from "@radix-ui/themes";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 
 const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
+  const showToast = useToast()
   const [entries, setEntries] = useState([]);
   const [weighImage, setWeighImage] = useState('');
   const [docOrders, setDocOrders] = useState({});
@@ -184,7 +186,11 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
         ...prev,
         [type.toLowerCase()]: imageUrl,
       }));
-      toast.success(`${type} uploaded successfully!`);
+      showToast({
+        message: `${type} uploaded successfully!`,
+        type: "success",
+      })
+      
     } catch (error) {
       toast.error(`Failed to upload ${type}. Please try again.`);
       console.error("Upload error:", error.response?.data || error.message);
@@ -252,7 +258,7 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[101]">
       <div className="bg-white p-6 rounded shadow-md w-[90%] max-w-[850px] relative max-h-[550px] overflow-y-scroll">
-        <Toaster />
+        {/* <Toaster /> */}
         <Flex justify="between" className="mb-4">
           <div>
             <p className="text-sm font-bold opacity-50">Customer Name:</p>
@@ -289,7 +295,7 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
                   <p className="text-xs">
                     {entry.creditType === null &&
                       `${entry.quantity} ${entry.unit} of`}{" "}
-                    {entry.quantity && formatMoney(entry?.quantity) || ""} {entry.unit && entry?.unit || ""} of  {entry.product?.name}
+                    {entry.quantity && entry?.quantity || ""} {entry.unit && entry?.unit || ""} of  {entry.product?.name}
                   </p>
                   <p className="text-xs">
                     {entry.creditType && `Paid with ${entry.creditType}`}

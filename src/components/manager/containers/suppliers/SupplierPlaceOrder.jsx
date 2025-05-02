@@ -1,3 +1,4 @@
+import useToast from "../../../../hooks/useToast";
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import {
@@ -17,6 +18,7 @@ const { Option } = Select;
 const API_ROOT = import.meta.env.VITE_ROOT;
 
 const SupplierPlaceOrder = () => {
+  const showToast = useToast()
   const { id } = useParams(); // Get ticket ID from URL params
   const [basePrice, setBasePrice] = useState("");
   const [customers, setCustomers] = useState([]);
@@ -162,10 +164,12 @@ const SupplierPlaceOrder = () => {
       await axios.post(`${API_ROOT}/customer/raise-supplier-order`, orderData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success("Order placed successfully!", {
-        style: { padding: "20px" },
-        duration: 5000,
-      });
+      showToast({
+        message:"Order Placed Successfully",
+        type:"success",
+        duration:5000
+      })
+      
       setBasePrice("");
       setSelectedCustomerId("");
       setSelectedProductId("");
@@ -198,7 +202,7 @@ const SupplierPlaceOrder = () => {
             <div className="w-full">
               <Text className="font-bold">Supplier Name</Text>
               <Select
-                showSearch                
+                showSearch
                 placeholder="Select Supplier"
                 optionFilterProp="children"
                 onChange={(value) => setSelectedCustomerId(value)}
@@ -207,14 +211,14 @@ const SupplierPlaceOrder = () => {
                   customers.length === 0 || !!id ? "bg-gray-100 text-black font-bold" : ""
                 }`}
                 filterOption={(input, option) =>
-                  option.children.toLowerCase().includes(input.toLowerCase())
+                  option?.children?.toString().toLowerCase().includes(input.toLowerCase())
                 }
                 disabled={customers.length === 0 || !!id} // Disable if no customers or id exists
                 required
               >
                 {customers.map((customer) => (
                   <Option key={customer.id} value={customer.id}>
-                    {customer.firstname} {customer.lastname}
+                    {`${customer.firstname} ${customer.lastname}`}
                   </Option>
                 ))}
               </Select>

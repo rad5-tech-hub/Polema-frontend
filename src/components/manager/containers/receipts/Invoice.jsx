@@ -74,10 +74,10 @@ const Invoice = () => {
             body, .bg-white, .bg-[#E1E1E1] {
               -webkit-print-color-adjust: exact !important;
               print-color-adjust: exact !important;
-              background-color: inherit !important;
+              background-color: inherit !important;            
             }
             *{           
-            box-shadow: none !important;
+              box-shadow: none !important;              
             }
             /* Ensure borders are visible */
             table, th, td {
@@ -131,17 +131,17 @@ const Invoice = () => {
           </div>
 
           {/* Invoice Section */}
-          <div className="mt-8 bg-white p-6 sm:p-8 lg:p-14 rounded print:block">
+          <div className="mt-5 bg-white p-6 sm:p-8 lg:p-14 rounded print:block">
             {/* Header with Logo */}
             <div className="flex justify-between gap-5">
               <div className="logo">
                 <img
                   src={isMobison ? mobisonLogo : polemaLogo}
                   alt={isMobison ? "mobison-logo" : "polema-logo"}
-                  className="h-fit"
+                  className="h-[120px] object-contain"
                 />
                 {isMobison && <div>
-                  <p className="text-start italic">
+                  <p className="text-start text-xs italic">
                     Pharmaceuticals,<br/>
                     Industrialists,<br/>
                     Oil Milling and<br/>
@@ -151,14 +151,14 @@ const Invoice = () => {
               </div>
               <div className="heading text-center">
                 <div>
-                  <p className="flex justify-end mb-14 text-xs sm:text-sm">
+                  <p className="flex justify-end mb-6 text-xs sm:text-sm">
                   <i>{isMobison ? 'RC 64084' : 'RC 131127'}</i>
                   </p>
-                  <h1
-                    className="text-[25px] sm:text-[32px] font-bold text-[#434343]"                  
+                  <h3
+                    className="text-[25px] font-bold text-[#434343]"                  
                   >
                     {isMobison ? "MAOBISON INTER-LINK ASSOCIATES LTD." : "POLEMA INDUSTRIES LIMITED"}                  
-                  </h1>
+                  </h3>
                   <p className="text-sm sm:text-base lg:text-lg font-bold text-[#434343]">
                     A DIVISION OF {!isMobison ? "MAOBISON INTER-LINK ASSOCIATES LTD." : "POLEMA INDUSTRIES LIMITED"}<br/>
                     <span className="text-sm font-bold text-[#434343]">Manufactures' & Exporters of Palm Kernel Oil, Palm Kernel Cakes and Drugs</span>
@@ -185,7 +185,7 @@ const Invoice = () => {
             </div>
 
             {/* Title Section */}
-            <div className="title flex justify-center mt-6 sm:mt-8 relative">
+            <div className="title flex justify-center mt-3 relative">
               <h1 className="border border-b-8 border-[#43434380] px-4 sm:px-8 py-2 text-[#919191] rounded-xl shadow-lg text-lg sm:text-xl lg:text-2xl font-bold">
                 CASH/CREDIT SALES INVOICE
               </h1>
@@ -271,7 +271,7 @@ const Invoice = () => {
                       {`${row.productName} ${row.credit > row.debit ? "returned" : ""}`}
                     </td>
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                      {row?.order?.rate || ""}
+                      {formatMoney(row?.order?.rate) || ""}
                     </td>
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                       {row.debit > row.credit
@@ -311,29 +311,63 @@ const Invoice = () => {
               </thead>
               <tbody>
                 <tr>
+                  {/* PREPARED BY */}
                   <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm text-center">
                     {invoice?.role?.admins?.[0]?.signature ? (
-                      <img
+                      <><img
                         src={invoice.role.admins[0].signature}
                         alt="Prepared by signature"
-                        className="w-32 h-auto mx-auto"
+                        className="object-contain mx-auto"
+                        style={{ height: "50px", width: "50px" }}
                       />
+                      {invoice?.role?.admins?.[0]?.firstname} {invoice?.role?.admins?.[0]?.lastname}
+                      </>
                     ) : (
-                      invoice.role?.name
+                      <>
+                        {invoice?.role?.admins?.[0]?.firstname} {invoice?.role?.admins?.[0]?.lastname}
+                      </>
                     )}
                   </td>
-                  <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm"></td>
+
+                  {/* DELIVERED BY */}
+                  <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm">
+                    {invoice?.role?.admins?.[0]?.signature ? (
+                      <><img
+                        src={invoice.role.admins[0].signature}
+                        alt="Prepared by signature"
+                        className="object-contain mx-auto"
+                        style={{ height: "50px", width: "50px" }}
+                      />
+                      {invoice?.role?.admins?.[0]?.firstname} {invoice?.role?.admins?.[0]?.lastname}
+                    </>
+                    ) : (
+                      <>
+                        {invoice?.role?.admins?.[0]?.firstname} {invoice?.role?.admins?.[0]?.lastname}
+                      </>
+                    )}
+                  </td>
+
+                  {/* CHECKED BY */}
                   <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm text-center">
-                    {invoice?.approvedByRole?.signature && (
-                      <img
-                        src={invoice.approvedByRole?.signature}
-                        alt="Checked by signature"
-                        className="w-32 h-auto mx-auto"
-                      />)
-                    }
+                    {invoice?.approvedByRole?.admins?.[0]?.signature ? (
+                      <>
+                        <img
+                          src={invoice.approvedByRole.admins[0].signature}
+                          alt="Checked by signature"
+                          className="object-contain mx-auto"
+                          style={{ height: "50px", width: "50px" }}
+                        />
+                        {invoice?.approvedByRole?.admins?.[0]?.firstname} {invoice?.approvedByRole?.admins?.[0]?.lastname}
+                      </>
+                    ) : (
+                      <>
+                        {invoice?.approvedByRole?.admins?.[0]?.firstname} {invoice?.approvedByRole?.admins?.[0]?.lastname}
+                      </>
+                    )}
                   </td>
-                  <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm text-center">                  
-                  </td>
+
+                  {/* CUSTOMER'S SIGNATURE */}
+                  <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm text-center"></td>
                 </tr>
               </tbody>
             </table>

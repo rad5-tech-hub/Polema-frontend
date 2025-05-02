@@ -14,10 +14,12 @@ import {
 import { LoaderIcon } from "react-hot-toast";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 
 const GeneralStorePlaceOrder = () => {
+  const showToast = useToast();
   // State to manage loader icon
   const [isLoading, setIsLoading] = useState(false);
 
@@ -92,18 +94,25 @@ const GeneralStorePlaceOrder = () => {
 
   // Function to handle form submission
   const handleSubmit = async (event) => {
+    const modifiedArrayWithoutId = plans.map(
+      ({ productId, quantity, unit, expectedDeliveryDate }) => ({
+        productId,
+        quantity,
+        unit,
+        expectedDeliveryDate,
+      })
+    );
     event.preventDefault();
     setIsLoading(true);
     const body = {
-      orders: plans,
+      orders: modifiedArrayWithoutId,
     };
 
     const retrToken = localStorage.getItem("token");
-    toast.loading("Submitting Order...", {
-      style: {
-        padding: "30px",
-      },
+    showToast({
+      message: "Submitting Order",
       duration: 1500,
+      type: "loading",
     });
 
     // Check if the token is available
@@ -124,16 +133,19 @@ const GeneralStorePlaceOrder = () => {
       );
       console.log(response);
       setIsLoading(false);
-      toast.success(response.data.message, {
-        style: {
-          padding: "20px",
-        },
-        duration: 6500,
+      showToast({
+        message: response.data.message,
+        type: "success",
+        duration: 4500,
       });
+
       resetForm();
     } catch (error) {
       console.log(error);
       setIsLoading(false);
+      showToast({
+        type: "error",
+      });
       toast.error("An error occurred");
     }
   };

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import useToast from "../../../../hooks/useToast";
 import axios from "axios";
 import { TextField, Select, Flex, Button, Spinner } from "@radix-ui/themes";
 import { useParams } from "react-router-dom";
@@ -18,6 +19,7 @@ const CreateGatepass = () => {
   const [driverName, setDriverName] = useState("");
   const [goodsOwner, setGoodsOwner] = useState("");
   const [customerId, setCustomerId] = useState("");
+  const showToast = useToast()
 
   const TransDetails = async () => {
     const token = localStorage.getItem("token");
@@ -71,7 +73,7 @@ const CreateGatepass = () => {
       });
     }
     try {
-      const response = await axios.get(`${root}/admin/all-admin`, {
+      const response = await axios.get(`${root}/admin/all-staff`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -121,17 +123,21 @@ const CreateGatepass = () => {
           adminIds: [adminId],
         }
       );
-      toast.success("Successfully sent to admin", {
-        style: {
-          padding: "30px",
-        },
-        duration: 10000,
-      });
+      showToast({
+        message: "Successfully sent to admin",
+        type:"success",
+        duration:5000
+      })
+     
       setButtonLoading(false);
       resetForm();
     } catch (error) {
       console.log(error);
-      setButtonLoading(false);
+       showToast({
+        message: "An error occurred while creating the gate pass",
+        type:"error",
+        duration:5000
+      })
     }
   };
 
@@ -244,7 +250,7 @@ const CreateGatepass = () => {
                   return (
                     <Select.Item
                       value={admin.role?.id || " "}
-                    >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
+                    >{`${admin.firstname} ${admin.lastname}`} ({admin.role?.name})</Select.Item>
                   );
                 })}
               </Select.Content>

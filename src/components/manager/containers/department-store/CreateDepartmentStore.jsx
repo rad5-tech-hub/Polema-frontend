@@ -14,7 +14,9 @@ import {
 } from "@radix-ui/themes";
 import axios from "axios";
 const root = import.meta.env.VITE_ROOT;
-const cloudinaryRoot = import.meta.env.VITE_CLOUD_ROOT;
+import useToast from "../../../../hooks/useToast";
+
+const showToast = useToast()
 
 const CreateDepartmentStore = () => {
   const fileInputRef = useRef(null);
@@ -175,12 +177,11 @@ const CreateDepartmentStore = () => {
         }
       );
       setButtonLoading(false);
-      toast.success("Created successfully", {
-        style: {
-          padding: "25px",
-        },
-        duration: 5000,
-      });
+      showToast({
+        message: "Created successfully",
+        type: "success",
+      })
+      
       resetForm();
     } catch (error) {
       console.log(error);

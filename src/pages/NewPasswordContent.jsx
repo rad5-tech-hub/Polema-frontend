@@ -11,13 +11,14 @@ import {
   EyeClosedIcon,
 } from "@radix-ui/react-icons";
 import { useSearchParams } from "react-router-dom";
+import useToast from "../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 
 const NewPasswordContent = () => {
   const [searchParams] = useSearchParams();
   const id = searchParams.get("token");
-
+const showToast = useToast()
   const [loading, setLoading] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [password, setPassword] = useState("");
@@ -44,12 +45,11 @@ const NewPasswordContent = () => {
       );
 
       // Handle success, navigate to login or show success message
-      toast.success("Password successfully updated!", {
-        style: {
-          padding: "20px",
-        },
+      showToast({
+        message: "Password successfully updated!",
+        type: "success",
         duration: 5000,
-      });
+      })
       setTimeout(() => {
         navigate("/login");
       }, 6000);

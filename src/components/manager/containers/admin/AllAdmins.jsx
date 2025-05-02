@@ -27,11 +27,12 @@ import toast, { LoaderIcon, Toaster } from "react-hot-toast";
 import axios from "axios";
 import { faPen } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
+import useToast from "../../../../hooks/useToast";
 const root = import.meta.env.VITE_ROOT;
 
 const SuspendDialog = ({ isOpen, onClose, runFetch, id }) => {
   const [suspendLoading, setSuspendLoading] = useState(false);
+  const showToast = useToast()
 
   const suspendAdmin = async (id) => {
     setSuspendLoading(true);
@@ -54,12 +55,11 @@ const SuspendDialog = ({ isOpen, onClose, runFetch, id }) => {
       );
       setSuspendLoading(false);
       onClose();
-      toast.success("Admin Suspended successfully", {
-        duration: 6500,
-        style: {
-          padding: "30px",
-        },
-      });
+      showToast({
+        message: "Admin Suspended successfully",
+        type: "success",
+        duration: 3500,
+      })
       runFetch();
     } catch (error) {
       setSuspendLoading(false);
@@ -194,405 +194,6 @@ const AllAdmins = () => {
     setAdminForEdit(admin);
   };
 
-  // const EditDialog = () => {
-  //   const [isLoading, setIsLoading] = useState(false);
-  //   const [firstname, setFirstname] = useState(adminForEdit.firstname);
-  //   const [lastname, setLastName] = useState(adminForEdit.lastname);
-  //   const [email, setEmail] = useState(adminForEdit.email);
-  //   const [address, setAddress] = useState(adminForEdit.address || "");
-  //   const [number, setNumber] = useState(adminForEdit.phoneNumber);
-  //   const [password, setPassword] = useState("");
-  //   const [confirmPassword, setConfirmPassword] = useState("");
-  //   const [role, setRole] = useState(adminForEdit.roleId);
-  //   const [rolesArray, setRolesArray] = useState([]);
-  //   const [adminDepartments, setAdminDepartments] = useState(
-  //     JSON.parse(adminForEdit.department)
-  //   );
-  //   const [departments, setDepartments] = useState([]);
-
-  //   // State to manage all department IDs
-  //   const [detID, setDeptID] = useState([]);
-  //   const [additionalDeptID, setAdditionalDeptID] = useState([
-  //     ...adminDepartments,
-  //   ]);
-
-  //   const [roleID, setRoleId] = useState("");
-
-  //   // State to toggle password visibility
-  //   const [showPassword, setShowPassword] = useState(false);
-  //   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  //   // Function to fetch departments
-  //   const fetchDept = async () => {
-  //     const token = localStorage.getItem("token");
-
-  //     if (!token) {
-  //       toast.error("An error occurred ,try logging in again", {
-  //         duration: 7000,
-  //         style: {
-  //           padding: "20px",
-  //         },
-  //       });
-  //       return;
-  //     }
-
-  //     try {
-  //       const response = await axios.get(`${root}/dept/view-department`, {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       });
-  //       const departments = response.data?.departments || [];
-
-  //       setDepartments(departments);
-  //     } catch (e) {
-  //       console.log(e);
-  //     }
-  //   };
-
-  //   const deptChange = (i, v) => {
-  //     //where i is index and v is value
-  //     const updatedDepartments = [...additionalDeptID];
-
-  //     updatedDepartments[i] = v;
-  //     setAdditionalDeptID(updatedDepartments);
-  //   };
-  //   const fetchRoles = async () => {
-  //     const retrToken = localStorage.getItem("token");
-
-  //     if (!retrToken) {
-  //       toast.error("An error occurred. Try logging in again");
-  //       return;
-  //     }
-  //     try {
-  //       const response = await axios.get(`${root}/admin/get-rolePerm`, {
-  //         headers: {
-  //           Authorization: `Bearer ${retrToken}`,
-  //         },
-  //       });
-  //       setRolesArray(response.data);
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   };
-
-  //   const handleSubmit = async (e) => {
-  //     e.preventDefault();
-  //     // setIsLoading(true);
-
-  //     const retrToken = localStorage.getItem("token");
-
-  //     // Check if the token is available
-  //     if (!retrToken) {
-  //       toast.error("An error occurred. Try logging in again");
-
-  //       return;
-  //     }
-
-  //     const body = {
-  //       firstname: firstname,
-  //       lastname: lastname,
-  //       phoneNumber: number,
-  //       ...(password && { password: password }),
-  //       email,
-  //       ...(confirmPassword && { confirmPassword: confirmPassword }),
-  //       roleId: roleID || role,
-  //     };
-
-  //     // try {
-  //     //   const response = await axios.patch(
-  //     //     `${root}/admin/update-staff/${adminForEdit.id}`,
-  //     //     body,
-  //     //     {
-  //     //       headers: {
-  //     //         Authorization: `Bearer ${retrToken}`,
-  //     //       },
-  //     //     }
-  //     //   );
-  //     //   console.log(response);
-  //     //   setIsLoading(false);
-  //     //   toast.success(response.data.message, {
-  //     //     duration: 6500,
-  //     //     style: {
-  //     //       padding: "30px",
-  //     //     },
-  //     //   });
-  //     //   fetchStaffData();
-  //     //   setTimeout(() => {
-  //     //     setEditDialogOpen(false);
-  //     //   }, 1500);
-  //     // } catch (error) {
-  //     //   console.log(error);
-  //     //   setIsLoading(false);
-
-  //     //   toast.error(error.response.data.error);
-  //     // }
-  //     console.log(body);
-
-  //     console.log(...additionalDeptID);
-  //   };
-
-  //   useEffect(() => {
-  //     fetchRoles();
-  //     fetchDept();
-  //   }, []);
-
-  //   return (
-  //     <>
-  //       <div className="flex items-center gap-3">
-  //         <div
-  //           onClick={() => setEditDialogOpen(false)}
-  //           className="cursor-pointer"
-  //         >
-  //           <FontAwesomeIcon icon={faArrowLeft} />
-  //         </div>
-  //         <Heading>Edit Admin</Heading>
-  //       </div>
-  //       <Separator className="w-full my-3" />
-  //       <form onSubmit={handleSubmit}>
-  //         <Grid columns={"2"} gap={"4"}>
-  //           <div className="input-field mt-3">
-  //             <label
-  //               className="text-[15px] font-medium leading-[35px]"
-  //               htmlFor="firstname"
-  //             >
-  //               First Name
-  //             </label>
-  //             <TextField.Root
-  //               placeholder="Enter First Name"
-  //               defaultValue={firstname}
-  //               onChange={(e) => setFirstname(e.target.value)}
-  //               size={"3"}
-  //             />
-  //           </div>
-  //           <div className="mt-3 input-field">
-  //             <label
-  //               className="text-[15px] font-medium leading-[35px]"
-  //               htmlFor="lastname"
-  //             >
-  //               Last Name
-  //             </label>
-  //             <TextField.Root
-  //               placeholder="Enter Last Name"
-  //               onChange={(e) => setLastName(e.target.value)}
-  //               defaultValue={lastname}
-  //               size={"3"}
-  //             />
-  //           </div>
-  //           <div className="mt-3 input-field">
-  //             <label className="text-[15px] font-medium leading-[35px]">
-  //               Address
-  //             </label>
-  //             <TextField.Root
-  //               placeholder="Enter Address"
-  //               onChange={(e) => setAddress(e.target.value)}
-  //               defaultValue={address}
-  //               size={"3"}
-  //             />
-  //           </div>
-
-  //           <div className="input-field mt-3">
-  //             <label
-  //               className="text-[15px] font-medium leading-[35px]"
-  //               htmlFor="email"
-  //             >
-  //               Email
-  //             </label>
-  //             <TextField.Root
-  //               placeholder="Enter email"
-  //               onChange={(e) => setEmail(e.target.value)}
-  //               defaultValue={email}
-  //               size={"3"}
-  //             />
-  //           </div>
-
-  //           <div className="input-field mt-3">
-  //             <label
-  //               className="text-[15px] font-medium leading-[35px]"
-  //               htmlFor="number"
-  //             >
-  //               Phone Number
-  //             </label>
-  //             <TextField.Root
-  //               placeholder="Enter phone number"
-  //               onChange={(e) => setNumber(e.target.value)}
-  //               type="number"
-  //               defaultValue={number}
-  //               size={"3"}
-  //             />
-  //           </div>
-
-  //           <div className="mt-3 input-field">
-  //             <label
-  //               className="text-[15px] font-medium leading-[35px]"
-  //               htmlFor="role"
-  //             >
-  //               Assign Role
-  //             </label>
-  //             <Select.Root
-  //               size={"3"}
-  //               defaultValue={role}
-  //               onValueChange={(val) => {
-  //                 setRoleId(val);
-  //               }}
-  //             >
-  //               <Select.Trigger className="w-full" placeholder="Assign Role" />
-  //               <Select.Content position="popper">
-  //                 {rolesArray.map((customer) => {
-  //                   return (
-  //                     <Select.Item key={customer.id} value={customer.id}>
-  //                       {customer.name}
-  //                     </Select.Item>
-  //                   );
-  //                 })}
-  //               </Select.Content>
-  //             </Select.Root>
-  //           </div>
-  //           <div className="mt-3 input-field">
-  //             <label
-  //               className="text-[15px] font-medium leading-[35px]"
-  //               htmlFor="password"
-  //             >
-  //               Password
-  //             </label>
-  //             <TextField.Root
-  //               placeholder="Enter Password"
-  //               value={password}
-  //               onChange={(e) => setPassword(e.target.value)}
-  //               type={showPassword ? "text" : "password"}
-  //               size={"3"}
-  //             >
-  //               <TextField.Slot
-  //                 className="cursor-pointer"
-  //                 onClick={() => setShowPassword(!showPassword)}
-  //               >
-  //                 {showPassword ? (
-  //                   <EyeOpenIcon height={"16"} width={"16"} />
-  //                 ) : (
-  //                   <EyeClosedIcon height={"16"} width={"16"} />
-  //                 )}
-  //               </TextField.Slot>
-  //             </TextField.Root>
-  //           </div>
-
-  //           <div className="mt-3 input-field">
-  //             <label
-  //               className="text-[15px] font-medium leading-[35px]"
-  //               htmlFor="passwordConfirm"
-  //             >
-  //               Confirm Password
-  //             </label>
-  //             <TextField.Root
-  //               placeholder="Confirm Password"
-  //               value={confirmPassword}
-  //               onChange={(e) => setConfirmPassword(e.target.value)}
-  //               type={showConfirmPassword ? "text" : "password"}
-  //               size={"3"}
-  //             >
-  //               <TextField.Slot
-  //                 className="cursor-pointer"
-  //                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-  //               >
-  //                 {showConfirmPassword ? (
-  //                   <EyeOpenIcon height={"16"} width={"16"} />
-  //                 ) : (
-  //                   <EyeClosedIcon height={"16"} width={"16"} />
-  //                 )}
-  //               </TextField.Slot>
-  //             </TextField.Root>
-  //           </div>
-  //           {/* Sections for various departments */}
-  //           {adminDepartments === null ? (
-  //             <div className="mt-3 input-field">
-  //               <label
-  //                 className="text-[15px] font-medium leading-[35px]"
-  //                 htmlFor="passwordConfirm"
-  //               >
-  //                 Department
-  //               </label>
-  //               <Select.Root size={"3"}>
-  //                 <Select.Trigger
-  //                   placeholder="View Department Ledger"
-  //                   className="w-full "
-  //                 />
-  //                 <Select.Content position="popper">
-  //                   {departments.map((item) => {
-  //                     return (
-  //                       <Select.Item value={item.id}>{item.name}</Select.Item>
-  //                     );
-  //                   })}
-  //                 </Select.Content>
-  //               </Select.Root>
-  //             </div>
-  //           ) : (
-  //             adminDepartments.map((item, index) => {
-  //               return (
-  //                 <div className="mt-3 input-field">
-  //                   <label
-  //                     className="text-[15px] font-medium leading-[35px]"
-  //                     htmlFor="passwordConfirm"
-  //                   >
-  //                     Department {index + 1}
-  //                   </label>
-  //                   <Select.Root
-  //                     size={"3"}
-  //                     defaultValue={item}
-  //                     onValueChange={(val) => {
-  //                       deptChange(index, val);
-  //                     }}
-  //                   >
-  //                     <Select.Trigger
-  //                       placeholder="View Department Ledger"
-  //                       className="w-full "
-  //                     />
-  //                     <Select.Content position="popper">
-  //                       {departments.map((deptItem) => {
-  //                         return (
-  //                           <Select.Item value={deptItem.id}>
-  //                             {deptItem.name}
-  //                           </Select.Item>
-  //                         );
-  //                       })}
-  //                     </Select.Content>
-  //                   </Select.Root>
-  //                 </div>
-  //               );
-  //             })
-  //           )}
-  //         </Grid>
-
-  //         <Flex
-  //           justify={"end"}
-  //           align={"end"}
-  //           width={"100%"}
-  //           gap={"3"}
-  //           className="mt-4"
-  //         >
-  //           <Button
-  //             className="mt-4 cursor-pointer"
-  //             size={3}
-  //             type="button"
-  //             color="red"
-  //             onClick={() => setEditDialogOpen(false)}
-  //           >
-  //             Discard Changes
-  //           </Button>
-  //           <Button
-  //             className="mt-4 cursor-pointer"
-  //             size={3}
-  //             type="submit"
-  //             color="green"
-  //             disabled={isLoading}
-  //           >
-  //             {isLoading ? <Spinner size={"2"} /> : "Save Changes"}
-  //           </Button>
-  //         </Flex>
-  //       </form>
-  //       <Toaster position="top-right" />
-  //     </>
-  //   );
-  // };
-
   useEffect(() => {
     fetchRoles();
     fetchStaffData();
@@ -655,6 +256,7 @@ const AllAdmins = () => {
                 <Table.ColumnHeaderCell>NAME</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell>EMAIL</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell>ROLE</Table.ColumnHeaderCell>
+                <Table.ColumnHeaderCell>SIGNATURE</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
               </Table.Row>
             </Table.Header>
@@ -683,6 +285,13 @@ const AllAdmins = () => {
                     </Table.RowHeaderCell>
                     <Table.Cell>{staff.email}</Table.Cell>
                     <Table.Cell>{getRoleNameById(staff.roleId)}</Table.Cell>
+                    <Table.Cell
+                      className={`${
+                        staff.signature ? "text-green-500" : "text-yellow-500"
+                      }`}
+                    >
+                      {staff.signature ? "Signed" : "Pending"}
+                    </Table.Cell>
                     <Table.Cell>
                       <DropdownMenu.Root>
                         <DropdownMenu.Trigger>

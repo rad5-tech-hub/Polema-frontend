@@ -3,9 +3,11 @@ import axios from "axios";
 const root = import.meta.env.VITE_ROOT;
 import toast, { Toaster } from "react-hot-toast";
 import { Spinner } from "@radix-ui/themes";
+import useToast from "../../../../hooks/useToast";
 
 const EditModal = ({ closeModal, product, runFetch }) => {
   const [category, setCategory] = React.useState("");
+  const showToast = useToast()
   const [buttonLoading, setButtonLoading] = React.useState(false);
   const [productTag, setProductTag] = React.useState("");
   const [unit, setUnit] = React.useState("");
@@ -43,13 +45,12 @@ const EditModal = ({ closeModal, product, runFetch }) => {
         }
       );
       setButtonLoading(true);
-
-      toast.success("Edited Successfully", {
-        style: {
-          padding: "20px",
-        },
+      showToast({
+        message: "Edited Successfully",
+        type: "success",
         duration: 6000,
-      });
+      })
+    
 
       setTimeout(() => {
         closeModal();

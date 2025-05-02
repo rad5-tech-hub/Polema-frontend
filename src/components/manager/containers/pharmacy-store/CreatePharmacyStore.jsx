@@ -12,10 +12,12 @@ import {
   Button,
 } from "@radix-ui/themes";
 import axios from "axios";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 
 const CreatePharmacyStore = () => {
+  const showToast = useToast();
   const fileInputRef = useRef(null);
   const [image, setImage] = useState(null);
   const [uploadedImage, setUploadedImage] = useState(" ");
@@ -155,7 +157,12 @@ const CreatePharmacyStore = () => {
       );
       //localhost:5173/src/components/manager/containers/products/EditProducts.jsx?t=1738027508364
       http: setButtonLoading(false);
-      toast.success(response.data.message, { duration: 5000 });
+      showToast({
+        message:response.data.message,
+        type: "success",
+        
+      })
+      
 
       // Reset form fields
       setProductID("");

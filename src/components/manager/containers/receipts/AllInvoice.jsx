@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import useToast from "../../../../hooks/useToast";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquare, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
@@ -13,6 +14,7 @@ const root = import.meta.env.VITE_ROOT;
 const AllInvoice = () => {
   const navigate = useNavigate();
   const [invoices, setInvoices] = useState([]);
+  const showToast = useToast()
   const [failedSearch, setFailedSearch] = useState(false);
   const [failedText, setFailedText] = useState("");
   const [loadingId, setLoadingId] = useState(null);
@@ -62,12 +64,21 @@ const AllInvoice = () => {
         {}, // Empty body if no data is required
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      toast.success("Invoice sent to print successfully!");
+      showToast({
+        message:"Invoice sent to print successfully!",
+        type: "success",
+        duration: 5000,
+      })
+      
       console.log("Invoice Response:", response.data);
     } catch (error) {
       console.error("Error sending invoice to print:", error);
-      toast.error(error.response?.data?.message || "Failed to send invoice to print.");
+      showToast({
+        message:error.response?.data?.message || "Failed to send invoice to print.",
+        type: "error",
+        duration: 5000,
+      });
+      
     } finally {
       setLoadingId(null);
     }

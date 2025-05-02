@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import useToast from "../../../../hooks/useToast";
 import { useNavigate } from "react-router-dom";
 import {
   TextField,
@@ -17,6 +18,7 @@ const root = import.meta.env.VITE_ROOT;
 
 const CreateDispatchNote = () => {
   const navigate = useNavigate();
+  const showToast =  useToast()
   const [buttonLoading, setButtonLoading] = useState(false);
   const [adminId, setAdminId] = useState("");
   const [superAdmins, setSuperAdmins] = useState([]);
@@ -63,12 +65,6 @@ const CreateDispatchNote = () => {
       return;
     }
 
-    if (!adminId) {
-      toast.error("Please select an admin to send to.", { style: { padding: "20px" }, duration: 10000 });
-      setButtonLoading(false);
-      return;
-    }
-
     if (!formData.driverName) {
       toast.error("Driver's name is required.", { style: { padding: "20px" }, duration: 10000 });
       setButtonLoading(false);
@@ -95,12 +91,12 @@ const CreateDispatchNote = () => {
         throw new Error("Failed to retrieve dispatch ID.");
       }
 
-      // Send dispatch to admin
-      await axios.post(
-        `${root}/customer/send-vehicle/${dispatchId}`,
-        { adminIds: [adminId] },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      // // Send dispatch to admin
+      // await axios.post(
+      //   `${root}/customer/send-vehicle/${dispatchId}`,
+      //   { adminIds: [adminId] },
+      //   { headers: { Authorization: `Bearer ${token}` } }
+      // );
 
       setFormData({        
         driverName: "",
@@ -108,14 +104,21 @@ const CreateDispatchNote = () => {
         vehicleNumber: "",
         destination: "",
       })
-      toast.success("Dispatch note generated and sent to admin!", {
-        style: { padding: "20px" },
-        duration: 10000,
-      });
+      showToast({
+        message: "Dispatch note generated and sent to admin!",
+        duration: 5000,
+        type: "success",
+      })
+    
       
     } catch (error) {
       console.error("Error creating dispatch note:", error);
-      toast.error(error.response?.data?.message || "Failed to create dispatch note.");
+      showToast({
+        type: "error",
+        message: error.response?.data?.message || "Failed to create dispatch note.",
+        duration: 5000,
+      })
+      
     } finally {
       setButtonLoading(false);
     }
@@ -190,7 +193,7 @@ const CreateDispatchNote = () => {
               onChange={handleInputChange("destination")}
             />
           </Flex>
-          <Flex direction="column" gap="2">
+          {/* <Flex direction="column" gap="2">
             <Text as="label" size="2" weight="medium">
               Send To
             </Text>
@@ -210,7 +213,7 @@ const CreateDispatchNote = () => {
                 ))}
               </Select.Content>
             </Select.Root>
-          </Flex>
+          </Flex> */}
         </Grid>
         <Flex justify="end" className="mt-8">
           <Button
@@ -219,7 +222,7 @@ const CreateDispatchNote = () => {
             disabled={buttonLoading}
             className="!bg-theme cursor-pointer"
           >
-            {buttonLoading ? <Spinner size="2" /> : "Send"}
+            {buttonLoading ? <Spinner size="2" /> : "Create"}
           </Button>
         </Flex>
       </form>

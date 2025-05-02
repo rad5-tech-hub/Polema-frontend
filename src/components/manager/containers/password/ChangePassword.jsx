@@ -4,9 +4,11 @@ import { jwtDecode } from "jwt-decode";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios"
 import { EyeOpenIcon, EyeClosedIcon } from "@radix-ui/react-icons";
-import { TextField, Heading, Grid, Button,Spinner } from "@radix-ui/themes"
+import { TextField, Heading, Grid, Button, Spinner } from "@radix-ui/themes"
+import useToast from "../../../../hooks/useToast";
 const root = import.meta.env.VITE_ROOT
 const ChangePassword = () => {
+    const showToast = useToast()
     // State management for the input values
     const [oldPassword, setOldPassword] = useState("");
     const [oldPassIsText, setOldPassIsText] = useState(false);
@@ -59,11 +61,12 @@ const ChangePassword = () => {
                 }
             })
             setButtonLoading(false);
-            toast.success("Password Changed Successfully", {
-                style:{
-                    padding:"30px"
-                },duration:6000
-            });
+            showToast({
+                message:"Password Changed Successfully",
+                type: "success",
+                duration: 4000
+            })
+            
             resetForm()
         } catch (error) {
             setButtonLoading(false)

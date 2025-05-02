@@ -17,6 +17,7 @@ import {
 } from "@radix-ui/themes";
 import { ArrowLeftIcon, UploadIcon, CameraIcon } from "@radix-ui/react-icons";
 import { formatMoney } from "../../../date";
+import useToast from "../../../../hooks/useToast";
 import SignatureCanvas from "../../../signature-pad/SignatureCanvas";
 
 const root = import.meta.env.VITE_ROOT;
@@ -40,7 +41,7 @@ const NewWeigh = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-
+const showToast = useToast()
   const [fullName, setFullName] = useState("");
   const [isSupplier, setIsSupplier] = useState(false);
   const [vehicleNumber, setVehicleNumber] = useState("");
@@ -70,7 +71,7 @@ const NewWeigh = () => {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [webcamError, setWebcamError] = useState(null);
   const [isImageUploading, setIsImageUploading] = useState(false);
-  const [authWeigh, setAuthWeigh] = useState("");
+  const [bagNumber, setBagNumber] = useState("");
 
   const fileInputRef = useRef(null);
   const webcamRef = useRef(null);
@@ -286,10 +287,12 @@ const NewWeigh = () => {
       });
       setImageURL(request.data.imageUrl);
       setIsImageUploading(false);
-      toast.success("Image Uploaded Successfully", {
-        style: { padding: "20px" },
-        duration: 3000,
-      });
+      showToast({
+        message:"Image Uploaded Successfully",
+        duration:4000,
+        type:"success"
+      })
+      
     } catch (error) {
       console.error("Upload failed:", error);
       setImagePreview(null);
@@ -447,16 +450,19 @@ const NewWeigh = () => {
       body.extra = parseFloat(quantityNet) - initialQuantity;
     }
     if (imageURL) body.image = imageURL;
+    if (bagNumber) body.bags = parseInt(bagNumber, 10); // Add bagNumber to the body
 
     try {
       const endpoint = `/customer/save-weigh/${weighId}`;
       await axios.post(`${root}${endpoint}`, body, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success("Weigh Draft Saved Successfully", {
-        style: { padding: "20px" },
-      });
-    } catch (error) {
+      showToast({
+        message:"Weigh Draft Successfully",
+        type:"success",
+        duration:4000
+      })
+          } catch (error) {
       console.error("Save failed:", error);
       toast.error(
         error.response?.data?.error ||
@@ -484,7 +490,8 @@ const NewWeigh = () => {
       !tar ||
       !gross ||
       !quantityNet ||
-      !imageURL
+      !imageURL || 
+      !bagNumber
     ) {
       toast.error("Please fill all required fields", {
         style: { padding: "20px" },
@@ -525,6 +532,7 @@ const NewWeigh = () => {
       tar: parseFloat(tar),
       gross: parseFloat(gross),
       image: imageURL,
+      bags: bagNumber
     };
 
     try {
@@ -532,9 +540,12 @@ const NewWeigh = () => {
       await axios.post(`${root}${endpoint}`, body, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success("New Weigh Successful", {
-        style: { padding: "20px" },
-      });
+      showToast({
+        message:"New Weigh Successful",
+        type:"success",
+        duration:4000
+      })
+      
       setButtonLoading(false);
       resetForm();
       navigate("/admin/raise-ticket/authority-to-weigh");
@@ -767,6 +778,16 @@ const NewWeigh = () => {
                 setQuantityNet((grossVal - tarVal).toFixed(4));
               }}
               disabled={isGrossDisabled}
+            />
+          </div>
+          <div className="w-full">
+            <Text>No. of Bags (Applicable only for PKC)</Text>
+            <TextField.Root
+              type="number"
+              className="mt-2"
+              value={bagNumber}
+              onChange={(e) => setBagNumber(e.target.value)}
+              placeholder="Input number of bags"              
             />
           </div>
           <div className="w-full">

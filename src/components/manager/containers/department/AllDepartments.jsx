@@ -23,9 +23,9 @@ import { faPen, faTags } from "@fortawesome/free-solid-svg-icons";
 import * as Dialog from "@radix-ui/react-dialog";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import toast, { LoaderIcon, Toaster } from "react-hot-toast";
-
+import useToast from "../../../../hooks/useToast";
 const root = import.meta.env.VITE_ROOT;
-
+const showToast = useToast();
 //Delete Dialog Box $//
 const DeleteDialog = ({ isOpen, onClose, runfetch, id }) => {
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -52,7 +52,12 @@ const DeleteDialog = ({ isOpen, onClose, runfetch, id }) => {
       );
       console.log(response);
       setDeleteLoading(false);
-      toast.success(response.data.message);
+      showToast({
+        message: response.data.message,
+        type:"success",
+        duration:4500
+      })
+      
       onClose();
       runfetch();
     } catch (error) {
@@ -220,12 +225,12 @@ const AllDepartments = () => {
           }
         );
         setLoading(false);
-        toast.success(response.data.message, {
-          duration: 6500,
-          style: {
-            padding: "30px",
-          },
-        });
+        showToast({
+          message:response.data.message,
+          duration:4000,
+          type:"success",
+        })
+        
         setTimeout(() => {
           setIsEditOpen(false);
         }, 1500);
@@ -275,7 +280,7 @@ const AllDepartments = () => {
           </form>
           {/* </Card> */}
         </Card>
-        <Toaster position="top-right" />
+        {/* <Toaster position="top-right" /> */}
       </Dialog.Root>
     );
   };
@@ -407,7 +412,7 @@ const AllDepartments = () => {
             />
           )}
 
-          <Toaster position="top-right" />
+          {/* <Toaster position="top-right" /> */}
         </div>
       )}
     </>

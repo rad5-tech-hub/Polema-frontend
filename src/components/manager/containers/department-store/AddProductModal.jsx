@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import toast, { LoaderIcon, Toaster } from "react-hot-toast";
+import useToast from "../../../../hooks/useToast";
 
 const AddProductModal = ({
   closeModal,
@@ -10,6 +11,7 @@ const AddProductModal = ({
   onAddProduct,
 }) => {
   const [quantity, setQuantity] = useState("");
+  const showToast = useToast();
   const [thresholdValue, setThresholdValue] = useState("");
   const [buttonLoading, setButtonLoading] = useState(false);
   const root = import.meta.env.VITE_ROOT;
@@ -31,8 +33,11 @@ const AddProductModal = ({
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
-      toast.success("Product added successfully!");
+      showToast({
+        message: "Product added successfully!",
+        type: "success",
+        duration: 6000,
+      });
       setButtonLoading(false);
       closeModal();
       runFetch();
