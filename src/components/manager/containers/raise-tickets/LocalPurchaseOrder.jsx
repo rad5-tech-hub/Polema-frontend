@@ -16,12 +16,13 @@ import { Select as AntSelect } from "antd";
 const {Option} = AntSelect
 import toast, { Toaster } from "react-hot-toast";
 const root = import.meta.env.VITE_ROOT;
-
+import useToast from "../../../../hooks/useToast"
 const LocalPurchaseOrder = () => {
   const [suppliers, setSuppliers] = React.useState([]);
   const [raw, setRaw] = React.useState([]);
   const [buttonLoading, setButtonLoading] = React.useState(false);
   const [selectedPrice, setSelectedPrice] = React.useState("");
+  const showToast = useToast()
 
   // State management for form details
   const [receiver, setReceiver] = React.useState("");
@@ -171,15 +172,20 @@ const LocalPurchaseOrder = () => {
       );
 
       // Success feedback and reset form
-      toast.success("LPO raised and sent successfully!", {
-        style: {
-          padding: "20px",
-        },
-      });
+      showToast({
+        message: "LPO raised and sent successfully",
+        type:"success",
+        duration:5000
+      })
       resetForm();
     } catch (error) {
       console.error("Error occurred during submission:", error);
-      toast.error("Failed to submit the form. Please try again.");
+      showToast({
+        message: "Failed to submit form , please try again.",
+        type: "error",
+        duration:5000
+      })
+      
     } finally {
       setButtonLoading(false); // Reset loading state
     }
