@@ -3,16 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast, { Toaster, LoaderIcon } from "react-hot-toast";
 import { Select } from "@radix-ui/themes";
-import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 
 const CreateInvoice = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const showToast = useToast();
-
-  // State variables
   const [customerData, setCustomerData] = useState(null);
   const [superAdmins, setSuperAdmins] = useState([]);
   const [adminId, setAdminId] = useState("");
@@ -109,32 +104,18 @@ const CreateInvoice = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      showToast({
-        message: "Invoice created and sent successfully",
-        duration: 5000,
-        type: "success",
+      toast.success("Invoice created and sent successfully.", {
+        duration: 10000,
+        style: {
+          padding: "20px",
+        },
       });
-
-      // Clear form state
-      setAdminId("");
-      setAddress("");
-      setCustomer("");
-      setCustomerId("");
-
-      // Navigate to the provided route
-      setTimeout(() => {
-        navigate("/admin/receipts/invoice"); // Replace with the actual route
-      }, 2000);
-
       setBtnLoading(false);
     } catch (error) {
-      console.error(error);
-      showToast({
-        message: error.response?.data?.error || "An error occurred, try again",
-        type: "error",
-        duration: 5000,
+      console.log(error);
+      toast.error("An error occurred, please try again", {
+        duration: 7000,
       });
-
       setBtnLoading(false);
     }
   };

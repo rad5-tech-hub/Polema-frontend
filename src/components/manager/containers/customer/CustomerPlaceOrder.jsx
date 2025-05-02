@@ -85,13 +85,19 @@ const CustomerPlaceOrder = () => {
     const product = products.find((product) => product.id === id);
     return product
       ? product
-      : { price: [{ unit: "", amount: "" }], department: { name: "" }, pricePlan: [] };
+      : {
+          price: [{ unit: "", amount: "" }],
+          department: { name: "" },
+          pricePlan: [],
+        };
   };
 
   // Get matching price plans
   const getMatchingPlansFromId = (id) => {
     const product = getMatchingUnitFromId(id);
-    setSelectedProductPlan(Array.isArray(product.pricePlan) ? product.pricePlan : []);
+    setSelectedProductPlan(
+      Array.isArray(product.pricePlan) ? product.pricePlan : []
+    );
   };
 
   // Handle price input change
@@ -177,7 +183,10 @@ const CustomerPlaceOrder = () => {
       quantity: Number(quantity),
       unit: product.price[0]?.unit || "",
       price: Number(basePrice) || Number(product.price[0]?.amount) || 0,
-      discount: planAmount === "custom" ? Number(planAmountValue) : Number(planAmount) || null,
+      discount:
+        planAmount === "custom"
+          ? Number(planAmountValue)
+          : Number(planAmount) || null,
     };
 
     try {
@@ -186,12 +195,10 @@ const CustomerPlaceOrder = () => {
         body,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      showToast({
-        message: response.data.message,
-        type: "success",
-        duration: 7000,
-      })
-     
+      toast.success(response.data.message, {
+        style: { background: "#ecfdf5", color: "#047857", padding: "16px" },
+        duration: 10000,
+      });
 
       // Reset form fields
       setSelectedCustomerId("");
@@ -206,14 +213,17 @@ const CustomerPlaceOrder = () => {
       setPlanAmountValue("");
       setCustomerType("regular");
       setTimeout(() => {
-        navigate('/admin/customers/order');
+        navigate("/admin/customers/order");
       }, 2000);
     } catch (error) {
       console.error("Submit error:", error);
-      toast.error(error.response?.data?.message || "An error occurred, try again", {
-        style: { background: "#fef2f2", color: "#b91c1c", padding: "16px" },
-        duration: 5000,
-      });
+      toast.error(
+        error.response?.data?.message || "An error occurred, try again",
+        {
+          style: { background: "#fef2f2", color: "#b91c1c", padding: "16px" },
+          duration: 5000,
+        }
+      );
     } finally {
       setButtonLoading(false);
     }
@@ -258,7 +268,8 @@ const CustomerPlaceOrder = () => {
           </div>
 
           {/* Customer Category */}
-          {getMatchingUnitFromId(selectedProductId).department?.name === "Crushing" && (
+          {getMatchingUnitFromId(selectedProductId).department?.name ===
+            "Crushing" && (
             <div className="w-full">
               <Text as="label" size="2" weight="medium">
                 Customer Category <span className="text-red-500">*</span>
@@ -286,9 +297,13 @@ const CustomerPlaceOrder = () => {
               {customerType !== "walkin" ? "Customer Name" : "Walk In Details"}
               <span className="text-red-500">*</span>
             </Text>
-            {getMatchingUnitFromId(selectedProductId).department?.name === "Crushing" &&
-            customerType === "walkin" ? (
-              <Flex direction="column" gap="2" className="mt-1 border p-4 rounded-md">
+            {getMatchingUnitFromId(selectedProductId).department?.name ===
+              "Crushing" && customerType === "walkin" ? (
+              <Flex
+                direction="column"
+                gap="2"
+                className="mt-1 border p-4 rounded-md"
+              >
                 <TextField.Root
                   size="2"
                   required
@@ -327,7 +342,8 @@ const CustomerPlaceOrder = () => {
                 optionFilterProp="label"
                 filterOption={(input, option) => {
                   const customer = customers.find((c) => c.id === option.value);
-                  const fullName = `${customer.firstname} ${customer.lastname}`.toLowerCase();
+                  const fullName =
+                    `${customer.firstname} ${customer.lastname}`.toLowerCase();
                   const phoneNumbers = customer.phoneNumber || [];
                   return (
                     fullName.includes(input.toLowerCase()) ||
@@ -341,8 +357,7 @@ const CustomerPlaceOrder = () => {
                     value={customer.id}
                     label={`${customer.firstname} ${customer.lastname}`}
                   >
-                    {customer.firstname} {customer.lastname} (
-                    {customer.phoneNumber?.join(", ") || "No phone"})
+                    {customer.firstname} {customer.lastname}
                   </AntSelect.Option>
                 ))}
               </AntSelect>
@@ -381,7 +396,8 @@ const CustomerPlaceOrder = () => {
               disabled
               value={
                 selectedProductId
-                  ? getMatchingUnitFromId(selectedProductId).price[0]?.unit || ""
+                  ? getMatchingUnitFromId(selectedProductId).price[0]?.unit ||
+                    ""
                   : ""
               }
               placeholder="Select Product First"

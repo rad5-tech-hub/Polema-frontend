@@ -10,10 +10,7 @@ import useToast from "../../hooks/useToast";
 import { use } from "react";
 
 const Header = ({ sidebarOpen, setSidebarOpen }) => {   
-  const showToast  = useToast();
-
-  console.log(showToast);
-  
+  const showToast  = useToast();  
 
   const getAdminName = () => {
     const name = localStorage.getItem("adminData");

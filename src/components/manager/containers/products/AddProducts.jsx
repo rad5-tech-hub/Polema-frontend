@@ -20,11 +20,13 @@ import {
 } from "@radix-ui/themes";
 import { PlusIcon } from "@radix-ui/react-icons";
 import toast, { Toaster } from "react-hot-toast";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 
 const AddProducts = () => {
   const [isloading, setIsLoading] = useState(false);
+  const showToast = useToast();
   const [pricePlan, setPricePlan] = useState(false);
   const [basePrice, setBasePrice] = useState("");
   const [unit, setUnit] = useState("");
@@ -140,7 +142,7 @@ const AddProducts = () => {
       ],
     };
 
-    console.log(pricePlan ? submitObject : submitWithoutPlans);
+    // console.log(pricePlan ? submitObject : submitWithoutPlans);
     try {
       const response = await axios.post(
         `${root}/admin/add-product`,
@@ -153,15 +155,14 @@ const AddProducts = () => {
       );
       setIsLoading(false);
       setTimeout(() => {
-        toast.success(
-          selectedCategory === "products" ? "Product Created Successfully" : "Raw Material Created Successfully",
-          {
-            duration: 6500,
-            style: {
-              padding: "30px",
-            },
-          }
-        );
+        showToast({
+          message:
+            selectedCategory === "products"
+              ? "Product Created Successfully"
+              : "Raw Material Created Successfully",
+          type: "success",
+          duration: 4000,
+        });
       }, 2000);
 
       ///Close dialog box if request is successful
