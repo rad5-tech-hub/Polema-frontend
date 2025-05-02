@@ -106,6 +106,7 @@ const ViewAuthorityToWeigh = () => {
 
   const isWeighbridge = decodedToken?.roleName
     ?.toLowerCase()
+    .replace(/[^a-z]/g, "") // remove spaces, dashes, etc.
     .includes("weighbridge");
   const isAdmin = decodedToken?.isAdmin == true;
 
