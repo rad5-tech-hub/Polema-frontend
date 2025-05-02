@@ -11,11 +11,13 @@ import {
   EyeOpenIcon,
   EyeClosedIcon,
 } from "@radix-ui/react-icons"; // Add icons for eye open and closed
+import useToast from "../hooks/useToast"
 
 const root = import.meta.env.VITE_ROOT;
 
 const LoginContent = () => {
   const [loading, setLoading] = useState(false); // Spinner state
+  const showToast = useToast()
   const [passwordVisible, setPasswordVisible] = useState(false); // Password visibility state
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
@@ -44,19 +46,18 @@ const LoginContent = () => {
       
       // Handle error
       if (error.response) {
-        toast.error(error.response.data.error, {
-          style: {
-            padding: "30px",
-          },
-          duration: 7500,
+        showToast({
+          message: error.response.data.error,
+          type:"error"
         });
+        
       } else if (error.request) {
-        toast.error("Network Error", {
-          style: {
-            padding: "30px",
-          },
-          duration: 7500,
-        });
+        showToast({
+          message: "Network Error",
+          type: "error",
+          duration:4000
+        })
+     
       }
     } finally {
       setLoading(false); // Remove spinner after request completes
