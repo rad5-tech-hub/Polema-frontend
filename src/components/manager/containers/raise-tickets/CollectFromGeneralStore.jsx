@@ -198,7 +198,7 @@ const CollectFromGeneralStore = () => {
       console.error(e);
       showToast({
         type: "error",
-        message: "An error occurred while submitting the form.",,
+        message: "An error occurred while submitting the form.",
         duration:5000
       });
       
