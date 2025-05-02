@@ -452,8 +452,8 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                         <p className="text-[.9rem]">
                           {ticketDetails.customerId && ticketDetails.transactions?.corder
                             ? `${ticketDetails.transactions.corder.firstname} ${ticketDetails.transactions.corder.lastname}`
-                            : ticketDetails?.authToWeigh?.supplierId && ticketDetails?.authToWeigh?.supplier
-                            ? `${ticketDetails.authToWeigh.supplier.firstname} ${ticketDetails.authToWeigh.supplier.lastname}`
+                            : ticketDetails?.supplierId && ticketDetails?.supplier
+                            ? `${ticketDetails?.supplier.firstname} ${ticketDetails?.supplier.lastname}`
                             : "Name not available"}
                         </p>
                       </div>
