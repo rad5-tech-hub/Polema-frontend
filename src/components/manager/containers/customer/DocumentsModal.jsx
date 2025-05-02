@@ -295,7 +295,7 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
                   <p className="text-xs">
                     {entry.creditType === null &&
                       `${entry.quantity} ${entry.unit} of`}{" "}
-                    {entry.quantity && entry?.quantity || ""} {entry.unit && entry?.unit || ""} of  {entry.product?.name}
+                    {entry.quantity && entry?.quantity || ""} {entry.unit && entry?.unit || ""} of  {entry.product?.name} {entry?.unit === null && "(extra)"}
                   </p>
                   <p className="text-xs">
                     {entry.creditType && `Paid with ${entry.creditType}`}

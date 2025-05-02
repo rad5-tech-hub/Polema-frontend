@@ -915,7 +915,7 @@ const showToast = useToast()
             <TextField.Root
               placeholder="Input Initial Quantity"
               className="mt-2"
-              value={formatMoney(initialQuantity)}
+              value={initialQuantity}
               disabled
             />
           </div>

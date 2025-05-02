@@ -44,6 +44,8 @@ const WaybillCreateInvoice = () => {
       });
       const customerInfo = response.data.ledger?.customerId;
       setCustomerId(customerInfo);    
+      setDriverName(response.data.order?.authToWeighTickets?.driver || "");
+      setVehicleNo(response.data.order?.authToWeighTickets?.vehicleNo || "");
     } catch (error) {
 
       toast.error("Failed to fetch gate pass details");
@@ -65,6 +67,7 @@ const WaybillCreateInvoice = () => {
       });
       const customerInfo = response.data.customer;
       setAddress(customerInfo.address || "Loading");
+      
     } catch (error) {
       console.log(error);
       toast.error("Failed to fetch customer details.");
@@ -115,7 +118,8 @@ const WaybillCreateInvoice = () => {
     // Prepare the request body
     const body = {
       ...(bagNumber && { bags: bagNumber }),
-      driversLicense: driverLicense,
+      ...(driverLicense && {driversLicense: driverLicense}),
+      
       transportedBy: carriedByWho,
     };
 
@@ -254,7 +258,7 @@ const WaybillCreateInvoice = () => {
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
-          <div className="invoice-no">
+          {/* <div className="invoice-no">
             <label>Invoice No</label>
             <input
               value={invoiceNo}
@@ -272,7 +276,7 @@ const WaybillCreateInvoice = () => {
               placeholder="Input number of bags"
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
-          </div>
+          </div> */}
 
           <div>
             <label>Send To:</label>
