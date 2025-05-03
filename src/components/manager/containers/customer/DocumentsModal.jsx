@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
-import { formatMoney } from "../../../date";
+import { formatMoney , isNegative} from "../../../date";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import { CameraFilled } from "@ant-design/icons";
 import { Flex, Button, Separator, Spinner, Grid, Text } from "@radix-ui/themes";
@@ -295,7 +295,8 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
                   <p className="text-xs">
                     {entry.creditType === null &&
                       `${entry.quantity} ${entry.unit} of`}{" "}
-                    {entry.quantity && entry?.quantity || ""} {entry.unit && entry?.unit || ""} of  {entry.product?.name} {entry?.unit === null && "(extra)"}
+                    {entry.quantity && entry?.quantity || ""} {entry.unit && entry?.unit || ""} of  {entry.product?.name}
+                    {entry.unit === null ? isNegative(entry.quantity) ? "(extra)":"(returned)" : ""}
                   </p>
                   <p className="text-xs">
                     {entry.creditType && `Paid with ${entry.creditType}`}

@@ -3,7 +3,7 @@ import { jwtDecode } from "jwt-decode";
 import _ from "lodash";
 import axios from "axios";
 import { Spinner, Grid, Button, Text } from "@radix-ui/themes";
-import {refractor,formatMoney} from "../../../date"
+import {refractor,isNegative,formatMoney} from "../../../date"
 import { Modal } from "antd";
 import Image from "../../../../static/image/polema-logo.png";
 import { Toaster, toast, LoaderIcon } from "react-hot-toast";
@@ -422,7 +422,8 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                                 <>
                                   <p className="text-[.5rem]">
                                     {entry.quantity} {entry.unit} of{" "}
-                                    {entry.productName}
+                                    {entry.productName} {" "}
+                                    {entry.unit === null ? isNegative(entry.quantity) ? "(extra)":"(returned)" : ""}
                                   </p>{" "}
                                 </>
                               );

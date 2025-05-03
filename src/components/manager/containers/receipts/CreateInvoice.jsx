@@ -83,7 +83,7 @@ const CreateInvoice = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setBtnLoading(true);
+    
 
     const token = localStorage.getItem("token");
     if (!token) {
@@ -91,7 +91,16 @@ const CreateInvoice = () => {
       setBtnLoading(false);
       return;
     }
-
+    if (!adminId) {
+      showToast({
+        message: "Please select an admin to send the invoice to.",
+        type: "error",
+        duration: 5000,
+      }
+      )
+      return;
+    }
+    setBtnLoading(true);
     try {
       const response = await axios.post(
         `${root}/customer/create-invoice/${id}`,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { formatMoney, refractor, refractorToTime } from "../../../date";
+import { formatMoney, refractor, refractorToTime,isNegative } from "../../../date";
 import { Switch, Dropdown, Menu } from "antd";
 import axios from "axios";
 import { useParams } from "react-router-dom";
@@ -123,10 +123,13 @@ const Invoice = () => {
                 {isMobison ? "Switch off for Polema" : "Switch on for Mobison"}
               </p>
             </div>
-            <div className="w-full lg:text-end text-center">              
-              <button onClick={()=> handlePrint()} className="rounded-lg border-[1px] border-[#919191]  px-8 shadow-lg text-sm sm:text-base cursor-pointer p-2">
+            <div className="w-full lg:text-end text-center">
+              <button
+                onClick={() => handlePrint()}
+                className="rounded-lg border-[1px] border-[#919191]  px-8 shadow-lg text-sm sm:text-base cursor-pointer p-2"
+              >
                 Print
-              </button>              
+              </button>
             </div>
           </div>
 
@@ -140,48 +143,70 @@ const Invoice = () => {
                   alt={isMobison ? "mobison-logo" : "polema-logo"}
                   className="h-[120px] object-contain"
                 />
-                {isMobison && <div>
-                  <p className="text-start text-xs italic">
-                    Pharmaceuticals,<br/>
-                    Industrialists,<br/>
-                    Oil Milling and<br/>
-                    General Commerce<br/>
-                  </p>
-                  </div>}
+                {isMobison && (
+                  <div>
+                    <p className="text-start text-xs italic">
+                      Pharmaceuticals,
+                      <br />
+                      Industrialists,
+                      <br />
+                      Oil Milling and
+                      <br />
+                      General Commerce
+                      <br />
+                    </p>
+                  </div>
+                )}
               </div>
               <div className="heading text-center">
                 <div>
                   <p className="flex justify-end mb-6 text-xs sm:text-sm">
-                  <i>{isMobison ? 'RC 64084' : 'RC 131127'}</i>
+                    <i>{isMobison ? "RC 64084" : "RC 131127"}</i>
                   </p>
-                  <h3
-                    className="text-[25px] font-bold text-[#434343]"                  
-                  >
-                    {isMobison ? "MAOBISON INTER-LINK ASSOCIATES LTD." : "POLEMA INDUSTRIES LIMITED"}                  
+                  <h3 className="text-[25px] font-bold text-[#434343]">
+                    {isMobison
+                      ? "MAOBISON INTER-LINK ASSOCIATES LTD."
+                      : "POLEMA INDUSTRIES LIMITED"}
                   </h3>
                   <p className="text-sm sm:text-base lg:text-lg font-bold text-[#434343]">
-                    A DIVISION OF {!isMobison ? "MAOBISON INTER-LINK ASSOCIATES LTD." : "POLEMA INDUSTRIES LIMITED"}<br/>
-                    <span className="text-sm font-bold text-[#434343]">Manufactures' & Exporters of Palm Kernel Oil, Palm Kernel Cakes and Drugs</span>
+                    A DIVISION OF{" "}
+                    {!isMobison
+                      ? "MAOBISON INTER-LINK ASSOCIATES LTD."
+                      : "POLEMA INDUSTRIES LIMITED"}
+                    <br />
+                    <span className="text-sm font-bold text-[#434343]">
+                      Manufactures' & Exporters of Palm Kernel Oil, Palm Kernel
+                      Cakes and Drugs
+                    </span>
                   </p>
                 </div>
               </div>
-              {isMobison ? (<div className="flex items-center text-xs sm:text-sm justify-end">
-                  <p><b className="italic">HEAD OFFICE:</b> Old Aba-Owerri Road,<br/>
-                  Osisioma Industry Layout, <br/>
-                  Osisioma L.G.A, Abia State. <br/>
-                  Tel: 08065208084<br/>
-                  Email: onwaobiec@yahoo.com<br/></p>
-                </div> ) : (<div className="flex items-center text-xs sm:text-sm justify-end">                
-                <p>
-                  <b className="italic">FACTORY/OFFICE:</b>
-                  <br /> Osisioma Industry Layout,
-                  <br /> Osisioma L.G.A, Abia State.
-                  <br /> Tel: 08065208084
-                  <br /> Email: polema_@yahoo.com
-                  <br />
-                  <span>onwaobiec@yahoo.com</span>
-                </p>
-              </div>)}
+              {isMobison ? (
+                <div className="flex items-center text-xs sm:text-sm justify-end">
+                  <p>
+                    <b className="italic">HEAD OFFICE:</b> Old Aba-Owerri Road,
+                    <br />
+                    Osisioma Industry Layout, <br />
+                    Osisioma L.G.A, Abia State. <br />
+                    Tel: 08065208084
+                    <br />
+                    Email: onwaobiec@yahoo.com
+                    <br />
+                  </p>
+                </div>
+              ) : (
+                <div className="flex items-center text-xs sm:text-sm justify-end">
+                  <p>
+                    <b className="italic">FACTORY/OFFICE:</b>
+                    <br /> Osisioma Industry Layout,
+                    <br /> Osisioma L.G.A, Abia State.
+                    <br /> Tel: 08065208084
+                    <br /> Email: polema_@yahoo.com
+                    <br />
+                    <span>onwaobiec@yahoo.com</span>
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Title Section */}
@@ -229,7 +254,8 @@ const Invoice = () => {
               </div>
             </div>
             <p className="mt-4 text-sm">
-              Balance Brought Forward : ₦ {formatMoney(invoice.balanceBeforeDebit)}{" "}
+              Balance Brought Forward : ₦{" "}
+              {formatMoney(invoice.balanceBeforeDebit)}{" "}
             </p>
             {/* Table Section */}
             <table className="w-full mt-6 sm:mt-8 border-collapse border-spacing-0">
@@ -267,8 +293,11 @@ const Invoice = () => {
                       {refractor(row.createdAt)}
                     </td>
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                      {row.quantity && row.unit && `${row.quantity} ${row.unit} of`}{" "}
-                      {`${row.productName} ${row.credit > row.debit ? "returned" : ""}`}
+                      {row?.quantity && row.quantity}{" "}
+                      {row?.unit ? row.unit : ""} {row?.unit ? "of " : ""}
+                      {row.productName && row.productName}
+                      {row.unit === null ? isNegative(row.quantity) ? " (extra)":" (returned)" : ""}
+                      
                     </td>
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                       {formatMoney(row?.order?.rate) || ""}
@@ -314,17 +343,20 @@ const Invoice = () => {
                   {/* PREPARED BY */}
                   <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm text-center">
                     {invoice?.role?.admins?.[0]?.signature ? (
-                      <><img
-                        src={invoice.role.admins[0].signature}
-                        alt="Prepared by signature"
-                        className="object-contain mx-auto"
-                        style={{ height: "50px", width: "50px" }}
-                      />
-                      {invoice?.role?.admins?.[0]?.firstname} {invoice?.role?.admins?.[0]?.lastname}
+                      <>
+                        <img
+                          src={invoice.role.admins[0].signature}
+                          alt="Prepared by signature"
+                          className="object-contain mx-auto"
+                          style={{ height: "50px", width: "50px" }}
+                        />
+                        {invoice?.role?.admins?.[0]?.firstname}{" "}
+                        {invoice?.role?.admins?.[0]?.lastname}
                       </>
                     ) : (
                       <>
-                        {invoice?.role?.admins?.[0]?.firstname} {invoice?.role?.admins?.[0]?.lastname}
+                        {invoice?.role?.admins?.[0]?.firstname}{" "}
+                        {invoice?.role?.admins?.[0]?.lastname}
                       </>
                     )}
                   </td>
@@ -332,17 +364,20 @@ const Invoice = () => {
                   {/* DELIVERED BY */}
                   <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm">
                     {invoice?.role?.admins?.[0]?.signature ? (
-                      <><img
-                        src={invoice.role.admins[0].signature}
-                        alt="Prepared by signature"
-                        className="object-contain mx-auto"
-                        style={{ height: "50px", width: "50px" }}
-                      />
-                      {invoice?.role?.admins?.[0]?.firstname} {invoice?.role?.admins?.[0]?.lastname}
-                    </>
+                      <>
+                        <img
+                          src={invoice.role.admins[0].signature}
+                          alt="Prepared by signature"
+                          className="object-contain mx-auto"
+                          style={{ height: "50px", width: "50px" }}
+                        />
+                        {invoice?.role?.admins?.[0]?.firstname}{" "}
+                        {invoice?.role?.admins?.[0]?.lastname}
+                      </>
                     ) : (
                       <>
-                        {invoice?.role?.admins?.[0]?.firstname} {invoice?.role?.admins?.[0]?.lastname}
+                        {invoice?.role?.admins?.[0]?.firstname}{" "}
+                        {invoice?.role?.admins?.[0]?.lastname}
                       </>
                     )}
                   </td>
@@ -357,11 +392,13 @@ const Invoice = () => {
                           className="object-contain mx-auto"
                           style={{ height: "50px", width: "50px" }}
                         />
-                        {invoice?.approvedByRole?.admins?.[0]?.firstname} {invoice?.approvedByRole?.admins?.[0]?.lastname}
+                        {invoice?.approvedByRole?.admins?.[0]?.firstname}{" "}
+                        {invoice?.approvedByRole?.admins?.[0]?.lastname}
                       </>
                     ) : (
                       <>
-                        {invoice?.approvedByRole?.admins?.[0]?.firstname} {invoice?.approvedByRole?.admins?.[0]?.lastname}
+                        {invoice?.approvedByRole?.admins?.[0]?.firstname}{" "}
+                        {invoice?.approvedByRole?.admins?.[0]?.lastname}
                       </>
                     )}
                   </td>
