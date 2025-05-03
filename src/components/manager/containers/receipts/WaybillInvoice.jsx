@@ -24,6 +24,7 @@ const WaybillInvoice = () => {
   const [isMobison, setIsMobison] = useState(false); // State for Switch
   const [billDetails, setBillDetails] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [entries,setEntries] = useState([])
 
   const totalCreditBalance = tableData.reduce(
     (total, row) => total + row.amount,
@@ -52,6 +53,7 @@ const WaybillInvoice = () => {
 
       // const { waybill } = response.data;
       const waybill = response.data.parse;
+      const detailsEntries =response.data.parse?.invoice?.ledgerEntries.filter((item)=> item.unit !== null)
 
       if (!waybill) {
         // setFailedText("No records found.");
@@ -60,6 +62,7 @@ const WaybillInvoice = () => {
       } else {
         // setFailedSearch(false);
         setBillDetails(waybill);
+        setEntries(detailsEntries);
       }
       
     } catch (error) {
@@ -298,7 +301,7 @@ const WaybillInvoice = () => {
                 </tr>
               </thead>
               <tbody>
-                {billDetails?.invoice?.ledgerEntries.map((row, index) => (
+                {entries.map((row, index) => (
                   <tr key={index} className="text-center">
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                       {index + 1}

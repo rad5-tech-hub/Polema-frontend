@@ -6,11 +6,13 @@ import { useParams } from "react-router-dom";
 import toast, { Toaster, LoaderIcon } from "react-hot-toast";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClose, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
 
 const root = import.meta.env.VITE_ROOT;
 
 const CreateGatepass = () => {
   const { id } = useParams();
+  const navigate = useNavigate()
   const [escort, setEscort] = useState("");
   const [buttonLoading, setButtonLoading] = useState(false);
   const [selectedAdminId, setSelectedAdminId] = useState("");
@@ -167,6 +169,10 @@ const CreateGatepass = () => {
       setGoodsOwner('');
       setSealNo([''])
       setSelectedAdminId('');
+
+      setTimeout(()=>{
+        navigate("/admin/receipts/gate-pass-note")
+      },3000)
     } catch (error) {
       console.log(error);
       showToast({

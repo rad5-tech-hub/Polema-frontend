@@ -5,12 +5,14 @@ import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { Select } from "@radix-ui/themes";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const root = import.meta.env.VITE_ROOT;
 
 const WaybillCreateInvoice = () => {
   const showToast = useToast()
   const { id } = useParams();
+  const navigste = useNavigate()
   const [buttonLoading, setButtonLoading] = useState(false);
   const [ledgerEntries, setLedgerEntries] = useState(null); // Initialize as `null` for type safety.
   const [selectedTransport, setSelectedTransport] = useState("");
@@ -168,6 +170,9 @@ const WaybillCreateInvoice = () => {
         type: "success",
       });
      
+      setTimeout(()=>{
+        navigate("/admin/receipts/waybill");
+      },3000)
     } catch (error) {
       console.error("Error during request:", error);
       setButtonLoading(false);
@@ -254,7 +259,7 @@ const WaybillCreateInvoice = () => {
               placeholder="Input Driver License"
               value={driverLicense}
               onChange={(e) => setDriverLicense(e.target.value)}
-              required
+              
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
