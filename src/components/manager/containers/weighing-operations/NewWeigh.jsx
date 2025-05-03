@@ -815,7 +815,7 @@ const showToast = useToast()
             />
           </div>
           <div className="w-full">
-            <Text>No. of Bags (Applicable only for PKC)</Text>
+            <Text>No. of Bags (Applicable only for PKC, Enter 0 if no bags)</Text>
             <TextField.Root
               type="number"
               className="mt-2"
