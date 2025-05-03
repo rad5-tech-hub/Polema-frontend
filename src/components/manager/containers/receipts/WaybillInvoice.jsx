@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { faPrint } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {useParams} from "react-router-dom";
+import { useParams } from "react-router-dom";
 import polemaLogo from "../../../../static/image/polema-logo.png";
 import mobisonLogo from "../../../../static/image/mob-logo.png";
 import axios from "axios";
 import { Switch, Dropdown, Menu } from "antd";
 import { Spinner } from "@radix-ui/themes";
-import { refractor,formatMoney } from "../../../date";
-const root = import.meta.env.VITE_ROOT
+import { refractor, formatMoney } from "../../../date";
+const root = import.meta.env.VITE_ROOT;
 const WaybillInvoice = () => {
-  const {id} = useParams();
+  const { id } = useParams();
 
   // State for table data
   const [tableData, setTableData] = useState([
@@ -24,7 +24,7 @@ const WaybillInvoice = () => {
   const [isMobison, setIsMobison] = useState(false); // State for Switch
   const [billDetails, setBillDetails] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [entries,setEntries] = useState([])
+  const [entries, setEntries] = useState([]);
 
   const totalCreditBalance = tableData.reduce(
     (total, row) => total + row.amount,
@@ -35,7 +35,7 @@ const WaybillInvoice = () => {
     window.print();
   };
 
-  // Function to fetch waybill details 
+  // Function to fetch waybill details
   const fetchWaybillDetails = async () => {
     const token = localStorage.getItem("token");
 
@@ -53,7 +53,9 @@ const WaybillInvoice = () => {
 
       // const { waybill } = response.data;
       const waybill = response.data.parse;
-      const detailsEntries =response.data.parse?.invoice?.ledgerEntries.filter((item)=> item.unit !== null)
+      const detailsEntries = response.data.parse?.invoice?.ledgerEntries.filter(
+        (item) => item.unit !== null
+      );
 
       if (!waybill) {
         // setFailedText("No records found.");
@@ -64,7 +66,6 @@ const WaybillInvoice = () => {
         setBillDetails(waybill);
         setEntries(detailsEntries);
       }
-      
     } catch (error) {
       console.error("Error fetching waybills:", error);
       toast.error("Failed to fetch waybills. Please try again.", {
@@ -73,26 +74,23 @@ const WaybillInvoice = () => {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   React.useEffect(() => {
-    fetchWaybillDetails()
-  }, [])
-  
+    fetchWaybillDetails();
+  }, []);
 
-  // Loading Component 
+  // Loading Component
   const LoadingComponent = () => {
     return (
       <>
         <div className="w-full h-screen bg-black/20 flex justify-center items-center">
- 
-      <Spinner size={"3"}/>
+          <Spinner size={"3"} />
         </div>
       </>
-    )
-  }
-  
-  
+    );
+  };
+
   return (
     <div className="p-4 sm:p-8">
       {/* Inline style for print-specific rules */}
@@ -155,48 +153,70 @@ const WaybillInvoice = () => {
                   alt={isMobison ? "mobison-logo" : "polema-logo"}
                   className="h-fit"
                 />
-                {isMobison && <div>
-                  <p className="text-start italic">
-                    Pharmaceuticals,<br/>
-                    Industrialists,<br/>
-                    Oil Milling and<br/>
-                    General Commerce<br/>
-                  </p>
-                  </div>}
+                {isMobison && (
+                  <div>
+                    <p className="text-start italic">
+                      Pharmaceuticals,
+                      <br />
+                      Industrialists,
+                      <br />
+                      Oil Milling and
+                      <br />
+                      General Commerce
+                      <br />
+                    </p>
+                  </div>
+                )}
               </div>
               <div className="heading text-center">
                 <div>
                   <p className="flex justify-end mb-14 text-xs sm:text-sm">
-                  <i>{isMobison ? 'RC 64084' : 'RC 131127'}</i>
+                    <i>{isMobison ? "RC 64084" : "RC 131127"}</i>
                   </p>
-                  <h1
-                    className="text-[25px] sm:text-[32px] font-bold text-[#434343]"                  
-                  >
-                    {isMobison ? "MAOBISON INTER-LINK ASSOCIATES LTD." : "POLEMA INDUSTRIES LIMITED"}                  
+                  <h1 className="text-[25px] sm:text-[32px] font-bold text-[#434343]">
+                    {isMobison
+                      ? "MAOBISON INTER-LINK ASSOCIATES LTD."
+                      : "POLEMA INDUSTRIES LIMITED"}
                   </h1>
                   <p className="text-sm sm:text-base lg:text-lg font-bold text-[#434343]">
-                    A DIVISION OF {!isMobison ? "MAOBISON INTER-LINK ASSOCIATES LTD." : "POLEMA INDUSTRIES LIMITED"}<br/>
-                    <span className="text-sm font-bold text-[#434343]">Manufactures' & Exporters of Palm Kernel Oil, Palm Kernel Cakes and Drugs</span>
+                    A DIVISION OF{" "}
+                    {!isMobison
+                      ? "MAOBISON INTER-LINK ASSOCIATES LTD."
+                      : "POLEMA INDUSTRIES LIMITED"}
+                    <br />
+                    <span className="text-sm font-bold text-[#434343]">
+                      Manufactures' & Exporters of Palm Kernel Oil, Palm Kernel
+                      Cakes and Drugs
+                    </span>
                   </p>
                 </div>
               </div>
-              {isMobison ? (<div className="flex items-center text-xs sm:text-sm justify-end">
-                  <p><b className="italic">HEAD OFFICE:</b> Old Aba-Owerri Road,<br/>
-                  Osisioma Industry Layout, <br/>
-                  Osisioma L.G.A, Abia State. <br/>
-                  Tel: 08065208084<br/>
-                  Email: onwaobiec@yahoo.com<br/></p>
-                </div> ) : (<div className="flex items-center text-xs sm:text-sm justify-end">                
-                <p>
-                  <b className="italic">FACTORY/OFFICE:</b>
-                  <br /> Osisioma Industry Layout,
-                  <br /> Osisioma L.G.A, Abia State.
-                  <br /> Tel: 08065208084
-                  <br /> Email: polema_@yahoo.com
-                  <br />
-                  <span>onwaobiec@yahoo.com</span>
-                </p>
-              </div>)}
+              {isMobison ? (
+                <div className="flex items-center text-xs sm:text-sm justify-end">
+                  <p>
+                    <b className="italic">HEAD OFFICE:</b> Old Aba-Owerri Road,
+                    <br />
+                    Osisioma Industry Layout, <br />
+                    Osisioma L.G.A, Abia State. <br />
+                    Tel: 08065208084
+                    <br />
+                    Email: onwaobiec@yahoo.com
+                    <br />
+                  </p>
+                </div>
+              ) : (
+                <div className="flex items-center text-xs sm:text-sm justify-end">
+                  <p>
+                    <b className="italic">FACTORY/OFFICE:</b>
+                    <br /> Osisioma Industry Layout,
+                    <br /> Osisioma L.G.A, Abia State.
+                    <br /> Tel: 08065208084
+                    <br /> Email: polema_@yahoo.com
+                    <br />
+                    <span>onwaobiec@yahoo.com</span>
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Title Section */}
@@ -235,6 +255,17 @@ const WaybillInvoice = () => {
                     </p>
                   </div>
                 ))}
+                {billDetails.bags > 0 &&
+                  (billDetails.bags !== null && (
+                    <div className="flex items-center gap-2 flex-grow">
+                      <label className="font-semibold text-sm sm:text-base">
+                        Number of bags:
+                      </label>
+                      <p className="border-b border-black border-dotted flex-grow text-sm sm:text-base px-8">
+                        {billDetails.bags || ""} bags
+                      </p>
+                    </div>
+                  ))}
 
                 {/* Two items per row */}
                 <div className="flex flex-wrap gap-4">
@@ -247,6 +278,7 @@ const WaybillInvoice = () => {
                       {billDetails.invoice?.vehicleNo || ""}
                     </p>
                   </div>
+
                   {/* <div className="flex items-center gap-2 flex-grow">
                 <label className="font-semibold text-sm sm:text-base">
                   Time Out:
@@ -356,21 +388,23 @@ const WaybillInvoice = () => {
               <tbody>
                 <tr>
                   <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm">
-                      {billDetails?.preparedByRole?.admins?.[0]?.signature ? (
-                        <>
-                          <img
-                            src={billDetails.preparedByRole.admins[0].signature}
-                            alt="Checked by signature"
-                            className="object-contain mx-auto"
-                            style={{ height: "50px", width: "50px" }}
-                          />
-                          {billDetails?.preparedByRole?.admins?.[0]?.firstname} {billDetails?.preparedByRole?.admins?.[0]?.lastname}
-                        </>
-                      ) : (
-                        <>
-                          {billDetails?.preparedByRole?.admins?.[0]?.firstname} {billDetails?.preparedByRole?.admins?.[0]?.lastname}
-                        </>
-                      )}
+                    {billDetails?.preparedByRole?.admins?.[0]?.signature ? (
+                      <>
+                        <img
+                          src={billDetails.preparedByRole.admins[0].signature}
+                          alt="Checked by signature"
+                          className="object-contain mx-auto"
+                          style={{ height: "50px", width: "50px" }}
+                        />
+                        {billDetails?.preparedByRole?.admins?.[0]?.firstname}{" "}
+                        {billDetails?.preparedByRole?.admins?.[0]?.lastname}
+                      </>
+                    ) : (
+                      <>
+                        {billDetails?.preparedByRole?.admins?.[0]?.firstname}{" "}
+                        {billDetails?.preparedByRole?.admins?.[0]?.lastname}
+                      </>
+                    )}
                   </td>
                   <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm">
                     {/* <p>Name: Michael Smith</p>
