@@ -158,7 +158,7 @@ const SupplierLedger = () => {
           {suppliers.length === 0 ? (
             <Skeleton className="p-1 w-[150px] mt-4 h-[15px] rounded-full" />
           ) : (
-            <p>{`${getSupplierDetailsByID(id).supplierTag} `}</p>
+           getSupplierDetailsByID(id).supplierTag ? <p>{`${getSupplierDetailsByID(id).supplierTag} `}</p> : "Supplier" 
           )}
         </div>
         <div className="w-[70%]">
