@@ -294,7 +294,9 @@ const AuthorityToGiveCash = () => {
         </Select.Root>
       </div>
       <Separator className="my-4 w-full" />
-      <Tabs.Root defaultValue="Customers">
+      <Tabs.Root defaultValue="Customers" onValueChange={() => {
+        setComments("")
+      }}>
         <Tabs.List className="justify-center flex w-full items-center">
           <Tabs.Trigger value="Customers">Customers</Tabs.Trigger>
           <Tabs.Trigger value="Staff">Staff</Tabs.Trigger>

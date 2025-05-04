@@ -85,7 +85,7 @@ const CashManagementLedger = () => {
           <Table.Row>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>COMMENT</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>RECEIVED BY</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>RECEIVED FROM</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>GIVEN TO</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>APPROVED BY</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell className="text-green-500">CREDIT(₦)</Table.ColumnHeaderCell>
