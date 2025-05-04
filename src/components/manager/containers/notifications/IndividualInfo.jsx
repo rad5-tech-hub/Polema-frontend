@@ -478,9 +478,9 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                             QUANTITY
                           </Text>
                           <p className="text-[.9rem]">
-                            {formatMoney(
+                            {
                               ticketDetails.transactions?.quantity
-                            ) || ""}{" "}
+                             || ""}
                             {ticketDetails.transactions?.unit || ""}
                           </p>
                         </div>
