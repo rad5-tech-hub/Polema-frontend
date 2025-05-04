@@ -195,15 +195,22 @@ const AuthorityToGiveCash = () => {
 
   const staffSubmit = async (e) => {
     e.preventDefault();
-    setOthersLoading(true);
-
+    
     const token = localStorage.getItem("token");
-
+    
     if (!token) {
       toast.error("An error occurred, try logging in again");
       setOthersLoading(false);
       return;
     }
+    if (!adminId) {
+      showToast({
+        message:"Select an admin to send it to",
+        type:"error"
+      })
+      return
+    }
+    setOthersLoading(true);
 
     const resetForm = () => {
       setStaffAmount("");
@@ -295,7 +302,8 @@ const AuthorityToGiveCash = () => {
       </div>
       <Separator className="my-4 w-full" />
       <Tabs.Root defaultValue="Customers" onValueChange={() => {
-        setComments("")
+        setComments("");
+        setAdminId("")
       }}>
         <Tabs.List className="justify-center flex w-full items-center">
           <Tabs.Trigger value="Customers">Customers</Tabs.Trigger>
@@ -425,6 +433,7 @@ const AuthorityToGiveCash = () => {
               <Select.Root
                 disabled={superAdmins.length === 0}
                 onValueChange={(value) => setAdminId(value)}
+                value={adminId}
               >
                 <Select.Trigger
                   className="mt-3 w-full"
@@ -541,12 +550,13 @@ const AuthorityToGiveCash = () => {
                   onValueChange={(value) => {
                     setAdminId(value);
                   }}
+                  value={adminId}
                 >
                   <Select.Trigger
                     className="w-full mt-2"
                     placeholder="Select Admin"
                   />
-                  <Select.Content>
+                  <Select.Content position="popper">
                     {superAdmins.map((admin) => {
                       return (
                         <Select.Item
