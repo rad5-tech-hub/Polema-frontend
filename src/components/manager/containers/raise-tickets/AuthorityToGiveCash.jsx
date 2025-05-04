@@ -210,7 +210,6 @@ const AuthorityToGiveCash = () => {
       setStaffName("");
       setItemName("");
       setComments("");
-      setAuthorityType("");
       setDepartmentId("");
     };
 
