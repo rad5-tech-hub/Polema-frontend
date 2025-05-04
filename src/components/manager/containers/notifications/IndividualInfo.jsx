@@ -480,7 +480,7 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                           <p className="text-[.9rem]">
                             {
                               ticketDetails.transactions?.quantity
-                             || ""}
+                             || ""}{" "}
                             {ticketDetails.transactions?.unit || ""}
                           </p>
                         </div>
