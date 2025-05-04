@@ -276,10 +276,10 @@ const AuthorityToGiveCash = () => {
       <div className="flex justify-between items-center mb-4">
         <Heading>
           Authority To{" "}
-          {authorityType !== "credit" ? "Give Cash" : "Collect Cash"}
+          {authorityType !== "credit" ? "Give Cash (To Cashier)" : "Collect Cash (From Cashier)"}
         </Heading>
         <Select.Root
-          defaultValue="give"
+          defaultValue="collect"
           onValueChange={(value) => {
             value === "collect"
               ? setAuthorityType("credit")
