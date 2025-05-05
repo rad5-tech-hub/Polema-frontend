@@ -144,7 +144,6 @@ const AuthorityToGiveCash = () => {
       setSelectedCustomer("");
       setSelectedProduct("");
       setComments("");
-      setAuthorityType("");
     };
 
     const body = {
