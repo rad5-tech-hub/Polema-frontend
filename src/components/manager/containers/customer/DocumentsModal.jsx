@@ -327,7 +327,11 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
                       `${entry.quantity} ${entry.unit} of`}{" "}
                     {(entry.quantity && entry?.quantity) || ""}{" "}
                     {(entry.unit && entry?.unit) || ""} of {entry.product?.name}
-                    {entry.unit !== null && " ordered"}
+                    {/* {entry.unit !== null && " ordered"} */}
+                   {entry.unit === null ? "" : entry.unit === "" || entry.unit === "N/A" ? "" : " ordered"}
+                  
+                  
+                    
                     {entry.unit === null
                       ? isNegative(entry.quantity)
                         ? " (returned)"

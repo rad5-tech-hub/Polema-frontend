@@ -55,6 +55,7 @@ const AccountBook = () => {
     setComment("");
     setDeptID("");
     setOtherName("");
+    setBankId("")
   };
 
   const formatNumber = (num) => {
@@ -414,6 +415,7 @@ const AccountBook = () => {
                           : "Select Suppliers"
                       }
                       style={{ width: "100%" }}
+                      value={selectedCustomerId ? selectedCustomerId : ""}
                       onChange={(value) => {
                         setSelectedCustomerId(value);
                       }}
@@ -441,6 +443,7 @@ const AccountBook = () => {
                     <AntSelect
                       showSearch
                       className="mt-2"
+                      value={selectedProductId ? selectedProductId : ""}
                       placeholder={
                         accountRecipient === "customers"
                           ? "Select Products"
@@ -463,7 +466,6 @@ const AccountBook = () => {
                         </Option>
                       ))}
                     </AntSelect>
-          
                   </div>
                 </>
               )}
@@ -484,32 +486,28 @@ const AccountBook = () => {
                 <Text>
                   Bank Name <span className="text-red-500">*</span>
                 </Text>
-                
-                  <AntSelect
-                 
-                 showSearch
-                      className="mt-2"
-                      placeholder={
-                          "Select Bank"
-                      }
-                      style={{ width: "100%" }}
-                      onChange={(value) => {
-                        // setSelectedProductId(value);
-                        setBankId(value)
-                      }}
-                      optionFilterProp="children"
-                      filterOption={(input, option) =>
-                        option.children
-                          .toLowerCase()
-                          .includes(input.toLowerCase())
-                      }
-                    >
-                      {bankDetails.map((bank) => (
-                        <Option key={bank.id} value={bank.id} > 
-                          {`${bank.name} `}
-                        </Option>
-                      ))}
-                    </AntSelect>
+
+                <AntSelect
+                  showSearch
+                  className="mt-2"
+                  placeholder={"Select Bank"}
+                  value={bankId ? bankId : ""}
+                  style={{ width: "100%" }}
+                  onChange={(value) => {
+                    // setSelectedProductId(value);
+                    setBankId(value);
+                  }}
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    option.children.toLowerCase().includes(input.toLowerCase())
+                  }
+                >
+                  {bankDetails.map((bank) => (
+                    <Option key={bank.id} value={bank.id}>
+                      {`${bank.name} `}
+                    </Option>
+                  ))}
+                </AntSelect>
               </div>
 
               <div className="w-full">
