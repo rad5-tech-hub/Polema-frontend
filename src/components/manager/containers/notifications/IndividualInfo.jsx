@@ -602,13 +602,13 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                           TYPE
                         </Text>
                         {ticketDetails.creditOrDebit === "credit" ? (
-                          <p className="text-[.9rem] text-green-500">
+                          <p className="text-[.9rem] text-red-500">
                             {/* Give Cash */}
                             {/* This was changed to collected cash because if the cash is given , the admin collect it  */}
                             Collect Cash
                           </p>
                         ) : (
-                          <p className="text-[.9rem] text-red-500">
+                          <p className="text-[.9rem] text-green-500">
                             {/* This was changed because of the reverse of the abpve comments  */}
                             {/* Collected Cash */}
                             Give Cash
