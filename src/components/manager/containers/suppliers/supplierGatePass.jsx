@@ -4,6 +4,8 @@ import axios from "axios";
 import { TextField, Select, Flex, Button, Spinner } from "@radix-ui/themes";
 import toast, { Toaster, LoaderIcon } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faClose, faPlus } from "@fortawesome/free-solid-svg-icons";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -20,6 +22,24 @@ const CreateGatepassForSupplier = () => {
   const [rawMaterials, setRawMaterials] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState("");
   const navigate= useNavigate();
+
+  const [sealNo, setSealNo] = useState([""]); // Array to manage phone numbers
+
+  const handleAddPhoneNumber = () => {
+    setSealNo([...sealNo, ""]);
+  };
+
+  const handleRemovePhoneNumber = (index) => {
+    const updatedNumbers = sealNo.filter((_, i) => i !== index);
+    setSealNo(updatedNumbers);
+  };
+
+  const handlePhoneNumberChange = (value, index) => {
+    const updatedNumbers = sealNo.map((num, i) =>
+      i === index ? value : num
+    );
+    setSealNo(updatedNumbers);
+  };
 
   // Fetch super admins
   const fetchSuperAdmins = async () => {
@@ -82,6 +102,7 @@ const CreateGatepassForSupplier = () => {
       setEscort("");
       setVehicleNumber("");
       setGoodsOwner("");
+      setSealNo([""]); // Reset the seal numbers to an empty array
       setDestination("");
       setAdminId(""); // Clear the "Send To" field
       setSelectedProductId(""); // Clear the "Raw Material" field
@@ -93,6 +114,7 @@ const CreateGatepassForSupplier = () => {
       driver: driverName,
       vehicleNo: vehicleNumber,
       owner: goodsOwner,
+      seal: sealNo,
       productId: selectedProductId,
     };
   
@@ -227,6 +249,39 @@ const CreateGatepassForSupplier = () => {
               </Select.Content>
             </Select.Root>
           </div>
+          <div className="input-field ">
+            <label>
+              Seal Number
+            </label>
+            {sealNo.map((number, index) => (
+              <div
+                className="flex items-center gap-2 w-full relative mt-2"
+                key={index}
+              >
+                <TextField.Root
+                  placeholder="Enter Seal No."
+                  value={number}
+                  size={"3"}
+                  onChange={(e) =>
+                    handlePhoneNumberChange(e.target.value, index)
+                  }
+                  className="w-full"
+                />
+                <Button type="button" onClick={handleAddPhoneNumber}>
+                  <FontAwesomeIcon icon={faPlus} />
+                </Button>
+                {sealNo.length > 1 && (
+                  <Button
+                    type="button"
+                    onClick={() => handleRemovePhoneNumber(index)}
+                    className="bg-red-500 hover:bg-red-700"
+                  >
+                    <FontAwesomeIcon icon={faClose} />
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
           <div>
             <label htmlFor="">Send To:</label>
             <Select.Root
@@ -242,15 +297,15 @@ const CreateGatepassForSupplier = () => {
               <Select.Content position="popper">
                 {superAdmins.map((admin) => (
                   <Select.Item
-                    key={admin.role?.id}
-                    value={admin.role?.id || ""}
+                    key={admin.id}
+                    value={admin.id || ""}
                   >
                     {`${admin.firstname} ${admin.lastname}`} ({admin.role?.name})
                   </Select.Item>
                 ))}
               </Select.Content>
             </Select.Root>
-          </div>
+          </div>          
         </div>
         <Flex justify={"end"}>
           <Button
