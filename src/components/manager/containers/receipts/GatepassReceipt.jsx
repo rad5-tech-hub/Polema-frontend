@@ -201,6 +201,12 @@ const GatepassReceipt = () => {
                       refractorToTime(passDetails.createdAt) || "-",
                     ],
                     [
+                      "Seal",
+                      passDetails.seal && passDetails.seal.length > 0
+                        ? passDetails.seal.join(", ")
+                        : "-"
+                    ],
+                    [
                       "Authorized By",
                       passDetails.preparedByRole?.admins?.[0]
                         ? `${passDetails.preparedByRole.admins[0].firstname} ${passDetails.preparedByRole.admins[0].lastname}`
