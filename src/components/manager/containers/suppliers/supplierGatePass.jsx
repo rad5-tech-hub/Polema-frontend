@@ -20,6 +20,7 @@ const CreateGatepassForSupplier = () => {
   const [driverName, setDriverName] = useState("");
   const [goodsOwner, setGoodsOwner] = useState("");
   const [rawMaterials, setRawMaterials] = useState([]);
+  const [selectedAdminId, setSelectedAdminId] = useState("");
   const [selectedProductId, setSelectedProductId] = useState("");
   const navigate= useNavigate();
 
@@ -96,6 +97,20 @@ const CreateGatepassForSupplier = () => {
       setButtonLoading(false);
       return;
     }
+    if (!selectedAdminId) {
+      toast.error("Please select an admin role");
+      setButtonLoading(false);
+      return;
+    }
+    const selectedAdmin = superAdmins.find(
+      (admin) => admin.id === selectedAdminId
+    );
+    if (!selectedAdmin) {
+      toast.error('Selected admin not found');
+      setButtonLoading(false);
+      return;
+    }
+    const roleIdToSend = selectedAdmin.roleId;
   
     const resetForm = () => {
       setDriverName("");
@@ -133,14 +148,8 @@ const CreateGatepassForSupplier = () => {
       const passID = response.data.gatepass.id;
       await axios.post(
         `${root}/customer/send-gate-pass/${passID}`,
-        {
-          adminIds: [adminId],
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { adminIds: [roleIdToSend] },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       showToast({
     message:"Successfully Sent to Admin",
@@ -283,29 +292,22 @@ const CreateGatepassForSupplier = () => {
             ))}
           </div>
           <div>
-            <label htmlFor="">Send To:</label>
+            <label>Send To:</label>
             <Select.Root
-              size={"3"}
+              value={selectedAdminId}
+              onValueChange={setSelectedAdminId}
               disabled={superAdmins.length === 0}
-              value={adminId} // Bind the value to the state
-              onValueChange={(value) => setAdminId(value)}
             >
-              <Select.Trigger
-                className="w-full mt-2"
-                placeholder="Select Admin"
-              />
-              <Select.Content position="popper">
+              <Select.Trigger className='w-full mt-2' />
+              <Select.Content>
                 {superAdmins.map((admin) => (
-                  <Select.Item
-                    key={admin.id}
-                    value={admin.id || ""}
-                  >
+                  <Select.Item key={admin.id} value={admin.id}>
                     {`${admin.firstname} ${admin.lastname}`} ({admin.role?.name})
                   </Select.Item>
                 ))}
               </Select.Content>
             </Select.Root>
-          </div>          
+          </div>           
         </div>
         <Flex justify={"end"}>
           <Button

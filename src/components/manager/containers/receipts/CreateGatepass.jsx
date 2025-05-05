@@ -4,6 +4,8 @@ import axios from "axios";
 import { TextField, Select, Flex, Button } from "@radix-ui/themes";
 import { useParams } from "react-router-dom";
 import toast, { Toaster, LoaderIcon } from "react-hot-toast";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faClose, faPlus } from "@fortawesome/free-solid-svg-icons";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -18,7 +20,25 @@ const CreateGatepass = () => {
   const [driverName, setDriverName] = useState("");
   const [goodsOwner, setGoodsOwner] = useState("");
   const [customerId, setCustomerId] = useState("");
-  const showToast = useToast()
+  const showToast = useToast();
+  const [sealNo, setSealNo] = useState([""]); // Array to manage phone numbers
+  
+    const handleAddPhoneNumber = () => {
+      setSealNo([...sealNo, ""]);
+    };
+  
+    const handleRemovePhoneNumber = (index) => {
+      const updatedNumbers = sealNo.filter((_, i) => i !== index);
+      setSealNo(updatedNumbers);
+    };
+  
+    const handlePhoneNumberChange = (value, index) => {
+      const updatedNumbers = sealNo.map((num, i) =>
+        i === index ? value : num
+      );
+      setSealNo(updatedNumbers);
+    };
+  
 
   // Fetch gate pass related details
   const TransDetails = useCallback(async () => {
@@ -99,9 +119,8 @@ const CreateGatepass = () => {
   // Submit gatepass form
   const submitForm = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     if (!token) return toast.error("An error occurred, try logging in again");
-
     setButtonLoading(true);
     if (!selectedAdminId) {
       toast.error("Please select an admin role");
@@ -112,21 +131,16 @@ const CreateGatepass = () => {
       (admin) => admin.id === selectedAdminId
     );
     if (!selectedAdmin) {
-      toast.error("Selected admin not found");
+      toast.error('Selected admin not found');
       setButtonLoading(false);
       return;
     }
-
-    const resetForm = function () {
-      setDestination("");
-      setEscort("");
-    };
+    const roleIdToSend = selectedAdmin.roleId;
     const body = {
       escortName: escort,
       destination,
       seal: sealNo,
     };
-
     try {
       const res = await axios.post(
         `${root}/customer/create-gatepass/${id}`,
@@ -135,32 +149,29 @@ const CreateGatepass = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
       const passID = res.data.gatepass.id;
-
       await axios.post(
         `${root}/customer/send-gate-pass/${passID}`,
         { adminIds: [roleIdToSend] },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
       showToast({
-        message: "Successfully sent to admin",
-        type: "success",
+        message: 'Successfully sent to admin',
+        type: 'success',
         duration: 5000,
       });
-
-      setDestination("");
-      setEscort("");
-      setVehicleNumber("");
-      setDriverName("");
-      setGoodsOwner("");
-      setSelectedAdminId("");
+      setDestination('');
+      setEscort('');
+      setVehicleNumber('');
+      setDriverName('');
+      setGoodsOwner('');
+      setSealNo([''])
+      setSelectedAdminId('');
     } catch (error) {
       console.log(error);
       showToast({
-        message: "An error occurred while creating the gate pass",
-        type: "error",
+        message: 'An error occurred while creating the gate pass',
+        type: 'error',
         duration: 5000,
       });
     } finally {
@@ -228,7 +239,8 @@ const CreateGatepass = () => {
               onChange={(e) => setDestination(e.target.value)}
             />
           </div>
-          <div className="input-field">
+
+          <div className="input-field ">
             <label>
               Seal Number
             </label>
@@ -261,6 +273,7 @@ const CreateGatepass = () => {
               </div>
             ))}
           </div>
+
           <div>
             <label>Send To:</label>
             <Select.Root
@@ -268,18 +281,13 @@ const CreateGatepass = () => {
               onValueChange={setSelectedAdminId}
               disabled={superAdmins.length === 0}
             >
-              <Select.Trigger
-                className="w-full mt-2"
-                placeholder="Select Admin"
-              />
-              <Select.Content position="popper">
-                {superAdmins.map((admin) => {
-                  return (
-                    <Select.Item
-                      value={admin.role?.id || " "}
-                    >{`${admin.firstname} ${admin.lastname}`} ({admin.role?.name})</Select.Item>
-                  );
-                })}
+              <Select.Trigger className='w-full mt-2' />
+              <Select.Content>
+                {superAdmins.map((admin) => (
+                  <Select.Item key={admin.id} value={admin.id}>
+                    {`${admin.firstname} ${admin.lastname}`} ({admin.role?.name})
+                  </Select.Item>
+                ))}
               </Select.Content>
             </Select.Root>
           </div>
