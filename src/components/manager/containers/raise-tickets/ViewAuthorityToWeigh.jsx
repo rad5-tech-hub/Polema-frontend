@@ -293,7 +293,11 @@ const ViewAuthorityToWeigh = () => {
                               <DropdownMenu.Item
                                 onClick={() =>
                                   navigate(
+<<<<<<< HEAD
+                                    `/admin/weighing-operations/raise-order/${item.id}`
+=======
                                     `/admin/suppliers/place-supplier-order/${item.weigh.id}`
+>>>>>>> 6c1b5b931653a8c80fc3d9c56fc00546021c8aee
                                   )
                                 }
                               >
