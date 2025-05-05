@@ -98,7 +98,9 @@ const GatepassReceipt = () => {
                   onChange={(checked) => setIsMobison(checked)}
                 />
                 <p className="text-sm font-semibold mt-2 text-[#D2D2D2]">
-                  {isMobison ? "Switch off for Polema" : "Switch on for Mobison"}
+                  {isMobison
+                    ? "Switch off for Polema"
+                    : "Switch on for Mobison"}
                 </p>
               </div>
               <div className="lg:text-end text-center w-full">
@@ -121,7 +123,7 @@ const GatepassReceipt = () => {
                       src={isMobison ? mobisonLogo : polemaLogo}
                       alt={isMobison ? "mobison-logo" : "polema-logo"}
                       className="object-contain"
-                      style={{                        
+                      style={{
                         height: "100px",
                       }}
                     />
@@ -173,13 +175,16 @@ const GatepassReceipt = () => {
                       "Goods/Invoice No",
                       passDetails.transaction
                         ? `${
-                            passDetails.transaction.porders?.name || "-"
-                          } / 
+                            passDetails.transaction?.quantityloaded
+                              ?.quantityLoaded || "-"
+                          }  ${passDetails.transaction?.unit || "-"}  of  ${
+                            passDetails.transaction?.porders?.name
+                          } /
                           ${
                             passDetails.transaction.invoice?.invoiceNumber
                               ? `000${passDetails.transaction.invoice.invoiceNumber}`
-                              : "-"
-                          } / Quantity Loaded ${passDetails.transaction?.quantityloaded?.quantityLoaded}`
+                              : ""
+                          }`
                         : passDetails.rawMaterial?.name || "-",
                     ],
                     [

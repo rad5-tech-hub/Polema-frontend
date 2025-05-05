@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import useToast from "../../../../hooks/useToast";
 import axios from "axios";
-import { TextField, Select, Flex, Button, Spinner } from "@radix-ui/themes";
+import { TextField, Select, Flex, Button } from "@radix-ui/themes";
 import { useParams } from "react-router-dom";
 import toast, { Toaster, LoaderIcon } from "react-hot-toast";
+//import { Loader2 as LoaderIcon } from "lucide-react"; // or another loader icon import
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -11,156 +12,159 @@ const CreateGatepass = () => {
   const { id } = useParams();
   const [escort, setEscort] = useState("");
   const [buttonLoading, setButtonLoading] = useState(false);
-  const [adminId, setAdminId] = useState("");
+  const [selectedAdminId, setSelectedAdminId] = useState("");
   const [destination, setDestination] = useState("");
-  const [entryDetails, setEntryDetails] = useState({});
   const [superAdmins, setSuperAdmins] = useState([]);
   const [vehicleNumber, setVehicleNumber] = useState("");
   const [driverName, setDriverName] = useState("");
   const [goodsOwner, setGoodsOwner] = useState("");
   const [customerId, setCustomerId] = useState("");
-  const showToast = useToast()
+  const showToast = useToast();
 
-  const TransDetails = async () => {
+  // Fetch gate pass related details
+  const TransDetails = useCallback(async () => {
     const token = localStorage.getItem("token");
-
-    if (!token) {
-      toast.error("An error occurred, try logging in again");
-      return;
-    }
+    if (!token) return toast.error("An error occurred, try logging in again");
 
     try {
       const response = await axios.get(`${root}/customer/get-summary/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const customerInfo = response.data.ledger?.customerId;
-      setCustomerId(customerInfo);    
-    } catch (error) {
-
-      toast.error("Failed to fetch gate pass details");
-    }
-  };
-
-  const fetchDetails = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error("An error occurred, try logging in again.", {
-        duration: 5000,
-      });
-      return;
-    }
-
-    try {
-      const response = await axios.get(`${root}/customer/get-customer/${customerId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      const data = response.data;
+      const customerId = data.ledger?.customerId;
+      setCustomerId(customerId);
+
+      setDriverName(data.order?.authToWeighTickets?.driver || "");
+      setVehicleNumber(data.order?.authToWeighTickets?.vehicleNo || "");
+
+      const customer = data.ledgerSummary?.ledgerEntries[0]?.customer;
+      const fullName = `${customer?.firstname || ""} ${
+        customer?.lastname || ""
+      }`;
+      setGoodsOwner(fullName);
+    } catch (error) {
+      toast.error("Failed to fetch gate pass details");
+    }
+  }, [id]);
+
+  // Fetch customer destination address
+  const fetchCustomerDetails = useCallback(async () => {
+    if (!customerId) return;
+
+    const token = localStorage.getItem("token");
+    if (!token) return toast.error("An error occurred, try logging in again");
+
+    try {
+      const response = await axios.get(
+        `${root}/customer/get-customer/${customerId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       const customerInfo = response.data.customer;
-      setDestination(customerInfo.address || "Loading");
+      setDestination(customerInfo.address || "");
     } catch (error) {
       console.log(error);
       toast.error("Failed to fetch customer details.");
     }
-  };
-  
-  const fetchSuperAdmins = async () => {
-    const token = localStorage.getItem("token");
+  }, [customerId]);
 
-    if (!token) {
-      toast.error("An error occurred ,try logging in again", {
-        duration: 10000,
-      });
-    }
+  // Fetch super admin list
+  const fetchSuperAdmins = useCallback(async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return toast.error("An error occurred, try logging in again");
+
     try {
       const response = await axios.get(`${root}/admin/all-staff`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       setSuperAdmins(response.data.staffList);
     } catch (error) {
       console.log(error);
+      toast.error("Failed to load admins");
     }
-  };
+  }, []);
 
-  // Function to submit form
+  useEffect(() => {
+    fetchSuperAdmins();
+    TransDetails();
+  }, [fetchSuperAdmins, TransDetails]);
+
+  useEffect(() => {
+    if (customerId) {
+      fetchCustomerDetails();
+    }
+  }, [customerId, fetchCustomerDetails]);
+
+  // Submit gatepass form
   const submitForm = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
+    if (!token) return toast.error("An error occurred, try logging in again");
+
     setButtonLoading(true);
-    if (!token) {
-      toast.error("An error occurred, try logging in again");
+    if (!selectedAdminId) {
+      toast.error("Please select an admin role");
+      setButtonLoading(false);
+      return;
+    }
+    const selectedAdmin = superAdmins.find(
+      (admin) => admin.id === selectedAdminId
+    );
+    if (!selectedAdmin) {
+      toast.error("Selected admin not found");
+      setButtonLoading(false);
       return;
     }
 
-    const resetForm = function () {
-      setDestination("");
-      setEscort("");
-    };
+    const roleIdToSend = selectedAdmin.roleId;
+
     const body = {
       escortName: escort,
       destination,
     };
+
     try {
-      const response = await axios.post(
+      const res = await axios.post(
         `${root}/customer/create-gatepass/${id}`,
         body,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      // SECOND API REQUEST
-      const passID = response.data.gatepass.id;
+      const passID = res.data.gatepass.id;
 
-      const secondResponse = await axios.post(
+      await axios.post(
         `${root}/customer/send-gate-pass/${passID}`,
-        {
-          adminIds: [adminId],
-        }
+        { adminIds: [roleIdToSend] },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
+
       showToast({
         message: "Successfully sent to admin",
-        type:"success",
-        duration:5000
-      })
-     
-      setButtonLoading(false);
-      resetForm();
+        type: "success",
+        duration: 5000,
+      });
+
+      setDestination("");
+      setEscort("");
+      setVehicleNumber("");
+      setDriverName("");
+      setGoodsOwner("");
+      setSelectedAdminId("");
     } catch (error) {
       console.log(error);
-       showToast({
+      showToast({
         message: "An error occurred while creating the gate pass",
-        type:"error",
-        duration:5000
-      })
+        type: "error",
+        duration: 5000,
+      });
+    } finally {
+      setButtonLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchSuperAdmins();
-
-    setDriverName(entryDetails.order?.authToWeighTickets?.driver || "");
-    setVehicleNumber(entryDetails.order?.authToWeighTickets?.vehicleNo || "")
-    setGoodsOwner(
-      `${
-        entryDetails.ledgerSummary?.ledgerEntries[0]?.customer?.firstname || ""
-      } ${
-        entryDetails.ledgerSummary?.ledgerEntries[0]?.customer?.lastname || ""
-      }`
-    );
-  }, []);
-
-  useEffect(() => {      
-    TransDetails();
-    if (customerId) {
-      fetchDetails();
-    }
-  }, [id, customerId]);
 
   return (
     <div className="p-6 relative mb-16">
@@ -169,101 +173,84 @@ const CreateGatepass = () => {
       </div>
       <form className="my-8" onSubmit={submitForm}>
         <div className="my-8 grid grid-cols-2 max-sm:grid-cols-1 gap-8 border-t-[1px] border-[#9191914] py-8">
-          <div className="drivers-name">
+          <div>
             <label>Driver's Name</label>
-            <input
-              type="text"
+            <TextField.Root
+              size="3"
+              className="mt-2"
               placeholder="Enter Driver Name"
               value={driverName}
-              onChange={(e) => {
-                setDriverName(e.target.value);
-              }}
-              className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
-            />
-          </div>
-          <div className="Escorts-name">
-            <label>Escort's Name</label>
-            <input
-              type="text"
-              value={escort}
-              onChange={(e) => {
-                setEscort(e.target.value);
-              }}
-              placeholder="Input Name"
-              className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
-            />
-          </div>
-          <div className="vehicle-no">
-            <label>Vehicle No</label>
-            <input
-              type="text"
-              // disabled
-              placeholder="Enter Vehicle Number"
-              value={vehicleNumber}
-              onChange={(e) => {
-                setVehicleNumber(e.target.value);
-              }}
-              className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
-            />
-          </div>
-          <div className="owner">
-            <label>Owner of Goods</label>
-            <input
-              type="text"
-              // disabled
-              placeholder="Enter Owner of Goods"
-              value={goodsOwner}
-              onChange={(e) => {
-                setGoodsOwner(e.target.value);
-              }}
-              className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
+              onChange={(e) => setDriverName(e.target.value)}
+              readOnly
             />
           </div>
           <div>
-            <label htmlFor="">Destination</label>
+            <label>Escort's Name</label>
             <TextField.Root
-              size={"3"}
+              size="3"
+              className="mt-2"
+              placeholder="Input Name"
+              value={escort}
+              onChange={(e) => setEscort(e.target.value)}
+            />
+          </div>
+          <div>
+            <label>Vehicle No</label>
+            <TextField.Root
+              size="3"
+              className="mt-2"
+              placeholder="Enter Vehicle Number"
+              value={vehicleNumber}
+              onChange={(e) => setVehicleNumber(e.target.value)}
+              readOnly
+            />
+          </div>
+          <div>
+            <label>Owner of Goods</label>
+            <TextField.Root
+              size="3"
+              className="mt-2"
+              placeholder="Enter Owner of Goods"
+              value={goodsOwner}
+              onChange={(e) => setGoodsOwner(e.target.value)}
+              readOnly
+            />
+          </div>
+          <div>
+            <label>Destination</label>
+            <TextField.Root
+              size="3"
               className="mt-2"
               placeholder="Enter Destination"
               value={destination}
-              disabled
-              onChange={(e) => {
-                setDestination(e.target.value);
-              }}
+              onChange={(e) => setDestination(e.target.value)}
             />
           </div>
           <div>
-            <label htmlFor="">Send To:</label>
+            <label>Send To:</label>
             <Select.Root
-              size={"3"}
+              value={selectedAdminId}
+              onValueChange={setSelectedAdminId}
               disabled={superAdmins.length === 0}
-              onValueChange={(value) => {
-                setAdminId(value);
-              }}
             >
-              <Select.Trigger
-                className="w-full mt-2"
-                placeholder="Select Admin"
-              />
-              <Select.Content position="popper">
-                {superAdmins.map((admin) => {
-                  return (
-                    <Select.Item
-                      value={admin.role?.id || " "}
-                    >{`${admin.firstname} ${admin.lastname}`} ({admin.role?.name})</Select.Item>
-                  );
-                })}
+              <Select.Trigger className="w-full mt-2" />
+              <Select.Content>
+                {superAdmins.map((admin) => (
+                  <Select.Item key={admin.id} value={admin.id}>
+                    {`${admin.firstname} ${admin.lastname}`} ({admin.role?.name})
+                  </Select.Item>
+                ))}
               </Select.Content>
             </Select.Root>
           </div>
         </div>
-        <Flex justify={"end"}>
+        <Flex justify="end">
           <Button
-            size={"4"}
+            size="4"
             className="bg-theme cursor-pointer font-amsterdam"
             disabled={buttonLoading}
           >
-            {buttonLoading ? <LoaderIcon /> : "Submit"}
+            {buttonLoading ? <LoaderIcon className="animate-spin" /> : "Submit"}
           </Button>
         </Flex>
       </form>
