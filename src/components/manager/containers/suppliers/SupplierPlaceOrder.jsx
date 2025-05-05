@@ -196,7 +196,7 @@ const SupplierPlaceOrder = () => {
 
   return (
     <>
-      <Heading>Received Order</Heading>
+      <Heading>Receive Order</Heading>
       <Separator className="my-3 w-full" />
       {ticketLoading ? (
         <Flex justify="center" className="my-4">

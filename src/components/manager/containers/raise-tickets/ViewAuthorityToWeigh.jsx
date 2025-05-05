@@ -297,7 +297,7 @@ const ViewAuthorityToWeigh = () => {
                                   )
                                 }
                               >
-                                Raise Supplier Order
+                                Receive Supplier Order
                               </DropdownMenu.Item>
                             )}
 
