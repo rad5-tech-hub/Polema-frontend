@@ -60,8 +60,6 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
         return "customer/view-gatepass";
       case "invoice":
         return "customer/invoice-pdf";
-      case "supplier-weigh":
-        return "/customer/view-weigh/";
       case "weigh":
         return "admin/view-auth-weigh";
         case "waybill":
@@ -142,9 +140,6 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
           break;
         case "weigh":
           setTicketDetails(response.data.ticket);
-          break;
-        case "supplier-weigh":
-          setTicketDetails(response.data.data);
           break;
         case "gatepass":
           setTicketDetails(response.data.gatePass);
@@ -443,93 +438,49 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                   {/* Weigh Ticket Example */}
                   {selectedTicket.type === "weigh" && (
                     <>
+                      {/* Driver */}
                       <div className="flex w-full justify-between items-center p-2">
-                        <Text className="text-[.9rem] font-black tracking-wide">
-                          DRIVER
-                        </Text>
-                        <p className="text-[.9rem]">{ticketDetails.driver}</p>
+                        <Text className="text-[.9rem] font-black tracking-wide">DRIVER</Text>
+                        <p className="text-[.9rem]">{ticketDetails.driver || "N/A"}</p>
                       </div>
-                      <div className="flex w-full justify-between items-center p-2">
-                        <Text className="text-[.9rem] font-black tracking-wide">
-                        {ticketDetails.supplierId ? 'SUPPLIER': 'CUSTOMER'} NAME
-                        </Text>
-                        <p className="text-[.9rem]">
-                          {ticketDetails.supplierId && ticketDetails.supplier
-                          ? `${ticketDetails.supplier.firstname} ${ticketDetails.supplier.lastname}`
-                          : ticketDetails.customerId && ticketDetails.transactions?.corder
-                          ? `${ticketDetails.transactions.corder.firstname} ${ticketDetails.transactions.corder.lastname}`
-                          : "Name not available"}
-                        </p>
-                      </div>
-                      {ticketDetails.transactions && <div className="flex w-full justify-between items-center p-2">
-                        <Text className="text-[.9rem] font-black tracking-wide">
-                          QUANTITY
-                        </Text>
-                        <p className="text-[.9rem]">
-                          {formatMoney(ticketDetails.transactions?.quantity) ||
-                            ""}{" "}
-                          {ticketDetails.transactions?.unit || ""}
-                        </p>
-                      </div>}
-                      {ticketDetails.transactions && <div className="flex w-full justify-between items-center p-2">
-                        <Text className="text-[.9rem] font-black tracking-wide">
-                          PRODUCT
-                        </Text>
-                        <p className="text-[.9rem]">
-                          {ticketDetails.transactions?.porders.name}
-                        </p>
-                      </div>}
-                      <div className="flex w-full justify-between items-center p-2">
-                        <Text className="text-[.9rem] font-black tracking-wide">
-                          VEHICLE NO
-                        </Text>
-                        <p className="text-[.9rem]">
-                          {ticketDetails.vehicleNo}
-                        </p>
-                      </div>
-                    </>
-                  )}
 
-                    {/* Weigh Ticket Example */}
-                  {selectedTicket.type === "supplier-weigh" && (
-                    <>                     
+                      {/* Customer or Supplier Name */}
                       <div className="flex w-full justify-between items-center p-2">
                         <Text className="text-[.9rem] font-black tracking-wide">
-                        {ticketDetails?.authToWeigh?.supplierId ? 'SUPPLIER': 'CUSTOMER'} NAME
+                          {ticketDetails.customerId ? "CUSTOMER NAME" : "SUPPLIER NAME"}
                         </Text>
                         <p className="text-[.9rem]">
-                          {ticketDetails?.authToWeigh?.supplierId && ticketDetails?.authToWeigh?.supplier
-                          ? `${ticketDetails?.authToWeigh?.supplier.firstname} ${ticketDetails?.authToWeigh?.supplier.lastname}`                         
-                          : "Name not available"}
-                        </p>
-                      </div>                      
-                      {ticketDetails?.authToWeigh?.rawMaterial && <div className="flex w-full justify-between items-center p-2">
-                        <Text className="text-[.9rem] font-black tracking-wide">
-                          PRODUCT
-                        </Text>
-                        <p className="text-[.9rem]">
-                          {ticketDetails.authToWeigh?.rawMaterial.name}
-                        </p>
-                      </div>}
-                      <div className="flex w-full justify-between items-center p-2">
-                        <Text className="text-[.9rem] font-black tracking-wide">
-                          VEHICLE NO
-                        </Text>
-                        <p className="text-[.9rem]">
-                          {ticketDetails.vehicleNo}
+                          {ticketDetails.customerId && ticketDetails.transactions?.corder
+                            ? `${ticketDetails.transactions.corder.firstname} ${ticketDetails.transactions.corder.lastname}`
+                            : ticketDetails?.supplierId && ticketDetails?.supplier
+                            ? `${ticketDetails?.supplier.firstname} ${ticketDetails?.supplier.lastname}`
+                            : "Name not available"}
                         </p>
                       </div>
+
+                      {/* Quantity */}
+                      {ticketDetails.transactions && (
+                        <div className="flex w-full justify-between items-center p-2">
+                          <Text className="text-[.9rem] font-black tracking-wide">QUANTITY</Text>
+                          <p className="text-[.9rem]">
+                            {formatMoney(ticketDetails.transactions?.quantity) || ""}{" "}
+                            {ticketDetails.transactions?.unit || ""}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Product */}
                       <div className="flex w-full justify-between items-center p-2">
-                        <Text className="text-[.9rem] font-black tracking-wide">
-                          SUPERVISIOR-SIGNIN
-                        </Text>
-                        <p className="text-[.9rem]">{ticketDetails.signInSupervisor}</p>
+                        <Text className="text-[.9rem] font-black tracking-wide">PRODUCT</Text>
+                        <p className="text-[.9rem]">
+                          {ticketDetails.transactions?.porders?.name || ticketDetails.rawMaterial?.name || "N/A"}
+                        </p>
                       </div>
+
+                      {/* Vehicle Number */}
                       <div className="flex w-full justify-between items-center p-2">
-                        <Text className="text-[.9rem] font-black tracking-wide">
-                          SUPERVISIOR-SIGNOUT
-                        </Text>
-                        <p className="text-[.9rem]">{ticketDetails.signOutSupervisor}</p>
+                        <Text className="text-[.9rem] font-black tracking-wide">VEHICLE NO</Text>
+                        <p className="text-[.9rem]">{ticketDetails.vehicleNo || "N/A"}</p>
                       </div>
                     </>
                   )}

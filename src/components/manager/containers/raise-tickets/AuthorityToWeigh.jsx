@@ -135,6 +135,7 @@ const showToast = useToast()
       setDriverName("");
       setChiefAdminId("")
       setVehicleNumber("");
+      
     };
 
     const body = {

@@ -482,12 +482,10 @@ const showToast = useToast()
       await axios.post(`${root}${endpoint}`, body, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      showToast({
-        message:"Weigh Draft Successfully",
-        type:"success",
-        duration:4000
-      })
-          } catch (error) {
+      toast.success("Weigh Draft Saved Successfully", {
+        style: { padding: "20px" },
+      });
+    } catch (error) {
       console.error("Save failed:", error);
 
       showToast({
@@ -581,7 +579,11 @@ const showToast = useToast()
       
       setButtonLoading(false);
       resetForm();
-      navigate("/admin/raise-ticket/authority-to-weigh");
+
+      setTimeout(() => {
+        navigate('/admin/weighing-operations');
+      }, 2000);
+
     } catch (error) {
       console.error("Submission failed:", error);
       showToast({

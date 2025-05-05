@@ -195,10 +195,9 @@ const CustomerPlaceOrder = () => {
         body,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      showToast({
-        message: response.data.message,
-        type: "success",
-        duration: 7000,
+      toast.success(response.data.message, {
+        style: { background: "#ecfdf5", color: "#047857", padding: "16px" },
+        duration: 10000,
       });
 
       // Reset form fields
