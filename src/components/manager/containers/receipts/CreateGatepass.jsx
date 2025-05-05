@@ -4,7 +4,8 @@ import axios from "axios";
 import { TextField, Select, Flex, Button } from "@radix-ui/themes";
 import { useParams } from "react-router-dom";
 import toast, { Toaster, LoaderIcon } from "react-hot-toast";
-//import { Loader2 as LoaderIcon } from "lucide-react"; // or another loader icon import
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faClose, faPlus } from "@fortawesome/free-solid-svg-icons";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -19,7 +20,25 @@ const CreateGatepass = () => {
   const [driverName, setDriverName] = useState("");
   const [goodsOwner, setGoodsOwner] = useState("");
   const [customerId, setCustomerId] = useState("");
-  const showToast = useToast();
+  const showToast = useToast()
+
+  const [sealNo, setSealNo] = useState([""]); // Array to manage phone numbers
+
+  const handleAddPhoneNumber = () => {
+    setSealNo([...sealNo, ""]);
+  };
+
+  const handleRemovePhoneNumber = (index) => {
+    const updatedNumbers = sealNo.filter((_, i) => i !== index);
+    setSealNo(updatedNumbers);
+  };
+
+  const handlePhoneNumberChange = (value, index) => {
+    const updatedNumbers = sealNo.map((num, i) =>
+      i === index ? value : num
+    );
+    setSealNo(updatedNumbers);
+  };
 
   // Fetch gate pass related details
   const TransDetails = useCallback(async () => {
@@ -118,11 +137,15 @@ const CreateGatepass = () => {
       return;
     }
 
-    const roleIdToSend = selectedAdmin.roleId;
-
+    const resetForm = function () {
+      setDestination("");
+      setEscort("");
+      setSealNo([""]);
+    };
     const body = {
       escortName: escort,
       destination,
+      seal: sealNo,
     };
 
     try {
@@ -226,6 +249,39 @@ const CreateGatepass = () => {
               onChange={(e) => setDestination(e.target.value)}
             />
           </div>
+          <div className="input-field">
+            <label>
+              Seal Number
+            </label>
+            {sealNo.map((number, index) => (
+              <div
+                className="flex items-center gap-2 w-full relative mt-2"
+                key={index}
+              >
+                <TextField.Root
+                  placeholder="Enter Seal No."
+                  value={number}
+                  size={"3"}
+                  onChange={(e) =>
+                    handlePhoneNumberChange(e.target.value, index)
+                  }
+                  className="w-full"
+                />
+                <Button type="button" onClick={handleAddPhoneNumber}>
+                  <FontAwesomeIcon icon={faPlus} />
+                </Button>
+                {sealNo.length > 1 && (
+                  <Button
+                    type="button"
+                    onClick={() => handleRemovePhoneNumber(index)}
+                    className="bg-red-500 hover:bg-red-700"
+                  >
+                    <FontAwesomeIcon icon={faClose} />
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
           <div>
             <label>Send To:</label>
             <Select.Root
@@ -233,13 +289,19 @@ const CreateGatepass = () => {
               onValueChange={setSelectedAdminId}
               disabled={superAdmins.length === 0}
             >
-              <Select.Trigger className="w-full mt-2" />
-              <Select.Content>
-                {superAdmins.map((admin) => (
-                  <Select.Item key={admin.id} value={admin.id}>
-                    {`${admin.firstname} ${admin.lastname}`} ({admin.role?.name})
-                  </Select.Item>
-                ))}
+              <Select.Trigger
+                className="w-full mt-2"
+                placeholder="Select Admin"
+              />
+              <Select.Content position="popper">
+                {superAdmins.map((admin) => {
+                  return (
+                    <Select.Item
+                      key={admin.id}
+                      value={admin.id || " "}
+                    >{`${admin.firstname} ${admin.lastname}`} ({admin.role?.name})</Select.Item>
+                  );
+                })}
               </Select.Content>
             </Select.Root>
           </div>
