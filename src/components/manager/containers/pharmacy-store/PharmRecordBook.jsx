@@ -24,13 +24,15 @@ const PharmRecordBook = () => {
   const [recordBookDetails, setRecordBookDetails] = useState([]);
   const [failedSearch, setFailedSearch] = useState(false);
   const [tableLoading, setTableLoading] = useState(false);
-  const [nextPageClicked, setnextPageClicked] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [filterLoading, setFilterLoading] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false); // Track navigation loading
+  const [previousPageUrl, setPreviousPageUrl] = useState(null); // Store previous page endpoint
 
   const filterBoxRef = useRef(null);
+
   const pageParams = {
     lastCreatedAt: searchParams.get("lastCreatedAt"),
     lastId: searchParams.get("lastId"),
@@ -41,44 +43,103 @@ const PharmRecordBook = () => {
 
   // Function to get record book details
   const getRecordDetails = async (start = "", end = "") => {
-     setTableLoading(true);
-     const token = localStorage.getItem("token");
- 
-     if (!token) {
-       toast.error("An error occurred, try logging in again", {
-         style: { padding: "20px" },
-         duration: 500,
-       });
-       return;
-     }
- 
-     let url = `${root}/dept/pharm-log`;
-     // let nextPageURL = `${root}/dept/deptstore-log?lastCreatedAt=${pageParams.lastCreatedAt}&lastId=${pageParams.lastId}&limit=${pageParams.limit}&sortBy=${pageParams.sortBy}&sortOrder=${pageParams.sortOrder}`;
-      if (start && end) {
-        url += `?startDate=${start}&endDate=${end}`;
+    setTableLoading(true);
+    setPreviousPageUrl(null); // Reset previous page on new fetch or filter
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("An error occurred, try logging in again", {
+        style: { padding: "20px" },
+        duration: 500,
+      });
+      return;
+    }
+
+    let url = `${root}/dept/pharm-log`;
+    if (start && end) {
+      url += `?startDate=${start}&endDate=${end}`;
+    }
+
+    try {
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.data.data.length === 0) {
+        setFailedSearch(true);
+        setRecordBookDetails([]);
+      } else {
+        setFailedSearch(false);
+        setRecordBookDetails(response.data.data);
       }
- 
-     try {
-       const response = await axios.get(!nextPageClicked ? url : nextPageURL, {
-         headers: { Authorization: `Bearer ${token}` },
-       });
- 
-       if (response.data.data.length === 0) {
-         setFailedSearch(true);
-       } else {
-         setFailedSearch(false);
-         setRecordBookDetails(response.data.data); // Replace existing data instead of appending
-       }
- 
-       setDetails(response.data);
-     } catch (error) {
-       setFailedSearch(true);
-       console.error(error);
-     } finally {
-       setTableLoading(false);
-     }
-   };
- 
+
+      setDetails(response.data);
+    } catch (error) {
+      setFailedSearch(true);
+      console.error(error);
+      toast.error("Failed to load records.");
+    } finally {
+      setTableLoading(false);
+    }
+  };
+
+  // Handle pagination navigation
+  const handlePageNavigation = async (pageUrl, direction) => {
+    if (!pageUrl || isNavigating) return;
+    setIsNavigating(true);
+    setTableLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("An error occurred, try logging in again", {
+          style: { padding: "20px" },
+          duration: 500,
+        });
+        return;
+      }
+
+      // Before navigating to next page, save current page as previous
+      if (direction === "next") {
+        const currentParams = searchParams.toString();
+        setPreviousPageUrl(
+          currentParams ? `/dept/pharm-log?${currentParams}` : "/dept/pharm-log"
+        );
+      }
+
+      const response = await axios.get(`${root}${pageUrl}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.data.data.length === 0) {
+        setFailedSearch(true);
+        setRecordBookDetails([]);
+      } else {
+        setFailedSearch(false);
+        setRecordBookDetails(response.data.data);
+        setDetails(response.data);
+        showToast({
+          message: `Navigated to ${direction} page successfully.`,
+          type: "success",
+        });
+
+        // Update URL with new pagination parameters
+        const params = new URLSearchParams(pageUrl.split("?")[1] || "");
+        navigate(`/admin/pharmacy-store/record-book?${params.toString()}`);
+
+        // Clear previousPageUrl when returning to first page
+        if (direction === "previous" && !params.toString()) {
+          setPreviousPageUrl(null);
+        }
+      }
+    } catch (error) {
+      console.error(`Error fetching ${direction} page:`, error);
+      toast.error(`Failed to load ${direction} page.`);
+      setFailedSearch(true);
+    } finally {
+      setTableLoading(false);
+      setIsNavigating(false);
+    }
+  };
 
   const getSquareColor = (str) => {
     switch (str) {
@@ -92,17 +153,6 @@ const PharmRecordBook = () => {
         return "";
     }
   };
-
-  function parseUrlParams(url) {
-    const [_, queryString] = url.split("?");
-    if (!queryString) return {};
-
-    return queryString.split("&").reduce((params, pair) => {
-      const [key, value] = pair.split("=");
-      params[decodeURIComponent(key)] = decodeURIComponent(value);
-      return params;
-    }, {});
-  }
 
   const handleFilterSubmit = async () => {
     if (!startDate || !endDate) {
@@ -145,6 +195,9 @@ const PharmRecordBook = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [filterOpen]);
+
+  // Show Previous button if previousPageUrl exists
+  const showPreviousButton = !!previousPageUrl;
 
   return (
     <>
@@ -222,7 +275,7 @@ const PharmRecordBook = () => {
             <Table.ColumnHeaderCell>NAME</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>BATCH NO.</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>QUANT. OUT</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>QUANT. ADD</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>QUANT. IN</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>BALANCE</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>SIGNED</Table.ColumnHeaderCell>
           </Table.Row>
@@ -230,11 +283,17 @@ const PharmRecordBook = () => {
 
         <Table.Body>
           {tableLoading ? (
-            <div className="p-4">
-              <Spinner />
-            </div>
+            <Table.Row>
+              <Table.Cell colSpan={8} className="p-4 text-center">
+                <Spinner />
+              </Table.Cell>
+            </Table.Row>
           ) : failedSearch || recordBookDetails.length === 0 ? (
-            <div className="p-4">No records found</div>
+            <Table.Row>
+              <Table.Cell colSpan={8} className="p-4 text-center">
+                No records found
+              </Table.Cell>
+            </Table.Row>
           ) : (
             recordBookDetails.map((item) => (
               <Table.Row key={item.id}>
@@ -280,31 +339,36 @@ const PharmRecordBook = () => {
         </Table.Body>
       </Table.Root>
 
-      {details?.pagination?.nextPage && (
-        <Flex className="my-6" justify={"end"}>
-          <Button
-            className="bg-theme cursor-pointer"
-            onClick={() => {
-              setnextPageClicked(true);
-              navigate(
-                `/admin/pharmacy-store/record-book?lastCreatedAt=${
-                  parseUrlParams(details.pagination.nextPage)["lastCreatedAt"]
-                }&lastId=${
-                  parseUrlParams(details.pagination.nextPage)["lastId"]
-                }&limit=${
-                  parseUrlParams(details.pagination.nextPage)["limit"]
-                }&sortBy=${
-                  parseUrlParams(details.pagination.nextPage)["sortBy"]
-                }&sortOrder=${
-                  parseUrlParams(details.pagination.nextPage)["sortOrder"]
-                }`
-              );
-
-              setTimeout(() => getRecordDetails(), 4000);
-            }}
-          >
-            Next Page
-          </Button>
+      {(showPreviousButton || details?.pagination?.nextPage) && (
+        <Flex className="my-6" justify={"end"} gap="3">
+          {showPreviousButton && (
+            <Button
+              className="bg-theme cursor-pointer"
+              disabled={isNavigating || tableLoading}
+              onClick={() => handlePageNavigation(previousPageUrl, "previous")}
+            >
+              {isNavigating && !details?.pagination?.nextPage ? (
+                <Spinner size="2" />
+              ) : (
+                "Previous Page"
+              )}
+            </Button>
+          )}
+          {details?.pagination?.nextPage && (
+            <Button
+              className="bg-theme cursor-pointer"
+              disabled={isNavigating || tableLoading}
+              onClick={() =>
+                handlePageNavigation(details.pagination.nextPage, "next")
+              }
+            >
+              {isNavigating && details?.pagination?.nextPage ? (
+                <Spinner size="2" />
+              ) : (
+                "Next Page"
+              )}
+            </Button>
+          )}
         </Flex>
       )}
 

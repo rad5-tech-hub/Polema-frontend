@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { formatMoney, refractor } from "../../../date";
 import toast, { Toaster } from "react-hot-toast";
@@ -25,15 +25,30 @@ const DepartmentRecordBook = () => {
   const [recordBookDetails, setRecordBookDetails] = useState([]);
   const [failedSearch, setFailedSearch] = useState(false);
   const [tableLoading, setTableLoading] = useState(false);
-  const [nextPageClicked, setnextPageClicked] = useState(false);
   const [modalOpened, setModalOpened] = useState(false);
   const [modalDetails, setModalDetails] = useState({});
   const [filterOpen, setFilterOpen] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [filterLoading, setFilterLoading] = useState(false);
-// Ref for filter box
+  const [isNavigating, setIsNavigating] = useState(false); // Track navigation loading
+  const [previousPageUrl, setPreviousPageUrl] = useState(null); // Store previous page endpoint
+
+  // Ref for filter box
   const filterBoxRef = useRef(null);
+
+  // Close filter box when clicking outside
+  useEffect(() => {
+    if (!filterOpen) return;
+    function handleClickOutside(event) {
+      if (filterBoxRef.current && !filterBoxRef.current.contains(event.target)) {
+        setFilterOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [filterOpen]);
+
   const pageParams = {
     lastCreatedAt: searchParams.get("lastCreatedAt"),
     lastId: searchParams.get("lastId"),
@@ -45,6 +60,7 @@ const DepartmentRecordBook = () => {
   // Function to get record book details
   const getRecordDetails = async (start = "", end = "") => {
     setTableLoading(true);
+    setPreviousPageUrl(null); // Reset previous page on new fetch or filter
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -56,33 +72,90 @@ const DepartmentRecordBook = () => {
     }
 
     let url = `${root}/dept/deptstore-log`;
-    // let nextPageURL = `${root}/dept/deptstore-log?lastCreatedAt=${pageParams.lastCreatedAt}&lastId=${pageParams.lastId}&limit=${pageParams.limit}&sortBy=${pageParams.sortBy}&sortOrder=${pageParams.sortOrder}`;
-     if (start && end) {
-       url += `?startDate=${start}&endDate=${end}`;
-     }
+    if (start && end) {
+      url += `?startDate=${start}&endDate=${end}`;
+    }
 
     try {
-      const response = await axios.get(!nextPageClicked ? url : nextPageURL, {
+      const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.data.data.length === 0) {
         setFailedSearch(true);
+        setRecordBookDetails([]);
       } else {
         setFailedSearch(false);
-        setRecordBookDetails(response.data.data); // Replace existing data instead of appending
+        setRecordBookDetails(response.data.data);
       }
 
       setDetails(response.data);
     } catch (error) {
       setFailedSearch(true);
       console.error(error);
+      toast.error("Failed to load records.");
     } finally {
       setTableLoading(false);
     }
   };
 
-  
+  // Handle pagination navigation
+  const handlePageNavigation = async (pageUrl, direction) => {
+    if (!pageUrl || isNavigating) return;
+    setIsNavigating(true);
+    setTableLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("An error occurred, try logging in again", {
+          style: { padding: "20px" },
+          duration: 500,
+        });
+        return;
+      }
+
+      // Before navigating to next page, save current page as previous
+      if (direction === "next") {
+        const currentParams = searchParams.toString();
+        setPreviousPageUrl(
+          currentParams ? `/dept/deptstore-log?${currentParams}` : "/dept/deptstore-log"
+        );
+      }
+
+      const response = await axios.get(`${root}${pageUrl}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.data.data.length === 0) {
+        setFailedSearch(true);
+        setRecordBookDetails([]);
+      } else {
+        setFailedSearch(false);
+        setRecordBookDetails(response.data.data);
+        setDetails(response.data);
+        showToast({
+          message: `Navigated to ${direction} page successfully.`,
+          type: "success",
+        });
+
+        // Update URL with new pagination parameters
+        const params = new URLSearchParams(pageUrl.split("?")[1] || "");
+        navigate(`/admin/department-store/record-book?${params.toString()}`);
+
+        // Clear previousPageUrl when returning to first page
+        if (direction === "previous" && !params.toString()) {
+          setPreviousPageUrl(null);
+        }
+      }
+    } catch (error) {
+      console.error(`Error fetching ${direction} page:`, error);
+      toast.error(`Failed to load ${direction} page.`);
+      setFailedSearch(true);
+    } finally {
+      setTableLoading(false);
+      setIsNavigating(false);
+    }
+  };
 
   const getSquareColor = (str) => {
     switch (str) {
@@ -97,17 +170,6 @@ const DepartmentRecordBook = () => {
     }
   };
 
-  function parseUrlParams(url) {
-    const [_, queryString] = url.split("?");
-    if (!queryString) return {};
-
-    return queryString.split("&").reduce((params, pair) => {
-      const [key, value] = pair.split("=");
-      params[decodeURIComponent(key)] = decodeURIComponent(value);
-      return params;
-    }, {});
-  }
-
   const handleFilterSubmit = async () => {
     if (!startDate || !endDate) {
       toast.error("Please select both start and end dates.");
@@ -118,16 +180,14 @@ const DepartmentRecordBook = () => {
       await getRecordDetails(startDate, endDate);
       showToast({
         message: "Records filtered successfully.",
-        type:"success"
-    })
-     
+        type: "success",
+      });
     } catch (error) {
       console.error(error);
       showToast({
-        message:"Failed to filter records",
-        type:"error"
-      })
-      
+        message: "Failed to filter records",
+        type: "error",
+      });
     } finally {
       setFilterLoading(false);
     }
@@ -136,21 +196,8 @@ const DepartmentRecordBook = () => {
   useEffect(() => {
     getRecordDetails();
   }, []);
-  // Close filter box when clicking outside
-    useEffect(() => {
-      if (!filterOpen) return;
-      function handleClickOutside(event) {
-        if (filterBoxRef.current && !filterBoxRef.current.contains(event.target)) {
-          setFilterOpen(false);
-        }
-      }
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [filterOpen]);
 
-
-
-  //Modal when you click on any item
+  // Modal when you click on any item
   const DetailsModal = () => {
     return (
       <>
@@ -179,7 +226,6 @@ const DepartmentRecordBook = () => {
               <div className="my-4">
                 <p className="font-bold text-red-400">QUANTITY OUT</p>
                 <p>
-                  {" "}
                   {modalDetails.quantityRemoved > modalDetails.quantityAdded
                     ? modalDetails.quantityRemoved
                     : ""}
@@ -188,9 +234,8 @@ const DepartmentRecordBook = () => {
             )}
             {modalDetails.quantityAdded > modalDetails.quantityRemoved && (
               <div className="my-4">
-                <p className="font-bold text-green-400">QUANTITY OUT</p>
+                <p className="font-bold text-green-400">QUANTITY IN</p>
                 <p>
-                  {" "}
                   {modalDetails.quantityAdded > modalDetails.quantityRemoved
                     ? modalDetails.quantityAdded
                     : ""}
@@ -209,70 +254,72 @@ const DepartmentRecordBook = () => {
     );
   };
 
+  // Show Previous button if previousPageUrl exists
+  const showPreviousButton = !!previousPageUrl;
+
   return (
     <>
       <div className="flex justify-between items-center">
-
-      <Heading>Record Book</Heading>
-      <div className="relative mb-4">
-        <Button
-          className="bg-theme cursor-pointer"
-          onClick={() => setFilterOpen(!filterOpen)}
-        >
-          Filter by Date
-        </Button>
-        {filterOpen && (
-          <div
-            ref={filterBoxRef}
-            className="absolute right-0 mt-2 p-4 border rounded bg-gray-50 shadow-lg z-10"
+        <Heading>Record Book</Heading>
+        <div className="relative mb-4">
+          <Button
+            className="bg-theme cursor-pointer"
+            onClick={() => setFilterOpen(!filterOpen)}
           >
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div>
-                <label
-                  htmlFor="startDate"
-                  className="block text-sm font-medium"
+            Filter by Date
+          </Button>
+          {filterOpen && (
+            <div
+              ref={filterBoxRef}
+              className="absolute right-0 mt-2 p-4 border rounded bg-gray-50 shadow-lg z-10"
+            >
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div>
+                  <label
+                    htmlFor="startDate"
+                    className="block text-sm font-medium"
+                  >
+                    Start Date
+                  </label>
+                  <input
+                    type="date"
+                    id="startDate"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="border border-gray-300 rounded px-2 py-1 w-full"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="endDate" className="block text-sm font-medium">
+                    End Date
+                  </label>
+                  <input
+                    type="date"
+                    id="endDate"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="border border-gray-300 rounded px-2 py-1 w-full"
+                  />
+                </div>
+              </div>
+              <div className="mt-4 flex justify-between">
+                <Button
+                  className="bg-white rounded !text-black text-base"
+                  onClick={getRecordDetails}
                 >
-                  Start Date
-                </label>
-                <input
-                  type="date"
-                  id="startDate"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="border border-gray-300 rounded px-2 py-1 w-full"
-                />
-              </div>
-              <div>
-                <label htmlFor="endDate" className="block text-sm font-medium">
-                  End Date
-                </label>
-                <input
-                  type="date"
-                  id="endDate"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="border border-gray-300 rounded px-2 py-1 w-full"
-                />
+                  Back
+                </Button>
+                <Button
+                  className="bg-theme cursor-pointer"
+                  onClick={handleFilterSubmit}
+                  disabled={filterLoading}
+                >
+                  {filterLoading ? <Spinner size="3" /> : "Submit"}
+                </Button>
               </div>
             </div>
-            <div className="mt-4 flex justify-between">
-              <Button
-                className="bg-white rounded !text-black text-base"
-                onClick={getRecordDetails}
-              >
-                Back
-              </Button>
-              <Button
-                className="bg-theme cursor-pointer"
-                onClick={handleFilterSubmit}
-                disabled={filterLoading}
-              >
-                {filterLoading ? <Spinner size="3" /> : "Submit"}
-              </Button>
-            </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
       </div>
       <Separator className="my-4 w-full" />
       <Table.Root className="mt-5" variant="surface">
@@ -281,9 +328,8 @@ const DepartmentRecordBook = () => {
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>ITEM</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>NAME</Table.ColumnHeaderCell>
-            {/* <Table.ColumnHeaderCell>BATCH NO.</Table.ColumnHeaderCell> */}
             <Table.ColumnHeaderCell>QUANT. OUT</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>QUANT. ADD</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>QUANT. IN</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>BALANCE</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>SIGNED</Table.ColumnHeaderCell>
           </Table.Row>
@@ -291,11 +337,17 @@ const DepartmentRecordBook = () => {
 
         <Table.Body>
           {tableLoading ? (
-            <div className="p-4">
-              <Spinner />
-            </div>
+            <Table.Row>
+              <Table.Cell colSpan={7} className="p-4 text-center">
+                <Spinner />
+              </Table.Cell>
+            </Table.Row>
           ) : failedSearch || recordBookDetails.length === 0 ? (
-            <div className="p-4">No records found</div>
+            <Table.Row>
+              <Table.Cell colSpan={7} className="p-4 text-center">
+                No records found
+              </Table.Cell>
+            </Table.Row>
           ) : (
             recordBookDetails.map((item) => (
               <Table.Row
@@ -313,7 +365,6 @@ const DepartmentRecordBook = () => {
                     item.departmentStore.other}
                 </Table.Cell>
                 <Table.Cell>{item.name}</Table.Cell>
-
                 <Table.Cell>
                   {item.quantityRemoved > item.quantityAdded
                     ? item.quantityRemoved
@@ -350,33 +401,39 @@ const DepartmentRecordBook = () => {
         </Table.Body>
       </Table.Root>
 
-      {details?.pagination?.nextPage && (
-        <Flex className="my-6" justify={"end"}>
-          <Button
-            className="bg-theme cursor-pointer"
-            onClick={() => {
-              setnextPageClicked(true);
-              navigate(
-                `/admin/department-store/record-book?lastCreatedAt=${
-                  parseUrlParams(details.pagination.nextPage)["lastCreatedAt"]
-                }&lastId=${
-                  parseUrlParams(details.pagination.nextPage)["lastId"]
-                }&limit=${
-                  parseUrlParams(details.pagination.nextPage)["limit"]
-                }&sortBy=${
-                  parseUrlParams(details.pagination.nextPage)["sortBy"]
-                }&sortOrder=${
-                  parseUrlParams(details.pagination.nextPage)["sortOrder"]
-                }`
-              );
-
-              setTimeout(() => getRecordDetails(), 4000);
-            }}
-          >
-            Next Page
-          </Button>
+      {(showPreviousButton || details?.pagination?.nextPage) && (
+        <Flex className="my-6" justify={"end"} gap="3">
+          {showPreviousButton && (
+            <Button
+              className="bg-theme cursor-pointer"
+              disabled={isNavigating || tableLoading}
+              onClick={() => handlePageNavigation(previousPageUrl, "previous")}
+            >
+              {isNavigating && !details?.pagination?.nextPage ? (
+                <Spinner size="2" />
+              ) : (
+                "Previous Page"
+              )}
+            </Button>
+          )}
+          {details?.pagination?.nextPage && (
+            <Button
+              className="bg-theme cursor-pointer"
+              disabled={isNavigating || tableLoading}
+              onClick={() =>
+                handlePageNavigation(details.pagination.nextPage, "next")
+              }
+            >
+              {isNavigating && details?.pagination?.nextPage ? (
+                <Spinner size="2" />
+              ) : (
+                "Next Page"
+              )}
+            </Button>
+          )}
         </Flex>
       )}
+
       <DetailsModal />
       <Toaster position="top-right" />
     </>
@@ -384,224 +441,3 @@ const DepartmentRecordBook = () => {
 };
 
 export default DepartmentRecordBook;
-
-////Use this component later
-// import React, { useState, useEffect, useCallback } from 'react';
-// import { useNavigate, useSearchParams } from 'react-router-dom';
-// import { formatMoney, refractor } from '../../../date';
-// import toast, { Toaster } from 'react-hot-toast';
-// import axios from 'axios';
-// import { Heading, Separator, Table, Spinner, Flex, Button } from '@radix-ui/themes';
-// import { Modal } from 'antd';
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// import { faSquare } from '@fortawesome/free-solid-svg-icons';
-
-// const root = import.meta.env.VITE_ROOT;
-
-// const DepartmentRecordBook = () => {
-//   const [searchParams] = useSearchParams();
-//   const navigate = useNavigate();
-
-//   const [details, setDetails] = useState(null);
-//   const [recordBookDetails, setRecordBookDetails] = useState([]);
-//   const [failedSearch, setFailedSearch] = useState(false);
-//   const [tableLoading, setTableLoading] = useState(false);
-//   const [nextPageClicked, setNextPageClicked] = useState(false);
-//   const [modalOpened, setModalOpened] = useState(false);
-//   const [modalDetails, setModalDetails] = useState({});
-
-//   const pageParams = {
-//     lastCreatedAt: searchParams.get('lastCreatedAt'),
-//     lastId: searchParams.get('lastId'),
-//     limit: searchParams.get('limit') || 10, // Default limit
-//     sortBy: searchParams.get('sortBy') || 'createdAt', // Default sort field
-//     sortOrder: searchParams.get('sortOrder') || 'desc', // Default sort order
-//   };
-
-//   // Fetch record book details
-//   const getRecordDetails = useCallback(async () => {
-//     setTableLoading(true);
-//     const token = localStorage.getItem('token');
-
-//     if (!token) {
-//       toast.error('Please log in to continue', { style: { padding: '20px' }, duration: 2000 });
-//       navigate('/login'); // Redirect to login
-//       return;
-//     }
-
-//     const baseUrl = `${root}/dept/deptstore-log`;
-//     const queryString = nextPageClicked && Object.keys(pageParams).every(key => pageParams[key])
-//       ? `?${new URLSearchParams(pageParams).toString()}`
-//       : '';
-//     const url = `${baseUrl}${queryString}`;
-
-//     try {
-//       const response = await axios.get(url, {
-//         headers: { Authorization: `Bearer ${token}` },
-//       });
-
-//       const data = response.data.data || [];
-//       setRecordBookDetails(data);
-//       setFailedSearch(data.length === 0);
-//       setDetails(response.data);
-//     } catch (error) {
-//       console.error('Error fetching record details:', error);
-//       toast.error(error.response?.data?.message || 'Failed to load records', {
-//         style: { padding: '20px' },
-//         duration: 3000,
-//       });
-//       setFailedSearch(true);
-//     } finally {
-//       setTableLoading(false);
-//     }
-//   }, [nextPageClicked, navigate, pageParams]);
-
-//   // Get status color for signature
-//   const getSquareColor = (status) => {
-//     return {
-//       pending: 'text-yellow-500',
-//       received: 'text-green-500',
-//       rejected: 'text-red-500',
-//     }[status] || 'text-gray-500';
-//   };
-
-//   // Handle row click to open modal
-//   const handleRowClick = (item) => {
-//     setModalDetails(item);
-//     setModalOpened(true);
-//   };
-
-//   // Fetch data on mount and when search params change
-//   useEffect(() => {
-//     getRecordDetails();
-//   }, [getRecordDetails, searchParams]);
-
-//   // Modal component
-//   const DetailsModal = () => (
-//     <Modal
-//       open={modalOpened}
-//       title="Record Book Details"
-//       footer={null}
-//       onCancel={() => setModalOpened(false)}
-//       width={400}
-//     >
-//       <div className="space-y-4 py-4">
-//         <div>
-//           <p className="font-bold text-gray-700">Date</p>
-//           <p>{refractor(modalDetails.createdAt)}</p>
-//         </div>
-//         <div>
-//           <p className="font-bold text-gray-700">Customer Name</p>
-//           <p>{modalDetails.name || 'N/A'}</p>
-//         </div>
-//         <div>
-//           <p className="font-bold text-gray-700">Product Name</p>
-//           <p>{modalDetails.departmentStore?.product?.name || 'N/A'}</p>
-//         </div>
-//         {modalDetails.quantityRemoved > modalDetails.quantityAdded ? (
-//           <div>
-//             <p className="font-bold text-red-500">Quantity Out</p>
-//             <p>{modalDetails.quantityRemoved}</p>
-//           </div>
-//         ) : modalDetails.quantityAdded > modalDetails.quantityRemoved ? (
-//           <div>
-//             <p className="font-bold text-green-500">Quantity In</p>
-//             <p>{modalDetails.quantityAdded}</p>
-//           </div>
-//         ) : null}
-//         {modalDetails.comments && (
-//           <div>
-//             <p className="font-bold text-gray-700">Comments</p>
-//             <p>{modalDetails.comments}</p>
-//           </div>
-//         )}
-//       </div>
-//     </Modal>
-//   );
-
-//   return (
-//     <div className="p-6">
-//       <Flex justify="between" align="center">
-//         <Heading size="6">Record Book</Heading>
-//         <Button variant="soft" onClick={() => navigate(-1)}>
-//           Back
-//         </Button>
-//       </Flex>
-//       <Separator className="my-4 w-full" />
-
-//       <Table.Root className="mt-5" variant="surface">
-//         <Table.Header>
-//           <Table.Row>
-//             <Table.ColumnHeaderCell>Date</Table.ColumnHeaderCell>
-//             <Table.ColumnHeaderCell>Item</Table.ColumnHeaderCell>
-//             <Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
-//             <Table.ColumnHeaderCell>Quant. Out</Table.ColumnHeaderCell>
-//             <Table.ColumnHeaderCell>Quant. In</Table.ColumnHeaderCell>
-//             <Table.ColumnHeaderCell>Balance</Table.ColumnHeaderCell>
-//             <Table.ColumnHeaderCell>Signed</Table.ColumnHeaderCell>
-//           </Table.Row>
-//         </Table.Header>
-
-//         <Table.Body>
-//           {tableLoading ? (
-//             <Table.Row>
-//               <Table.Cell colSpan={7} className="text-center py-4">
-//                 <Spinner />
-//               </Table.Cell>
-//             </Table.Row>
-//           ) : failedSearch || recordBookDetails.length === 0 ? (
-//             <Table.Row>
-//               <Table.Cell colSpan={7} className="text-center py-4">
-//                 No records found
-//               </Table.Cell>
-//             </Table.Row>
-//           ) : (
-//             recordBookDetails.map((item) => (
-//               <Table.Row
-//                 key={item.id}
-//                 className="hover:bg-gray-100 cursor-pointer transition-colors"
-//                 onClick={() => handleRowClick(item)}
-//               >
-//                 <Table.Cell>{refractor(item.createdAt)}</Table.Cell>
-//                 <Table.Cell>{item.departmentStore?.product?.name || 'N/A'}</Table.Cell>
-//                 <Table.Cell>{item.name || 'N/A'}</Table.Cell>
-//                 <Table.Cell>{item.quantityRemoved > item.quantityAdded ? item.quantityRemoved : ''}</Table.Cell>
-//                 <Table.Cell>{item.quantityAdded > item.quantityRemoved ? item.quantityAdded : ''}</Table.Cell>
-//                 <Table.Cell>{formatMoney(item.amountRemaining)}</Table.Cell>
-//                 <Table.Cell>
-//                   <FontAwesomeIcon
-//                     icon={faSquare}
-//                     className={`mr-2 ${getSquareColor(item.signature ? 'received' : 'rejected')}`}
-//                   />
-//                   {item.signature ? 'Signed' : 'Not Signed'}
-//                 </Table.Cell>
-//               </Table.Row>
-//             ))
-//           )}
-//         </Table.Body>
-//       </Table.Root>
-
-//       {details?.pagination?.nextPage && (
-//         <Flex justify="end" className="my-6">
-//           <Button
-//             className="bg-theme cursor-pointer"
-//             onClick={() => {
-//               setNextPageClicked(true);
-//               const nextParams = new URLSearchParams(details.pagination.nextPage.split('?')[1]);
-//               navigate(`/admin/department-store/record-book?${nextParams.toString()}`);
-//               getRecordDetails(); // Call immediately, remove delay
-//             }}
-//             disabled={tableLoading}
-//           >
-//             Next Page
-//           </Button>
-//         </Flex>
-//       )}
-
-//       <DetailsModal />
-//       <Toaster position="top-right" />
-//     </div>
-//   );
-// };
-
-// export default DepartmentRecordBook;
