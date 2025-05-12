@@ -4,7 +4,6 @@ import axios from "axios";
 import { TextField, Select, Flex, Button } from "@radix-ui/themes";
 import { useParams } from "react-router-dom";
 import toast, { Toaster, LoaderIcon } from "react-hot-toast";
-//import { Loader2 as LoaderIcon } from "lucide-react"; // or another loader icon import
 
 const root = import.meta.env.VITE_ROOT;
 
