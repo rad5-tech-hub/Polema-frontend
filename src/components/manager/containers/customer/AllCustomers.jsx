@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { refractor } from "../../../date";
-import { Table, Spinner, TextField, Flex, Text } from "@radix-ui/themes";
+import { Table, Spinner, TextField, Flex, Text, Card } from "@radix-ui/themes";
 import axios from "axios";
 
 // All imports for the dropdown menu
@@ -11,10 +11,9 @@ import { faPen, faUser, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
 import { Suspend } from "../../../icons";
 
 //All imports for the Dialog Box
-import * as Dialog from "@radix-ui/react-dialog";
-import { faClose } from "@fortawesome/free-solid-svg-icons";
+
 import toast, { LoaderIcon, Toaster } from "react-hot-toast";
-import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import { MagnifyingGlassIcon, TrashIcon,PlusIcon } from "@radix-ui/react-icons";
 
 import useToast from "../../../../hooks/useToast";
 
@@ -22,11 +21,11 @@ const root = import.meta.env.VITE_ROOT;
 
 //Edit Dialog Box $//
 const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
+  const showToast = useToast()
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const showToast = useToast();
   const [changedFirstName, setChangedFirstName] = useState(id.firstname);
-  const [changedLastName, setChangesLastName] = useState(id.lastname);
-  const [changedPhone, setChangedPhone] = useState(id.phoneNumber);
+  const [changedLastName, setChangedLastName] = useState(id.lastname);
+  const [changedPhone, setChangedPhone] = useState(id.phoneNumber || []);
   const [changedAddress, setChangedAddress] = useState(id.address);
   const [changedEmail, setChangedEmail] = useState(id.email);
 
@@ -44,7 +43,7 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
       lastname: changedLastName,
       address: changedAddress,
       ...(changedEmail && { email: changedEmail }),
-      phoneNumber: [changedPhone],
+      phoneNumber: changedPhone.filter((phone) => phone.trim() !== ""),
     };
 
     try {
@@ -60,9 +59,8 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
       setDeleteLoading(false);
       onClose();
       showToast({
-        message: response.data.message,
-        type: "success",
-        duration: 6500,
+        message:response.data.message,
+        type:"success"
       })
       
       fetchCustomers();
@@ -70,18 +68,35 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
       console.log(error);
       setDeleteLoading(false);
       onClose();
-      toast.error(error.message, {
-        duration: 6500,
-        style: { padding: "30px" },
-      });
+      showToast({
+        message:error?.message || "An error occurred while trying to edit customer",
+        type:"error"
+      })
     }
+  };
+
+  // Add a new phone number input
+  const addPhoneNumber = () => {
+    setChangedPhone([...changedPhone, ""]);
+  };
+
+  // Delete a phone number by index
+  const deletePhoneNumber = (index) => {
+    setChangedPhone(changedPhone.filter((_, i) => i !== index));
+  };
+
+  // Update a phone number by index
+  const updatePhoneNumber = (index, value) => {
+    const newPhoneNumbers = [...changedPhone];
+    newPhoneNumbers[index] = value;
+    setChangedPhone(newPhoneNumbers);
   };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-[101]">
-      <div className="fixed top-[50%] left-[50%]  h-fit w-[90vw] max-w-[450px] transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-md shadow-lg">
+      <div className="fixed top-[50%] left-[50%] h-[90%] w-[90vw] max-w-[450px] overflow-y-scroll transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-md shadow-lg">
         <Heading as="h1" className="text-2xl font-semibold mb-4 text-black">
           Edit Customer
         </Heading>
@@ -92,7 +107,7 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
           </label>
           <input
             placeholder="Enter First Name"
-            defaultValue={id.firstname}
+            value={changedFirstName}
             onChange={(e) => setChangedFirstName(e.target.value)}
             type="text"
             className="w-full p-2 mb-5 rounded-sm border"
@@ -103,8 +118,8 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
           </label>
           <input
             placeholder="Enter Last Name"
-            defaultValue={id.lastname}
-            onChange={(e) => setChangesLastName(e.target.value)}
+            value={changedLastName}
+            onChange={(e) => setChangedLastName(e.target.value)}
             type="text"
             className="w-full p-2 mb-5 rounded-sm border"
           />
@@ -114,35 +129,54 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
           </label>
           <input
             placeholder="Enter Email"
-            defaultValue={id.email}
+            value={changedEmail}
             onChange={(e) => setChangedEmail(e.target.value)}
             type="text"
             className="w-full p-2 mb-5 rounded-sm border"
           />
 
           <label className="text-sm font-medium text-black leading-[35px]">
-            Phone Number
+            Phone Numbers
           </label>
-          <input
-            placeholder="Enter Phone Number"
-            defaultValue={id.phoneNumber}
-            onChange={(e) => setChangedPhone(e.target.value)}
-            className="w-full p-2 mb-5 rounded-sm border"
-          />
+          {changedPhone.map((phone, index) => (
+            <div key={index} className="flex items-center gap-2 mb-2">
+              <input
+                placeholder="Enter Phone Number"
+                value={phone}
+                onChange={(e) => updatePhoneNumber(index, e.target.value)}
+                type="text"
+                className="w-full p-2 rounded-lg border"
+              />
+              <button
+                type="button"
+                onClick={() => deletePhoneNumber(index)}
+                className="bg-red-400 p-2 rounded-sm cursor-pointer"
+              >
+                <TrashIcon className="text-white" />
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={addPhoneNumber}
+            className="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-md mt-2 mb-5"
+          >
+            <PlusIcon className="text-white" />
+          </button> <br/>
 
           <label className="text-sm font-medium text-black leading-[35px]">
             Address
           </label>
           <input
             placeholder="Enter Address"
-            defaultValue={id.address}
+            value={changedAddress}
             onChange={(e) => setChangedAddress(e.target.value)}
             type="text"
             className="w-full p-2 mb-5 rounded-sm border"
           />
         </form>
 
-        <div className="mt-6 flex justify-end ">
+        <div className="mt-6 flex justify-end">
           <button
             onClick={onClose}
             className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-md mr-2"
@@ -163,12 +197,13 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
           className="absolute top-2 right-2 text-gray-700 hover:bg-gray-200 rounded-full p-1"
           aria-label="Close"
         >
-          &times;
+          ×
         </button>
       </div>
     </div>
   );
 };
+
 
 const AllCustomers = () => {
   const [customerData, setCustomerData] = useState([]);
@@ -263,9 +298,6 @@ const AllCustomers = () => {
   // Use this function to derive the filtered customer data
   const filteredCustomers = filterCustomers(customerData, searchTerm);
 
-
-
-
   useEffect(() => {
     fetchCustomers();
   }, []);
@@ -353,7 +385,6 @@ const AllCustomers = () => {
           </Table.Body>
         )}
       </Table.Root>
-      
 
       {selectEditCustomer && (
         <EditDialog

@@ -660,31 +660,36 @@ const Notifications = () => {
                 </Tabs.List>
 
                 {selectedNotificationIds.length > 0 && (
-  <div className="delete-icon flex justify-end mt-2 sticky gap-2">
-    <p
-      className="underline text-sm cursor-pointer"
-      onClick={() => {
-        if (selectedNotificationIds.length === notifications.length) {
-          // If all are selected, deselect all
-          setSelectedNotificationIds([]);
-        } else {
-          // Select all notifications
-          setSelectedNotificationIds(notifications.map((n) => n.id));
-        }
-      }}
-    >
-      {selectedNotificationIds.length === notifications.length
-        ? "Unselect All"
-        : "Select All"}
-    </p>
-    <DeleteOutlined
-      className="text-red-400 cursor-pointer hover:text-lg"
-      onClick={() => {
-        deleteNotifications();
-      }}
-    />
-  </div>
-)}
+                  <div className="delete-icon flex justify-end mt-2 sticky gap-2">
+                    <p
+                      className="underline text-sm cursor-pointer"
+                      onClick={() => {
+                        if (
+                          selectedNotificationIds.length ===
+                          notifications.length
+                        ) {
+                          // If all are selected, deselect all
+                          setSelectedNotificationIds([]);
+                        } else {
+                          // Select all notifications
+                          setSelectedNotificationIds(
+                            notifications.map((n) => n.id)
+                          );
+                        }
+                      }}
+                    >
+                      {selectedNotificationIds.length === notifications.length
+                        ? "Unselect All"
+                        : "Select All"}
+                    </p>
+                    <DeleteOutlined
+                      className="text-red-400 cursor-pointer hover:text-lg"
+                      onClick={() => {
+                        deleteNotifications();
+                      }}
+                    />
+                  </div>
+                )}
 
                 <div
                   className="pt-3 max-h-[100vh] w-full notifications-box"
@@ -801,8 +806,13 @@ const Notifications = () => {
                                     </Text>
 
                                     {decodeToken().isAdmin &&
-                                      notification.ticketStatus ==
-                                        "pending" && (
+                                      (notification.ticketStatus ===
+                                        "pending" ||
+                                        (["waybill", "gatepass"].includes(
+                                          notification.type
+                                        ) &&
+                                          notification.ticketStatus ===
+                                            "pending")) && (
                                         <div className="button-groups flex gap-4 mt-4">
                                           <AntButton
                                             className="bg-theme text-white hover:!bg-theme hover:text-white"
