@@ -33,7 +33,8 @@ const AccountBook = () => {
   const [deptID, setDeptID] = useState("");
   const [modalSelected, setModalSelected] = useState(false);
   const [bankDetails,setBankDetails] = useState([]);
-  const [bankId,setBankId] = useState("")
+  const [bankId, setBankId] = useState("");
+  const [transactionType,setTransactionType] = useState("")
 
   const [isCustomer, setIscustomer] = useState("");
 
@@ -55,7 +56,8 @@ const AccountBook = () => {
     setComment("");
     setDeptID("");
     setOtherName("");
-    setBankId("")
+    setBankId("");
+    setTransactionType("");
   };
 
   const formatNumber = (num) => {
@@ -159,27 +161,24 @@ const AccountBook = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+  
     const retrToken = localStorage.getItem("token");
-
+  
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
       return;
     }
-
-    // Function to check if account Receipient is either customer/supplier or others
+  
+    // Function to check if account Recipient is either customer/supplier or others
     const customerOrSupplier = () => {
-      if (
-        accountRecipient === "customers" ||
-        accountRecipient === "suppliers"
-      ) {
+      if (accountRecipient === "customers" || accountRecipient === "suppliers") {
         return true;
       } else {
         return false;
       }
     };
-
-    // Function to check if account receipient is either customer or supplier
+  
+    // Function to check if account recipient is either customer or supplier
     const isCustomer = () => {
       if (accountRecipient === "customers") {
         return true;
@@ -189,20 +188,32 @@ const AccountBook = () => {
         return null;
       }
     };
-
+  
+    // Validate transactionType for 'others'
+    if (accountRecipient === "others" && !transactionType) {
+      showToast({
+        message:"Plase select transaction typr (Credit or Debit)",
+        type:"error",
+        duration:4000
+      })
+      
+      setLoading(false);
+      return;
+    }
+  
     const submissionData = {
-      // bankName: bankName,
       bankId,
       ...(isCustomer() === true && { customerId: selectedCustomerId }),
       ...(isCustomer() === false && { supplierId: selectedCustomerId }),
       ...(customerOrSupplier() && { productId: selectedProductId }),
-
-      [isCustomer() ? "credit" : "debit"]: basePrice,
+      ...(accountRecipient === "customers" && { credit: basePrice }),
+      ...(accountRecipient === "suppliers" && { debit: basePrice }),
+      ...(accountRecipient === "others" && { [transactionType]: basePrice }),
       comments: comment,
       ...(isCustomer() === null && { other: otherName }),
       ...(!customerOrSupplier() && { departmentId: deptID }),
     };
-
+  
     try {
       const response = await axios.post(
         `${root}/customer/create-account`,
@@ -217,11 +228,15 @@ const AccountBook = () => {
       resetForm();
     } catch (error) {
       console.log(error);
+      showToast({
+        type:"error",
+        message:"An error occured ,check your details and try again  later"
+      })
+      
     }
-
+  
     setLoading(false);
   };
-
   // Function to fetch bank names and details 
   const fetchBankDetails = async()=>{
     const token = localStorage.getItem("token");
@@ -352,6 +367,7 @@ const AccountBook = () => {
                       Department <span className="text-red-500">*</span>{" "}
                     </Text>
                     <Select.Root
+                      value={deptID}
                       onValueChange={(value) => {
                         setDeptID(value);
                       }}
@@ -524,6 +540,35 @@ const AccountBook = () => {
                   }}
                 />
               </div>
+
+              {accountRecipient === "others" && (
+                <div className="w-full">
+                  <Text>Transaction Type</Text>
+                  <Select.Root
+                    value={transactionType}
+                    onValueChange={(value) => {
+                      setTransactionType(value);
+                    }}
+                    required
+                  >
+                    <Select.Trigger
+                      disabled={department.length === 0}
+                      placeholder="Select transaction type"
+                      className="w-full mt-2"
+                    />
+                    <Select.Content position="popper">
+                          <Select.Item value={"credit"} >
+                            Credit
+                          </Select.Item>
+                          <Select.Item value={"debit"} >
+                            Debit
+                          </Select.Item>
+                          
+
+                    </Select.Content>
+                  </Select.Root>
+                </div>
+              )}
             </Grid>
             <Flex justify={"end"} className="mt-4 cursor-pointer">
               <Button
