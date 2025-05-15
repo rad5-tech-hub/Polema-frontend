@@ -118,7 +118,7 @@ const IndividualDepartmentLedger = () => {
   const CreditDeptModal = () => {
     const [productId, setProductId] = useState("");
     const [transactionType, setTransactionType] = useState("credit");
-    const [customerId, setCustomerId] = useState("");
+    const [customerName, setCustomerName] = useState("");
     const [creditAmount, setCreditAmount] = useState("");
     const [itemName, setItemName] = useState(""); // New state for Item Name
     const [buttonLoading, setButtonLoading] = useState(false);
@@ -157,21 +157,21 @@ const IndividualDepartmentLedger = () => {
         });
         return;
       }
-      if (!customerId) {
+      if (!customerName) {
         showToast({
-          message: "Select a customer first",
+          message: "Enter a customer name first",
           type: "error",
         });
         return;
       }
-      if (selectedField === "product" && !productId) {
-        showToast({
-          message: "Select a product first",
-          type: "error",
-        });
-        return;
-      }
-      if (selectedField === "itemName" && !itemName) {
+      // if (selectedField === "product" && !productId) {
+      //   showToast({
+      //     message: "Select a product first",
+      //     type: "error",
+      //   });
+      //   return;
+      // }
+      if (!itemName) {
         showToast({
           message: "Enter an item name",
           type: "error",
@@ -188,10 +188,10 @@ const IndividualDepartmentLedger = () => {
       setButtonLoading(true);
       const body = {
         departmentId: id,
-        name: customerId,
+        name: customerName,
         [transactionType]: creditAmount,
-        ...(selectedField === "product" && { productId: productId }),
-        ...(selectedField === "itemName" && { productName: itemName }),
+        // ...(selectedField === "product" && { productId: productId }),
+         productName: itemName 
       };
 
       try {
@@ -234,7 +234,7 @@ const IndividualDepartmentLedger = () => {
         footer={null}
         onCancel={() => {
           setCreditCustomerModalOpen(false);
-          setCustomerId("");
+          setCustomerName("");
           setProductId("");
           setItemName("");
           setSelectedField("product");
@@ -245,13 +245,13 @@ const IndividualDepartmentLedger = () => {
             <label htmlFor="customer-select" className="font-bold">
               Customer Name
             </label>
-            <Select
+            {/* <Select
               id="customer-select"
               showSearch
               placeholder="Search for a customer"
               optionFilterProp="children"
               onChange={(value) => setCustomerId(value)}
-              value={customerId || undefined}
+              value={customerName || undefined}
               filterOption={filterCustomerOption}
               options={customerData.map((customer) => ({
                 value: customer.id,
@@ -259,9 +259,19 @@ const IndividualDepartmentLedger = () => {
               }))}
               style={{ width: "100%", marginTop: 8 }}
               allowClear
+            /> */}
+             <TextField.Root
+              id="item-name"
+              placeholder="Enter Customer Name"
+              className="p-3"
+              value={customerName}
+              onChange={(e)=>{
+                setCustomerName(e.target.value)
+              }}
+              
             />
           </div>
-          <div className="mt-4">
+          {/* <div className="mt-4">
             <div className="flex justify-between">
               <label htmlFor="product-select" className="font-bold">
                 Product
@@ -288,17 +298,17 @@ const IndividualDepartmentLedger = () => {
               allowClear
               disabled={selectedField !== "product"}
             />
-          </div>
+          </div> */}
           <div className="mt-4">
             <div className="flex justify-between">
               <label htmlFor="item-name" className="font-bold">
                 Item Name
               </label>
-              <input
+              {/* <input
                 type="checkbox"
                 checked={selectedField === "itemName"}
                 onChange={() => handleFieldToggle("itemName")}
-              />
+              /> */}
             </div>
             <TextField.Root
               id="item-name"
@@ -306,7 +316,7 @@ const IndividualDepartmentLedger = () => {
               className="p-3"
               value={itemName}
               onChange={handleItemNameChange}
-              disabled={selectedField !== "itemName"}
+              
             />
           </div>
           <div className="mt-4">

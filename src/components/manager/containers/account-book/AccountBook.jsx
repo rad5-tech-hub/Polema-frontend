@@ -186,8 +186,71 @@ const AccountBook = () => {
     if (e && e.preventDefault) {
       e.preventDefault();
     }
-    if (confirmModal) {
-      setConfirmModal(false);
+
+    // Validation before opening modal
+    if (!transactionType) {
+      showToast({
+        message: "Please select a transaction type (Credit or Debit)",
+        type: "error",
+        duration: 4000,
+      });
+      return;
+    }
+    if (!basePrice) {
+      showToast({
+        message: "Please enter an amount",
+        type: "error",
+        duration: 4000,
+      });
+      return;
+    }
+    if (accountRecipient === "others" && !otherName) {
+      showToast({
+        message: "Please enter a name",
+        type: "error",
+        duration: 4000,
+      });
+      return;
+    }
+    if (accountRecipient === "others" && !deptID) {
+      showToast({
+        message: "Please select a department",
+        type: "error",
+        duration: 4000,
+      });
+      return;
+    }
+    if (accountRecipient !== "others" && !selectedCustomerId) {
+      showToast({
+        message: `Please select a ${accountRecipient === "customers" ? "customer" : "supplier"}`,
+        type: "error",
+        duration: 4000,
+      });
+      return;
+    }
+    if (accountRecipient !== "others" && !selectedProductId) {
+      showToast({
+        message: `Please select a ${accountRecipient === "customers" ? "product" : "raw material"}`,
+        type: "error",
+        duration: 4000,
+      });
+      return;
+    }
+    if (!bankId) {
+      showToast({
+        message: "Please select a bank",
+        type: "error",
+        duration: 4000,
+      });
+      return;
+    }
+    if (!comment) {
+      showToast({
+        message: "Please enter a comment",
+        type: "error",
+        duration: 4000,
+      });
+      return;
     }
 
     if (!confirmModal) {
@@ -231,18 +294,6 @@ const AccountBook = () => {
       }
     };
 
-    // Validate transactionType for 'others'
-    if (accountRecipient === "others" && !transactionType) {
-      showToast({
-        message: "Please select transaction type (Credit or Debit)",
-        type: "error",
-        duration: 4000,
-      });
-
-      setLoading(false);
-      return;
-    }
-
     const submissionData = {
       bankId,
       ...(isCustomer() === true && { customerId: selectedCustomerId }),
@@ -267,7 +318,6 @@ const AccountBook = () => {
       });
 
       setLoading(false);
-
       resetForm();
     } catch (error) {
       console.log(error);
@@ -280,22 +330,30 @@ const AccountBook = () => {
       });
     }
 
-    setLoading(false);
     setConfirmModal(false);
   };
 
   const ConfirmModal = () => {
+    // Get customer name for customers or suppliers
+    const customer = customers.find((c) => c.id === selectedCustomerId);
+    const customerName = customer
+      ? `${customer.firstname} ${customer.lastname}`
+      : otherName || "Unknown";
+
+    // Format amount with currency symbol
+    const formattedAmount = basePrice ? `₦${formatNumber(basePrice)}` : "₦0";
+
     return (
       <Modal
         open={confirmModal}
-        title="Are you sure ?"
+        title="Confirm Transaction"
         footer={null}
         onCancel={() => {
           setConfirmModal(false);
         }}
       >
         <Heading>
-          You are submitting this as a{" "}
+          Are you sure you want to{" "}
           <span
             className={`${
               transactionType === "credit" ? "text-green-400" : "text-red-400"
@@ -303,14 +361,14 @@ const AccountBook = () => {
           >
             {_.upperCase(transactionType)}
           </span>{" "}
-          entry, are you sure?
+          {formattedAmount} from {customerName}?
         </Heading>
         <Flex justify={"end"} className="mt-4">
           <Flex gap="3">
             <Button
               color="blue"
               className="p-2 rounded border-2 border-black cursor-pointer mr-2"
-              onClick={handleSubmit} // Call handleSubmit directly
+              onClick={handleSubmit}
             >
               Yes
             </Button>
@@ -617,7 +675,7 @@ const AccountBook = () => {
             </Flex>
           </form>
           <ConfirmModal />
-          <Toaster position="top-right" />
+          {/* <Toaster position="top-right" /> */}
         </>
       )}
     </>
