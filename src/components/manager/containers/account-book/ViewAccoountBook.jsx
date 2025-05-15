@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { DatePicker } from "antd";
 import { refractor, formatMoney } from "../../../date";
 import toast, { Toaster } from "react-hot-toast";
 import { Spinner, Table, Heading, Select, Flex } from "@radix-ui/themes";
 import axios from "axios";
 import { Modal } from "antd";
+const {RangePicker} = DatePicker
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -33,7 +35,7 @@ const ViewAccountBook = () => {
       const response = await axios.get(`${root}/admin/get-banks`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("Fetched banks:", response.data.banks); // Debug log
+      
       setBankDetails(response.data.banks || []);
     } catch (error) {
       console.error("Error fetching banks:", error);
@@ -42,12 +44,12 @@ const ViewAccountBook = () => {
   };
 
   // Fetch Account Book Details
-  const fetchAccountBookDetails = async () => {
+  const fetchAccountBookDetails = async (startDate,endDate) => {
     setLoading(true);
     setRawAccountBook([]);
     setAccountBook([]);
     setFailedSearch(false);
-    const retrToken = localStorage.getItem("token");
+    let retrToken = localStorage.getItem("token");
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
       setLoading(false);
@@ -62,21 +64,31 @@ const ViewAccountBook = () => {
         default: return "";
       }
     };
+    let url;
+    
+    url = `${root}/customer/${changeURLByRecepient(accountRecepient)}`;
+  if(startDate && endDate){
 
+  url = `${root}/customer/acctbook-filter?startDate=${startDate}&endDate=${endDate}`
+   }
     try {
-      const url = `${root}/customer/${changeURLByRecepient(accountRecepient)}`;
-      console.log("Fetching account book with URL:", url); // Debug log
+      
+      let output;
       const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${retrToken}` },
       });
-      console.log("Account book response:", response.data.acct); // Debug log
-      if (response.data.acct.length === 0) {
+      if (startDate && endDate) {
+        output =response.data.data
+      } else {
+        output = response.data.acct
+      }
+      if (output.length === 0)   {
         setFailedSearch(true);
         setRawAccountBook([]);
         setAccountBook([]);
       } else {
-        setRawAccountBook(response.data.acct);
-        setAccountBook(response.data.acct); // Initially show all records
+        setRawAccountBook(output);
+        setAccountBook(output); // Initially show all records
         setFailedSearch(false);
       }
       setLoading(false);
@@ -162,7 +174,7 @@ const ViewAccountBook = () => {
 
   // Handle bank selection
   const handleBankChange = (value) => {
-    console.log("Selected bank:", value); // Debug log
+    
     setSelectedBank(value);
   };
 
@@ -175,7 +187,7 @@ const ViewAccountBook = () => {
       const filtered = rawAccountBook.filter(
         (details) => details.bank?.name?.toString() === selectedBank
       );
-      console.log("Filtered account book:", filtered); // Debug log
+      
       setAccountBook(filtered);
       setFailedSearch(filtered.length === 0);
     }
@@ -197,27 +209,47 @@ const ViewAccountBook = () => {
     <>
       <Flex justify="between" align="center" className="mb-4">
         <Heading>Account Book</Heading>
-        <Select.Root
-          value={selectedBank}
-          onValueChange={handleBankChange}
-          size="2"
-        >
-          <Select.Trigger placeholder="Filter by Bank" />
-          <Select.Content>
-            <Select.Item value="all">All Banks</Select.Item>
-            {bankDetails.length === 0 ? (
-              <Select.Item value="no-banks" disabled>
-                No Banks Available
-              </Select.Item>
-            ) : (
-              bankDetails.map((bank) => (
-                <Select.Item key={bank.id} value={bank.name.toString()}>
-                  {bank.name}
+        <div className="flex gap-4">
+          <div className="date-picker  right-0 top-0">
+            <RangePicker
+              onCalendarChange={(e) => {
+                if (e && e[0] && e[1]) {
+                  // setDateRange({
+                  //   startDate: e[0].format("YYYY-MM-DD"),
+                  //   endDate: e[1].format("YYYY-MM-DD"),
+                  // });
+                  fetchAccountBookDetails(
+                    e[0].format("YYYY-MM-DD"),
+                    e[1].format("YYYY-MM-DD")
+                  );
+                } else {
+                  return;
+                }
+              }}
+            />
+          </div>
+          <Select.Root
+            value={selectedBank}
+            onValueChange={handleBankChange}
+            size="2"
+          >
+            <Select.Trigger placeholder="Filter by Bank" />
+            <Select.Content>
+              <Select.Item value="all">All Banks</Select.Item>
+              {bankDetails.length === 0 ? (
+                <Select.Item value="no-banks" disabled>
+                  No Banks Available
                 </Select.Item>
-              ))
-            )}
-          </Select.Content>
-        </Select.Root>
+              ) : (
+                bankDetails.map((bank) => (
+                  <Select.Item key={bank.id} value={bank.name.toString()}>
+                    {bank.name}
+                  </Select.Item>
+                ))
+              )}
+            </Select.Content>
+          </Select.Root>
+        </div>
       </Flex>
       <Table.Root variant="surface">
         <Table.Header>
@@ -228,8 +260,12 @@ const ViewAccountBook = () => {
             <Table.ColumnHeaderCell>DEPARTMENT</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>PRODUCT</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>RAW MATERIALS</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-green-500">CREDIT(₦)</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-red-500">DEBIT(₦)</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-green-500">
+              CREDIT(₦)
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-red-500">
+              DEBIT(₦)
+            </Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>
               {selectedBank === "all" ? "BALANCE" : "BANK BALANCE"}
             </Table.ColumnHeaderCell>
@@ -260,13 +296,21 @@ const ViewAccountBook = () => {
                 <Table.Cell>{refractor(details.createdAt)}</Table.Cell>
                 <Table.Cell>
                   {details.other === null
-                    ? details.credit > details.debit
-                      ? `${details.theCustomer.firstname} ${details.theCustomer.lastname}`
-                      : `${details.theSupplier.firstname} ${details.theSupplier.lastname}`
+                    ? details.theSupplier === null
+                      ? `${details.theCustomer?.firstname || ""} ${
+                          details.theCustomer?.lastname || ""
+                        }`
+                      : `${details.theSupplier?.firstname || ""} ${
+                          details.theSupplier?.lastname || ""
+                        }`
                     : details.other}
                 </Table.Cell>
-                <Table.Cell>{details.bank?.name || "No bank provided"}</Table.Cell>
-                <Table.Cell>{matchDepartmentNameById(details.departmentId)}</Table.Cell>
+                <Table.Cell>
+                  {details.bank?.name || "No bank provided"}
+                </Table.Cell>
+                <Table.Cell>
+                  {matchDepartmentNameById(details.departmentId)}
+                </Table.Cell>
                 <Table.Cell>
                   {details.other == null
                     ? details.credit < details.debit
@@ -282,13 +326,21 @@ const ViewAccountBook = () => {
                     : ""}
                 </Table.Cell>
                 <Table.Cell>
-                  {formatMoney(details.credit > details.debit ? details.credit : "")}
+                  {formatMoney(
+                    details.credit > details.debit ? details.credit : ""
+                  )}
                 </Table.Cell>
                 <Table.Cell>
-                  {formatMoney(details.debit > details.credit ? details.debit : "")}
+                  {formatMoney(
+                    details.debit > details.credit ? details.debit : ""
+                  )}
                 </Table.Cell>
                 <Table.Cell>
-                  {formatMoney(selectedBank === "all" ? details.balance : details.bankBalance || "")}
+                  {formatMoney(
+                    selectedBank === "all"
+                      ? details.balance
+                      : details.bankBalance || ""
+                  )}
                 </Table.Cell>
               </Table.Row>
             ))
@@ -305,20 +357,54 @@ const ViewAccountBook = () => {
       >
         {selectedRow && (
           <div>
-            <p style={{ padding: "8px 0" }}><strong>Date:</strong> {refractor(selectedRow.createdAt)}</p>
-            <p style={{ padding: "8px 0" }}><strong>Name:</strong>
+            <p style={{ padding: "8px 0" }}>
+              <strong>Date:</strong> {refractor(selectedRow.createdAt)}
+            </p>
+            <p style={{ padding: "8px 0" }}>
+              <strong>Name:</strong>
               {selectedRow.other === null
-                ? selectedRow.credit > selectedRow.debit
-                  ? `${selectedRow.theCustomer.firstname} ${selectedRow.theCustomer.lastname}`
-                  : `${selectedRow.theSupplier.firstname} ${selectedRow.theSupplier.lastname}`
+                ? selectedRow.theSupplier === null
+                  ? `${selectedRow.theCustomer?.firstname || ""} ${
+                      selectedRow.theCustomer?.lastname || ""
+                    }`
+                  : `${selectedRow.theSupplier?.firstname || ""} ${
+                      selectedRow.theSupplier?.lastname || ""
+                    }`
                 : selectedRow.other}
             </p>
-            <p style={{ padding: "8px 0" }}><strong>Bank Name:</strong> {selectedRow.bank?.name || "No bank provided"}</p>
-            <p style={{ padding: "8px 0" }}><strong>Department:</strong> {matchDepartmentNameById(selectedRow.departmentId)}</p>
-            <p style={{ padding: "8px 0" }}><strong>Credit (₦):</strong> {formatMoney(selectedRow.credit > selectedRow.debit ? selectedRow.credit : 0)}</p>
-            <p style={{ padding: "8px 0" }}><strong>Debit (₦):</strong> {formatMoney(selectedRow.debit > selectedRow.credit ? selectedRow.debit : 0)}</p>
-            <p style={{ padding: "8px 0" }}><strong>{selectedBank === "all" ? "Balance" : "Bank Balance"} (₦):</strong> {formatMoney(selectedBank === "all" ? selectedRow.balance : selectedRow.bankBalance || 0)}</p>
-            <p style={{ padding: "8px 0" }}><strong>Comment:</strong> {selectedRow.comments}</p>
+            <p style={{ padding: "8px 0" }}>
+              <strong>Bank Name:</strong>{" "}
+              {selectedRow.bank?.name || "No bank provided"}
+            </p>
+            <p style={{ padding: "8px 0" }}>
+              <strong>Department:</strong>{" "}
+              {matchDepartmentNameById(selectedRow.departmentId)}
+            </p>
+            <p style={{ padding: "8px 0" }}>
+              <strong>Credit (₦):</strong>{" "}
+              {formatMoney(
+                selectedRow.credit > selectedRow.debit ? selectedRow.credit : 0
+              )}
+            </p>
+            <p style={{ padding: "8px 0" }}>
+              <strong>Debit (₦):</strong>{" "}
+              {formatMoney(
+                selectedRow.debit > selectedRow.credit ? selectedRow.debit : 0
+              )}
+            </p>
+            <p style={{ padding: "8px 0" }}>
+              <strong>
+                {selectedBank === "all" ? "Balance" : "Bank Balance"} (₦):
+              </strong>{" "}
+              {formatMoney(
+                selectedBank === "all"
+                  ? selectedRow.balance
+                  : selectedRow.bankBalance || 0
+              )}
+            </p>
+            <p style={{ padding: "8px 0" }}>
+              <strong>Comment:</strong> {selectedRow.comments}
+            </p>
           </div>
         )}
       </Modal>
