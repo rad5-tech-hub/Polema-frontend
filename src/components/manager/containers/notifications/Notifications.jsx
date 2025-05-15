@@ -182,7 +182,11 @@ const Notifications = () => {
     }
 
     if (!endpoint || endpoint === null || endpoint === undefined) {
-      toast.error("ticket type does not exist");
+      showToast({
+        message:"Ticket type does not exist",
+        type:"error"
+      })
+      
       return;
     }
 
@@ -805,14 +809,11 @@ const Notifications = () => {
                                       </div>
                                     </Text>
 
-                                    {decodeToken().isAdmin &&
-                                      (notification.ticketStatus ===
-                                        "pending" ||
-                                        (["waybill", "gatepass"].includes(
+                                    {notification.ticketStatus === "pending" &&
+                                      (decodeToken().isAdmin ||
+                                        ["waybill", "gatepass"].includes(
                                           notification.type
-                                        ) &&
-                                          notification.ticketStatus ===
-                                            "pending")) && (
+                                        )) && (
                                         <div className="button-groups flex gap-4 mt-4">
                                           <AntButton
                                             className="bg-theme text-white hover:!bg-theme hover:text-white"

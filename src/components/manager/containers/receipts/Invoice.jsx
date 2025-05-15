@@ -315,7 +315,7 @@ const Invoice = () => {
             <div className="flex justify-end w-full text-[0.8rem] mt-6">
               <div>
                 <p>
-                  <span className="underline">TOTAL CREDIT BALANCE</span>: ₦
+                  <span className="underline">TOTAL {isNegative(invoice.currentBalance) ? "DEBIT" :"CREDIT"} BALANCE</span>: ₦
                   {formatMoney(invoice.currentBalance)}
                 </p>
               </div>

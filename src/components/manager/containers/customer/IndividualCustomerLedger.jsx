@@ -14,10 +14,9 @@ import {
   Flex,
   Button,
   TextField,
-  Select,
 } from "@radix-ui/themes";
 import axios from "axios";
-import { Modal } from "antd";
+import { Modal, Select } from "antd"; // Import Select from antd
 import { StopOutlined } from "@ant-design/icons";
 import useToast from "../../../../hooks/useToast";
 
@@ -38,10 +37,6 @@ const IndividualCustomerLedger = () => {
   const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [creditCustomerModalOpen, setCreditCustomerModalOpen] = useState(false);
   const [loadingStates, setLoadingStates] = useState({}); // Track loading per transaction
-
-  const [productId, setProductId] = useState("");
-  const [transactionType, setTransanctionType] = useState("");
-  const [creditAmount, setCreditAmount] = useState("");
 
   const searchInputRef = useRef(null);
   const formatNumberWithCommas = (value) => {
@@ -186,16 +181,15 @@ const IndividualCustomerLedger = () => {
     return product ? product.name : "Product not Found";
   };
 
-  //Modal for crediting customer
+  // Modal for crediting customer
   const CreditCustomerModal = () => {
     const [productId, setProductId] = useState("");
-    const [transactionType, setTransanctionType] = useState("credit");
+    const [transactionType, setTransactionType] = useState("credit");
     const [creditAmount, setCreditAmount] = useState("");
     const [buttonLoading, setButtonLoading] = useState(false);
 
     const handlePriceChange = (e) => {
       const value = e.target.value.replace(/,/g, "");
-
       if (!isNaN(value) && value !== "" && Number(value) >= 0) {
         setCreditAmount(value);
       } else {
@@ -205,13 +199,29 @@ const IndividualCustomerLedger = () => {
 
     const handleCreditSubmit = async (e) => {
       e.preventDefault();
-      const token = localStorage.getItem("token")
-      if(!token){
+      const token = localStorage.getItem("token");
+      if (!token) {
+        showToast({
+          type: "error",
+          message: "An error occurred, try logging in again.",
+        });
+        return;
+      }
+      if (!productId) {
+        showToast({
+          message: "Select a product first",
+          type: "error",
+        });
+        return;
+      }
+
+      if(!creditAmount){
         showToast({
           type:"error",
-          message:"An error occurred ,try loggging in again."
+          message:"Enter an amount first"
         })
-        return 
+        
+        return;
       }
       setButtonLoading(true);
       const body = {
@@ -229,13 +239,12 @@ const IndividualCustomerLedger = () => {
         showToast({
           message: "Ledger Updated Successfully",
           type: "success",
-          duration:5000
-        })
+          duration: 5000,
+        });
 
         setButtonLoading(false);
         setCreditCustomerModalOpen(false);
         if (id) getCustomerLedger();
-
       } catch (err) {
         showToast({
           type: "error",
@@ -247,6 +256,10 @@ const IndividualCustomerLedger = () => {
       }
     };
 
+    // Custom filter function for product search
+    const filterProductOption = (input, option) =>
+      (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
+
     return (
       <Modal
         open={creditCustomerModalOpen}
@@ -254,39 +267,50 @@ const IndividualCustomerLedger = () => {
         footer={null}
         onCancel={() => {
           setCreditCustomerModalOpen(false);
+          setProductId("");
         }}
       >
         <form action="" onSubmit={handleCreditSubmit}>
           <div className="mt-4">
-            <label htmlFor="" className="font-bold">
+            <label htmlFor="product-select" className="font-bold">
               Product
             </label>
-            <select
-              className="block w-full border-2 border-black/60 p-3 rounded"
-              onChange={(e) => setProductId(e.target.value)}
-            >
-              {products.map((product) => {
-                return <option value={product.id}>{product.name}</option>;
-              })}
-            </select>
+            <Select
+              id="product-select"
+              showSearch
+              placeholder="Search for a product"
+              optionFilterProp="children"
+              onChange={(value) => setProductId(value)}
+              value={productId || undefined}
+              filterOption={filterProductOption}
+              options={products.map((product) => ({
+                value: product.id,
+                label: product.name,
+              }))}
+              style={{ width: "100%", marginTop: 8 }}
+              allowClear
+            />
           </div>
           <div className="mt-4">
-            <label htmlFor="" className="font-bold mt-4">
+            <label htmlFor="transaction-type" className="font-bold mt-4">
               Transaction Type
             </label>
             <select
+              id="transaction-type"
               className="block w-full border-2 border-black/60 p-3 rounded"
-              onChange={(e) => setTransanctionType(e.target.value)}
+              onChange={(e) => setTransactionType(e.target.value)}
+              value={transactionType}
             >
-              <option value={"credit"}>Credit</option>
-              <option value={"debit"}>Debit</option>
+              <option value="credit">Credit</option>
+              <option value="debit">Debit</option>
             </select>
           </div>
           <div className="mt-4">
-            <label htmlFor="" className="font-bold mt-4">
+            <label htmlFor="amount" className="font-bold mt-4">
               Enter Amount
             </label>
             <TextField.Root
+              id="amount"
               placeholder="Enter Amount"
               className="p-3"
               value={formatNumberWithCommas(creditAmount)}
@@ -294,12 +318,13 @@ const IndividualCustomerLedger = () => {
             />
           </div>
 
-          <button
+          <Button
+            type="submit"
             className="mt-4 p-2 text-white !bg-blue-400"
             disabled={buttonLoading}
           >
-            {buttonLoading ? "Please Wait.." : "Submit"}
-          </button>
+            {buttonLoading ? "Please Wait..." : "Submit"}
+          </Button>
         </form>
       </Modal>
     );
@@ -358,25 +383,6 @@ const IndividualCustomerLedger = () => {
           )}
         </div>
 
-        <Modal
-          isOpen={creditCustomerModalOpen}
-          onClose={() => setCreditCustomerModalOpen(false)}
-        >
-          <Modal.Header>
-            <Modal.Title>Credit Customer</Modal.Title>
-            <Modal.Description>
-              Enter the amount you want to credit the customer
-            </Modal.Description>
-          </Modal.Header>
-          <Modal.Content>
-            <input
-              type="number"
-              placeholder="Enter amount"
-              className="border border-gray-300 rounded p-2 w-full"
-              onChange={(e) => setCreditAmount(e.target.value)}
-            />
-          </Modal.Content>
-        </Modal>
         <div className="w-[70%]">
           <div className="relative w-full max-w-md" ref={searchInputRef}>
             <TextField.Root
@@ -496,10 +502,7 @@ const IndividualCustomerLedger = () => {
                       {loadingStates[entry.id] ? (
                         <Spinner size="1" />
                       ) : (
-                        <StopOutlined
-                          StopOutlinedColor="#ff4d4f"
-                          style={{ fontSize: "20px" }}
-                        />
+                        <StopOutlined style={{ fontSize: "20px" }} />
                       )}
                     </Button>
                   )}
