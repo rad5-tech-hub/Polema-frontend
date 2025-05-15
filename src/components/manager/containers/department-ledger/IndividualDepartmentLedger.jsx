@@ -120,7 +120,9 @@ const IndividualDepartmentLedger = () => {
     const [transactionType, setTransactionType] = useState("credit");
     const [customerId, setCustomerId] = useState("");
     const [creditAmount, setCreditAmount] = useState("");
+    const [itemName, setItemName] = useState(""); // New state for Item Name
     const [buttonLoading, setButtonLoading] = useState(false);
+    const [selectedField, setSelectedField] = useState("product"); // Track active field: 'product' or 'itemName'
 
     const handlePriceChange = (e) => {
       const value = e.target.value.replace(/,/g, "");
@@ -128,6 +130,20 @@ const IndividualDepartmentLedger = () => {
         setCreditAmount(value);
       } else {
         setCreditAmount("");
+      }
+    };
+
+    const handleItemNameChange = (e) => {
+      setItemName(e.target.value);
+    };
+
+    const handleFieldToggle = (field) => {
+      setSelectedField(field);
+      // Clear the other field's value when toggling
+      if (field === "product") {
+        setItemName("");
+      } else {
+        setProductId("");
       }
     };
 
@@ -148,9 +164,16 @@ const IndividualDepartmentLedger = () => {
         });
         return;
       }
-      if (!productId) {
+      if (selectedField === "product" && !productId) {
         showToast({
           message: "Select a product first",
+          type: "error",
+        });
+        return;
+      }
+      if (selectedField === "itemName" && !itemName) {
+        showToast({
+          message: "Enter an item name",
           type: "error",
         });
         return;
@@ -166,8 +189,9 @@ const IndividualDepartmentLedger = () => {
       const body = {
         departmentId: id,
         name: customerId,
-        productName: productId,
         [transactionType]: creditAmount,
+        ...(selectedField === "product" && { productId: productId }),
+        ...(selectedField === "itemName" && { productName: itemName }),
       };
 
       try {
@@ -212,6 +236,8 @@ const IndividualDepartmentLedger = () => {
           setCreditCustomerModalOpen(false);
           setCustomerId("");
           setProductId("");
+          setItemName("");
+          setSelectedField("product");
         }}
       >
         <form action="" onSubmit={handleCreditSubmit}>
@@ -236,9 +262,16 @@ const IndividualDepartmentLedger = () => {
             />
           </div>
           <div className="mt-4">
-            <label htmlFor="product-select" className="font-bold">
-              Product
-            </label>
+            <div className="flex justify-between">
+              <label htmlFor="product-select" className="font-bold">
+                Product
+              </label>
+              <input
+                type="checkbox"
+                checked={selectedField === "product"}
+                onChange={() => handleFieldToggle("product")}
+              />
+            </div>
             <Select
               id="product-select"
               showSearch
@@ -253,6 +286,27 @@ const IndividualDepartmentLedger = () => {
               }))}
               style={{ width: "100%", marginTop: 8 }}
               allowClear
+              disabled={selectedField !== "product"}
+            />
+          </div>
+          <div className="mt-4">
+            <div className="flex justify-between">
+              <label htmlFor="item-name" className="font-bold">
+                Item Name
+              </label>
+              <input
+                type="checkbox"
+                checked={selectedField === "itemName"}
+                onChange={() => handleFieldToggle("itemName")}
+              />
+            </div>
+            <TextField.Root
+              id="item-name"
+              placeholder="Enter Item Name"
+              className="p-3"
+              value={itemName}
+              onChange={handleItemNameChange}
+              disabled={selectedField !== "itemName"}
             />
           </div>
           <div className="mt-4">

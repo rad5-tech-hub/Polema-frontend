@@ -296,8 +296,17 @@ const Invoice = () => {
                       {row?.quantity && row.quantity}{" "}
                       {row?.unit ? row.unit : ""} {row?.unit ? "of " : ""}
                       {row.productName && row.productName}
-                      {row.unit !== null && " ordered"}
-                      {row.unit === null ? isNegative(row.quantity) ? " (returned)":" (extra)" : ""}
+                      {/* {row.unit !== null && " ordered"}
+                      {row.unit === null ? isNegative(row.quantity) ? " (returned)":" (extra)" : ""} */}
+                        {entry.unit === null ? "" : entry.unit === "" || entry.unit === "N/A" ? "" : " ordered"}
+                                        
+                                        
+                                          
+                                          {entry.unit === null
+                                            ? isNegative(entry.quantity)
+                                              ? " (returned)"
+                                              : " (extra)"
+                                            : ""}
                       
                     </td>
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
