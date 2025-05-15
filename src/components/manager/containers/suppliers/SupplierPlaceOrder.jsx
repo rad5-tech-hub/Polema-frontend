@@ -153,9 +153,10 @@ const SupplierPlaceOrder = () => {
     }
 
     const orderData = {
-      supplierId: selectedCustomerId,
-      productId: selectedProductId,
-      quantity,
+      // supplierId: selectedCustomerId,
+      // productId: selectedProductId,
+      supplierWeighId:id,
+      // quantity,
       price: basePrice.replace(/,/g, ""),
       ...(comment && { comments: comment }),
       ...(subCharge && { discount: subCharge.replace(/,/g, "") }),

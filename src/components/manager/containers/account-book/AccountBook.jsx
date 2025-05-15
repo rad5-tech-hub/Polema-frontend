@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
+import { LoaderIcon } from "react-hot-toast";
 import toast, { Toaster } from "react-hot-toast";
 import _ from "lodash";
 import { useNavigate } from "react-router-dom";
@@ -18,6 +19,67 @@ import {
 import axios from "axios";
 import useToast from "../../../../hooks/useToast";
 const root = import.meta.env.VITE_ROOT;
+
+// Define ConfirmModal outside AccountBook
+const ConfirmModal = ({
+  open,
+  onCancel,
+  transactionType,
+  basePrice,
+  customers,
+  selectedCustomerId,
+  otherName,
+  handleSubmit,
+}) => {
+  // Memoize computed values to avoid unnecessary recalculations
+  const customerName = useMemo(() => {
+    const customer = customers.find((c) => c.id === selectedCustomerId);
+    return customer ? `${customer.firstname} ${customer.lastname}` : otherName || "Unknown";
+  }, [customers, selectedCustomerId, otherName]);
+
+  const formattedAmount = useMemo(() => {
+    return basePrice ? `₦${basePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}` : "₦0";
+  }, [basePrice]);
+
+  return (
+    <Modal
+      open={open}
+      title="Confirm Transaction"
+      footer={null}
+      onCancel={onCancel}
+    >
+      <Heading>
+        Are you sure you want to{" "}
+        <span
+          className={`${
+            transactionType === "credit" ? "text-green-400" : "text-red-400"
+          }`}
+        >
+          {_.upperCase(transactionType)}
+        </span>{" "}
+        {formattedAmount} from {customerName}?
+      </Heading>
+      <Flex justify={"end"} className="mt-4">
+        <Flex gap="3">
+          <Button
+            color="blue"
+            className="p-2 rounded border-2 border-black cursor-pointer mr-2"
+            onClick={handleSubmit}
+          >
+            Yes
+          </Button>
+          <Button
+            color="gray"
+            className="p-2 rounded border-2 border-black cursor-pointer mr-2"
+            onClick={onCancel}
+          >
+            No
+          </Button>
+        </Flex>
+      </Flex>
+    </Modal>
+  );
+};
 
 const AccountBook = () => {
   const navigate = useNavigate();
@@ -59,6 +121,7 @@ const AccountBook = () => {
     setOtherName("");
     setBankId("");
     setTransactionType("");
+    setConfirmModal(false); // Ensure modal is closed on reset
   };
 
   const formatNumber = (num) => {
@@ -82,7 +145,6 @@ const AccountBook = () => {
       return;
     }
 
-    // Function to check for customer or supplier
     const isCustomer = () => {
       if (accountRecipient === "customers") {
         return true;
@@ -99,9 +161,14 @@ const AccountBook = () => {
           },
         }
       );
-      setCustomers(response.data.customers);
+      setCustomers(response.data.customers || []);
     } catch (error) {
       console.log(error);
+      showToast({
+        message: "Failed to fetch customers or suppliers",
+        type: "error",
+        duration: 4000,
+      });
     }
   };
 
@@ -114,7 +181,6 @@ const AccountBook = () => {
       return;
     }
 
-    // Function to check for customer or supplier
     const isCustomer = () => {
       if (accountRecipient === "customers") {
         return true;
@@ -132,9 +198,14 @@ const AccountBook = () => {
         }
       );
 
-      setProducts(response.data.products);
+      setProducts(response.data.products || []);
     } catch (error) {
       console.log(error);
+      showToast({
+        message: "Failed to fetch products or raw materials",
+        type: "error",
+        duration: 4000,
+      });
     }
   };
 
@@ -153,9 +224,14 @@ const AccountBook = () => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      setDepartment(response.data.departments);
+      setDepartment(response.data.departments || []);
     } catch (error) {
       console.log(error);
+      showToast({
+        message: "Failed to fetch departments",
+        type: "error",
+        duration: 4000,
+      });
     }
   };
 
@@ -174,28 +250,35 @@ const AccountBook = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setBankDetails(response.data.banks);
+      setBankDetails(response.data.banks || []);
     } catch (error) {
       console.log(error);
-      toast.error("Error: Error in getting bank details");
+      showToast({
+        message: "Error in getting bank details",
+        type: "error",
+        duration: 4000,
+      });
     }
   };
 
   const handleSubmit = async (e) => {
-    // Only call preventDefault if an event is provided (form submission)
     if (e && e.preventDefault) {
       e.preventDefault();
     }
 
-    // Validation before opening modal
-    if (!transactionType) {
-      showToast({
-        message: "Please select a transaction type (Credit or Debit)",
-        type: "error",
-        duration: 4000,
-      });
-      return;
+
+    if (confirmModal){
+      setConfirmModal(false)
     }
+      if (!transactionType) {
+        // Validation before opening modal
+        showToast({
+          message: "Please select a transaction type (Credit or Debit)",
+          type: "error",
+          duration: 4000,
+        });r
+        return;
+      }
     if (!basePrice) {
       showToast({
         message: "Please enter an amount",
@@ -271,19 +354,10 @@ const AccountBook = () => {
       return;
     }
 
-    // Function to check if account Recipient is either customer/supplier or others
     const customerOrSupplier = () => {
-      if (
-        accountRecipient === "customers" ||
-        accountRecipient === "suppliers"
-      ) {
-        return true;
-      } else {
-        return false;
-      }
+      return accountRecipient === "customers" || accountRecipient === "suppliers";
     };
 
-    // Function to check if account recipient is either customer or supplier
     const isCustomer = () => {
       if (accountRecipient === "customers") {
         return true;
@@ -321,70 +395,15 @@ const AccountBook = () => {
       resetForm();
     } catch (error) {
       console.log(error);
-
-      setLoading(false);
-
       showToast({
-        type: "error",
         message: "An error occurred, check your details and try again later",
+        type: "error",
+        duration: 4000,
       });
+      setLoading(false);
     }
 
     setConfirmModal(false);
-  };
-
-  const ConfirmModal = () => {
-    // Get customer name for customers or suppliers
-    const customer = customers.find((c) => c.id === selectedCustomerId);
-    const customerName = customer
-      ? `${customer.firstname} ${customer.lastname}`
-      : otherName || "Unknown";
-
-    // Format amount with currency symbol
-    const formattedAmount = basePrice ? `₦${formatNumber(basePrice)}` : "₦0";
-
-    return (
-      <Modal
-        open={confirmModal}
-        title="Confirm Transaction"
-        footer={null}
-        onCancel={() => {
-          setConfirmModal(false);
-        }}
-      >
-        <Heading>
-          Are you sure you want to{" "}
-          <span
-            className={`${
-              transactionType === "credit" ? "text-green-400" : "text-red-400"
-            }`}
-          >
-            {_.upperCase(transactionType)}
-          </span>{" "}
-          {formattedAmount} from {customerName}?
-        </Heading>
-        <Flex justify={"end"} className="mt-4">
-          <Flex gap="3">
-            <Button
-              color="blue"
-              className="p-2 rounded border-2 border-black cursor-pointer mr-2"
-              onClick={handleSubmit}
-            >
-              Yes
-            </Button>
-            <Button
-              color="gray"
-              className="p-2 rounded border-2 border-black cursor-pointer mr-2"
-              onClick={() => {
-                setConfirmModal(false);
-              }}
-            >
-              No
-            </Button>
-          </Flex>
-        </Flex>
-      </Modal>
-    );
   };
 
   // Make the below requests when page loads
@@ -447,8 +466,8 @@ const AccountBook = () => {
 
   return (
     <>
-      {dialogOpen !== false && <InitDialog />}
-      {dialogOpen === false && (
+      {dialogOpen && <InitDialog />}
+      {!dialogOpen && (
         <>
           <Flex justify={"between"}>
             <Heading className="mb-4">Add</Heading>
@@ -503,13 +522,11 @@ const AccountBook = () => {
                         className="w-full mt-2"
                       />
                       <Select.Content>
-                        {department.map((item, index) => {
-                          return (
-                            <Select.Item value={item.id} key={index}>
-                              {item.name}
-                            </Select.Item>
-                          );
-                        })}
+                        {department.map((item, index) => (
+                          <Select.Item value={item.id} key={index}>
+                            {item.name}
+                          </Select.Item>
+                        ))}
                       </Select.Content>
                     </Select.Root>
                   </div>
@@ -520,8 +537,7 @@ const AccountBook = () => {
                 <>
                   <div className="w-full">
                     <Text className="mb-4">
-                      {accountRecipient === "customers" && "Customer Name"}
-                      {accountRecipient === "suppliers" && "Supplier Name"}
+                      {accountRecipient === "customers" ? "Customer Name" : "Supplier Name"}
                       <span className="text-red-500">*</span>
                     </Text>
 
@@ -534,7 +550,7 @@ const AccountBook = () => {
                           : "Select Suppliers"
                       }
                       style={{ width: "100%" }}
-                      value={selectedCustomerId ? selectedCustomerId : ""}
+                      value={selectedCustomerId || ""}
                       onChange={(value) => {
                         setSelectedCustomerId(value);
                       }}
@@ -554,15 +570,13 @@ const AccountBook = () => {
                   </div>
                   <div className="w-full">
                     <Text className="mb-4">
-                      {accountRecipient === "customers" && "Select Product"}
-                      {accountRecipient === "suppliers" &&
-                        "Select Raw Materials"}
+                      {accountRecipient === "customers" ? "Select Product" : "Select Raw Materials"}
                       <span className="text-red-500">*</span>
                     </Text>
                     <AntSelect
                       showSearch
                       className="mt-2"
-                      value={selectedProductId ? selectedProductId : ""}
+                      value={selectedProductId || ""}
                       placeholder={
                         accountRecipient === "customers"
                           ? "Select Products"
@@ -581,7 +595,7 @@ const AccountBook = () => {
                     >
                       {products.map((product) => (
                         <Option key={product.id} value={product.id}>
-                          {`${product.name} `}
+                          {product.name}
                         </Option>
                       ))}
                     </AntSelect>
@@ -610,7 +624,7 @@ const AccountBook = () => {
                   showSearch
                   className="mt-2"
                   placeholder={"Select Bank"}
-                  value={bankId ? bankId : ""}
+                  value={bankId || ""}
                   style={{ width: "100%" }}
                   onChange={(value) => {
                     setBankId(value);
@@ -622,7 +636,7 @@ const AccountBook = () => {
                 >
                   {bankDetails.map((bank) => (
                     <Option key={bank.id} value={bank.id}>
-                      {`${bank.name} `}
+                      {bank.name}
                     </Option>
                   ))}
                 </AntSelect>
@@ -670,14 +684,23 @@ const AccountBook = () => {
                 type="submit"
                 disabled={loading}
               >
-                {loading ? <Spinner /> : "Submit"}
+                {loading ?<LoaderIcon/> : "Submit"}
               </Button>
             </Flex>
           </form>
-          <ConfirmModal />
-          {/* <Toaster position="top-right" /> */}
+          <ConfirmModal
+            open={confirmModal}
+            onCancel={() => setConfirmModal(false)}
+            transactionType={transactionType}
+            basePrice={basePrice}
+            customers={customers}
+            selectedCustomerId={selectedCustomerId}
+            otherName={otherName}
+            handleSubmit={handleSubmit}
+          />
         </>
       )}
+      {/* <Toaster position="top-right" /> */}
     </>
   );
 };
