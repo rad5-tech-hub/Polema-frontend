@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
-import React from "react";
+import React, { useSyncExternalStore, useState } from "react";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { refractor, formatMoney } from "../../../date";
 import { useParams } from "react-router-dom";
@@ -11,8 +11,11 @@ import {
   Spinner,
   Flex,
   TextField,
+  Button,
 } from "@radix-ui/themes";
 import axios from "axios";
+import { Modal, Select } from "antd";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -152,6 +155,157 @@ const SupplierLedger = () => {
     }
   }, [id]);
 
+  const CreditSupplierModal = () => {
+    const [productId, setProductId] = useState("");
+    const [transactionType, setTransactionType] = useState("credit");
+    const [amount, setAmount] = useState("");
+    const [buttonLoading, setButtonLoading] = useState(false);
+
+    const handlePriceChange = (e) => {
+      const value = e.target.value.replace(/,/g, "");
+      if (!isNaN(value) && value !== "" && Number(value) >= 0) {
+        setAmount(Number(value));
+      } else {
+        setAmount("");
+      }
+    };
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      const token = localStorage.getItem("token");
+      if (!token) {
+        showToast({
+          type: "error",
+          message: "An error occurred, try logging in again.",
+        });
+        return;
+      }
+
+      if (!productId) {
+        showToast({
+          message: "Select a raw material first",
+          type: "error",
+        });
+        return;
+      }
+
+      if (!amount || Number(amount) <= 0) {
+        showToast({
+          type: "error",
+          message: "Please enter a valid amount",
+        });
+        return;
+      }
+      setButtonLoading(true);
+
+      const body = {
+        supplierId: id,
+        productId,
+        [transactionType]: amount,
+      };
+      try {
+        await axios.post(`${root}/customer/create-supplier-ledger`, body, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        showToast({
+          message: "Supplier Ledger Updated Successfully",
+          type: "success",
+          duration: 5000,
+        });
+
+        setProductId("");
+        setAmount("");
+        setTransactionType("credit");
+        setIsModalOpen(false);
+        fetchLedger();
+      } catch (err) {
+        showToast({
+          type: "error",
+          message:
+            err.response?.data?.message ||
+            "An error occurred while updating supplier ledger",
+        });
+      } finally {
+        setButtonLoading(false);
+      }
+    };
+
+    const filterProductOption = (input, option) =>
+      (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
+    return (
+      <Modal
+        open={isModalOpen}
+        title="Record Supplier Transaction"
+        footer={null}
+        onCancel={() => {
+          setIsModalOpen(false);
+          setProductId("");
+          setAmount("");
+          setTransactionType("credit");
+        }}
+      >
+        <form onSubmit={handleSubmit}>
+          <div className="mt-4">
+            <label htmlFor="product-select" className="font-bold">
+              Raw Material
+            </label>
+            <Select
+              id="product-select"
+              showSearch
+              placeholder="Search for a raw material"
+              optionFilterProp="children"
+              onChange={(value) => setProductId(value)}
+              value={productId || undefined}
+              filterOption={filterProductOption}
+              options={rawMaterials.map((material) => ({
+                value: material.id,
+                label: material.name,
+              }))}
+              style={{ width: "100%", marginTop: 8 }}
+              allowClear
+            />
+          </div>
+
+          <div className="mt-4">
+            <label htmlFor="transaction-type" className="font-bold mt-4">
+              Transaction Type
+            </label>
+            <select
+              id="transaction-type"
+              className="block w-full border-2 border-black/60 p-3 rounded"
+              onChange={(e) => setTransactionType(e.target.value)}
+              value={transactionType}
+            >
+              <option value="credit">Credit</option>
+              <option value="debit">Debit</option>
+            </select>
+          </div>
+
+          <div className="mt-4">
+            <label htmlFor="amount" className="font-bold mt-4">
+              Enter Amount
+            </label>
+            <TextField.Root
+              id="amount"
+              placeholder="Enter Amount"
+              className="p-3"
+              value={amount ? amount.toLocaleString() : ""}
+              onChange={handlePriceChange}
+            />
+          </div>
+
+          <Button
+            type="submit"
+            className="mt-4 p-2 text-white !bg-blue-400"
+            disabled={buttonLoading}
+          >
+            {buttonLoading ? "Processing..." : "Submit"}
+          </Button>
+        </form>
+      </Modal>
+    );
+  };
+
   return (
     <>
       <Flex justify={"between"}>
@@ -222,6 +376,14 @@ const SupplierLedger = () => {
           </div>
         </div>
       </Flex>
+      <Flex justify="start" className="mt-4">
+        <Button
+          className="bg-green-600 text-white"
+          onClick={() => setIsModalOpen(true)}
+        >
+          Credit Supplier
+        </Button>
+      </Flex>
 
       {/* Table to show supplier ledger details */}
       <Table.Root className="mt-4" variant="surface">
@@ -272,6 +434,7 @@ const SupplierLedger = () => {
           )}
         </Table.Body>
       </Table.Root>
+      <CreditSupplierModal />
     </>
   );
 };
