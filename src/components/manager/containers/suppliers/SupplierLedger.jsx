@@ -26,6 +26,14 @@ const SupplierLedger = () => {
   const [searchInput, setSearchInput] = React.useState("");
   const [filteredSuppliers, setFilteredSuppliers] = React.useState([]);
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const showToast = useToast();
+
+  // New states for modal form
+  const [selectedProductId, setSelectedProductId] = React.useState("");
+  const [credit, setCredit] = React.useState("");
+  const [debit, setDebit] = React.useState("");
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   // Function to fetch suppliers
   const fetchSuppliers = async () => {
     const retrToken = localStorage.getItem("token");
@@ -157,8 +165,10 @@ const SupplierLedger = () => {
           )}
           {suppliers.length === 0 ? (
             <Skeleton className="p-1 w-[150px] mt-4 h-[15px] rounded-full" />
+          ) : getSupplierDetailsByID(id).supplierTag ? (
+            <p>{`${getSupplierDetailsByID(id).supplierTag} `}</p>
           ) : (
-           getSupplierDetailsByID(id).supplierTag ? <p>{`${getSupplierDetailsByID(id).supplierTag} `}</p> : "Supplier" 
+            "Supplier"
           )}
         </div>
         <div className="w-[70%]">
