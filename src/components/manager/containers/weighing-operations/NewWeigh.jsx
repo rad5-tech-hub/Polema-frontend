@@ -41,7 +41,7 @@ const NewWeigh = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-const showToast = useToast()
+  const showToast = useToast();
   const [fullName, setFullName] = useState("");
   const [isSupplier, setIsSupplier] = useState(false);
   const [vehicleNumber, setVehicleNumber] = useState("");
@@ -62,8 +62,10 @@ const showToast = useToast()
   const [canvasVisibleWeighOut, setCanvasVisibleWeighOut] = useState(false);
   const [isTarDisabled, setIsTarDisabled] = useState(false);
   const [isGrossDisabled, setIsGrossDisabled] = useState(false);
-  const [isSupervisorWeighInDisabled, setIsSupervisorWeighInDisabled] = useState(false);
-  const [isSupervisorWeighOutDisabled, setIsSupervisorWeighOutDisabled] = useState(false);
+  const [isSupervisorWeighInDisabled, setIsSupervisorWeighInDisabled] =
+    useState(false);
+  const [isSupervisorWeighOutDisabled, setIsSupervisorWeighOutDisabled] =
+    useState(false);
   const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
   const [capturedImage, setCapturedImage] = useState(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -80,10 +82,10 @@ const showToast = useToast()
     const token = localStorage.getItem("token");
     if (!token) {
       showToast({
-        message:"No token found , Please log in",
-        type:"error"
-      })
-      
+        message: "No token found , Please log in",
+        type: "error",
+      });
+
       return;
     }
 
@@ -103,7 +105,7 @@ const showToast = useToast()
           : "Name not available"
       );
       setVehicleNumber(ticket.vehicleNo || "");
-      setSaveAuthId(ticket.authToWeighId || '');
+      setSaveAuthId(ticket.authToWeighId || "");
       setTar(ticket.tar || "");
       setIsTarDisabled(!!ticket.tar);
       setGross(ticket.gross || "");
@@ -127,9 +129,8 @@ const showToast = useToast()
       showToast({
         message: "Failed to fetch saved weigh details",
         type: "success",
-        duration:4000
-      })
-      
+        duration: 4000,
+      });
     }
   };
 
@@ -139,9 +140,9 @@ const showToast = useToast()
       showToast({
         message: "No token found , Please log in",
         type: "error",
-        duration:4000
-      })
-      
+        duration: 4000,
+      });
+
       return;
     }
 
@@ -184,14 +185,15 @@ const showToast = useToast()
       showToast({
         message: "Failed to fetch weigh details",
         type: "error",
-        duration:5000
-      })
-    
+        duration: 5000,
+      });
     }
   };
 
   useEffect(() => {
-    if (location.pathname.startsWith("/admin/weighing-operations/finish-weigh")) {
+    if (
+      location.pathname.startsWith("/admin/weighing-operations/finish-weigh")
+    ) {
       fetchSavedWeigh();
     } else {
       fetchIndividualWeigh();
@@ -232,7 +234,9 @@ const showToast = useToast()
         canvas.toBlob(
           (blob) => {
             if (blob) {
-              const jpegFile = new File([blob], filename, { type: "image/jpeg" });
+              const jpegFile = new File([blob], filename, {
+                type: "image/jpeg",
+              });
               if (input instanceof File) URL.revokeObjectURL(img.src);
               resolve(jpegFile);
             } else {
@@ -283,7 +287,8 @@ const showToast = useToast()
           0.8
         );
       };
-      img.onerror = () => reject(new Error("Failed to load image for cropping"));
+      img.onerror = () =>
+        reject(new Error("Failed to load image for cropping"));
     });
   };
 
@@ -301,11 +306,10 @@ const showToast = useToast()
       setImageURL(request.data.imageUrl);
       setIsImageUploading(false);
       showToast({
-        message:"Image Uploaded Successfully",
-        duration:4000,
-        type:"success"
-      })
-      
+        message: "Image Uploaded Successfully",
+        duration: 4000,
+        type: "success",
+      });
     } catch (error) {
       console.error("Upload failed:", error);
       setImagePreview(null);
@@ -315,9 +319,8 @@ const showToast = useToast()
       showToast({
         message: "Failed to upload image",
         type: "error",
-        duration:5000
-      })
-      
+        duration: 5000,
+      });
     }
   };
 
@@ -342,10 +345,10 @@ const showToast = useToast()
     if (!isImage) {
       showToast({
         message: "Please upload a valid image file",
-        type:"error",
-        duration:3000
-      })
-     
+        type: "error",
+        duration: 3000,
+      });
+
       return;
     }
 
@@ -370,11 +373,11 @@ const showToast = useToast()
       setCapturedImage(imageSrc);
     } else {
       showToast({
-        message: "Failed to capture photo. Please ensure webcam access is granted.",
-        type:"error",
-        duration:3000
-      })
-     
+        message:
+          "Failed to capture photo. Please ensure webcam access is granted.",
+        type: "error",
+        duration: 3000,
+      });
     }
   };
 
@@ -387,9 +390,9 @@ const showToast = useToast()
       showToast({
         message: "No image to save",
         type: "error",
-        duration:3000
-      })
-    
+        duration: 3000,
+      });
+
       return;
     }
 
@@ -407,9 +410,8 @@ const showToast = useToast()
       showToast({
         type: "error",
         message: "Failed to save cropped image",
-        duration:3000
-      })
-    
+        duration: 3000,
+      });
     }
   };
 
@@ -448,16 +450,18 @@ const showToast = useToast()
     if (!token) {
       showToast({
         message: "No token found , Please Log in",
-        type:"error",
-        duration:3000
-      })
-      
+        type: "error",
+        duration: 3000,
+      });
+
       setButtonLoadingSaving(false);
       return;
     }
 
     let weighId;
-    if (location.pathname.startsWith("/admin/weighing-operations/finish-weigh")) {
+    if (
+      location.pathname.startsWith("/admin/weighing-operations/finish-weigh")
+    ) {
       weighId = saveAuthId;
     } else {
       weighId = id;
@@ -482,9 +486,14 @@ const showToast = useToast()
       await axios.post(`${root}${endpoint}`, body, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success("Weigh Draft Saved Successfully", {
-        style: { padding: "20px" },
-      });
+      showToast({
+        message:"Weigh Draft Saved Successfully",
+        type:"success"
+      })
+      
+      setTimeout(() => {
+        navigate("/admin/weighing-operations");
+      }, 3000);
     } catch (error) {
       console.error("Save failed:", error);
 
@@ -494,8 +503,8 @@ const showToast = useToast()
           error.response?.data?.message ||
           "Failed to save draft",
         type: "error",
-        
       });
+
       
     } finally {
       setButtonLoadingSaving(false);
@@ -514,15 +523,15 @@ const showToast = useToast()
       !tar ||
       !gross ||
       !quantityNet ||
-      !imageURL || 
+      !imageURL ||
       !bagNumber
     ) {
       showToast({
         message: "Please fill all required fields",
         type: "error",
-        duration:4000
-      })
-      
+        duration: 4000,
+      });
+
       setButtonLoading(false);
       return;
     }
@@ -531,15 +540,17 @@ const showToast = useToast()
     if (!token) {
       showToast({
         message: "No token found . Please log in",
-        type:"error"
-      })
-      
+        type: "error",
+      });
+
       setButtonLoading(false);
       return;
     }
 
     let weighId;
-    if (location.pathname.startsWith("/admin/weighing-operations/finish-weigh")) {
+    if (
+      location.pathname.startsWith("/admin/weighing-operations/finish-weigh")
+    ) {
       weighId = saveAuthId;
     } else {
       weighId = id;
@@ -548,9 +559,9 @@ const showToast = useToast()
     if (!weighId) {
       showToast({
         message: "Invalid weigh ID. Please try again.",
-        type:"error"
+        type: "error",
       });
-     
+
       setButtonLoadingSaving(false);
       return;
     }
@@ -563,7 +574,7 @@ const showToast = useToast()
       tar: parseFloat(tar),
       gross: parseFloat(gross),
       image: imageURL,
-      bags: bagNumber
+      bags: bagNumber,
     };
 
     try {
@@ -572,27 +583,27 @@ const showToast = useToast()
         headers: { Authorization: `Bearer ${token}` },
       });
       showToast({
-        message:"New Weigh Successful",
-        type:"success",
-        duration:4000
-      })
-      
+        message: "New Weigh Successful",
+        type: "success",
+        duration: 4000,
+      });
+
       setButtonLoading(false);
       resetForm();
 
       setTimeout(() => {
-        navigate('/admin/weighing-operations');
-      }, 2000);
-
+        navigate("/admin/weighing-operations");
+      }, 3000);
     } catch (error) {
       console.error("Submission failed:", error);
       showToast({
-        message: error.response?.data?.error ||
-        error.response?.data?.message ||
+        message:
+          error.response?.data?.error ||
+          error.response?.data?.message ||
           "An error occurred",
         type: "error",
-        duration:35000
-      })
+        duration: 35000,
+      });
       setButtonLoading(false);
     }
   };
@@ -614,14 +625,13 @@ const showToast = useToast()
       message: "Webcam access denied or unavailable. Please check permissions.",
       type: "error",
     });
- 
   };
 
   return (
     <>
       <Toaster position="top-right" />
       <Heading className="flex justify-between items-center py-5">
-        <span>New Weigh</span>      
+        <span>New Weigh</span>
       </Heading>
       <Separator className="w-full mt-3" />
 
@@ -635,7 +645,7 @@ const showToast = useToast()
         <div className="flex my-4">
           <div
             className={`relative w-[100px] h-[100px] border-2 border-dashed rounded-lg bg-gray-500/30 flex justify-center items-center cursor-pointer overflow-hidden ${
-              isImageUploading ? 'opacity-50' : 'opacity-100'
+              isImageUploading ? "opacity-50" : "opacity-100"
             }`}
             style={{
               backgroundImage: imagePreview ? `url(${imagePreview})` : "none",
@@ -651,13 +661,14 @@ const showToast = useToast()
               </div>
             )}
 
-           
             {/* Camera icon - centered */}
             {!imagePreview && !isImageUploading && (
               <button
                 type="button"
                 onClick={handleCameraClick}
-                disabled={buttonLoading || buttonLoadingSaving || isImageUploading}
+                disabled={
+                  buttonLoading || buttonLoadingSaving || isImageUploading
+                }
                 className="absolute inset-0 flex justify-center items-center bg-transparent z-10"
               >
                 <Flex direction="column" align="center" gap="1">
@@ -667,18 +678,17 @@ const showToast = useToast()
               </button>
             )}
           </div>
-           {/* Upload icon - top left */}
-           <button
-              type="button"
-              title="Upload Image"
-              onClick={handleFileSelectClick}
-              disabled={buttonLoading || buttonLoadingSaving || isImageUploading}
-              className="p-2 bg-gray-200 h-fit rounded-md flex items-center justify-start"
-            >
-              <UploadIcon className="w-5 h-5" />
+          {/* Upload icon - top left */}
+          <button
+            type="button"
+            title="Upload Image"
+            onClick={handleFileSelectClick}
+            disabled={buttonLoading || buttonLoadingSaving || isImageUploading}
+            className="p-2 bg-gray-200 h-fit rounded-md flex items-center justify-start"
+          >
+            <UploadIcon className="w-5 h-5" />
           </button>
         </div>
-
 
         <CustomDialog
           isOpen={isCameraModalOpen}
@@ -694,7 +704,8 @@ const showToast = useToast()
         >
           {webcamError ? (
             <div className="text-red-500">
-              {webcamError}. Please check webcam permissions or try another device.
+              {webcamError}. Please check webcam permissions or try another
+              device.
             </div>
           ) : !capturedImage ? (
             <>
@@ -815,13 +826,17 @@ const showToast = useToast()
             />
           </div>
           <div className="w-full">
-            <Text>No. of Bags (Applicable only for PKC, Enter 0 if no bags)</Text>
+            <Text>
+              {/* No. of Bags (Applicable only for PKC, Enter 0 if no bags) */}
+              No. of Bags (Applicable only for PKC)
+
+            </Text>
             <TextField.Root
               type="number"
               className="mt-2"
               value={bagNumber}
               onChange={(e) => setBagNumber(e.target.value)}
-              placeholder="Input number of bags"              
+              placeholder="Input number of bags"
             />
           </div>
           <div className="w-full">
@@ -839,7 +854,8 @@ const showToast = useToast()
             <Flex
               className="w-full"
               onClick={() =>
-                !signatureWeighIn && setCanvasVisibleWeighIn(!canvasVisibleWeighIn)
+                !signatureWeighIn &&
+                setCanvasVisibleWeighIn(!canvasVisibleWeighIn)
               }
             >
               <TextField.Root
@@ -877,7 +893,8 @@ const showToast = useToast()
             <Flex
               className="w-full"
               onClick={() =>
-                !signatureWeighOut && setCanvasVisibleWeighOut(!canvasVisibleWeighOut)
+                !signatureWeighOut &&
+                setCanvasVisibleWeighOut(!canvasVisibleWeighOut)
               }
             >
               <TextField.Root

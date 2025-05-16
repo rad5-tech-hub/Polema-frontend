@@ -7,11 +7,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowDown } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 
 const DepartmentLedger = () => {
   const navigate = useNavigate();
+  const showToast = useToast()
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchInput, setSearchInput] = useState("");
@@ -30,7 +32,11 @@ const DepartmentLedger = () => {
         });
         setDepartments(response.data.departments);
       } catch (error) {
-        toast.error("Failed to fetch departments.");
+        showToast({
+          message:"Failed to fetch departments",
+          type:"error"
+        })
+        
       } finally {
         setLoading(false);
       }

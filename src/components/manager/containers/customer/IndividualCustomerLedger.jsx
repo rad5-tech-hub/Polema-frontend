@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { jwtDecode } from "jwt-decode";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch, faStop, faRedo } from "@fortawesome/free-solid-svg-icons";
 import DocumentsModal from "./DocumentsModal";
@@ -15,6 +16,7 @@ import {
   TextField,
 } from "@radix-ui/themes";
 import axios from "axios";
+import { Modal, Select } from "antd"; // Import Select from antd
 import { StopOutlined } from "@ant-design/icons";
 import useToast from "../../../../hooks/useToast";
 
@@ -23,7 +25,7 @@ const root = import.meta.env.VITE_ROOT;
 const IndividualCustomerLedger = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const showToast = useToast()
+  const showToast = useToast();
 
   const [failedSearch, setFailedSearch] = useState(false);
   const [customer, setCustomers] = useState([]);
@@ -33,9 +35,17 @@ const IndividualCustomerLedger = () => {
   const [transactionId, setTransactionId] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [filteredCustomers, setFilteredCustomers] = useState([]);
+  const [creditCustomerModalOpen, setCreditCustomerModalOpen] = useState(false);
   const [loadingStates, setLoadingStates] = useState({}); // Track loading per transaction
 
   const searchInputRef = useRef(null);
+  const formatNumberWithCommas = (value) => {
+    if (!value) return "";
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+  const decodeToken = () => {
+    return jwtDecode(localStorage.getItem("token"));
+  };
 
   // Fetch customers
   const fetchCustomers = async () => {
@@ -112,8 +122,8 @@ const IndividualCustomerLedger = () => {
         message: "Transaction ended successfully",
         type: "success",
         duration: 5000,
-      })
-      
+      });
+
       getCustomerLedger(); // Refresh ledger
     } catch (error) {
       console.error("Error ending transaction:", error);
@@ -140,12 +150,12 @@ const IndividualCustomerLedger = () => {
           headers: { Authorization: `Bearer ${retrToken}` },
         }
       );
-      
+
       showToast({
         message: "Transaction restarted successfully",
         type: "success",
         duration: 5000,
-      })
+      });
       getCustomerLedger(); // Refresh ledger
     } catch (error) {
       console.error("Error restarting transaction:", error);
@@ -169,6 +179,155 @@ const IndividualCustomerLedger = () => {
   const getProductByID = (id) => {
     const product = products.find((item) => item.id === id);
     return product ? product.name : "Product not Found";
+  };
+
+  // Modal for crediting customer
+  const CreditCustomerModal = () => {
+    const [productId, setProductId] = useState("");
+    const [transactionType, setTransactionType] = useState("credit");
+    const [creditAmount, setCreditAmount] = useState("");
+    const [buttonLoading, setButtonLoading] = useState(false);
+
+    const handlePriceChange = (e) => {
+      const value = e.target.value.replace(/,/g, "");
+      if (!isNaN(value) && value !== "" && Number(value) >= 0) {
+        setCreditAmount(value);
+      } else {
+        setCreditAmount("");
+      }
+    };
+
+    const handleCreditSubmit = async (e) => {
+      e.preventDefault();
+      const token = localStorage.getItem("token");
+      if (!token) {
+        showToast({
+          type: "error",
+          message: "An error occurred, try logging in again.",
+        });
+        return;
+      }
+      if (!productId) {
+        showToast({
+          message: "Select a product first",
+          type: "error",
+        });
+        return;
+      }
+
+      if(!creditAmount){
+        showToast({
+          type:"error",
+          message:"Enter an amount first"
+        })
+        
+        return;
+      }
+      setButtonLoading(true);
+      const body = {
+        customerId: id,
+        productId,
+        [transactionType]: creditAmount,
+      };
+
+      try {
+        const response = await axios.post(
+          `${root}/customer/create-ledger`,
+          body,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        showToast({
+          message: "Ledger Updated Successfully",
+          type: "success",
+          duration: 5000,
+        });
+
+        setButtonLoading(false);
+        setCreditCustomerModalOpen(false);
+        if (id) getCustomerLedger();
+      } catch (err) {
+        showToast({
+          type: "error",
+          message:
+            err.message || "An error occurred while trying to update ledger",
+        });
+
+        setButtonLoading(false);
+      }
+    };
+
+    // Custom filter function for product search
+    const filterProductOption = (input, option) =>
+      (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
+
+    return (
+      <Modal
+        open={creditCustomerModalOpen}
+        title="Record Book Details"
+        footer={null}
+        onCancel={() => {
+          setCreditCustomerModalOpen(false);
+          setProductId("");
+        }}
+      >
+        <form action="" onSubmit={handleCreditSubmit}>
+          <div className="mt-4">
+            <label htmlFor="product-select" className="font-bold">
+              Product
+            </label>
+            <Select
+              id="product-select"
+              showSearch
+              placeholder="Search for a product"
+              optionFilterProp="children"
+              onChange={(value) => setProductId(value)}
+              value={productId || undefined}
+              filterOption={filterProductOption}
+              options={products.map((product) => ({
+                value: product.id,
+                label: product.name,
+              }))}
+              style={{ width: "100%", marginTop: 8 }}
+              allowClear
+            />
+          </div>
+          <div className="mt-4">
+            <label htmlFor="transaction-type" className="font-bold mt-4">
+              Transaction Type
+            </label>
+            <select
+              id="transaction-type"
+              className="block w-full border-2 border-black/60 p-3 rounded"
+              onChange={(e) => setTransactionType(e.target.value)}
+              value={transactionType}
+            >
+              <option value="credit">Credit</option>
+              <option value="debit">Debit</option>
+            </select>
+          </div>
+          <div className="mt-4">
+            <label htmlFor="amount" className="font-bold mt-4">
+              Enter Amount
+            </label>
+            <TextField.Root
+              id="amount"
+              placeholder="Enter Amount"
+              className="p-3"
+              value={formatNumberWithCommas(creditAmount)}
+              onChange={handlePriceChange}
+            />
+          </div>
+
+          <Button
+            type="submit"
+            className="mt-4 p-2 text-white !bg-blue-400"
+            disabled={buttonLoading}
+          >
+            {buttonLoading ? "Please Wait..." : "Submit"}
+          </Button>
+        </form>
+      </Modal>
+    );
   };
 
   const handleSearchInput = (event) => {
@@ -211,6 +370,16 @@ const IndividualCustomerLedger = () => {
             <p className="text-sm opacity-65">
               {getCustomerByID(id).customerTag}
             </p>
+          )}
+          {decodeToken().isAdmin && customer.length > 0 && (
+            <Button
+              className="mt-4 cursor-pointer"
+              onClick={() => {
+                setCreditCustomerModalOpen(true);
+              }}
+            >
+              Credit Customer
+            </Button>
           )}
         </div>
 
@@ -333,7 +502,7 @@ const IndividualCustomerLedger = () => {
                       {loadingStates[entry.id] ? (
                         <Spinner size="1" />
                       ) : (
-                        <StopOutlined  StopOutlinedColor="#ff4d4f" style={{ fontSize: "20px" }} />
+                        <StopOutlined style={{ fontSize: "20px" }} />
                       )}
                     </Button>
                   )}
@@ -343,7 +512,7 @@ const IndividualCustomerLedger = () => {
           )}
         </Table.Body>
       </Table.Root>
-
+      <CreditCustomerModal />
       <DocumentsModal
         isOpen={isModalOpen}
         onClose={() => setModalOpen(false)}

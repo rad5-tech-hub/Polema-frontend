@@ -18,14 +18,17 @@ const root = import.meta.env.VITE_ROOT;
 
 const AuthorityToGiveCash = () => {
   const [customers, setCustomers] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const showToast = useToast();
+  const [suppliers, setSuppliers] = useState([]);
   const [products, setProducts] = useState([]);
+  const [rawMaterials, setRawMaterials] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchProductQuery, setSearchProductQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedRawMaterial, setSelectedRawMaterial] = useState(null);
   const [authorityType, setAuthorityType] = useState("credit");
   const [othersDescription, setOthersDescription] = useState("");
   const [originalAmount, setOriginalAmount] = useState("");
@@ -33,14 +36,14 @@ const AuthorityToGiveCash = () => {
   const [superAdmins, setSuperAdmins] = useState([]);
   const [adminId, setAdminId] = useState("");
   const [ticketId, setTicketId] = useState("");
-
-  // STATE MANAGEMENT FOR THE STAFF TABS
   const [staffName, setStaffName] = useState("");
   const [itemName, setItemName] = useState("");
   const [departments, setDepartments] = useState([]);
   const [comments, setComments] = useState("");
   const [departmentId, setDepartmentId] = useState("");
   const [staffAmount, setStaffAmount] = useState("");
+
+  const showToast = useToast();
 
   // Function to format numbers with commas
   const formatWithCommas = (value) => {
@@ -62,9 +65,59 @@ const AuthorityToGiveCash = () => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      setCustomers(response.data.customers);
+      setCustomers(response.data.customers || []);
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || "An error occurred");
+    }
+  };
+
+  const fetchSuppliers = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      showToast({
+        message: "An error occurred. Try logging in again",
+        type: "error",
+      });
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${root}/customer/get-suppliers`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setSuppliers(response.data.customers || []);
+    } catch (err) {
+      showToast({
+        message: err?.message || "An error occurred",
+        type: "error",
+      });
+    }
+  };
+
+  const fetchRawMaterials = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      showToast({
+        message: "An error occurred, try logging in again",
+        type: "error",
+      });
+      return;
+    }
+    try {
+      const response = await axios.get(`${root}/admin/get-raw-materials`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setRawMaterials(response.data.products || []);
+    } catch (err) {
+      showToast({
+        message: err?.message || "An error occurred",
+        type: "error",
+      });
     }
   };
 
@@ -82,9 +135,9 @@ const AuthorityToGiveCash = () => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      setProducts(response.data.products);
+      setProducts(response.data.products || []);
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || "An error occurred");
     }
   };
 
@@ -102,9 +155,13 @@ const AuthorityToGiveCash = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setSuperAdmins(response.data.staffList);
+      setSuperAdmins(response.data.staffList || []);
     } catch (error) {
       console.log(error);
+      showToast({
+        message: error.message || "An error occurred",
+        type: "error",
+      });
     }
   };
 
@@ -122,9 +179,13 @@ const AuthorityToGiveCash = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setDepartments(request.data.departments);
+      setDepartments(request.data.departments || []);
     } catch (error) {
       console.log(error);
+      showToast({
+        message: error.message || "An error occurred",
+        type: "error",
+      });
     }
   };
 
@@ -135,15 +196,29 @@ const AuthorityToGiveCash = () => {
     const retrToken = localStorage.getItem("token");
 
     if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
+      showToast({
+        message: "An error occurred. Try logging in again",
+        type: "error",
+        duration: 5000,
+      });
       setLoading(false);
       return;
     }
+    if (!adminId) {
+      showToast({
+        message: "Select an admin to send it to",
+        type: "error",
+      });
+      setLoading(false);
+      return;
+    }
+
     const resetForm = () => {
       setAmount("");
-      setSelectedCustomer("");
-      setSelectedProduct("");
+      setSelectedCustomer(null);
+      setSelectedProduct(null);
       setComments("");
+      setAdminId("");
     };
 
     const body = {
@@ -192,22 +267,104 @@ const AuthorityToGiveCash = () => {
     }
   };
 
+  const handleSuppliersSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const retrToken = localStorage.getItem("token");
+
+    if (!retrToken) {
+      showToast({
+        message: "An error occurred. Try logging in again",
+        type: "error",
+        duration: 5000,
+      });
+      setLoading(false);
+      return;
+    }
+    if (!adminId) {
+      showToast({
+        message: "Select an admin to send it to",
+        type: "error",
+      });
+      setLoading(false);
+      return;
+    }
+
+    const resetForm = () => {
+      setAmount("");
+      setSelectedSupplier(null);
+      setSelectedRawMaterial(null);
+      setComments("");
+      setAdminId("");
+    };
+
+    const body = {
+      amount: amount.replaceAll(",", ""),
+      supplierId: selectedSupplier,
+      comments,
+      productId: selectedRawMaterial,
+      creditOrDebit: authorityType,
+    };
+
+    try {
+      const response = await axios.post(`${root}/admin/cash-ticket`, body, {
+        headers: {
+          Authorization: `Bearer ${retrToken}`,
+        },
+      });
+
+      const ticketId = response.data.ticket.id;
+      setTicketId(ticketId);
+
+      await axios.post(
+        `${root}/admin/send-ticket/${ticketId}`,
+        { adminIds: [adminId] },
+        {
+          headers: {
+            Authorization: `Bearer ${retrToken}`,
+          },
+        }
+      );
+      resetForm();
+      showToast({
+        message: "Ticket created and sent successfully!",
+        type: "success",
+        duration: 5000,
+      });
+
+      setLoading(false);
+    } catch (error) {
+      console.error("Error during submission:", error);
+      showToast({
+        message: "Failed to submit the form. Please try again.",
+        type: "error",
+        duration: 5000,
+      });
+      setLoading(false);
+    }
+  };
+
   const staffSubmit = async (e) => {
     e.preventDefault();
-    
+
     const token = localStorage.getItem("token");
-    
+
     if (!token) {
-      toast.error("An error occurred, try logging in again");
+      showToast({
+        message: "An error occurred, try logging in again",
+        type: "error",
+      });
       setOthersLoading(false);
       return;
     }
     if (!adminId) {
       showToast({
-        message:"Select an admin to send it to",
-        type:"error"
-      })
-      return
+        message: "Select an admin to send it to",
+        type: "error",
+      });
+      setOthersLoading(false);
+      return;
     }
     setOthersLoading(true);
 
@@ -217,6 +374,7 @@ const AuthorityToGiveCash = () => {
       setItemName("");
       setComments("");
       setDepartmentId("");
+      setAdminId("");
     };
 
     const body = {
@@ -229,7 +387,6 @@ const AuthorityToGiveCash = () => {
     };
 
     try {
-      // First API call
       const firstResponse = await axios.post(
         `${root}/admin/cash-ticket`,
         body,
@@ -243,7 +400,7 @@ const AuthorityToGiveCash = () => {
       const newTicketId = firstResponse.data.ticket.id;
       setTicketId(newTicketId);
 
-      const secondResponse = await axios.post(
+      await axios.post(
         `${root}/admin/send-ticket/${newTicketId}`,
         {
           adminIds: [adminId],
@@ -272,7 +429,9 @@ const AuthorityToGiveCash = () => {
 
   useEffect(() => {
     fetchCustomers();
+    fetchSuppliers();
     fetchProducts();
+    fetchRawMaterials();
     fetchSuperAdmins();
     fetchDept();
   }, []);
@@ -282,7 +441,9 @@ const AuthorityToGiveCash = () => {
       <div className="flex justify-between items-center mb-4">
         <Heading>
           Authority To{" "}
-          {authorityType !== "credit" ? "Give Cash (To Cashier)" : "Collect Cash (From Cashier)"}
+          {authorityType !== "credit"
+            ? "Give Cash (To Cashier)"
+            : "Collect Cash (From Cashier)"}
         </Heading>
         <Select.Root
           defaultValue="collect"
@@ -300,12 +461,21 @@ const AuthorityToGiveCash = () => {
         </Select.Root>
       </div>
       <Separator className="my-4 w-full" />
-      <Tabs.Root defaultValue="Customers" onValueChange={() => {
-        setComments("");
-        setAdminId("")
-      }}>
+      <Tabs.Root
+        defaultValue="Customers"
+        onValueChange={() => {
+          setComments("");
+          setAdminId("");
+          setAmount("");
+          setSelectedCustomer(null);
+          setSelectedSupplier(null);
+          setSelectedProduct(null);
+          setSelectedRawMaterial(null);
+        }}
+      >
         <Tabs.List className="justify-center flex w-full items-center">
           <Tabs.Trigger value="Customers">Customers</Tabs.Trigger>
+          <Tabs.Trigger value="Suppliers">Suppliers</Tabs.Trigger>
           <Tabs.Trigger value="Staff">Staff</Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="Customers">
@@ -385,6 +555,160 @@ const AuthorityToGiveCash = () => {
                       .map((product) => (
                         <Select.Item key={product.id} value={product.id}>
                           {product.name}
+                        </Select.Item>
+                      ))}
+                  </Select.Content>
+                </Select.Root>
+              </div>
+            </div>
+
+            <div className="flex w-full mt-4 justify-between gap-8">
+              <div className="w-[49%]">
+                <label htmlFor="amount">
+                  Enter Amount <span className="text-red-500">*</span>
+                </label>
+                <TextField.Root
+                  id="amount"
+                  required
+                  className="mt-3"
+                  value={amount}
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/[^0-9]/g, "");
+                    if (rawValue === "") {
+                      setAmount("");
+                    } else {
+                      const formattedValue = formatWithCommas(rawValue);
+                      setAmount(formattedValue);
+                    }
+                  }}
+                  placeholder="Enter Amount in Naira (₦)"
+                />
+              </div>
+
+              <div className="comments w-[50%]">
+                <label htmlFor="comments">Comments</label>
+                <TextField.Root
+                  id="comments"
+                  required
+                  className="mt-3 mb-4"
+                  value={comments}
+                  onChange={(e) => setComments(e.target.value)}
+                  placeholder="Enter a description..."
+                />
+              </div>
+            </div>
+            <div className="w-[49%]">
+              <Text>Send To</Text>
+              <Select.Root
+                disabled={superAdmins.length === 0}
+                onValueChange={(value) => setAdminId(value)}
+                value={adminId}
+              >
+                <Select.Trigger
+                  className="mt-3 w-full"
+                  placeholder="Select Admin"
+                />
+                <Select.Content position="popper">
+                  {superAdmins.map((admin) => (
+                    <Select.Item
+                      key={admin.role?.id || " "}
+                      value={admin.role?.id || " "}
+                    >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
+                  ))}
+                </Select.Content>
+              </Select.Root>
+            </div>
+
+            <Flex justify={"end"} className="mt-4">
+              <Button
+                size={"3"}
+                disabled={loading}
+                type="submit"
+                className="!bg-theme"
+              >
+                {loading ? <Spinner /> : "Send"}
+              </Button>
+            </Flex>
+          </form>
+        </Tabs.Content>
+
+        <Tabs.Content value="Suppliers">
+          <form onSubmit={handleSuppliersSubmit} className="mt-6">
+            <div className="flex w-full justify-between gap-8">
+              <div className="w-full">
+                <Text>
+                  Supplier Name <span className="text-red-500">*</span>
+                </Text>
+                <Select.Root
+                  value={selectedSupplier}
+                  required
+                  onValueChange={setSelectedSupplier}
+                >
+                  <Select.Trigger
+                    className="w-full mt-2"
+                    placeholder="Select Supplier Name"
+                  />
+                  <Select.Content position="popper">
+                    <div className="p-2">
+                      <input
+                        type="text"
+                        placeholder="Search suppliers..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded"
+                      />
+                    </div>
+                    {suppliers
+                      .filter(
+                        (supplier) =>
+                          supplier.firstname
+                            .toLowerCase()
+                            .includes(searchQuery.toLowerCase()) ||
+                          supplier.lastname
+                            .toLowerCase()
+                            .includes(searchQuery.toLowerCase())
+                      )
+                      .map((supplier) => (
+                        <Select.Item key={supplier.id} value={supplier.id}>
+                          {supplier.firstname} {supplier.lastname}
+                        </Select.Item>
+                      ))}
+                  </Select.Content>
+                </Select.Root>
+              </div>
+
+              <div className="w-full">
+                <Text>
+                  Select Raw Material <span className="text-red-500">*</span>
+                </Text>
+                <Select.Root
+                  required
+                  value={selectedRawMaterial}
+                  onValueChange={setSelectedRawMaterial}
+                >
+                  <Select.Trigger
+                    className="w-full mt-2"
+                    placeholder="Select Raw Material"
+                  />
+                  <Select.Content position="popper">
+                    <div className="p-2">
+                      <input
+                        type="text"
+                        placeholder="Search raw materials..."
+                        value={searchProductQuery}
+                        onChange={(e) => setSearchProductQuery(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded"
+                      />
+                    </div>
+                    {rawMaterials
+                      .filter((material) =>
+                        material.name
+                          .toLowerCase()
+                          .includes(searchProductQuery.toLowerCase())
+                      )
+                      .map((material) => (
+                        <Select.Item key={material.id} value={material.id}>
+                          {material.name}
                         </Select.Item>
                       ))}
                   </Select.Content>
@@ -559,6 +883,7 @@ const AuthorityToGiveCash = () => {
                     {superAdmins.map((admin) => {
                       return (
                         <Select.Item
+                          key={admin.role?.id || " "}
                           value={admin.role?.id || " "}
                         >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
                       );
@@ -581,7 +906,7 @@ const AuthorityToGiveCash = () => {
           </form>
         </Tabs.Content>
       </Tabs.Root>
-      <Toaster position="top-right" />
+      {/* <Toaster position="top-right" /> */}
     </>
   );
 };
