@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import useToast from "../../../../hooks/useToast"
+import useToast from "../../../../hooks/useToast";
 import {
   Tabs,
   Heading,
@@ -19,7 +19,7 @@ const root = import.meta.env.VITE_ROOT;
 const AuthorityToGiveCash = () => {
   const [customers, setCustomers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const showToast = useToast()
+  const showToast = useToast();
   const [products, setProducts] = useState([]);
   const [searchProductQuery, setSearchProductQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,7 +34,7 @@ const AuthorityToGiveCash = () => {
   const [adminId, setAdminId] = useState("");
   const [ticketId, setTicketId] = useState("");
 
-  // STATE MANAGAEMENT FOR THE STAFF TABS
+  // STATE MANAGEMENT FOR THE STAFF TABS
   const [staffName, setStaffName] = useState("");
   const [itemName, setItemName] = useState("");
   const [departments, setDepartments] = useState([]);
@@ -42,13 +42,11 @@ const AuthorityToGiveCash = () => {
   const [departmentId, setDepartmentId] = useState("");
   const [staffAmount, setStaffAmount] = useState("");
 
-
-  // Function that is used to remove commas from the amount string
-  function removeCommas(numberStr) {
-    return numberStr.includes(",")
-      ? parseInt(numberStr.replace(/,/g, ""), 10)
-      : numberStr;
-  }
+  // Function to format numbers with commas
+  const formatWithCommas = (value) => {
+    const numericValue = value.replace(/[^0-9]/g, ""); // Remove non-numeric characters
+    return Number(numericValue).toLocaleString(); // Format with commas
+  };
 
   const fetchCustomers = async () => {
     const retrToken = localStorage.getItem("token");
@@ -95,7 +93,7 @@ const AuthorityToGiveCash = () => {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      toast.error("An error occured,try logging in again.");
+      toast.error("An error occurred, try logging in again.");
     }
 
     try {
@@ -115,7 +113,7 @@ const AuthorityToGiveCash = () => {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      toast.error("An error occured,try logging in again.");
+      toast.error("An error occurred, try logging in again.");
     }
 
     try {
@@ -138,7 +136,7 @@ const AuthorityToGiveCash = () => {
 
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
-      setButtonLoading(false);
+      setLoading(false);
       return;
     }
     const resetForm = () => {
@@ -146,11 +144,10 @@ const AuthorityToGiveCash = () => {
       setSelectedCustomer("");
       setSelectedProduct("");
       setComments("");
-      setAuthorityType('');
     };
 
     const body = {
-      amount: removeCommas(originalAmount),
+      amount: amount.replaceAll(",", ""),
       customerId: selectedCustomer,
       comments,
       productId: selectedProduct,
@@ -169,7 +166,7 @@ const AuthorityToGiveCash = () => {
 
       await axios.post(
         `${root}/admin/send-ticket/${ticketId}`,
-        { adminIds:[adminId] },
+        { adminIds: [adminId] },
         {
           headers: {
             Authorization: `Bearer ${retrToken}`,
@@ -179,46 +176,52 @@ const AuthorityToGiveCash = () => {
       resetForm();
       showToast({
         message: "Ticket created and sent successfully!",
-        type:"success",
-        duration:5000
-      })
-      
+        type: "success",
+        duration: 5000,
+      });
+
       setLoading(false);
     } catch (error) {
       console.error("Error during submission:", error);
-        showToast({
+      showToast({
         message: "Failed to submit the form. Please try again.",
-        type:"error",
-        duration:5000
-      })
+        type: "error",
+        duration: 5000,
+      });
       setLoading(false);
     }
   };
 
   const staffSubmit = async (e) => {
     e.preventDefault();
-    setOthersLoading(true);
-
+    
     const token = localStorage.getItem("token");
-
+    
     if (!token) {
       toast.error("An error occurred, try logging in again");
       setOthersLoading(false);
       return;
     }
+    if (!adminId) {
+      showToast({
+        message:"Select an admin to send it to",
+        type:"error"
+      })
+      return
+    }
+    setOthersLoading(true);
 
     const resetForm = () => {
       setStaffAmount("");
       setStaffName("");
       setItemName("");
       setComments("");
-      setAuthorityType('');
-      setDepartmentId('');
+      setDepartmentId("");
     };
 
     const body = {
       staffName,
-      amount: Number(staffAmount),
+      amount: staffAmount.replaceAll(",", ""),
       item: itemName,
       creditOrDebit: authorityType,
       comments,
@@ -243,7 +246,7 @@ const AuthorityToGiveCash = () => {
       const secondResponse = await axios.post(
         `${root}/admin/send-ticket/${newTicketId}`,
         {
-          adminIds:[adminId],
+          adminIds: [adminId],
         },
         {
           headers: {
@@ -253,24 +256,18 @@ const AuthorityToGiveCash = () => {
       );
       resetForm();
       showToast({
-        message:"Ticket Processed Successfully",
-        type:"success"
-      })
-      
+        message: "Ticket Processed Successfully",
+        type: "success",
+      });
     } catch (error) {
       console.error(error);
       showToast({
         message: "An error occurred while processing the ticket.",
         type: "error",
       });
-      
     } finally {
       setOthersLoading(false);
     }
-  };
-  const formatWithCommas = (value) => {
-    const numericValue = value.replace(/[^0-9]/g, ""); // Remove non-numeric characters
-    return Number(numericValue).toLocaleString(); // Format with commas
   };
 
   useEffect(() => {
@@ -283,9 +280,12 @@ const AuthorityToGiveCash = () => {
   return (
     <>
       <div className="flex justify-between items-center mb-4">
-        <Heading>Authority To { authorityType !== "credit" ? "Give Cash" : "Collect Cash"}</Heading>
+        <Heading>
+          Authority To{" "}
+          {authorityType !== "credit" ? "Give Cash (To Cashier)" : "Collect Cash (From Cashier)"}
+        </Heading>
         <Select.Root
-          defaultValue="give"
+          defaultValue="collect"
           onValueChange={(value) => {
             value === "collect"
               ? setAuthorityType("credit")
@@ -300,7 +300,10 @@ const AuthorityToGiveCash = () => {
         </Select.Root>
       </div>
       <Separator className="my-4 w-full" />
-      <Tabs.Root defaultValue="Customers">
+      <Tabs.Root defaultValue="Customers" onValueChange={() => {
+        setComments("");
+        setAdminId("")
+      }}>
         <Tabs.List className="justify-center flex w-full items-center">
           <Tabs.Trigger value="Customers">Customers</Tabs.Trigger>
           <Tabs.Trigger value="Staff">Staff</Tabs.Trigger>
@@ -309,7 +312,7 @@ const AuthorityToGiveCash = () => {
           <form onSubmit={handleCustomersSubmit} className="mt-6">
             <div className="flex w-full justify-between gap-8">
               <div className="w-full">
-                <Text >
+                <Text>
                   Customer Name <span className="text-red-500">*</span>
                 </Text>
                 <Select.Root
@@ -400,11 +403,11 @@ const AuthorityToGiveCash = () => {
                   className="mt-3"
                   value={amount}
                   onChange={(e) => {
-                    const rawValue = e.target.value.replace(/,/g, ''); // Remove commas
-                    if (rawValue === '') {
-                      setAmount(''); // Clear the input if the value is empty
-                    } else if (!isNaN(rawValue)) {
-                      const formattedValue = Number(rawValue).toLocaleString(); // Format with commas
+                    const rawValue = e.target.value.replace(/[^0-9]/g, "");
+                    if (rawValue === "") {
+                      setAmount("");
+                    } else {
+                      const formattedValue = formatWithCommas(rawValue);
                       setAmount(formattedValue);
                     }
                   }}
@@ -429,6 +432,7 @@ const AuthorityToGiveCash = () => {
               <Select.Root
                 disabled={superAdmins.length === 0}
                 onValueChange={(value) => setAdminId(value)}
+                value={adminId}
               >
                 <Select.Trigger
                   className="mt-3 w-full"
@@ -446,7 +450,12 @@ const AuthorityToGiveCash = () => {
             </div>
 
             <Flex justify={"end"} className="mt-4">
-              <Button size={"3"} disabled={loading} type="submit" className="!bg-theme">  
+              <Button
+                size={"3"}
+                disabled={loading}
+                type="submit"
+                className="!bg-theme"
+              >
                 {loading ? <Spinner /> : "Send"}
               </Button>
             </Flex>
@@ -484,21 +493,21 @@ const AuthorityToGiveCash = () => {
               <div className="w-full">
                 <Text>Price</Text>
                 <TextField.Root
-                className="mt-2"
-                value={staffAmount}
-                placeholder="Enter Price"
-                onChange={(e) => {
-                  const rawValue = e.target.value.replace(/,/g, ''); // Remove commas
-                  if (rawValue === '') {
-                    setStaffAmount(''); // Clear the input if the value is empty
-                  } else if (!isNaN(rawValue)) {
-                    const formattedValue = Number(rawValue).toLocaleString(); // Format with commas
-                    setStaffAmount(formattedValue);
-                  }
-                }}
-              >
-                <TextField.Slot>₦</TextField.Slot>
-              </TextField.Root>
+                  className="mt-2"
+                  value={staffAmount}
+                  placeholder="Enter Price"
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/[^0-9]/g, "");
+                    if (rawValue === "") {
+                      setStaffAmount("");
+                    } else {
+                      const formattedValue = formatWithCommas(rawValue);
+                      setStaffAmount(formattedValue);
+                    }
+                  }}
+                >
+                  <TextField.Slot>₦</TextField.Slot>
+                </TextField.Root>
               </div>
               <div className="w-full">
                 <Text>Select Department</Text>
@@ -514,7 +523,7 @@ const AuthorityToGiveCash = () => {
                   <Select.Content position="popper">
                     {departments.map((dept) => {
                       return (
-                        <Select.Item key={dept.id} value={dept.id} >
+                        <Select.Item key={dept.id} value={dept.id}>
                           {dept.name}
                         </Select.Item>
                       );
@@ -524,9 +533,14 @@ const AuthorityToGiveCash = () => {
               </div>
               <div className="w-full">
                 <Text>Comments </Text>
-                <TextField.Root className="mt-2" value={comments} onChange={(e)=>{
-                  setComments(e.target.value);
-                }} placeholder="Enter Comments" />
+                <TextField.Root
+                  className="mt-2"
+                  value={comments}
+                  onChange={(e) => {
+                    setComments(e.target.value);
+                  }}
+                  placeholder="Enter Comments"
+                />
               </div>
               <div className="w-full">
                 <Text>Send To</Text>
@@ -535,12 +549,13 @@ const AuthorityToGiveCash = () => {
                   onValueChange={(value) => {
                     setAdminId(value);
                   }}
+                  value={adminId}
                 >
                   <Select.Trigger
                     className="w-full mt-2"
                     placeholder="Select Admin"
                   />
-                  <Select.Content>
+                  <Select.Content position="popper">
                     {superAdmins.map((admin) => {
                       return (
                         <Select.Item
@@ -554,7 +569,12 @@ const AuthorityToGiveCash = () => {
             </Grid>
 
             <Flex justify={"end"} className="mt-5">
-              <Button size={"3"} disabled={othersLoading} type="submit" className="!bg-theme">
+              <Button
+                size={"3"}
+                disabled={othersLoading}
+                type="submit"
+                className="!bg-theme"
+              >
                 {othersLoading ? <Spinner /> : "Send"}
               </Button>
             </Flex>

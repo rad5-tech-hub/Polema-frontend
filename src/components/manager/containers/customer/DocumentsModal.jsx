@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
-import { formatMoney } from "../../../date";
+import { formatMoney, isNegative } from "../../../date";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import { CameraFilled } from "@ant-design/icons";
 import { Flex, Button, Separator, Spinner, Grid, Text } from "@radix-ui/themes";
@@ -12,9 +12,9 @@ import useToast from "../../../../hooks/useToast";
 const root = import.meta.env.VITE_ROOT;
 
 const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
-  const showToast = useToast()
+  const showToast = useToast();
   const [entries, setEntries] = useState([]);
-  const [weighImage, setWeighImage] = useState('');
+  const [weighImage, setWeighImage] = useState("");
   const [docOrders, setDocOrders] = useState({});
   const [summary, setSummary] = useState({});
   const [failedSearch, setFailedSearch] = useState(false);
@@ -50,9 +50,12 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
 
     setLoading(true);
     try {
-      const { data } = await axios.get(`${root}/customer/get-summary/${customerId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { data } = await axios.get(
+        `${root}/customer/get-summary/${customerId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setEntries(data.ledgerSummary?.ledgerEntries || []);
       setSummary(data.ledgerSummary || {});
       setDocOrders(data.order || {});
@@ -101,9 +104,11 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
     const requestFullscreen = () => {
       if (img.requestFullscreen) {
         return img.requestFullscreen();
-      } else if (img.webkitRequestFullscreen) { // Safari
+      } else if (img.webkitRequestFullscreen) {
+        // Safari
         return img.webkitRequestFullscreen();
-      } else if (img.msRequestFullscreen) { // IE/Edge
+      } else if (img.msRequestFullscreen) {
+        // IE/Edge
         return img.msRequestFullscreen();
       } else {
         toast.error("Fullscreen mode is not supported in this browser.");
@@ -116,15 +121,31 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
       .then(() => {
         // Listen for fullscreen change to clean up
         const handleFullscreenChange = () => {
-          if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+          if (
+            !document.fullscreenElement &&
+            !document.webkitFullscreenElement &&
+            !document.msFullscreenElement
+          ) {
             document.body.removeChild(img);
-            document.removeEventListener("fullscreenchange", handleFullscreenChange);
-            document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
-            document.removeEventListener("msfullscreenchange", handleFullscreenChange);
+            document.removeEventListener(
+              "fullscreenchange",
+              handleFullscreenChange
+            );
+            document.removeEventListener(
+              "webkitfullscreenchange",
+              handleFullscreenChange
+            );
+            document.removeEventListener(
+              "msfullscreenchange",
+              handleFullscreenChange
+            );
           }
         };
         document.addEventListener("fullscreenchange", handleFullscreenChange);
-        document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+        document.addEventListener(
+          "webkitfullscreenchange",
+          handleFullscreenChange
+        );
         document.addEventListener("msfullscreenchange", handleFullscreenChange);
       })
       .catch((err) => {
@@ -137,10 +158,14 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
   const getReceiptBody = (receiptType, imageUrl) => {
     if (!imageUrl) return null;
     switch (receiptType.toLowerCase()) {
-      case "cashticket": return { cashImage: imageUrl };
-      case "invoice": return { invoiceImg: imageUrl };
-      case "gatepass": return { gatepassImage: imageUrl };
-      case "waybill": return { wayBillImage: imageUrl };
+      case "cashticket":
+        return { cashImage: imageUrl };
+      case "invoice":
+        return { invoiceImg: imageUrl };
+      case "gatepass":
+        return { gatepassImage: imageUrl };
+      case "waybill":
+        return { wayBillImage: imageUrl };
       default:
         console.warn(`Unknown receipt type: ${receiptType}`);
         return null;
@@ -169,9 +194,13 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
 
       const body = getReceiptBody(type, imageUrl);
       if (body) {
-        await axios.patch(`${root}/customer/ledgers-images/${customerId}`, body, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await axios.patch(
+          `${root}/customer/ledgers-images/${customerId}`,
+          body,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
       }
 
       setUploadedFiles((prev) => ({
@@ -189,8 +218,7 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
       showToast({
         message: `${type} uploaded successfully!`,
         type: "success",
-      })
-      
+      });
     } catch (error) {
       toast.error(`Failed to upload ${type}. Please try again.`);
       console.error("Upload error:", error.response?.data || error.message);
@@ -232,7 +260,9 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
                   id={`image-${type}`}
                   className="bg-gray-300 rounded min-w-[70px] h-[70px] flex justify-center items-center overflow-hidden cursor-pointer"
                   style={{
-                    backgroundImage: displayImageUrl ? `url(${displayImageUrl})` : "none",
+                    backgroundImage: displayImageUrl
+                      ? `url(${displayImageUrl})`
+                      : "none",
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                   }}
@@ -295,7 +325,18 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
                   <p className="text-xs">
                     {entry.creditType === null &&
                       `${entry.quantity} ${entry.unit} of`}{" "}
-                    {entry.quantity && entry?.quantity || ""} {entry.unit && entry?.unit || ""} of  {entry.product?.name}
+                    {(entry.quantity && entry?.quantity) || ""}{" "}
+                    {(entry.unit && entry?.unit) || ""} of {entry.product?.name}
+                    {/* {entry.unit !== null && " ordered"} */}
+                   {entry.unit === null ? "" : entry.unit === "" || entry.unit === "N/A" ? "" : " ordered"}
+                  
+                  
+                    
+                    {entry.unit === null
+                      ? isNegative(entry.quantity)
+                        ? " (returned)"
+                        : " (extra)"
+                      : ""}
                   </p>
                   <p className="text-xs">
                     {entry.creditType && `Paid with ${entry.creditType}`}
@@ -328,9 +369,7 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
               className="w-20 h-20 mt-2 rounded-md bg-gray-400/40 border-2 cursor-pointer"
               onClick={() => handleFullscreen("weigh", weighImage)}
               style={{
-                backgroundImage: weighImage
-                  ? `url(${weighImage})`
-                  : "none",
+                backgroundImage: weighImage ? `url(${weighImage})` : "none",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}

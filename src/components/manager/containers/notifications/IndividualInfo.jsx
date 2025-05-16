@@ -3,7 +3,7 @@ import { jwtDecode } from "jwt-decode";
 import _ from "lodash";
 import axios from "axios";
 import { Spinner, Grid, Button, Text } from "@radix-ui/themes";
-import {refractor,formatMoney} from "../../../date"
+import { refractor, isNegative, formatMoney } from "../../../date";
 import { Modal } from "antd";
 import Image from "../../../../static/image/polema-logo.png";
 import { Toaster, toast, LoaderIcon } from "react-hot-toast";
@@ -12,7 +12,7 @@ import useToast from "../../../../hooks/useToast";
 const root = import.meta.env.VITE_ROOT;
 const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
   const [ticketDetails, setTicketDetails] = useState();
-  const showToast = useToast()
+  const showToast = useToast();
   const [rejectLoading, setRejectLoading] = useState(false);
   const [approveLoading, setApproveLoading] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
@@ -22,7 +22,8 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
   const [storeDetails, setStoreDetails] = useState([]);
 
   //------------- State management for approving to to other admins-------------
-  const [approveToOtherAdminChecked,setApproveToOtherAdminChecked] = useState(false)
+  const [approveToOtherAdminChecked, setApproveToOtherAdminChecked] =
+    useState(false);
 
   // Function to fetch general store
   const fetchGeneralStore = async () => {
@@ -62,8 +63,8 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
         return "customer/invoice-pdf";
       case "weigh":
         return "admin/view-auth-weigh";
-        case "waybill":
-          return "customer/waybill-pdf";
+      case "waybill":
+        return "customer/waybill-pdf";
       default:
         break;
     }
@@ -116,7 +117,7 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
         style: { padding: "20px" },
         duration: 6000,
       });
-      return
+      return;
     }
 
     // setTicketDetails({})
@@ -150,9 +151,9 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
         case "store":
           setTicketDetails(response.data.records);
           break;
-          case "waybill":
-            setTicketDetails(response.data?.parse || []);
-            break;
+        case "waybill":
+          setTicketDetails(response.data?.parse || []);
+          break;
         default:
           break;
       }
@@ -175,11 +176,10 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
       setOpen(false);
       setTimeout(() => {
         showToast({
-          message:"Ticket Approved",
-          duration:4000,
-          type:"success"
-        })
-        
+          message: "Ticket Approved",
+          duration: 4000,
+          type: "success",
+        });
       }, 1000);
     } catch (error) {
       console.log(error);
@@ -203,11 +203,10 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
       );
       setRejectLoading(false);
       showToast({
-        message:"Ticket Disapproved",
-        duration:4000,
-        type:"success"
-      })
-      
+        message: "Ticket Disapproved",
+        duration: 4000,
+        type: "success",
+      });
     } catch (error) {
       console.log(error);
       setRejectLoading(false);
@@ -237,11 +236,11 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
         }
       );
       showToast({
-        message:"Ticket Confirmed",
-        duration:5000,
-        type:"success"
-      })
-      
+        message: "Ticket Confirmed",
+        duration: 5000,
+        type: "success",
+      });
+
       setConfirmLoading(false);
     } catch (error) {
       console.log(error);
@@ -261,7 +260,6 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
     setOpen(false);
   };
 
-  
   React.useEffect(() => {
     fetchTicketDetails();
     fetchGeneralStore();
@@ -305,10 +303,10 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                       </div>
                       <div>
                         <Text className="text-[.56rem] font-black tracking-wide">
-                        OWNER OF GOODS
+                          OWNER OF GOODS
                         </Text>
                         <p className="text-[.7rem]">
-                          {ticketDetails.owner || '-'}
+                          {ticketDetails.owner || "-"}
                         </p>
                       </div>
                       <div>
@@ -324,7 +322,8 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                           PRODUCT NAME
                         </Text>
                         <p className="text-[.7rem]">
-                          {ticketDetails.transaction?.porders?.name  || ticketDetails?.rawMaterial?.name}
+                          {ticketDetails.transaction?.porders?.name ||
+                            ticketDetails?.rawMaterial?.name}
                         </p>
                       </div>
                     </>
@@ -422,7 +421,24 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                                 <>
                                   <p className="text-[.5rem]">
                                     {entry.quantity} {entry.unit} of{" "}
-                                    {entry.productName}
+                                    {entry.productName}{" "}
+                                    {/* {entry.unit !== null && "ordered"}
+                                    {entry.unit === null
+                                      ? isNegative(entry.quantity)
+                                        ? " (returned)"
+                                        : " (extra)"
+                                      : ""} */}
+                                    {entry.unit === null
+                                      ? ""
+                                      : entry.unit === "" ||
+                                        entry.unit === "N/A"
+                                      ? ""
+                                      : " ordered"}
+                                    {entry.unit === null
+                                      ? isNegative(entry.quantity)
+                                        ? " (returned)"
+                                        : " (extra)"
+                                      : ""}
                                   </p>{" "}
                                 </>
                               );
@@ -440,19 +456,27 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                     <>
                       {/* Driver */}
                       <div className="flex w-full justify-between items-center p-2">
-                        <Text className="text-[.9rem] font-black tracking-wide">DRIVER</Text>
-                        <p className="text-[.9rem]">{ticketDetails.driver || "N/A"}</p>
+                        <Text className="text-[.9rem] font-black tracking-wide">
+                          DRIVER
+                        </Text>
+                        <p className="text-[.9rem]">
+                          {ticketDetails.driver || "N/A"}
+                        </p>
                       </div>
 
                       {/* Customer or Supplier Name */}
                       <div className="flex w-full justify-between items-center p-2">
                         <Text className="text-[.9rem] font-black tracking-wide">
-                          {ticketDetails.customerId ? "CUSTOMER NAME" : "SUPPLIER NAME"}
+                          {ticketDetails.customerId
+                            ? "CUSTOMER NAME"
+                            : "SUPPLIER NAME"}
                         </Text>
                         <p className="text-[.9rem]">
-                          {ticketDetails.customerId && ticketDetails.transactions?.corder
+                          {ticketDetails.customerId &&
+                          ticketDetails.transactions?.corder
                             ? `${ticketDetails.transactions.corder.firstname} ${ticketDetails.transactions.corder.lastname}`
-                            : ticketDetails?.supplierId && ticketDetails?.supplier
+                            : ticketDetails?.supplierId &&
+                              ticketDetails?.supplier
                             ? `${ticketDetails?.supplier.firstname} ${ticketDetails?.supplier.lastname}`
                             : "Name not available"}
                         </p>
@@ -461,9 +485,11 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                       {/* Quantity */}
                       {ticketDetails.transactions && (
                         <div className="flex w-full justify-between items-center p-2">
-                          <Text className="text-[.9rem] font-black tracking-wide">QUANTITY</Text>
+                          <Text className="text-[.9rem] font-black tracking-wide">
+                            QUANTITY
+                          </Text>
                           <p className="text-[.9rem]">
-                            {formatMoney(ticketDetails.transactions?.quantity) || ""}{" "}
+                            {ticketDetails.transactions?.quantity || ""}{" "}
                             {ticketDetails.transactions?.unit || ""}
                           </p>
                         </div>
@@ -471,16 +497,24 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
 
                       {/* Product */}
                       <div className="flex w-full justify-between items-center p-2">
-                        <Text className="text-[.9rem] font-black tracking-wide">PRODUCT</Text>
+                        <Text className="text-[.9rem] font-black tracking-wide">
+                          PRODUCT
+                        </Text>
                         <p className="text-[.9rem]">
-                          {ticketDetails.transactions?.porders?.name || ticketDetails.rawMaterial?.name || "N/A"}
+                          {ticketDetails.transactions?.porders?.name ||
+                            ticketDetails.rawMaterial?.name ||
+                            "N/A"}
                         </p>
                       </div>
 
                       {/* Vehicle Number */}
                       <div className="flex w-full justify-between items-center p-2">
-                        <Text className="text-[.9rem] font-black tracking-wide">VEHICLE NO</Text>
-                        <p className="text-[.9rem]">{ticketDetails.vehicleNo || "N/A"}</p>
+                        <Text className="text-[.9rem] font-black tracking-wide">
+                          VEHICLE NO
+                        </Text>
+                        <p className="text-[.9rem]">
+                          {ticketDetails.vehicleNo || "N/A"}
+                        </p>
                       </div>
                     </>
                   )}
@@ -568,13 +602,13 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                           TYPE
                         </Text>
                         {ticketDetails.creditOrDebit === "credit" ? (
-                          <p className="text-[.9rem] text-green-500">
+                          <p className="text-[.9rem] text-red-500">
                             {/* Give Cash */}
                             {/* This was changed to collected cash because if the cash is given , the admin collect it  */}
                             Collect Cash
                           </p>
                         ) : (
-                          <p className="text-[.9rem] text-red-500">
+                          <p className="text-[.9rem] text-green-500">
                             {/* This was changed because of the reverse of the abpve comments  */}
                             {/* Collected Cash */}
                             Give Cash

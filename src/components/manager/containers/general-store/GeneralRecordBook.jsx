@@ -15,12 +15,13 @@ import { Modal } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquare, faClose } from "@fortawesome/free-solid-svg-icons";
 import useToast from "../../../../hooks/useToast";
+import { Grid } from "antd";
 const root = import.meta.env.VITE_ROOT;
 
 const GeneralRecordBook = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const showToast = useToast()
+  const showToast = useToast();
 
   const [details, setDetails] = useState(null);
   const [recordBookDetails, setRecordBookDetails] = useState([]);
@@ -32,6 +33,8 @@ const GeneralRecordBook = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [filterLoading, setFilterLoading] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [previousPageUrl, setPreviousPageUrl] = useState(null); // Store previous page endpoint
 
   // Ref for filter box
   const filterBoxRef = useRef(null);
@@ -40,7 +43,10 @@ const GeneralRecordBook = () => {
   useEffect(() => {
     if (!filterOpen) return;
     function handleClickOutside(event) {
-      if (filterBoxRef.current && !filterBoxRef.current.contains(event.target)) {
+      if (
+        filterBoxRef.current &&
+        !filterBoxRef.current.contains(event.target)
+      ) {
         setFilterOpen(false);
       }
     }
@@ -59,10 +65,10 @@ const GeneralRecordBook = () => {
   // Fetch record book details
   const getRecordDetails = async (start = "", end = "") => {
     setTableLoading(true);
+    setPreviousPageUrl(null); // Reset previous page on new fetch or filter
     const token = localStorage.getItem("token");
     if (!token) {
       toast.error("An error occurred, try logging in again", {
-     
         style: { padding: "20px" },
         duration: 500,
       });
@@ -78,6 +84,7 @@ const GeneralRecordBook = () => {
       });
       if (response.data.data.length === 0) {
         setFailedSearch(true);
+        setRecordBookDetails([]);
       } else {
         setFailedSearch(false);
         setRecordBookDetails(response.data.data);
@@ -86,8 +93,69 @@ const GeneralRecordBook = () => {
     } catch (error) {
       setFailedSearch(true);
       console.error(error);
+      toast.error("Failed to load records.");
     } finally {
       setTableLoading(false);
+    }
+  };
+
+  // Handle pagination navigation
+  const handlePageNavigation = async (pageUrl, direction) => {
+    if (!pageUrl || isNavigating) return;
+    setIsNavigating(true);
+    setTableLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("An error occurred, try logging in again", {
+          style: { padding: "20px" },
+          duration: 500,
+        });
+        return;
+      }
+
+      // Before navigating to next page, save current page as previous
+      if (direction === "next") {
+        const currentParams = searchParams.toString();
+        setPreviousPageUrl(
+          currentParams
+            ? `/dept/genstore-log?${currentParams}`
+            : "/dept/genstore-log"
+        );
+      }
+
+      const response = await axios.get(`${root}${pageUrl}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.data.data.length === 0) {
+        setFailedSearch(true);
+        setRecordBookDetails([]);
+      } else {
+        setFailedSearch(false);
+        setRecordBookDetails(response.data.data);
+        setDetails(response.data);
+        showToast({
+          message: `Navigated to ${direction} page successfully.`,
+          type: "success",
+        });
+
+        // Update URL with new pagination parameters
+        const params = new URLSearchParams(pageUrl.split("?")[1] || "");
+        navigate(`/admin/general-store/record-book?${params.toString()}`);
+
+        // Clear previousPageUrl when returning to first page
+        if (direction === "previous" && !params.toString()) {
+          setPreviousPageUrl(null);
+        }
+      }
+    } catch (error) {
+      console.error(`Error fetching ${direction} page:`, error);
+      toast.error(`Failed to load ${direction} page.`);
+      setFailedSearch(true);
+    } finally {
+      setTableLoading(false);
+      setIsNavigating(false);
     }
   };
 
@@ -101,9 +169,8 @@ const GeneralRecordBook = () => {
       await getRecordDetails(startDate, endDate);
       showToast({
         message: "Records filtered successfully.",
-        type:"success"
-    })
-     
+        type: "success",
+      });
     } catch (error) {
       console.error(error);
       toast.error("Failed to filter records.");
@@ -116,6 +183,9 @@ const GeneralRecordBook = () => {
     getRecordDetails();
     // eslint-disable-next-line
   }, []);
+
+  // Show Previous button if previousPageUrl exists
+  const showPreviousButton = !!previousPageUrl;
 
   return (
     <>
@@ -136,7 +206,10 @@ const GeneralRecordBook = () => {
             >
               <div className="flex flex-col sm:flex-row gap-4">
                 <div>
-                  <label htmlFor="startDate" className="block text-sm font-medium">
+                  <label
+                    htmlFor="startDate"
+                    className="block text-sm font-medium"
+                  >
                     Start Date
                   </label>
                   <input
@@ -148,7 +221,10 @@ const GeneralRecordBook = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="endDate" className="block text-sm font-medium">
+                  <label
+                    htmlFor="endDate"
+                    className="block text-sm font-medium"
+                  >
                     End Date
                   </label>
                   <input
@@ -161,12 +237,12 @@ const GeneralRecordBook = () => {
                 </div>
               </div>
               <div className="mt-4 flex justify-between">
-              <Button
-                className="bg-white rounded !text-black text-base" 
-                onClick={getRecordDetails}
-              >
-                Back
-              </Button>
+                <Button
+                  className="bg-white rounded !text-black text-base"
+                  onClick={getRecordDetails}
+                >
+                  Back
+                </Button>
                 <Button
                   className="bg-theme cursor-pointer"
                   onClick={handleFilterSubmit}
@@ -257,12 +333,7 @@ const GeneralRecordBook = () => {
         </Table.Body>
       </Table.Root>
 
-      <Modal
-        open={modalOpen}
-        footer={null}
-        centered
-        closable={false}
-      >
+      <Modal open={modalOpen} footer={null} centered closable={false}>
         <p
           className="absolute top-[10px] right-[20px] cursor-pointer"
           onClick={() => setModalOpen(false)}
@@ -309,55 +380,37 @@ const GeneralRecordBook = () => {
         </div>
       </Modal>
 
-      {details?.pagination?.nextPage && (
-        <Flex className="my-6" justify={"end"}>
-          <Button
-            className="bg-theme cursor-pointer"
-            onClick={async () => {
-              setTableLoading(true);
-              try {
-                const token = localStorage.getItem("token");
-                if (!token) {
-                  toast.error("An error occurred, try logging in again", {
-                    style: { padding: "20px" },
-                    duration: 500,
-                  });
-                  return;
-                }
-
-                // Construct the next page URL from pagination data
-                const nextPageUrl = `${root}${details.pagination.nextPage}`;
-                const response = await axios.get(nextPageUrl, {
-                  headers: { Authorization: `Bearer ${token}` },
-                });
-
-                if (response.data.data.length === 0) {
-                  setFailedSearch(true);
-                  setRecordBookDetails([]);
-                } else {
-                  setFailedSearch(false);
-                  setRecordBookDetails(response.data.data);
-                  setDetails(response.data);
-
-                  // Update URL with new pagination parameters
-                  const params = new URLSearchParams(
-                    details.pagination.nextPage.split("?")[1]
-                  );
-                  navigate(
-                    `/admin/general-store/record-book?${params.toString()}`
-                  );
-                }
-              } catch (error) {
-                console.error("Error fetching next page:", error);
-                toast.error("Failed to load next page.");
-                setFailedSearch(true);
-              } finally {
-                setTableLoading(false);
+      {(showPreviousButton || details?.pagination?.nextPage) && (
+        <Flex className="my-6" justify={"between"} gap="3">
+          
+          {showPreviousButton && (
+            <Button
+              className="bg-theme cursor-pointer"
+              disabled={isNavigating || tableLoading}
+              onClick={() => handlePageNavigation(previousPageUrl, "previous")}
+            >
+              {isNavigating && !details?.pagination?.nextPage ? (
+                <Spinner size="2" />
+              ) : (
+                "Previous Page"
+              )}
+            </Button>
+          )}
+          {details?.pagination?.nextPage && (
+            <Button
+              className="bg-theme cursor-pointer"
+              disabled={isNavigating || tableLoading}
+              onClick={() =>
+                handlePageNavigation(details.pagination.nextPage, "next")
               }
-            }}
-          >
-            Next Page
-          </Button>
+            >
+              {isNavigating && details?.pagination?.nextPage ? (
+                <Spinner size="2" />
+              ) : (
+                "Next Page"
+              )}
+            </Button>
+          )}
         </Flex>
       )}
 

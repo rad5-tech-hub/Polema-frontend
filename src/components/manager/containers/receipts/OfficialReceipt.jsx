@@ -205,9 +205,8 @@ const OfficialReceipt = () => {
               </h4>
 
               {/* Receipt Number */}
-              <div className="receiptNo absolute top-[320px] right-[10%] italic rotate-6 font-bold text-[24px] sm:text-[32px] text-[#D2D2D2]">
-                0818
-              </div>
+            
+                
             </div>
 
             {/* Receipt Details */}
@@ -240,6 +239,7 @@ const OfficialReceipt = () => {
                 </button>
               </div>
               <div className="flex flex-col items-center">
+                {receiptDetails?.preparedByAdmin?.admins[0]?.firstname && <img width={150} src={receiptDetails?.preparedByAdmin?.admins[0].signature}/>}
                 <p className="border-b border-black border-dotted w-[150px] sm:w-[230px]"></p>
                 <label className="text-sm sm:text-base mt-2">
                   RECEIVER’S SIGNATURE

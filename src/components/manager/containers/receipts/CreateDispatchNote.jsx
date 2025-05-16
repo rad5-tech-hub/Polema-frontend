@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+
 import useToast from "../../../../hooks/useToast";
 import { useNavigate } from "react-router-dom";
 import {
@@ -18,7 +19,7 @@ const root = import.meta.env.VITE_ROOT;
 
 const CreateDispatchNote = () => {
   const navigate = useNavigate();
-  const showToast =  useToast()
+  const showToast = useToast();
   const [buttonLoading, setButtonLoading] = useState(false);
   const [adminId, setAdminId] = useState("");
   const [superAdmins, setSuperAdmins] = useState([]);
@@ -33,7 +34,10 @@ const CreateDispatchNote = () => {
   const fetchSuperAdmins = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("Please log in again.", { style: { padding: "20px" }, duration: 10000 });
+      toast.error("Please log in again.", {
+        style: { padding: "20px" },
+        duration: 10000,
+      });
       return;
     }
 
@@ -60,13 +64,19 @@ const CreateDispatchNote = () => {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      toast.error("Please log in again.", { style: { padding: "20px" }, duration: 10000 });
+      toast.error("Please log in again.", {
+        style: { padding: "20px" },
+        duration: 10000,
+      });
       setButtonLoading(false);
       return;
     }
 
     if (!formData.driverName) {
-      toast.error("Driver's name is required.", { style: { padding: "20px" }, duration: 10000 });
+      toast.error("Driver's name is required.", {
+        style: { padding: "20px" },
+        duration: 10000,
+      });
       setButtonLoading(false);
       return;
     }
@@ -98,27 +108,29 @@ const CreateDispatchNote = () => {
       //   { headers: { Authorization: `Bearer ${token}` } }
       // );
 
-      setFormData({        
+      setFormData({
         driverName: "",
         escortName: "",
         vehicleNumber: "",
         destination: "",
-      })
+      });
       showToast({
         message: "Dispatch note generated and sent to admin!",
         duration: 5000,
         type: "success",
-      })
-    
-      
+      });
+
+      setTimeout(() => {
+        navigate("/admin/receipts/all-dispatchnote");
+      }, 3000);
     } catch (error) {
       console.error("Error creating dispatch note:", error);
       showToast({
         type: "error",
-        message: error.response?.data?.message || "Failed to create dispatch note.",
+        message:
+          error.response?.data?.message || "Failed to create dispatch note.",
         duration: 5000,
-      })
-      
+      });
     } finally {
       setButtonLoading(false);
     }
@@ -131,9 +143,13 @@ const CreateDispatchNote = () => {
 
   return (
     <Flex direction="column" gap="4" className="p-6">
-      <Flex justify="between" align="center" className=" py-4 border-b border-gray-200">
+      <Flex
+        justify="between"
+        align="center"
+        className=" py-4 border-b border-gray-200"
+      >
         <Heading size="5">Create Vehicle Dispatch Note</Heading>
-        <Button       
+        <Button
           variant="outline"
           className="px-8 p-5 border-theme text-theme"
           onClick={() => navigate("/admin/receipts/all-dispatchnote")}
@@ -143,11 +159,7 @@ const CreateDispatchNote = () => {
       </Flex>
 
       <form onSubmit={handleSubmit}>
-        <Grid
-          columns={{ initial: "1", sm: "2" }}
-          gap="6"
-          className=" pt-6"
-        >
+        <Grid columns={{ initial: "1", sm: "2" }} gap="6" className=" pt-6">
           <Flex direction="column" gap="2">
             <Text as="label" size="2" weight="medium">
               Driver's Name

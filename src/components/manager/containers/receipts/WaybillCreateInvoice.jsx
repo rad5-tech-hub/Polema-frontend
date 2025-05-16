@@ -5,12 +5,14 @@ import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { Select } from "@radix-ui/themes";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const root = import.meta.env.VITE_ROOT;
 
 const WaybillCreateInvoice = () => {
   const showToast = useToast()
   const { id } = useParams();
+  const navigste = useNavigate()
   const [buttonLoading, setButtonLoading] = useState(false);
   const [ledgerEntries, setLedgerEntries] = useState(null); // Initialize as `null` for type safety.
   const [selectedTransport, setSelectedTransport] = useState("");
@@ -44,6 +46,8 @@ const WaybillCreateInvoice = () => {
       });
       const customerInfo = response.data.ledger?.customerId;
       setCustomerId(customerInfo);    
+      setDriverName(response.data.order?.authToWeighTickets?.driver || "");
+      setVehicleNo(response.data.order?.authToWeighTickets?.vehicleNo || "");
     } catch (error) {
 
       toast.error("Failed to fetch gate pass details");
@@ -65,6 +69,7 @@ const WaybillCreateInvoice = () => {
       });
       const customerInfo = response.data.customer;
       setAddress(customerInfo.address || "Loading");
+      
     } catch (error) {
       console.log(error);
       toast.error("Failed to fetch customer details.");
@@ -115,7 +120,8 @@ const WaybillCreateInvoice = () => {
     // Prepare the request body
     const body = {
       ...(bagNumber && { bags: bagNumber }),
-      driversLicense: driverLicense,
+      ...(driverLicense && {driversLicense: driverLicense}),
+      
       transportedBy: carriedByWho,
     };
 
@@ -164,6 +170,9 @@ const WaybillCreateInvoice = () => {
         type: "success",
       });
      
+      setTimeout(()=>{
+        navigate("/admin/receipts/waybill");
+      },3000)
     } catch (error) {
       console.error("Error during request:", error);
       setButtonLoading(false);
@@ -250,11 +259,11 @@ const WaybillCreateInvoice = () => {
               placeholder="Input Driver License"
               value={driverLicense}
               onChange={(e) => setDriverLicense(e.target.value)}
-              required
+              
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
-          <div className="invoice-no">
+          {/* <div className="invoice-no">
             <label>Invoice No</label>
             <input
               value={invoiceNo}
@@ -272,7 +281,7 @@ const WaybillCreateInvoice = () => {
               placeholder="Input number of bags"
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
-          </div>
+          </div> */}
 
           <div>
             <label>Send To:</label>

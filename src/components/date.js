@@ -48,4 +48,12 @@ function formatMoney(value) {
   return formattedInteger;
 }
 
-export { refractor, refractorToTime, formatMoney };
+// function to check if a number is negative
+function isNegative(value) {
+    // Convert to number if string
+    const num = Number(value);
+    // Check if it's a valid number and negative
+    return !isNaN(num) && num < 0;
+}
+
+export { refractor, refractorToTime, formatMoney,isNegative };

@@ -12,13 +12,15 @@ import {
 } from "@radix-ui/themes";
 import toast, { Toaster, LoaderIcon } from "react-hot-toast";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { Input, Select } from "antd";
 
 const { Option } = Select;
 const API_ROOT = import.meta.env.VITE_ROOT;
 
 const SupplierPlaceOrder = () => {
-  const showToast = useToast()
+  const showToast = useToast();
+  const navigate = useNavigate();
   const { id } = useParams(); // Get ticket ID from URL params
   const [basePrice, setBasePrice] = useState("");
   const [customers, setCustomers] = useState([]);
@@ -177,6 +179,11 @@ const SupplierPlaceOrder = () => {
       setComment("");
       setSubCharge("");
       setSelectedUnit(null);
+
+      setTimeout(() => {
+        navigate(`/admin/supplier/supplier-ledger/${selectedCustomerId}`);
+      },3000)
+
     } catch (error) {
       console.error("Error placing order:", error);
       toast.error(
@@ -189,7 +196,7 @@ const SupplierPlaceOrder = () => {
 
   return (
     <>
-      <Heading>Received Order</Heading>
+      <Heading>Receive Order</Heading>
       <Separator className="my-3 w-full" />
       {ticketLoading ? (
         <Flex justify="center" className="my-4">

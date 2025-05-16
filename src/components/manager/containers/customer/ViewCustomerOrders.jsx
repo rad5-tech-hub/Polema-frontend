@@ -105,7 +105,7 @@ const ViewCustomerOrders = () => {
                   {item.porders.name || '-'}
                 </Table.Cell>
                 <Table.Cell>{item.unit}</Table.Cell>
-                <Table.Cell>{formatMoney(item.quantity)}</Table.Cell>
+                <Table.Cell>{item.quantity}</Table.Cell>
                 <Table.Cell>
                   {item.price === item.basePrice ? (
                     <>

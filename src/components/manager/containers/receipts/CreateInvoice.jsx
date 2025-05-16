@@ -5,9 +5,12 @@ import toast, { Toaster, LoaderIcon } from "react-hot-toast";
 import { Select } from "@radix-ui/themes";
 
 const root = import.meta.env.VITE_ROOT;
+import useToast from "../../../../hooks/useToast";
 
 const CreateInvoice = () => {
   const { id } = useParams();
+  const showToast = useToast()
+  const navigate = useNavigate();
   const [customerData, setCustomerData] = useState(null);
   const [superAdmins, setSuperAdmins] = useState([]);
   const [adminId, setAdminId] = useState("");
@@ -80,7 +83,7 @@ const CreateInvoice = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setBtnLoading(true);
+    
 
     const token = localStorage.getItem("token");
     if (!token) {
@@ -88,7 +91,16 @@ const CreateInvoice = () => {
       setBtnLoading(false);
       return;
     }
-
+    if (!adminId) {
+      showToast({
+        message: "Please select an admin to send the invoice to.",
+        type: "error",
+        duration: 5000,
+      }
+      )
+      return;
+    }
+    setBtnLoading(true);
     try {
       const response = await axios.post(
         `${root}/customer/create-invoice/${id}`,
@@ -104,18 +116,26 @@ const CreateInvoice = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      toast.success("Invoice created and sent successfully.", {
-        duration: 10000,
-        style: {
-          padding: "20px",
-        },
-      });
+      showToast({
+        message: "Invoice created and sent successfully.",
+        type: "success",
+        duration:5000
+      })
+      
       setBtnLoading(false);
+
+      setTimeout(() => {
+        
+        navigate("/admin/receipts/invoice");
+      },3000)
     } catch (error) {
       console.log(error);
-      toast.error("An error occurred, please try again", {
-        duration: 7000,
-      });
+      showToast({
+        message: "An error occurred, please try again.",
+        type: "error",
+        duration: 5000,
+      })
+      
       setBtnLoading(false);
     }
   };
