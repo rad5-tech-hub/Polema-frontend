@@ -18,6 +18,7 @@ import {
   // WelcomeComponent,
   PharmRecordBook,
   ChangePassword,
+  ViewCashTickets,
   CashManagement,
   EditProducts,
   PharmacyPlaceOrder,
@@ -204,7 +205,7 @@ const App = () => {
 
                   <Route
                     path="suppliers/create-gatepass"
-                    element={<CreateGatepassForSupplier/>}
+                    element={<CreateGatepassForSupplier />}
                   />
 
                   {/* Product Routes */}
@@ -263,6 +264,10 @@ const App = () => {
                     path="raise-ticket/cash-authority"
                     element={<AuthorityToGiveCash />}
                   />
+                  <Route
+                    path="raise-ticket/view-cash-tickets"
+                    element={<ViewCashTickets />}
+                  />
 
                   <Route
                     path="raise-ticket/store-authority"
@@ -304,11 +309,10 @@ const App = () => {
                     path="/pharmacy-store/record-book"
                     element={<PharmRecordBook />}
                   />
-                   <Route
+                  <Route
                     path="/pharmacy-store/manage-store"
                     element={<ManagePharmacyStore />}
                   />
-                  
 
                   {/*  Routes for general store */}
                   <Route
@@ -359,7 +363,7 @@ const App = () => {
                     path="/department-store/record-book"
                     element={<DepartmentRecordBook />}
                   />
-                   <Route
+                  <Route
                     path="/department-store/manage-store"
                     element={<ManageDeptStore />}
                   />
@@ -455,21 +459,15 @@ const App = () => {
                   />
 
                   {/* Change Password Route */}
-                  <Route
-                    path="/change-password"
-                    element={<ChangePassword />}
-                  />
+                  <Route path="/change-password" element={<ChangePassword />} />
 
                   {/* Invoice for Authority to weigh */}
                   <Route
                     path="/tickets/view-auth-to-weigh/:id"
                     element={<InvoiceAuthorityToWeigh />}
                   />
-                  <Route
-                    path="/printing"
-                    element={<PrintingRecords />}
-                  />
-                </Routes>                             
+                  <Route path="/printing" element={<PrintingRecords />} />
+                </Routes>
               </DashBoardManager>
             </PrivateRoute>
           }

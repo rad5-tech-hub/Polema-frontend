@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import useToast from "../../../../hooks/useToast";
 import {
   Tabs,
@@ -17,6 +18,7 @@ import toast, { Toaster } from "react-hot-toast";
 const root = import.meta.env.VITE_ROOT;
 
 const AuthorityToGiveCash = () => {
+  const navigate = useNavigate()
   const [customers, setCustomers] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [products, setProducts] = useState([]);
@@ -461,6 +463,7 @@ const AuthorityToGiveCash = () => {
         </Select.Root>
       </div>
       <Separator className="my-4 w-full" />
+
       <Tabs.Root
         defaultValue="Customers"
         onValueChange={() => {
@@ -473,11 +476,21 @@ const AuthorityToGiveCash = () => {
           setSelectedRawMaterial(null);
         }}
       >
-        <Tabs.List className="justify-center flex w-full items-center">
-          <Tabs.Trigger value="Customers">Customers</Tabs.Trigger>
-          <Tabs.Trigger value="Suppliers">Suppliers</Tabs.Trigger>
-          <Tabs.Trigger value="Staff">Staff</Tabs.Trigger>
-        </Tabs.List>
+        <div className="flex justify-center mt-6">
+          <Tabs.List className="justify-start flex w-full items-center">
+            <Tabs.Trigger value="Customers">Customers</Tabs.Trigger>
+            <Tabs.Trigger value="Suppliers">Suppliers</Tabs.Trigger>
+            <Tabs.Trigger value="Staff">Staff</Tabs.Trigger>
+          </Tabs.List>
+          <Button
+            className="cursor-pointer"
+            onClick={() => {
+              navigate("/admin/raise-ticket/view-cash-tickets");
+            }}
+          >
+            View Cash Tickets
+          </Button>
+        </div>
         <Tabs.Content value="Customers">
           <form onSubmit={handleCustomersSubmit} className="mt-6">
             <div className="flex w-full justify-between gap-8">

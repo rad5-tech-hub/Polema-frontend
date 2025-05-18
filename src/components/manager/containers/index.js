@@ -6,6 +6,7 @@ import BlankLPO from "./raise-tickets/BlankLPO";
 import EditDialog from "./products/EditDialog";
 import EditProducts from "./products/EditProducts";
 import AuthorityToGiveCash from "./raise-tickets/AuthorityToGiveCash";
+import ViewCashTickets from "./raise-tickets/ViewCashTickets"
 import AllWeigh from "./weighing-operations/AllWeigh";
 import ViewAuthorityToWeigh from "./raise-tickets/ViewAuthorityToWeigh";
 import IndividualDepartmentLedger from "./department-ledger/IndividualDepartmentLedger";
@@ -107,6 +108,7 @@ export {
   ViewDepartmentStore,
   AuthorityToGiveCash,
   SupplierPlaceOrder,
+  ViewCashTickets,
   AddSuppliers,
   AccountBook,
   CustomerPlaceOrder,

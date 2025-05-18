@@ -72,9 +72,9 @@ const ViewAuthorityToWeigh = () => {
   };
 
   const getClientName = (item) => {
-    if (item.customer) {
+    if (item.customer !== null) {
       return `${item.customer.firstname} ${item.customer.lastname}`;
-    } else if (item.supplier) {
+    } else if (item.supplier !== null) {
       return `${item.supplier.firstname} ${item.supplier.lastname}`;
     }
     return "Name not available";
