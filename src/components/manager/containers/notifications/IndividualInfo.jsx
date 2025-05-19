@@ -577,10 +577,14 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                     <>
                       <div className="flex items-center gap-6 justify-between">
                         <Text className="text-[.56rem] font-black tracking-wide">
-                            {ticketDetails?.product !== null ? "PRODUCT" :"ITEM NAME"}
+                          {ticketDetails?.product !== null
+                            ? "PRODUCT"
+                            : "ITEM NAME"}
                         </Text>
                         <p className="text-[.9rem]">
-                          {ticketDetails.product?.name || ticketDetails?.item || ""}
+                          {ticketDetails.product?.name ||
+                            ticketDetails?.item ||
+                            ""}
                         </p>
                       </div>
                       <div className="flex items-center gap-6 justify-between">
@@ -624,14 +628,20 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                             {`${ticketDetails.customer.firstname} ${ticketDetails.customer.lastname}`}
                           </p>
                         </div>
-                      ) :  <div className="flex items-center gap-6 justify-between">
-                      <Text className="text-[.56rem] font-black tracking-wide">
-                        NAME
-                      </Text>
-                      <p className="text-[.9rem]">
-                        {`${ticketDetails?.staffName}`}
-                      </p>
-                    </div>}
+                      ) : (
+                        <div className="flex items-center gap-6 justify-between">
+                          <Text className="text-[.56rem] font-black tracking-wide">
+                            NAME
+                          </Text>
+                          <p className="text-[.9rem]">
+                            {ticketDetails.staffName !== null
+                              ? ticketDetails.staffName
+                              : ticketDetails.customer !== null
+                              ? `${ticketDetails.customer.firstname} ${ticketDetails.customer.lastname}`
+                              : `${ticketDetails.supplier.firstname} ${ticketDetails.supplier.lastname}`}
+                          </p>
+                        </div>
+                      )}
                     </>
                   )}
 

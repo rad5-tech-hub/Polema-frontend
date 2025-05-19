@@ -1,12 +1,14 @@
-import { Table, Tabs, Heading, Spinner } from "@radix-ui/themes";
+import { Table, Tabs, Heading, Spinner,Button } from "@radix-ui/themes";
 import { refractor, formatMoney } from "../../../date";
 import axios from "axios";
 import useToast from "../../../../hooks/useToast";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const root = import.meta.env.VITE_ROOT;
 
 const CashTickets = () => {
+  const navigate = useNavigate()
   const showToast = useToast();
   const [ticketsDetails, setTicketDetails] = useState([]);
   const [fetchError, setFetchError] = useState(false);
@@ -145,7 +147,14 @@ const CashTickets = () => {
 
   return (
     <>
+      <div className="flex justify-between">
+
       <Heading>Cash Tickets</Heading>
+
+        <Button onClick={()=>{
+          navigate("/admin/raise-ticket/cash-authority")
+        }}>Create Cash Ticket </Button>
+      </div>
       <Tabs.Root defaultValue="customer" onValueChange={handleTabChange}>
         <div className="flex justify-center mb-0">
           <Tabs.List className="flex gap-2">
