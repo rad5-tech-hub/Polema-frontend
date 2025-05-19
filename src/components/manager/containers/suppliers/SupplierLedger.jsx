@@ -382,7 +382,7 @@ const SupplierLedger = () => {
           </div>
         </div>
       </Flex>
-      {decodeToken.isAdmin() && (
+      {decodeToken().isAdmin && (
         <Flex justify="start" className="mt-4">
           <Button
             className="bg-green-600 text-white"
