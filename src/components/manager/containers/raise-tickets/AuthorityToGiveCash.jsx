@@ -447,22 +447,32 @@ const AuthorityToGiveCash = () => {
             ? "Give Cash (To Cashier)"
             : "Collect Cash (From Cashier)"}
         </Heading>
-        <Select.Root
-          defaultValue="collect"
-          onValueChange={(value) => {
-            value === "collect"
-              ? setAuthorityType("credit")
-              : setAuthorityType("debit");
-          }}
-        >
-          <Select.Trigger />
-          <Select.Content position="popper">
-            <Select.Item value="give">Give Cash</Select.Item>
-            <Select.Item value="collect">Collect Cash</Select.Item>
-          </Select.Content>
-        </Select.Root>
+        <div className="flex gap-2 items-center justify-center">
+          <Select.Root
+            defaultValue="collect"
+            onValueChange={(value) => {
+              value === "collect"
+                ? setAuthorityType("credit")
+                : setAuthorityType("debit");
+            }}
+          >
+            <Select.Trigger />
+            <Select.Content position="popper">
+              <Select.Item value="give">Give Cash</Select.Item>
+              <Select.Item value="collect">Collect Cash</Select.Item>
+            </Select.Content>
+          </Select.Root>
+          <Button
+            className="cursor-pointer"
+            onClick={() => {
+              navigate("/admin/raise-ticket/view-cash-tickets");
+            }}
+          >
+            View Cash Tickets
+          </Button>
+        </div>
       </div>
-      <Separator className="my-4 w-full" />
+      {/* <Separator className="my-4 w-full" /> */}
 
       <Tabs.Root
         defaultValue="Customers"
@@ -477,19 +487,11 @@ const AuthorityToGiveCash = () => {
         }}
       >
         <div className="flex justify-center mt-6">
-          <Tabs.List className="justify-start flex w-full items-center">
+          <Tabs.List className="justify-center flex w-full items-center">
             <Tabs.Trigger value="Customers">Customers</Tabs.Trigger>
             <Tabs.Trigger value="Suppliers">Suppliers</Tabs.Trigger>
             <Tabs.Trigger value="Staff">Staff</Tabs.Trigger>
           </Tabs.List>
-          <Button
-            className="cursor-pointer"
-            onClick={() => {
-              navigate("/admin/raise-ticket/view-cash-tickets");
-            }}
-          >
-            View Cash Tickets
-          </Button>
         </div>
         <Tabs.Content value="Customers">
           <form onSubmit={handleCustomersSubmit} className="mt-6">
