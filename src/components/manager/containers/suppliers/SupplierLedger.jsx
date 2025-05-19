@@ -147,6 +147,12 @@ const SupplierLedger = () => {
     return material ? material : "Raw Material not found";
   };
 
+  const decodeToken = () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+      return jwtDecode(token);
+    };
+
   React.useEffect(() => {
     fetchSuppliers();
     fetchRaw();
@@ -376,14 +382,16 @@ const SupplierLedger = () => {
           </div>
         </div>
       </Flex>
-      <Flex justify="start" className="mt-4">
-        <Button
-          className="bg-green-600 text-white"
-          onClick={() => setIsModalOpen(true)}
-        >
-          Credit Supplier
-        </Button>
-      </Flex>
+      {decodeToken.isAdmin() && (
+        <Flex justify="start" className="mt-4">
+          <Button
+            className="bg-green-600 text-white"
+            onClick={() => setIsModalOpen(true)}
+          >
+            Credit Supplier
+          </Button>
+        </Flex>
+      )}
 
       {/* Table to show supplier ledger details */}
       <Table.Root className="mt-4" variant="surface">
