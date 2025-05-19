@@ -298,12 +298,12 @@ const Invoice = () => {
                       {row.productName && row.productName}
                       {/* {row.unit !== null && " ordered"}
                       {row.unit === null ? isNegative(row.quantity) ? " (returned)":" (extra)" : ""} */}
-                        {entry.unit === null ? "" : entry.unit === "" || entry.unit === "N/A" ? "" : " ordered"}
+                        {row.unit === null ? "" : row.unit === "" || row.unit === "N/A" ? "" : " ordered"}
                                         
                                         
-                                          
-                                          {entry.unit === null
-                                            ? isNegative(entry.quantity)
+                                  
+                                          {row.unit === null
+                                            ? isNegative(row.quantity)
                                               ? " (returned)"
                                               : " (extra)"
                                             : ""}

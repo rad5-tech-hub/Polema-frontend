@@ -119,6 +119,7 @@ const IndividualDepartmentLedger = () => {
     const [productId, setProductId] = useState("");
     const [transactionType, setTransactionType] = useState("credit");
     const [customerName, setCustomerName] = useState("");
+    const [comments, setComments] = useState("");
     const [creditAmount, setCreditAmount] = useState("");
     const [itemName, setItemName] = useState(""); // New state for Item Name
     const [buttonLoading, setButtonLoading] = useState(false);
@@ -135,6 +136,9 @@ const IndividualDepartmentLedger = () => {
 
     const handleItemNameChange = (e) => {
       setItemName(e.target.value);
+    };
+    const handleComment = (e) => {
+      setComments(e.target.value);
     };
 
     const handleFieldToggle = (field) => {
@@ -190,8 +194,9 @@ const IndividualDepartmentLedger = () => {
         departmentId: id,
         name: customerName,
         [transactionType]: creditAmount,
+        comments: comments,
         // ...(selectedField === "product" && { productId: productId }),
-         productName: itemName 
+        productName: itemName,
       };
 
       try {
@@ -235,6 +240,7 @@ const IndividualDepartmentLedger = () => {
         onCancel={() => {
           setCreditCustomerModalOpen(false);
           setCustomerName("");
+          setComments("");
           setProductId("");
           setItemName("");
           setSelectedField("product");
@@ -260,15 +266,14 @@ const IndividualDepartmentLedger = () => {
               style={{ width: "100%", marginTop: 8 }}
               allowClear
             /> */}
-             <TextField.Root
+            <TextField.Root
               id="item-name"
               placeholder="Enter Customer Name"
               className="p-3"
               value={customerName}
-              onChange={(e)=>{
-                setCustomerName(e.target.value)
+              onChange={(e) => {
+                setCustomerName(e.target.value);
               }}
-              
             />
           </div>
           {/* <div className="mt-4">
@@ -316,7 +321,6 @@ const IndividualDepartmentLedger = () => {
               className="p-3"
               value={itemName}
               onChange={handleItemNameChange}
-              
             />
           </div>
           <div className="mt-4">
@@ -343,6 +347,18 @@ const IndividualDepartmentLedger = () => {
               className="p-3"
               value={formatNumberWithCommas(creditAmount)}
               onChange={handlePriceChange}
+            />
+          </div>
+          <div className="mt-4">
+            <label htmlFor="comment" className="font-bold mt-4">
+              Comment
+            </label>
+            <TextField.Root
+              id="comment"
+              placeholder="Optional Comment"
+              className="p-3"
+              value={comments}
+              onChange={handleComment}
             />
           </div>
 
@@ -428,7 +444,6 @@ const IndividualDepartmentLedger = () => {
         </Table.Body>
       </Table.Root>
       <CreditDeptModal />
-      
     </>
   );
 };
