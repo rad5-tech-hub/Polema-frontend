@@ -255,7 +255,7 @@ const GatepassReceipt = () => {
                     </div>
 
                     {/* Approved By Signature */}
-                    <div className="approved-by flex flex-col gap-2 items-end">
+                    {/* <div className="approved-by flex flex-col gap-2 items-end">
                       {passDetails.approvedByRole?.admins?.[0]?.signature ? (
                         <>
                           <img
@@ -278,7 +278,7 @@ const GatepassReceipt = () => {
                       <label className="w-fit text-sm sm:text-base">
                         ADMIN OFFICER’S SIGNATURE
                       </label>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </div>

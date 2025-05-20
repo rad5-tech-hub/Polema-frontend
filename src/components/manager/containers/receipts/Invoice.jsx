@@ -298,16 +298,16 @@ const Invoice = () => {
                       {row.productName && row.productName}
                       {/* {row.unit !== null && " ordered"}
                       {row.unit === null ? isNegative(row.quantity) ? " (returned)":" (extra)" : ""} */}
-                        {row.unit === null ? "" : row.unit === "" || row.unit === "N/A" ? "" : " ordered"}
-                                        
-                                        
-                                  
-                                          {row.unit === null
-                                            ? isNegative(row.quantity)
-                                              ? " (returned)"
-                                              : " (extra)"
-                                            : ""}
-                      
+                      {row.unit === null
+                        ? ""
+                        : row.unit === "" || row.unit === "N/A"
+                        ? ""
+                        : " ordered"}
+                      {row.unit === null
+                        ? isNegative(row.quantity)
+                          ? " (returned)"
+                          : " (extra)"
+                        : ""}
                     </td>
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                       {formatMoney(row?.order?.rate) || ""}
@@ -324,8 +324,12 @@ const Invoice = () => {
             <div className="flex justify-end w-full text-[0.8rem] mt-6">
               <div>
                 <p>
-                  <span className="underline">TOTAL {isNegative(invoice.currentBalance) ? "DEBIT" :"CREDIT"} BALANCE</span>: ₦
-                  {formatMoney(invoice.currentBalance)}
+                  <span className="underline">
+                    TOTAL{" "}
+                    {isNegative(invoice.currentBalance) ? "DEBIT" : "CREDIT"}{" "}
+                    BALANCE
+                  </span>
+                  : ₦{formatMoney(invoice.currentBalance)}
                 </p>
               </div>
             </div>
@@ -337,9 +341,11 @@ const Invoice = () => {
                   <th className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                     Prepared by
                   </th>
-                  <th className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                    Delivered by
-                  </th>
+                  {isMobison && (
+                    <th className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
+                      Delivered by
+                    </th>
+                  )}
                   <th className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                     Checked by
                   </th>
@@ -372,25 +378,27 @@ const Invoice = () => {
                   </td>
 
                   {/* DELIVERED BY */}
-                  <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm">
-                    {invoice?.role?.admins?.[0]?.signature ? (
-                      <>
-                        <img
-                          src={invoice.role.admins[0].signature}
-                          alt="Prepared by signature"
-                          className="object-contain mx-auto"
-                          style={{ height: "50px", width: "50px" }}
-                        />
-                        {invoice?.role?.admins?.[0]?.firstname}{" "}
-                        {invoice?.role?.admins?.[0]?.lastname}
-                      </>
-                    ) : (
-                      <>
-                        {invoice?.role?.admins?.[0]?.firstname}{" "}
-                        {invoice?.role?.admins?.[0]?.lastname}
-                      </>
-                    )}
-                  </td>
+                  {isMobison && (
+                    <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm">
+                      {invoice?.role?.admins?.[0]?.signature ? (
+                        <>
+                          <img
+                            src={invoice.role.admins[0].signature}
+                            alt="Prepared by signature"
+                            className="object-contain mx-auto"
+                            style={{ height: "50px", width: "50px" }}
+                          />
+                          {invoice?.role?.admins?.[0]?.firstname}{" "}
+                          {invoice?.role?.admins?.[0]?.lastname}
+                        </>
+                      ) : (
+                        <>
+                          {invoice?.role?.admins?.[0]?.firstname}{" "}
+                          {invoice?.role?.admins?.[0]?.lastname}
+                        </>
+                      )}
+                    </td>
+                  )}
 
                   {/* CHECKED BY */}
                   <td className="border border-[#43434380] px-4 py-[20px] text-xs sm:text-sm text-center">
