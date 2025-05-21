@@ -78,6 +78,8 @@ const SupplierPlaceOrder = () => {
   // Fetch products
   const fetchProducts = async () => {
     const token = localStorage.getItem("token");
+    
+
     if (!token) {
       toast.error("Please log in again.");
       return;
@@ -97,20 +99,31 @@ const SupplierPlaceOrder = () => {
   // Fetch ticket details
   const fetchTicketDetails = async () => {
     const token = localStorage.getItem("token");
-    if (!token || !id) {
-      toast.error("Invalid session or ticket ID.");
-      setTicketLoading(false);
-      return;
+    let url = `${API_ROOT}`;
+
+    if (id.includes("-not-weigh")) {
+      url += `/admin/view-auth-weigh/${id.replace("-not-weigh", "")}`;
+    } else {
+      url += `/customer/view-weigh/${id}`;
+
+
     }
+      if (!token || !id) {
+        toast.error("Invalid session or ticket ID.");
+        setTicketLoading(false);
+        return;
+      }
 
     try {
-      const { data } = await axios.get(`${API_ROOT}/customer/view-weigh/${id}`, {
+      const { data } = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const ticket = data.data; // Access the 'data' object from the response
-      setSelectedCustomerId(ticket.authToWeigh.supplierId); // Supplier ID
-      setSelectedProductId(ticket.authToWeigh.productId); // Product ID
-      setQuantity(ticket.net); // Net weight as quantity
+      const ticket = data.data;
+      setSelectedCustomerId(ticket?.authToWeigh?.supplierId || data.ticket.supplierId); // Supplier ID
+      setSelectedProductId(
+        ticket?.authToWeigh?.productId || data.ticket.productId
+      ); // Product ID
+      setQuantity(ticket?.net || ""); // Net weight as quantity
     } catch (error) {
       console.error("Failed to fetch ticket details:", error);
       toast.error("Error fetching ticket details. Try again later.");
@@ -153,8 +166,6 @@ const SupplierPlaceOrder = () => {
     }
 
     const orderData = {
-      // supplierId: selectedCustomerId,
-      // productId: selectedProductId,
       supplierWeighId:id,
       // quantity,
       price: basePrice.replace(/,/g, ""),

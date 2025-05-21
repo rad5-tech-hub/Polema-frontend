@@ -293,7 +293,9 @@ const ViewAuthorityToWeigh = () => {
                               <DropdownMenu.Item
                                 onClick={() =>
                                   navigate(
-                                    `/admin/suppliers/place-supplier-order/${item.weigh.id}`
+                                    `/admin/suppliers/place-supplier-order/${
+                                      item.weigh?.id || item.id
+                                    }${item.weigh?.id ? "" : "-not-weigh"}`
                                   )
                                 }
                               >
