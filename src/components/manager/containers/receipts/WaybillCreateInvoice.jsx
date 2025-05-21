@@ -12,7 +12,7 @@ const root = import.meta.env.VITE_ROOT;
 const WaybillCreateInvoice = () => {
   const showToast = useToast()
   const { id } = useParams();
-  const navigste = useNavigate()
+  const navigate = useNavigate()
   const [buttonLoading, setButtonLoading] = useState(false);
   const [ledgerEntries, setLedgerEntries] = useState(null); // Initialize as `null` for type safety.
   const [selectedTransport, setSelectedTransport] = useState("");
@@ -289,6 +289,7 @@ const WaybillCreateInvoice = () => {
               size="3"
               value={adminId}
               disabled={superAdmins.length === 0}
+              required
               onValueChange={(value) => setAdminId(value)}
             >
               <Select.Trigger

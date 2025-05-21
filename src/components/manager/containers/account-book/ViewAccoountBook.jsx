@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faClose } from "@fortawesome/free-solid-svg-icons";
 import { DatePicker } from "antd";
 import { refractor, formatMoney } from "../../../date";
 import toast, { Toaster } from "react-hot-toast";
 import { Spinner, Table, Heading, Select, Flex } from "@radix-ui/themes";
 import axios from "axios";
 import { Modal } from "antd";
-const {RangePicker} = DatePicker
+const { RangePicker } = DatePicker;
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -23,6 +25,7 @@ const ViewAccountBook = () => {
   const [selectedRow, setSelectedRow] = useState(null);
   const [bankDetails, setBankDetails] = useState([]);
   const [selectedBank, setSelectedBank] = useState("all");
+  const [dateRange, setDateRange] = useState(null); // State for RangePicker value
 
   // Fetch Bank Details
   const fetchBankDetails = async () => {
@@ -35,7 +38,6 @@ const ViewAccountBook = () => {
       const response = await axios.get(`${root}/admin/get-banks`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      
       setBankDetails(response.data.banks || []);
     } catch (error) {
       console.error("Error fetching banks:", error);
@@ -44,7 +46,7 @@ const ViewAccountBook = () => {
   };
 
   // Fetch Account Book Details
-  const fetchAccountBookDetails = async (startDate,endDate) => {
+  const fetchAccountBookDetails = async (startDate, endDate) => {
     setLoading(true);
     setRawAccountBook([]);
     setAccountBook([]);
@@ -58,31 +60,27 @@ const ViewAccountBook = () => {
 
     const changeURLByRecepient = (recepient) => {
       switch (recepient) {
-        case "customers": return "get-accountbook";
-        case "suppliers": return "get-supplier-accountbook";
-        case "others": return "get-other-accountbook";
-        default: return "";
+        case "customers":
+          return "get-accountbook";
+        case "suppliers":
+          return "get-supplier-accountbook";
+        case "others":
+          return "get-other-accountbook";
+        default:
+          return "";
       }
     };
-    let url;
-    
-    url = `${root}/customer/${changeURLByRecepient(accountRecepient)}`;
-  if(startDate && endDate){
+    let url = `${root}/customer/${changeURLByRecepient(accountRecepient)}`;
+    if (startDate && endDate) {
+      url = `${root}/customer/acctbook-filter?startDate=${startDate}&endDate=${endDate}`;
+    }
 
-  url = `${root}/customer/acctbook-filter?startDate=${startDate}&endDate=${endDate}`
-   }
     try {
-      
-      let output;
       const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${retrToken}` },
       });
-      if (startDate && endDate) {
-        output =response.data.data
-      } else {
-        output = response.data.acct
-      }
-      if (output.length === 0)   {
+      const output = startDate && endDate ? response.data.data : response.data.acct;
+      if (output.length === 0) {
         setFailedSearch(true);
         setRawAccountBook([]);
         setAccountBook([]);
@@ -174,8 +172,13 @@ const ViewAccountBook = () => {
 
   // Handle bank selection
   const handleBankChange = (value) => {
-    
     setSelectedBank(value);
+  };
+
+  // Handle clear date range
+  const handleClearDateRange = () => {
+    setDateRange(null); // Clear the date range state
+    fetchAccountBookDetails(); // Fetch data without date parameters
   };
 
   // Filter accountBook based on selectedBank
@@ -187,7 +190,6 @@ const ViewAccountBook = () => {
       const filtered = rawAccountBook.filter(
         (details) => details.bank?.name?.toString() === selectedBank
       );
-      
       setAccountBook(filtered);
       setFailedSearch(filtered.length === 0);
     }
@@ -210,23 +212,26 @@ const ViewAccountBook = () => {
       <Flex justify="between" align="center" className="mb-4">
         <Heading>Account Book</Heading>
         <div className="flex gap-4">
-          <div className="date-picker  right-0 top-0">
+          <div className="date-picker right-0 top-0">
             <RangePicker
-              onCalendarChange={(e) => {
-                if (e && e[0] && e[1]) {
-                  // setDateRange({
-                  //   startDate: e[0].format("YYYY-MM-DD"),
-                  //   endDate: e[1].format("YYYY-MM-DD"),
-                  // });
+              value={dateRange} // Controlled RangePicker
+              onCalendarChange={(dates) => {
+                setDateRange(dates); // Update date range state
+                if (dates && dates[0] && dates[1]) {
                   fetchAccountBookDetails(
-                    e[0].format("YYYY-MM-DD"),
-                    e[1].format("YYYY-MM-DD")
+                    dates[0].format("YYYY-MM-DD"),
+                    dates[1].format("YYYY-MM-DD")
                   );
-                } else {
-                  return;
                 }
               }}
             />
+            {dateRange !== null && (
+              <FontAwesomeIcon
+                icon={faClose}
+                className="ml-2 cursor-pointer"
+                onClick={handleClearDateRange} // Clear date range on click
+              />
+            )}
           </div>
           <Select.Root
             value={selectedBank}
@@ -409,7 +414,7 @@ const ViewAccountBook = () => {
         )}
       </Modal>
 
-      <Toaster position="top-right" />
+      {/* // <Toaster position="top-right" /> */}
     </>
   );
 };

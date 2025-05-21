@@ -255,17 +255,16 @@ const WaybillInvoice = () => {
                     </p>
                   </div>
                 ))}
-                {billDetails.bags > 0 &&
-                  (billDetails.bags !== null && (
-                    <div className="flex items-center gap-2 flex-grow">
-                      <label className="font-semibold text-sm sm:text-base">
-                        Number of bags:
-                      </label>
-                      <p className="border-b border-black border-dotted flex-grow text-sm sm:text-base px-8">
-                        {billDetails.bags || ""} bags
-                      </p>
-                    </div>
-                  ))}
+                {billDetails.bags > 0 && billDetails.bags !== null && (
+                  <div className="flex items-center gap-2 flex-grow">
+                    <label className="font-semibold text-sm sm:text-base">
+                      Number of bags:
+                    </label>
+                    <p className="border-b border-black border-dotted flex-grow text-sm sm:text-base px-8">
+                      {billDetails.bags || ""} bags
+                    </p>
+                  </div>
+                )}
 
                 {/* Two items per row */}
                 <div className="flex flex-wrap gap-4">
@@ -355,19 +354,23 @@ const WaybillInvoice = () => {
                   </tr>
                 ))}
               </tbody>
-              {/* <tfoot>
-            <tr>
-              <td
-                colSpan="3"
-                className="text-right px-4 py-2 font-bold text-sm sm:text-base"
-              >
-                TOTAL CREDIT BALANCE:
-              </td>
-              <td className="border border-[#43434380] px-4 py-2 font-bold text-sm sm:text-base">
-                {totalCreditBalance.toLocaleString()}
-              </td>
-            </tr>
-          </tfoot> */}
+
+              <div className="flex justify-end w-full mt-4">
+                <div>
+                  <p>
+                    <span className="font-bold">TAR:</span>
+                    {billDetails.transaction.weighBridge.tar}
+                  </p>
+                  <p>
+                    <span className="font-bold">GROSS:</span>
+                    {billDetails.transaction.weighBridge.gross}
+                  </p>
+                  <p>
+                    <span className="font-bold">NET:</span>
+                    {billDetails.transaction.weighBridge.net}
+                  </p>
+                </div>
+              </div>
             </table>
 
             {/* Additional Table Section */}
