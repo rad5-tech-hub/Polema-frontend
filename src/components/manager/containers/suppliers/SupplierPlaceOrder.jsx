@@ -166,7 +166,9 @@ const SupplierPlaceOrder = () => {
     }
 
     const orderData = {
-      supplierWeighId:id.includes("-not-weigh") ? id.replace("-not-weigh",""):id ,
+      ...(id.includes("-not-weigh") && { atwWeighId: id.replace("-not-weigh", "") }),
+      ...(!id.includes("-not-weigh") && {supplierWeighId : id}),
+      // supplierWeighId:id.includes("-not-weigh") ? id.replace("-not-weigh",""):id ,
       ...(id.includes("-not-weigh") ? {atw:true}:{atw:false}),
       // quantity,
       price: basePrice.replace(/,/g, ""),
