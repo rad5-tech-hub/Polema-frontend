@@ -123,7 +123,7 @@ const SupplierPlaceOrder = () => {
       setSelectedProductId(
         ticket?.authToWeigh?.productId || data.ticket.productId
       ); // Product ID
-      setQuantity(ticket?.net || ""); // Net weight as quantity
+      setQuantity(ticket?.net || data.ticket?.quantityLoaded || ""); // Net weight as quantity
     } catch (error) {
       console.error("Failed to fetch ticket details:", error);
       toast.error("Error fetching ticket details. Try again later.");
@@ -167,6 +167,7 @@ const SupplierPlaceOrder = () => {
 
     const orderData = {
       supplierWeighId:id,
+      ...(id.includes("-not-weigh") ? {atw:true}:{atw:false}),
       // quantity,
       price: basePrice.replace(/,/g, ""),
       ...(comment && { comments: comment }),
