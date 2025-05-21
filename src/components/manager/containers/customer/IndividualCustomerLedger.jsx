@@ -187,6 +187,7 @@ const IndividualCustomerLedger = () => {
     const [transactionType, setTransactionType] = useState("credit");
     const [creditAmount, setCreditAmount] = useState("");
     const [buttonLoading, setButtonLoading] = useState(false);
+    const [comments,setComments] = useState("")
 
     const handlePriceChange = (e) => {
       const value = e.target.value.replace(/,/g, "");
@@ -228,6 +229,7 @@ const IndividualCustomerLedger = () => {
         customerId: id,
         productId,
         [transactionType]: creditAmount,
+        comments,
       };
 
       try {
@@ -315,6 +317,21 @@ const IndividualCustomerLedger = () => {
               className="p-3"
               value={formatNumberWithCommas(creditAmount)}
               onChange={handlePriceChange}
+            />
+          </div>
+          <div className="mt-4">
+            <label htmlFor="amount" className="font-bold mt-4">
+              Comments
+            </label>
+            <TextField.Root
+              id="amount"
+              placeholder="Enter Comments"
+              className="p-3"
+              required
+              value={comments}
+              onChange={(e) => {
+                setComments(e.target.value)
+              }}
             />
           </div>
 
@@ -430,6 +447,8 @@ const IndividualCustomerLedger = () => {
             <Table.ColumnHeaderCell>UNIT</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>QUANTITY</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>UNIT PRICE</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>COMMENTS</Table.ColumnHeaderCell>
+
             <Table.ColumnHeaderCell className="text-green-500">
               CREDIT(₦)
             </Table.ColumnHeaderCell>
@@ -460,6 +479,9 @@ const IndividualCustomerLedger = () => {
                 <Table.Cell>{entry.quantity}</Table.Cell>
                 <Table.Cell>
                   {entry.unitPrice ? formatMoney(entry.unitPrice) : ""}
+                </Table.Cell>
+                <Table.Cell>
+                  {entry.comments !== null ? entry.comments : ""}
                 </Table.Cell>
                 <Table.Cell className="text-green-500 font-bold">
                   {formatMoney(entry.credit > entry.debit ? entry.credit : " ")}

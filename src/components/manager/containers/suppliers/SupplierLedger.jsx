@@ -166,6 +166,7 @@ const SupplierLedger = () => {
     const [productId, setProductId] = useState("");
     const [transactionType, setTransactionType] = useState("credit");
     const [amount, setAmount] = useState("");
+    const [comments,setComments] = useState("")
     const [buttonLoading, setButtonLoading] = useState(false);
 
     const handlePriceChange = (e) => {
@@ -208,6 +209,7 @@ const SupplierLedger = () => {
         supplierId: id,
         productId,
         [transactionType]: amount,
+        comments
       };
       try {
         await axios.post(`${root}/customer/create-supplier-ledger`, body, {
@@ -298,6 +300,21 @@ const SupplierLedger = () => {
               className="p-3"
               value={amount ? amount.toLocaleString() : ""}
               onChange={handlePriceChange}
+            />
+          </div>
+
+          <div className="mt-4">
+            <label htmlFor="amount" className="font-bold mt-4">
+              Comments
+            </label>
+            <TextField.Root
+              id="amount"
+              placeholder="Enter Comment"
+              className="p-3"
+              value={comments}
+              onChange={(e) => {
+                setComments(e.target.value)
+              }}
             />
           </div>
 
@@ -402,6 +419,7 @@ const SupplierLedger = () => {
           <Table.ColumnHeaderCell>UNIT</Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell>QUANTITY</Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell>UNIT PRICE</Table.ColumnHeaderCell>
+          <Table.ColumnHeaderCell>COMMENTS</Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell className="text-green-500">
             CREDIT(₦)
           </Table.ColumnHeaderCell>
@@ -427,6 +445,9 @@ const SupplierLedger = () => {
                   <Table.Cell>{entry.quantity}</Table.Cell>
                   <Table.Cell>
                     {entry.unitPrice ? formatMoney(entry.unitPrice) : ""}
+                  </Table.Cell>
+                  <Table.Cell>
+                    {entry.comments !== null ? entry.comments : ""}
                   </Table.Cell>
                   <Table.Cell className="text-green-500">
                     {formatMoney(
