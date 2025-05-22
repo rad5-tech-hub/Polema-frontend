@@ -28,6 +28,7 @@ const WaybillInvoice = () => {
   const [billDetails, setBillDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [entries, setEntries] = useState([]);
+  const [apiResponse,setApiResponse] = useState([])
 
   const totalCreditBalance = tableData.reduce(
     (total, row) => total + row.amount,
@@ -56,9 +57,10 @@ const WaybillInvoice = () => {
 
       // const { waybill } = response.data;
       const waybill = response.data.parse;
-      const invoiceDetails = Array.isArray(response.data.parse?.invoice.ledgerEntries)
-        ? response.data.parse?.invoice.ledgerEntries
-        : [];
+      const invoiceDetails =
+        response.data.parse?.invoice.ledgerEntries ||
+        response.data?.ledgerEntries ||
+        [];
 
       const detailsEntries = invoiceDetails.filter(
         (item) => item.unit !== null
@@ -71,6 +73,7 @@ const WaybillInvoice = () => {
       } else {
         // setFailedSearch(false);
         setBillDetails(waybill);
+        setApiResponse(response.data)
         setEntries(detailsEntries || []);
       }
     } catch (error) {
@@ -282,7 +285,7 @@ const WaybillInvoice = () => {
                       Vehicle No.:
                     </label>
                     <p className="border-b border-black border-dotted flex-grow text-sm sm:text-base px-8">
-                      {billDetails?.invoice?.vehicleNo || ""}
+                      {billDetails?.invoice?.vehicleNo ||  apiResponse.parse?.transaction?.authToWeighTickets?.vehicleNo ||  ""}
                     </p>
                   </div>
 
@@ -354,6 +357,17 @@ const WaybillInvoice = () => {
                         {`${formatMoney(row.quantity)}  ${row.unit} of ${
                           row.product?.name || "PKC"
                         }`}
+                        {row.unit === null
+                          ? ""
+                          : row.unit === "" || row.unit === "N/A"
+                          ? ""
+                          : " ordered"}
+                        {row.order == null &&
+                          row.debit > row.credit &&
+                          " (extra)"}
+                        {row.order == null &&
+                          row.credit > row.debit &&
+                          " (returned)"}
                       </td>
                       <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                         {formatMoney(row.order?.rate) || ""}
