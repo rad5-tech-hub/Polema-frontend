@@ -2795,6 +2795,10 @@ video {
   background-color: rgb(156 163 175 / 0.1);
 }
 
+.hover\:bg-gray-400\/50:hover {
+  background-color: rgb(156 163 175 / 0.5);
+}
+
 .hover\:bg-gray-50:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1));
@@ -2849,6 +2853,23 @@ video {
 
 .hover\:bg-theme\/85:hover {
   background-color: rgb(67 67 67 / 0.85);
+}
+
+.hover\:bg-gray-400\/40:hover {
+  background-color: rgb(156 163 175 / 0.4);
+}
+
+.hover\:bg-gray-400\/20:hover {
+  background-color: rgb(156 163 175 / 0.2);
+}
+
+.hover\:bg-gray-400\/30:hover {
+  background-color: rgb(156 163 175 / 0.3);
+}
+
+.hover\:bg-gray-400:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(156 163 175 / var(--tw-bg-opacity, 1));
 }
 
 .hover\:text-lg:hover {
