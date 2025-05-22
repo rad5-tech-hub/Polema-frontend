@@ -289,14 +289,7 @@ const WaybillInvoice = () => {
                     </p>
                   </div>
 
-                  {/* <div className="flex items-center gap-2 flex-grow">
-                <label className="font-semibold text-sm sm:text-base">
-                  Time Out:
-                </label>
-                <p className="border-b border-black border-dotted flex-grow text-sm sm:text-base px-8">
-                  00:00 PM
-                </p>
-              </div> */}
+                  
                 </div>
 
                 <div className="flex flex-wrap gap-4 mt-2">
