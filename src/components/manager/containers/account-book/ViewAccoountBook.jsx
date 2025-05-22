@@ -24,9 +24,7 @@ const ViewAccountBook = () => {
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [customerActive, setCustomerActive] = useState(true);
   const [department, setDepartments] = useState([]);
-  const [accountRecepient, setAccountRecepient] = useState("customers");
   const [failedSearch, setFailedSearch] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
@@ -71,26 +69,13 @@ const ViewAccountBook = () => {
       return;
     }
 
-    const changeURLByRecepient = (recepient) => {
-      switch (recepient) {
-        case "customers":
-          return "get-accountbook";
-        case "suppliers":
-          return "get-supplier-accountbook";
-        case "others":
-          return "get-other-accountbook";
-        default:
-          return "";
-      }
-    };
-
     let url;
     if (pageUrl) {
-      url = `${root}${pageUrl}`; // Use the provided pagination URL
+      url = `${root}${pageUrl}`; // Use pagination URL
     } else if (startDate && endDate) {
       url = `${root}/customer/acctbook-filter?startDate=${startDate}&endDate=${endDate}`;
     } else {
-      url = `${root}/customer/${changeURLByRecepient(accountRecepient)}`;
+      url = `${root}/customer/acctbook-filter`;
     }
 
     try {
@@ -98,10 +83,7 @@ const ViewAccountBook = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const output =
-        pageUrl || (startDate && endDate)
-          ? response.data.data
-          : response.data.acct;
+      const output = response.data.data;
 
       if (output.length === 0) {
         setFailedSearch(true);
@@ -113,24 +95,24 @@ const ViewAccountBook = () => {
         setFailedSearch(false);
       }
 
-      // Store nextPage URL if it exists (for date filter or pagination)
-      if (response.data.pagination?.nextPage && (startDate || pageUrl)) {
+      // Store nextPage URL if it exists
+      if (response.data.pagination?.nextPage) {
         setPaginationUrls((prev) => {
           const newUrl = response.data.pagination.nextPage;
-          // Only add new URL if it's not already in the array
           if (!prev.includes(newUrl)) {
-            // If navigating forward, append new URL
-            if (pageUrl && currentPageIndex >= prev.length - 1) {
-              return [...prev, newUrl];
-            }
-            // If starting a new filter, reset to only the new URL
-            if (startDate && !pageUrl) {
-              return [newUrl];
+            // Reset for new fetch (no pageUrl) or append for forward navigation
+            if (!pageUrl || currentPageIndex >= prev.length - 1) {
+              return pageUrl && currentPageIndex >= prev.length - 1
+                ? [...prev, newUrl]
+                : [newUrl];
             }
             return prev;
           }
           return prev;
         });
+      } else {
+        // Clear future URLs if no nextPage is available
+        setPaginationUrls((prev) => prev.slice(0, currentPageIndex + 1));
       }
 
       setLoading(false);
@@ -269,12 +251,6 @@ const ViewAccountBook = () => {
     fetchBankDetails();
     fetchAccountBookDetails();
   }, []);
-
-  useEffect(() => {
-    setPaginationUrls([]);
-    setCurrentPageIndex(0);
-    fetchAccountBookDetails();
-  }, [accountRecepient]);
 
   return (
     <>
