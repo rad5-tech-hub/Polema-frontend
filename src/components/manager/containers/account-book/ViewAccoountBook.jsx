@@ -4,7 +4,14 @@ import { faClose } from "@fortawesome/free-solid-svg-icons";
 import { DatePicker } from "antd";
 import { refractor, formatMoney } from "../../../date";
 import toast, { Toaster } from "react-hot-toast";
-import { Spinner, Table, Heading, Select, Flex } from "@radix-ui/themes";
+import {
+  Spinner,
+  Table,
+  Heading,
+  Select,
+  Flex,
+  Button,
+} from "@radix-ui/themes";
 import axios from "axios";
 import { Modal } from "antd";
 const { RangePicker } = DatePicker;
@@ -12,8 +19,8 @@ const { RangePicker } = DatePicker;
 const root = import.meta.env.VITE_ROOT;
 
 const ViewAccountBook = () => {
-  const [rawAccountBook, setRawAccountBook] = useState([]); // Store unfiltered data
-  const [accountBook, setAccountBook] = useState([]); // Filtered data for display
+  const [rawAccountBook, setRawAccountBook] = useState([]);
+  const [accountBook, setAccountBook] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,7 +32,10 @@ const ViewAccountBook = () => {
   const [selectedRow, setSelectedRow] = useState(null);
   const [bankDetails, setBankDetails] = useState([]);
   const [selectedBank, setSelectedBank] = useState("all");
-  const [dateRange, setDateRange] = useState(null); // State for RangePicker value
+  const [dateRange, setDateRange] = useState(null);
+  // New states for pagination
+  const [paginationUrls, setPaginationUrls] = useState([]);
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
   // Fetch Bank Details
   const fetchBankDetails = async () => {
@@ -46,7 +56,11 @@ const ViewAccountBook = () => {
   };
 
   // Fetch Account Book Details
-  const fetchAccountBookDetails = async (startDate, endDate) => {
+  const fetchAccountBookDetails = async (
+    startDate,
+    endDate,
+    pageUrl = null
+  ) => {
     setLoading(true);
     setRawAccountBook([]);
     setAccountBook([]);
@@ -70,8 +84,11 @@ const ViewAccountBook = () => {
           return "";
       }
     };
-    let url = `${root}/customer/${changeURLByRecepient(accountRecepient)}`;
-    if (startDate && endDate) {
+    
+
+    let url =
+      `${root}${pageUrl}` || `${root}/customer/${changeURLByRecepient(accountRecepient)}`;
+    if (startDate && endDate && !pageUrl) {
       url = `${root}/customer/acctbook-filter?startDate=${startDate}&endDate=${endDate}`;
     }
 
@@ -79,15 +96,26 @@ const ViewAccountBook = () => {
       const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${retrToken}` },
       });
-      const output = startDate && endDate ? response.data.data : response.data.acct;
+      const output =
+        startDate && endDate ? response.data.data : response.data.acct;
       if (output.length === 0) {
         setFailedSearch(true);
         setRawAccountBook([]);
         setAccountBook([]);
       } else {
         setRawAccountBook(output);
-        setAccountBook(output); // Initially show all records
+        setAccountBook(output);
         setFailedSearch(false);
+        // Store nextPage URL if it exists and we're using date filter
+        if (startDate && endDate && response.data.pagination?.nextPage) {
+          setPaginationUrls((prev) => {
+            // Only add new URL if it's not already in the array
+            if (!prev.includes(response.data.pagination.nextPage)) {
+              return [...prev, response.data.pagination.nextPage];
+            }
+            return prev;
+          });
+        }
       }
       setLoading(false);
     } catch (error) {
@@ -177,8 +205,30 @@ const ViewAccountBook = () => {
 
   // Handle clear date range
   const handleClearDateRange = () => {
-    setDateRange(null); // Clear the date range state
-    fetchAccountBookDetails(); // Fetch data without date parameters
+    setDateRange(null);
+    fetchAccountBookDetails();
+    setPaginationUrls([]); // Clear pagination URLs when clearing date range
+    setCurrentPageIndex(0);
+  };
+
+  // Handle next page
+  const handleNextPage = () => {
+    if (currentPageIndex < paginationUrls.length - 1) {
+      const nextIndex = currentPageIndex + 1;
+      setCurrentPageIndex(nextIndex);
+      fetchAccountBookDetails(null, null, paginationUrls[nextIndex]);
+    } else if (paginationUrls[currentPageIndex]) {
+      fetchAccountBookDetails(null, null, paginationUrls[currentPageIndex]);
+    }
+  };
+
+  // Handle previous page
+  const handlePreviousPage = () => {
+    if (currentPageIndex > 0) {
+      const prevIndex = currentPageIndex - 1;
+      setCurrentPageIndex(prevIndex);
+      fetchAccountBookDetails(null, null, paginationUrls[prevIndex]);
+    }
   };
 
   // Filter accountBook based on selectedBank
@@ -205,7 +255,9 @@ const ViewAccountBook = () => {
 
   useEffect(() => {
     fetchAccountBookDetails();
-  }, [accountRecepient]); // Only refetch on recipient change
+    setPaginationUrls([]); // Reset pagination when recipient changes
+    setCurrentPageIndex(0);
+  }, [accountRecepient]);
 
   return (
     <>
@@ -214,10 +266,12 @@ const ViewAccountBook = () => {
         <div className="flex gap-4">
           <div className="date-picker right-0 top-0">
             <RangePicker
-              value={dateRange} // Controlled RangePicker
+              value={dateRange}
               onCalendarChange={(dates) => {
-                setDateRange(dates); // Update date range state
+                setDateRange(dates);
                 if (dates && dates[0] && dates[1]) {
+                  setPaginationUrls([]); // Reset pagination on new date filter
+                  setCurrentPageIndex(0);
                   fetchAccountBookDetails(
                     dates[0].format("YYYY-MM-DD"),
                     dates[1].format("YYYY-MM-DD")
@@ -229,7 +283,7 @@ const ViewAccountBook = () => {
               <FontAwesomeIcon
                 icon={faClose}
                 className="ml-2 cursor-pointer"
-                onClick={handleClearDateRange} // Clear date range on click
+                onClick={handleClearDateRange}
               />
             )}
           </div>
@@ -256,6 +310,7 @@ const ViewAccountBook = () => {
           </Select.Root>
         </div>
       </Flex>
+
       <Table.Root variant="surface">
         <Table.Header>
           <Table.Row>
@@ -353,6 +408,27 @@ const ViewAccountBook = () => {
         </Table.Body>
       </Table.Root>
 
+      {/* Pagination Controls */}
+      {paginationUrls.length > 0 && (
+        <Flex justify="center" gap="2" className="mt-4">
+          <Button
+            onClick={handlePreviousPage}
+            disabled={currentPageIndex === 0}
+          >
+            Previous
+          </Button>
+          <Button
+            onClick={handleNextPage}
+            disabled={
+              currentPageIndex >= paginationUrls.length - 1 &&
+              !paginationUrls[currentPageIndex]
+            }
+          >
+            Next
+          </Button>
+        </Flex>
+      )}
+
       {/* Modal for showing credit/debit details */}
       <Modal
         title="Transaction Details"
@@ -413,8 +489,6 @@ const ViewAccountBook = () => {
           </div>
         )}
       </Modal>
-
-      {/* // <Toaster position="top-right" /> */}
     </>
   );
 };

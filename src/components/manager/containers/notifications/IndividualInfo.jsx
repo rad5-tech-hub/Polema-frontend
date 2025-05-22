@@ -422,23 +422,17 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                                   <p className="text-[.5rem]">
                                     {entry.quantity} {entry.unit} of{" "}
                                     {entry.productName}{" "}
-                                    {/* {entry.unit !== null && "ordered"}
-                                    {entry.unit === null
-                                      ? isNegative(entry.quantity)
-                                        ? " (returned)"
-                                        : " (extra)"
-                                      : ""} */}
                                     {entry.unit === null
                                       ? ""
-                                      : entry.unit === "" ||
-                                        entry.unit === "N/A"
+                                      : entry.unit === "" || entry.unit === "N/A"
                                       ? ""
                                       : " ordered"}
-                                    {entry.unit === null
-                                      ? isNegative(entry.quantity)
-                                        ? " (returned)"
-                                        : " (extra)"
-                                      : ""}
+                                    {entry.order == null &&
+                                      entry.debit > entry.credit &&
+                                      " (extra)"}
+                                    {entry.order == null &&
+                                      entry.credit > entry.debit &&
+                                      " (returned)"}
                                   </p>{" "}
                                 </>
                               );

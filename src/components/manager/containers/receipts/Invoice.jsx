@@ -296,18 +296,17 @@ const Invoice = () => {
                       {row?.quantity && row.quantity}{" "}
                       {row?.unit ? row.unit : ""} {row?.unit ? "of " : ""}
                       {row.productName && row.productName}
-                      {/* {row.unit !== null && " ordered"}
-                      {row.unit === null ? isNegative(row.quantity) ? " (returned)":" (extra)" : ""} */}
+                      
+                      
                       {row.unit === null
                         ? ""
                         : row.unit === "" || row.unit === "N/A"
                         ? ""
-                        : " ordered"}
-                      {row.unit === null
-                        ? isNegative(row.quantity)
-                          ? " (returned)"
-                          : " (extra)"
-                        : ""}
+                          : " ordered"}
+                            
+                      {row.order == null && row.debit> row.credit && " (extra)"}
+                      {row.order == null && row.credit> row.debit && " (returned)"}
+                      
                     </td>
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                       {formatMoney(row?.order?.rate) || ""}

@@ -354,24 +354,24 @@ const WaybillInvoice = () => {
                   </tr>
                 ))}
               </tbody>
-
-              <div className="flex justify-end w-full mt-4">
-                <div>
-                  <p>
-                    <span className="font-bold">TAR:</span>
-                    {billDetails.transaction.weighBridge.tar}
-                  </p>
-                  <p>
-                    <span className="font-bold">GROSS:</span>
-                    {billDetails.transaction.weighBridge.gross}
-                  </p>
-                  <p>
-                    <span className="font-bold">NET:</span>
-                    {billDetails.transaction.weighBridge.net}
-                  </p>
-                </div>
-              </div>
             </table>
+
+            <div className="flex justify-end w-full mt-4">
+              <div>
+                <p className="mb-2">
+                  <span className="font-bold ">TAR:</span>
+                  {billDetails.transaction.weighBridge.tar}
+                </p>
+                <p className="mb-2">
+                  <span className="font-bold ">GROSS:</span>
+                  {billDetails.transaction.weighBridge.gross}
+                </p>
+                <p className="mb-2">
+                  <span className="font-bold ">NET:</span>
+                  {billDetails.transaction.weighBridge.net}
+                </p>
+              </div>
+            </div>
 
             {/* Additional Table Section */}
             <table className="w-full mt-6 sm:mt-8 border-collapse border-spacing-0">
