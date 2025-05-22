@@ -33,7 +33,6 @@ const ViewAccountBook = () => {
   const [bankDetails, setBankDetails] = useState([]);
   const [selectedBank, setSelectedBank] = useState("all");
   const [dateRange, setDateRange] = useState(null);
-  // New states for pagination
   const [paginationUrls, setPaginationUrls] = useState([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
@@ -57,16 +56,16 @@ const ViewAccountBook = () => {
 
   // Fetch Account Book Details
   const fetchAccountBookDetails = async (
-    startDate,
-    endDate,
+    startDate = null,
+    endDate = null,
     pageUrl = null
   ) => {
     setLoading(true);
     setRawAccountBook([]);
     setAccountBook([]);
     setFailedSearch(false);
-    let retrToken = localStorage.getItem("token");
-    if (!retrToken) {
+    const token = localStorage.getItem("token");
+    if (!token) {
       toast.error("An error occurred. Try logging in again");
       setLoading(false);
       return;
@@ -84,20 +83,26 @@ const ViewAccountBook = () => {
           return "";
       }
     };
-    
 
-    let url =
-      `${root}${pageUrl}` || `${root}/customer/${changeURLByRecepient(accountRecepient)}`;
-    if (startDate && endDate && !pageUrl) {
+    let url;
+    if (pageUrl) {
+      url = `${root}${pageUrl}`; // Use the provided pagination URL
+    } else if (startDate && endDate) {
       url = `${root}/customer/acctbook-filter?startDate=${startDate}&endDate=${endDate}`;
+    } else {
+      url = `${root}/customer/${changeURLByRecepient(accountRecepient)}`;
     }
 
     try {
       const response = await axios.get(url, {
-        headers: { Authorization: `Bearer ${retrToken}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
+
       const output =
-        startDate && endDate ? response.data.data : response.data.acct;
+        pageUrl || (startDate && endDate)
+          ? response.data.data
+          : response.data.acct;
+
       if (output.length === 0) {
         setFailedSearch(true);
         setRawAccountBook([]);
@@ -106,17 +111,28 @@ const ViewAccountBook = () => {
         setRawAccountBook(output);
         setAccountBook(output);
         setFailedSearch(false);
-        // Store nextPage URL if it exists and we're using date filter
-        if (startDate && endDate && response.data.pagination?.nextPage) {
-          setPaginationUrls((prev) => {
-            // Only add new URL if it's not already in the array
-            if (!prev.includes(response.data.pagination.nextPage)) {
-              return [...prev, response.data.pagination.nextPage];
+      }
+
+      // Store nextPage URL if it exists (for date filter or pagination)
+      if (response.data.pagination?.nextPage && (startDate || pageUrl)) {
+        setPaginationUrls((prev) => {
+          const newUrl = response.data.pagination.nextPage;
+          // Only add new URL if it's not already in the array
+          if (!prev.includes(newUrl)) {
+            // If navigating forward, append new URL
+            if (pageUrl && currentPageIndex >= prev.length - 1) {
+              return [...prev, newUrl];
+            }
+            // If starting a new filter, reset to only the new URL
+            if (startDate && !pageUrl) {
+              return [newUrl];
             }
             return prev;
-          });
-        }
+          }
+          return prev;
+        });
       }
+
       setLoading(false);
     } catch (error) {
       console.error("Error fetching account book:", error);
@@ -131,14 +147,14 @@ const ViewAccountBook = () => {
 
   // Fetch Customer details
   const fetchCustomers = async () => {
-    const retrToken = localStorage.getItem("token");
-    if (!retrToken) {
+    const token = localStorage.getItem("token");
+    if (!token) {
       toast.error("An error occurred. Try logging in again");
       return;
     }
     try {
       const response = await axios.get(`${root}/customer/get-customers`, {
-        headers: { Authorization: `Bearer ${retrToken}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setCustomers(response.data.customers || []);
     } catch (error) {
@@ -148,14 +164,14 @@ const ViewAccountBook = () => {
 
   // Fetch Products
   const fetchProducts = async () => {
-    const retrToken = localStorage.getItem("token");
-    if (!retrToken) {
+    const token = localStorage.getItem("token");
+    if (!token) {
       toast.error("An error occurred. Try logging in again");
       return;
     }
     try {
       const response = await axios.get(`${root}/admin/get-products`, {
-        headers: { Authorization: `Bearer ${retrToken}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setProducts(response.data.length === 0 ? [] : response.data.products);
     } catch (error) {
@@ -166,14 +182,14 @@ const ViewAccountBook = () => {
 
   // Fetch Departments
   const fetchDepartments = async () => {
-    const retrToken = localStorage.getItem("token");
-    if (!retrToken) {
+    const token = localStorage.getItem("token");
+    if (!token) {
       toast.error("An error occurred. Try logging in again");
       return;
     }
     try {
       const response = await axios.get(`${root}/dept/view-department`, {
-        headers: { Authorization: `Bearer ${retrToken}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setDepartments(response.data.departments);
     } catch (error) {
@@ -206,9 +222,9 @@ const ViewAccountBook = () => {
   // Handle clear date range
   const handleClearDateRange = () => {
     setDateRange(null);
-    fetchAccountBookDetails();
-    setPaginationUrls([]); // Clear pagination URLs when clearing date range
+    setPaginationUrls([]);
     setCurrentPageIndex(0);
+    fetchAccountBookDetails();
   };
 
   // Handle next page
@@ -218,6 +234,7 @@ const ViewAccountBook = () => {
       setCurrentPageIndex(nextIndex);
       fetchAccountBookDetails(null, null, paginationUrls[nextIndex]);
     } else if (paginationUrls[currentPageIndex]) {
+      setCurrentPageIndex((prev) => prev + 1);
       fetchAccountBookDetails(null, null, paginationUrls[currentPageIndex]);
     }
   };
@@ -254,9 +271,9 @@ const ViewAccountBook = () => {
   }, []);
 
   useEffect(() => {
-    fetchAccountBookDetails();
-    setPaginationUrls([]); // Reset pagination when recipient changes
+    setPaginationUrls([]);
     setCurrentPageIndex(0);
+    fetchAccountBookDetails();
   }, [accountRecepient]);
 
   return (
@@ -270,7 +287,7 @@ const ViewAccountBook = () => {
               onCalendarChange={(dates) => {
                 setDateRange(dates);
                 if (dates && dates[0] && dates[1]) {
-                  setPaginationUrls([]); // Reset pagination on new date filter
+                  setPaginationUrls([]);
                   setCurrentPageIndex(0);
                   fetchAccountBookDetails(
                     dates[0].format("YYYY-MM-DD"),
@@ -419,10 +436,7 @@ const ViewAccountBook = () => {
           </Button>
           <Button
             onClick={handleNextPage}
-            disabled={
-              currentPageIndex >= paginationUrls.length - 1 &&
-              !paginationUrls[currentPageIndex]
-            }
+            disabled={currentPageIndex >= paginationUrls.length}
           >
             Next
           </Button>
