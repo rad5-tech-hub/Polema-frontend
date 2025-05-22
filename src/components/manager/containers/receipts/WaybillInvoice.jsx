@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import useToast from "../../../../hooks/useToast";
+
 import { faPrint } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useParams } from "react-router-dom";
@@ -11,6 +13,7 @@ import { refractor, formatMoney } from "../../../date";
 const root = import.meta.env.VITE_ROOT;
 const WaybillInvoice = () => {
   const { id } = useParams();
+  const showToast = useToast();
 
   // State for table data
   const [tableData, setTableData] = useState([
@@ -53,7 +56,11 @@ const WaybillInvoice = () => {
 
       // const { waybill } = response.data;
       const waybill = response.data.parse;
-      const detailsEntries = response.data.parse?.invoice?.ledgerEntries.filter(
+      const invoiceDetails = Array.isArray(response.data.parse?.invoice.ledgerEntries)
+        ? response.data.parse?.invoice.ledgerEntries
+        : [];
+
+      const detailsEntries = invoiceDetails.filter(
         (item) => item.unit !== null
       );
 
@@ -64,12 +71,13 @@ const WaybillInvoice = () => {
       } else {
         // setFailedSearch(false);
         setBillDetails(waybill);
-        setEntries(detailsEntries);
+        setEntries(detailsEntries || []);
       }
     } catch (error) {
       console.error("Error fetching waybills:", error);
-      toast.error("Failed to fetch waybills. Please try again.", {
-        duration: 5000,
+      showToast({
+        message: "Failed to fetch waybills. Please try again.",
+        type: "error",
       });
     } finally {
       setLoading(false);
@@ -238,9 +246,9 @@ const WaybillInvoice = () => {
                   ["Date", `${refractor(billDetails.createdAt)}`],
                   [
                     "To",
-                    `${billDetails.transaction?.corder?.firstname} ${billDetails.transaction?.corder?.lastname}`,
+                    `${billDetails?.transaction?.corder?.firstname} ${billDetails?.transaction?.corder?.lastname}`,
                   ],
-                  ["Address", `${billDetails.address || ""}`],
+                  ["Address", `${billDetails?.address || ""}`],
                   [
                     "Transport Carried out by:",
                     `${billDetails?.transportedBy || ""}`,
@@ -261,7 +269,7 @@ const WaybillInvoice = () => {
                       Number of bags:
                     </label>
                     <p className="border-b border-black border-dotted flex-grow text-sm sm:text-base px-8">
-                      {billDetails.bags || ""} bags
+                      {billDetails?.bags || ""} bags
                     </p>
                   </div>
                 )}
@@ -274,7 +282,7 @@ const WaybillInvoice = () => {
                       Vehicle No.:
                     </label>
                     <p className="border-b border-black border-dotted flex-grow text-sm sm:text-base px-8">
-                      {billDetails.invoice?.vehicleNo || ""}
+                      {billDetails?.invoice?.vehicleNo || ""}
                     </p>
                   </div>
 
@@ -332,27 +340,33 @@ const WaybillInvoice = () => {
                 </tr>
               </thead>
               <tbody>
-                {entries.map((row, index) => (
-                  <tr key={index} className="text-center">
-                    <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                      {index + 1}
-                    </td>
-                    <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                      {`${formatMoney(row.quantity)}  ${row.unit} of ${
-                        row.product?.name || "PKC"
-                      }`}
-                    </td>
-                    <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                      {formatMoney(row.order?.rate) || ""}
-                    </td>
+                {entries.length === 0 ? (
+                  <div className="h-12">
+                    <p>NO INVOICE PROVIDED</p>
+                  </div>
+                ) : (
+                  entries.map((row, index) => (
+                    <tr key={index} className="text-center">
+                      <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
+                        {index + 1}
+                      </td>
+                      <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
+                        {`${formatMoney(row.quantity)}  ${row.unit} of ${
+                          row.product?.name || "PKC"
+                        }`}
+                      </td>
+                      <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
+                        {formatMoney(row.order?.rate) || ""}
+                      </td>
 
-                    <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                      {row.credit > row.debit
-                        ? formatMoney(row.credit)
-                        : formatMoney(row.debit)}
-                    </td>
-                  </tr>
-                ))}
+                      <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
+                        {row.credit > row.debit
+                          ? formatMoney(row.credit)
+                          : formatMoney(row.debit)}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
 
@@ -360,15 +374,15 @@ const WaybillInvoice = () => {
               <div>
                 <p className="mb-2">
                   <span className="font-bold ">TAR:</span>
-                  {billDetails.transaction.weighBridge.tar}
+                  {billDetails?.transaction?.weighBridge?.tar || ""}
                 </p>
                 <p className="mb-2">
                   <span className="font-bold ">GROSS:</span>
-                  {billDetails.transaction.weighBridge.gross}
+                  {billDetails?.transaction?.weighBridge?.gross || ""}
                 </p>
                 <p className="mb-2">
                   <span className="font-bold ">NET:</span>
-                  {billDetails.transaction.weighBridge.net}
+                  {billDetails?.transaction?.weighBridge?.net || ""}
                 </p>
               </div>
             </div>
