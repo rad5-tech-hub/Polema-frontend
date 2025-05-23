@@ -321,18 +321,18 @@ const WaybillInvoice = () => {
                   <th className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                     ITEM
                   </th>
-                  {/* <th className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
+                  <th className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                 QUANTITY
-              </th> */}
+              </th>
                   <th className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                    GOODS
+                    DESCRIPTION OF GOODS
                   </th>
-                  <th className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
+                  {/* <th className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                     RATE
                   </th>
                   <th className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                     TOTAL
-                  </th>
+                  </th> */}
                 </tr>
               </thead>
               <tbody>
@@ -347,7 +347,10 @@ const WaybillInvoice = () => {
                         {index + 1}
                       </td>
                       <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                        {`${formatMoney(row.quantity)}  ${row.unit} of ${
+                        {row?.quantity || ""}
+                      </td>
+                      <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
+                        {`  ${row.unit} of ${
                           row.product?.name || "PKC"
                         }`}
                         {row.unit === null
@@ -362,7 +365,7 @@ const WaybillInvoice = () => {
                           row.credit > row.debit &&
                           " (returned)"}
                       </td>
-                      <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
+                      {/* <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                         {formatMoney(row.order?.rate) || ""}
                       </td>
 
@@ -370,7 +373,7 @@ const WaybillInvoice = () => {
                         {row.credit > row.debit
                           ? formatMoney(row.credit)
                           : formatMoney(row.debit)}
-                      </td>
+                      </td> */}
                     </tr>
                   ))
                 )}
