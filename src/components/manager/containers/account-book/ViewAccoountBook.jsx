@@ -58,7 +58,7 @@ const ViewAccountBook = () => {
     endDate = null,
     pageUrl = null,
     clearParams = false,
-    bank = selectedBank // Use selectedBank as default
+    bank = selectedBank
   ) => {
     setLoading(true);
     setRawAccountBook([]);
@@ -75,7 +75,7 @@ const ViewAccountBook = () => {
     const nameParam = !clearParams && bank !== "all" ? `&name=${encodeURIComponent(bank)}` : "";
 
     if (pageUrl) {
-      url = `${root}${pageUrl}${nameParam}`; // Append name to pagination URL if not clearing
+      url = `${root}${pageUrl}${nameParam}`;
     } else if (startDate && endDate && !clearParams) {
       url = `${root}/customer/acctbook-filter?startDate=${startDate}&endDate=${endDate}${nameParam}`;
     } else {
@@ -99,12 +99,10 @@ const ViewAccountBook = () => {
         setFailedSearch(false);
       }
 
-      // Store nextPage URL if it exists
       if (response.data.pagination?.nextPage) {
         setPaginationUrls((prev) => {
           const newUrl = response.data.pagination.nextPage;
           if (!prev.includes(newUrl)) {
-            // Reset for new fetch (no pageUrl) or append for forward navigation
             if (!pageUrl || currentPageIndex >= prev.length - 1) {
               return pageUrl && currentPageIndex >= prev.length - 1
                 ? [...prev, newUrl]
@@ -115,7 +113,6 @@ const ViewAccountBook = () => {
           return prev;
         });
       } else {
-        // Clear future URLs if no nextPage is available
         setPaginationUrls((prev) => prev.slice(0, currentPageIndex + 1));
       }
 
@@ -209,9 +206,9 @@ const ViewAccountBook = () => {
       dateRange?.[1]?.format("YYYY-MM-DD"),
       null,
       false,
-      value // Pass the new bank value directly
+      value
     );
-    setSelectedBank(value); // Update state after fetch
+    setSelectedBank(value);
   };
 
   // Handle clear date range
@@ -219,7 +216,7 @@ const ViewAccountBook = () => {
     setDateRange(null);
     setPaginationUrls([]);
     setCurrentPageIndex(0);
-    fetchAccountBookDetails(null, null, null, true); // Clear all params
+    fetchAccountBookDetails(null, null, null, true);
   };
 
   // Handle next page
@@ -267,6 +264,28 @@ const ViewAccountBook = () => {
 
   return (
     <>
+      <style>
+        {`
+          .pagination-fixed {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            padding: 10px 0;
+            z-index: 20;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            align-items:center;
+            justify-content: center;
+            gap: 8px;
+          }
+          .dark .pagination-fixed {
+            background: transparent;
+            border-top: 1px solid #333;
+          }
+        `}
+      </style>
       <Flex justify="between" align="center" className="mb-4">
         <Heading>Account Book</Heading>
         <div className="flex gap-4">
@@ -414,25 +433,25 @@ const ViewAccountBook = () => {
         </Table.Body>
       </Table.Root>
 
-      {/* Pagination Controls */}
       {paginationUrls.length > 0 && (
-        <Flex justify="center" gap="2" className="mt-4">
-          <Button
-            onClick={handlePreviousPage}
-            disabled={currentPageIndex === 0}
-          >
-            Previous
-          </Button>
-          <Button
-            onClick={handleNextPage}
-            disabled={currentPageIndex >= paginationUrls.length}
-          >
-            Next
-          </Button>
-        </Flex>
+        <div className="pagination-fixed ml-8 items-center">
+          {/* <Flex justify="center" gap="2"> */}
+            <Button
+              onClick={handlePreviousPage}
+              disabled={currentPageIndex === 0}
+            >
+              Previous
+            </Button>
+            <Button
+              onClick={handleNextPage}
+              disabled={currentPageIndex >= paginationUrls.length}
+            >
+              Next
+            </Button>
+          {/* </Flex> */}
+        </div>
       )}
 
-      {/* Modal for showing credit/debit details */}
       <Modal
         title="Transaction Details"
         open={isModalOpen}
