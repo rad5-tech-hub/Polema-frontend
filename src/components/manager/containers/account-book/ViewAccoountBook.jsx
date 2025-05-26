@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faClose } from "@fortawesome/free-solid-svg-icons";
+import { faClose, faRedoAlt } from "@fortawesome/free-solid-svg-icons";
 import { DatePicker } from "antd";
 import { refractor, formatMoney } from "../../../date";
 import toast, { Toaster } from "react-hot-toast";
@@ -56,7 +56,9 @@ const ViewAccountBook = () => {
   const fetchAccountBookDetails = async (
     startDate = null,
     endDate = null,
-    pageUrl = null
+    pageUrl = null,
+    clearParams = false,
+    bank = selectedBank // Use selectedBank as default
   ) => {
     setLoading(true);
     setRawAccountBook([]);
@@ -70,12 +72,14 @@ const ViewAccountBook = () => {
     }
 
     let url;
+    const nameParam = !clearParams && bank !== "all" ? `&name=${encodeURIComponent(bank)}` : "";
+
     if (pageUrl) {
-      url = `${root}${pageUrl}`; // Use pagination URL
-    } else if (startDate && endDate) {
-      url = `${root}/customer/acctbook-filter?startDate=${startDate}&endDate=${endDate}`;
+      url = `${root}${pageUrl}${nameParam}`; // Append name to pagination URL if not clearing
+    } else if (startDate && endDate && !clearParams) {
+      url = `${root}/customer/acctbook-filter?startDate=${startDate}&endDate=${endDate}${nameParam}`;
     } else {
-      url = `${root}/customer/acctbook-filter`;
+      url = `${root}/customer/acctbook-filter${nameParam ? `?${nameParam.slice(1)}` : ""}`;
     }
 
     try {
@@ -198,7 +202,16 @@ const ViewAccountBook = () => {
 
   // Handle bank selection
   const handleBankChange = (value) => {
-    setSelectedBank(value);
+    setPaginationUrls([]);
+    setCurrentPageIndex(0);
+    fetchAccountBookDetails(
+      dateRange?.[0]?.format("YYYY-MM-DD"),
+      dateRange?.[1]?.format("YYYY-MM-DD"),
+      null,
+      false,
+      value // Pass the new bank value directly
+    );
+    setSelectedBank(value); // Update state after fetch
   };
 
   // Handle clear date range
@@ -206,7 +219,7 @@ const ViewAccountBook = () => {
     setDateRange(null);
     setPaginationUrls([]);
     setCurrentPageIndex(0);
-    fetchAccountBookDetails();
+    fetchAccountBookDetails(null, null, null, true); // Clear all params
   };
 
   // Handle next page
@@ -274,7 +287,7 @@ const ViewAccountBook = () => {
             />
             {dateRange !== null && (
               <FontAwesomeIcon
-                icon={faClose}
+                icon={faRedoAlt}
                 className="ml-2 cursor-pointer"
                 onClick={handleClearDateRange}
               />
@@ -479,6 +492,8 @@ const ViewAccountBook = () => {
           </div>
         )}
       </Modal>
+
+      {/* <Toaster position="top-right" /> */}
     </>
   );
 };
