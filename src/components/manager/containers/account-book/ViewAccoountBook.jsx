@@ -1,28 +1,38 @@
 import React, { useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faClose } from "@fortawesome/free-solid-svg-icons";
 import { DatePicker } from "antd";
 import { refractor, formatMoney } from "../../../date";
 import toast, { Toaster } from "react-hot-toast";
-import { Spinner, Table, Heading, Select, Flex } from "@radix-ui/themes";
+import {
+  Spinner,
+  Table,
+  Heading,
+  Select,
+  Flex,
+  Button,
+} from "@radix-ui/themes";
 import axios from "axios";
 import { Modal } from "antd";
-const {RangePicker} = DatePicker
+const { RangePicker } = DatePicker;
 
 const root = import.meta.env.VITE_ROOT;
 
 const ViewAccountBook = () => {
-  const [rawAccountBook, setRawAccountBook] = useState([]); // Store unfiltered data
-  const [accountBook, setAccountBook] = useState([]); // Filtered data for display
+  const [rawAccountBook, setRawAccountBook] = useState([]);
+  const [accountBook, setAccountBook] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [customerActive, setCustomerActive] = useState(true);
   const [department, setDepartments] = useState([]);
-  const [accountRecepient, setAccountRecepient] = useState("customers");
   const [failedSearch, setFailedSearch] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [bankDetails, setBankDetails] = useState([]);
   const [selectedBank, setSelectedBank] = useState("all");
+  const [dateRange, setDateRange] = useState(null);
+  const [paginationUrls, setPaginationUrls] = useState([]);
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
   // Fetch Bank Details
   const fetchBankDetails = async () => {
@@ -35,7 +45,6 @@ const ViewAccountBook = () => {
       const response = await axios.get(`${root}/admin/get-banks`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      
       setBankDetails(response.data.banks || []);
     } catch (error) {
       console.error("Error fetching banks:", error);
@@ -44,53 +53,68 @@ const ViewAccountBook = () => {
   };
 
   // Fetch Account Book Details
-  const fetchAccountBookDetails = async (startDate,endDate) => {
+  const fetchAccountBookDetails = async (
+    startDate = null,
+    endDate = null,
+    pageUrl = null
+  ) => {
     setLoading(true);
     setRawAccountBook([]);
     setAccountBook([]);
     setFailedSearch(false);
-    let retrToken = localStorage.getItem("token");
-    if (!retrToken) {
+    const token = localStorage.getItem("token");
+    if (!token) {
       toast.error("An error occurred. Try logging in again");
       setLoading(false);
       return;
     }
 
-    const changeURLByRecepient = (recepient) => {
-      switch (recepient) {
-        case "customers": return "get-accountbook";
-        case "suppliers": return "get-supplier-accountbook";
-        case "others": return "get-other-accountbook";
-        default: return "";
-      }
-    };
     let url;
-    
-    url = `${root}/customer/${changeURLByRecepient(accountRecepient)}`;
-  if(startDate && endDate){
+    if (pageUrl) {
+      url = `${root}${pageUrl}`; // Use pagination URL
+    } else if (startDate && endDate) {
+      url = `${root}/customer/acctbook-filter?startDate=${startDate}&endDate=${endDate}`;
+    } else {
+      url = `${root}/customer/acctbook-filter`;
+    }
 
-  url = `${root}/customer/acctbook-filter?startDate=${startDate}&endDate=${endDate}`
-   }
     try {
-      
-      let output;
       const response = await axios.get(url, {
-        headers: { Authorization: `Bearer ${retrToken}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
-      if (startDate && endDate) {
-        output =response.data.data
-      } else {
-        output = response.data.acct
-      }
-      if (output.length === 0)   {
+
+      const output = response.data.data;
+
+      if (output.length === 0) {
         setFailedSearch(true);
         setRawAccountBook([]);
         setAccountBook([]);
       } else {
         setRawAccountBook(output);
-        setAccountBook(output); // Initially show all records
+        setAccountBook(output);
         setFailedSearch(false);
       }
+
+      // Store nextPage URL if it exists
+      if (response.data.pagination?.nextPage) {
+        setPaginationUrls((prev) => {
+          const newUrl = response.data.pagination.nextPage;
+          if (!prev.includes(newUrl)) {
+            // Reset for new fetch (no pageUrl) or append for forward navigation
+            if (!pageUrl || currentPageIndex >= prev.length - 1) {
+              return pageUrl && currentPageIndex >= prev.length - 1
+                ? [...prev, newUrl]
+                : [newUrl];
+            }
+            return prev;
+          }
+          return prev;
+        });
+      } else {
+        // Clear future URLs if no nextPage is available
+        setPaginationUrls((prev) => prev.slice(0, currentPageIndex + 1));
+      }
+
       setLoading(false);
     } catch (error) {
       console.error("Error fetching account book:", error);
@@ -105,14 +129,14 @@ const ViewAccountBook = () => {
 
   // Fetch Customer details
   const fetchCustomers = async () => {
-    const retrToken = localStorage.getItem("token");
-    if (!retrToken) {
+    const token = localStorage.getItem("token");
+    if (!token) {
       toast.error("An error occurred. Try logging in again");
       return;
     }
     try {
       const response = await axios.get(`${root}/customer/get-customers`, {
-        headers: { Authorization: `Bearer ${retrToken}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setCustomers(response.data.customers || []);
     } catch (error) {
@@ -122,14 +146,14 @@ const ViewAccountBook = () => {
 
   // Fetch Products
   const fetchProducts = async () => {
-    const retrToken = localStorage.getItem("token");
-    if (!retrToken) {
+    const token = localStorage.getItem("token");
+    if (!token) {
       toast.error("An error occurred. Try logging in again");
       return;
     }
     try {
       const response = await axios.get(`${root}/admin/get-products`, {
-        headers: { Authorization: `Bearer ${retrToken}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setProducts(response.data.length === 0 ? [] : response.data.products);
     } catch (error) {
@@ -140,14 +164,14 @@ const ViewAccountBook = () => {
 
   // Fetch Departments
   const fetchDepartments = async () => {
-    const retrToken = localStorage.getItem("token");
-    if (!retrToken) {
+    const token = localStorage.getItem("token");
+    if (!token) {
       toast.error("An error occurred. Try logging in again");
       return;
     }
     try {
       const response = await axios.get(`${root}/dept/view-department`, {
-        headers: { Authorization: `Bearer ${retrToken}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setDepartments(response.data.departments);
     } catch (error) {
@@ -174,8 +198,36 @@ const ViewAccountBook = () => {
 
   // Handle bank selection
   const handleBankChange = (value) => {
-    
     setSelectedBank(value);
+  };
+
+  // Handle clear date range
+  const handleClearDateRange = () => {
+    setDateRange(null);
+    setPaginationUrls([]);
+    setCurrentPageIndex(0);
+    fetchAccountBookDetails();
+  };
+
+  // Handle next page
+  const handleNextPage = () => {
+    if (currentPageIndex < paginationUrls.length - 1) {
+      const nextIndex = currentPageIndex + 1;
+      setCurrentPageIndex(nextIndex);
+      fetchAccountBookDetails(null, null, paginationUrls[nextIndex]);
+    } else if (paginationUrls[currentPageIndex]) {
+      setCurrentPageIndex((prev) => prev + 1);
+      fetchAccountBookDetails(null, null, paginationUrls[currentPageIndex]);
+    }
+  };
+
+  // Handle previous page
+  const handlePreviousPage = () => {
+    if (currentPageIndex > 0) {
+      const prevIndex = currentPageIndex - 1;
+      setCurrentPageIndex(prevIndex);
+      fetchAccountBookDetails(null, null, paginationUrls[prevIndex]);
+    }
   };
 
   // Filter accountBook based on selectedBank
@@ -187,7 +239,6 @@ const ViewAccountBook = () => {
       const filtered = rawAccountBook.filter(
         (details) => details.bank?.name?.toString() === selectedBank
       );
-      
       setAccountBook(filtered);
       setFailedSearch(filtered.length === 0);
     }
@@ -201,32 +252,33 @@ const ViewAccountBook = () => {
     fetchAccountBookDetails();
   }, []);
 
-  useEffect(() => {
-    fetchAccountBookDetails();
-  }, [accountRecepient]); // Only refetch on recipient change
-
   return (
     <>
       <Flex justify="between" align="center" className="mb-4">
         <Heading>Account Book</Heading>
         <div className="flex gap-4">
-          <div className="date-picker  right-0 top-0">
+          <div className="date-picker right-0 top-0">
             <RangePicker
-              onCalendarChange={(e) => {
-                if (e && e[0] && e[1]) {
-                  // setDateRange({
-                  //   startDate: e[0].format("YYYY-MM-DD"),
-                  //   endDate: e[1].format("YYYY-MM-DD"),
-                  // });
+              value={dateRange}
+              onCalendarChange={(dates) => {
+                setDateRange(dates);
+                if (dates && dates[0] && dates[1]) {
+                  setPaginationUrls([]);
+                  setCurrentPageIndex(0);
                   fetchAccountBookDetails(
-                    e[0].format("YYYY-MM-DD"),
-                    e[1].format("YYYY-MM-DD")
+                    dates[0].format("YYYY-MM-DD"),
+                    dates[1].format("YYYY-MM-DD")
                   );
-                } else {
-                  return;
                 }
               }}
             />
+            {dateRange !== null && (
+              <FontAwesomeIcon
+                icon={faClose}
+                className="ml-2 cursor-pointer"
+                onClick={handleClearDateRange}
+              />
+            )}
           </div>
           <Select.Root
             value={selectedBank}
@@ -251,6 +303,7 @@ const ViewAccountBook = () => {
           </Select.Root>
         </div>
       </Flex>
+
       <Table.Root variant="surface">
         <Table.Header>
           <Table.Row>
@@ -348,6 +401,24 @@ const ViewAccountBook = () => {
         </Table.Body>
       </Table.Root>
 
+      {/* Pagination Controls */}
+      {paginationUrls.length > 0 && (
+        <Flex justify="center" gap="2" className="mt-4">
+          <Button
+            onClick={handlePreviousPage}
+            disabled={currentPageIndex === 0}
+          >
+            Previous
+          </Button>
+          <Button
+            onClick={handleNextPage}
+            disabled={currentPageIndex >= paginationUrls.length}
+          >
+            Next
+          </Button>
+        </Flex>
+      )}
+
       {/* Modal for showing credit/debit details */}
       <Modal
         title="Transaction Details"
@@ -408,8 +479,6 @@ const ViewAccountBook = () => {
           </div>
         )}
       </Modal>
-
-      <Toaster position="top-right" />
     </>
   );
 };

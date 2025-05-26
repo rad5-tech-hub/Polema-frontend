@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import useToast from "../../../../hooks/useToast";
+
 import { faPrint } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useParams } from "react-router-dom";
@@ -11,6 +13,7 @@ import { refractor, formatMoney } from "../../../date";
 const root = import.meta.env.VITE_ROOT;
 const WaybillInvoice = () => {
   const { id } = useParams();
+  const showToast = useToast();
 
   // State for table data
   const [tableData, setTableData] = useState([
@@ -25,6 +28,7 @@ const WaybillInvoice = () => {
   const [billDetails, setBillDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [entries, setEntries] = useState([]);
+  const [apiResponse,setApiResponse] = useState([])
 
   const totalCreditBalance = tableData.reduce(
     (total, row) => total + row.amount,
@@ -53,7 +57,12 @@ const WaybillInvoice = () => {
 
       // const { waybill } = response.data;
       const waybill = response.data.parse;
-      const detailsEntries = response.data.parse?.invoice?.ledgerEntries.filter(
+      const invoiceDetails =
+        response.data.parse?.invoice.ledgerEntries ||
+        response.data?.ledgerEntries ||
+        [];
+
+      const detailsEntries = invoiceDetails.filter(
         (item) => item.unit !== null
       );
 
@@ -64,12 +73,14 @@ const WaybillInvoice = () => {
       } else {
         // setFailedSearch(false);
         setBillDetails(waybill);
-        setEntries(detailsEntries);
+        setApiResponse(response.data)
+        setEntries(detailsEntries || []);
       }
     } catch (error) {
       console.error("Error fetching waybills:", error);
-      toast.error("Failed to fetch waybills. Please try again.", {
-        duration: 5000,
+      showToast({
+        message: "Failed to fetch waybills. Please try again.",
+        type: "error",
       });
     } finally {
       setLoading(false);
@@ -238,9 +249,9 @@ const WaybillInvoice = () => {
                   ["Date", `${refractor(billDetails.createdAt)}`],
                   [
                     "To",
-                    `${billDetails.transaction?.corder?.firstname} ${billDetails.transaction?.corder?.lastname}`,
+                    `${billDetails?.transaction?.corder?.firstname} ${billDetails?.transaction?.corder?.lastname}`,
                   ],
-                  ["Address", `${billDetails.address || ""}`],
+                  ["Address", `${billDetails?.address || ""}`],
                   [
                     "Transport Carried out by:",
                     `${billDetails?.transportedBy || ""}`,
@@ -255,17 +266,16 @@ const WaybillInvoice = () => {
                     </p>
                   </div>
                 ))}
-                {billDetails.bags > 0 &&
-                  (billDetails.bags !== null && (
-                    <div className="flex items-center gap-2 flex-grow">
-                      <label className="font-semibold text-sm sm:text-base">
-                        Number of bags:
-                      </label>
-                      <p className="border-b border-black border-dotted flex-grow text-sm sm:text-base px-8">
-                        {billDetails.bags || ""} bags
-                      </p>
-                    </div>
-                  ))}
+                {billDetails.bags > 0 && billDetails.bags !== null && (
+                  <div className="flex items-center gap-2 flex-grow">
+                    <label className="font-semibold text-sm sm:text-base">
+                      Number of bags:
+                    </label>
+                    <p className="border-b border-black border-dotted flex-grow text-sm sm:text-base px-8">
+                      {billDetails?.bags || ""} bags
+                    </p>
+                  </div>
+                )}
 
                 {/* Two items per row */}
                 <div className="flex flex-wrap gap-4">
@@ -275,18 +285,11 @@ const WaybillInvoice = () => {
                       Vehicle No.:
                     </label>
                     <p className="border-b border-black border-dotted flex-grow text-sm sm:text-base px-8">
-                      {billDetails.invoice?.vehicleNo || ""}
+                      {billDetails?.invoice?.vehicleNo ||  apiResponse.parse?.transaction?.authToWeighTickets?.vehicleNo ||  ""}
                     </p>
                   </div>
 
-                  {/* <div className="flex items-center gap-2 flex-grow">
-                <label className="font-semibold text-sm sm:text-base">
-                  Time Out:
-                </label>
-                <p className="border-b border-black border-dotted flex-grow text-sm sm:text-base px-8">
-                  00:00 PM
-                </p>
-              </div> */}
+                  
                 </div>
 
                 <div className="flex flex-wrap gap-4 mt-2">
@@ -318,57 +321,81 @@ const WaybillInvoice = () => {
                   <th className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                     ITEM
                   </th>
-                  {/* <th className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
+                  <th className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                 QUANTITY
-              </th> */}
+              </th>
                   <th className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                    GOODS
+                    DESCRIPTION OF GOODS
                   </th>
-                  <th className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
+                  {/* <th className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                     RATE
                   </th>
                   <th className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                     TOTAL
-                  </th>
+                  </th> */}
                 </tr>
               </thead>
               <tbody>
-                {entries.map((row, index) => (
-                  <tr key={index} className="text-center">
-                    <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                      {index + 1}
-                    </td>
-                    <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                      {`${formatMoney(row.quantity)}  ${row.unit} of ${
-                        row.product?.name || "PKC"
-                      }`}
-                    </td>
-                    <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                      {formatMoney(row.order?.rate) || ""}
-                    </td>
+                {entries.length === 0 ? (
+                  <div className="h-12">
+                    <p>NO INVOICE PROVIDED</p>
+                  </div>
+                ) : (
+                  entries.map((row, index) => (
+                    <tr key={index} className="text-center">
+                      <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
+                        {index + 1}
+                      </td>
+                      <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
+                        {row?.quantity || ""}
+                      </td>
+                      <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
+                        {`  ${row.unit} of ${
+                          row.product?.name || "PKC"
+                        }`}
+                        {row.unit === null
+                          ? ""
+                          : row.unit === "" || row.unit === "N/A"
+                          ? ""
+                          : " ordered"}
+                        {row.order == null &&
+                          row.debit > row.credit &&
+                          " (extra)"}
+                        {row.order == null &&
+                          row.credit > row.debit &&
+                          " (returned)"}
+                      </td>
+                      {/* <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
+                        {formatMoney(row.order?.rate) || ""}
+                      </td>
 
-                    <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
-                      {row.credit > row.debit
-                        ? formatMoney(row.credit)
-                        : formatMoney(row.debit)}
-                    </td>
-                  </tr>
-                ))}
+                      <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
+                        {row.credit > row.debit
+                          ? formatMoney(row.credit)
+                          : formatMoney(row.debit)}
+                      </td> */}
+                    </tr>
+                  ))
+                )}
               </tbody>
-              {/* <tfoot>
-            <tr>
-              <td
-                colSpan="3"
-                className="text-right px-4 py-2 font-bold text-sm sm:text-base"
-              >
-                TOTAL CREDIT BALANCE:
-              </td>
-              <td className="border border-[#43434380] px-4 py-2 font-bold text-sm sm:text-base">
-                {totalCreditBalance.toLocaleString()}
-              </td>
-            </tr>
-          </tfoot> */}
             </table>
+
+            <div className="flex justify-end w-full mt-4">
+              <div>
+                <p className="mb-2">
+                  <span className="font-bold ">TAR:</span>
+                  {billDetails?.transaction?.weighBridge?.tar || ""}
+                </p>
+                <p className="mb-2">
+                  <span className="font-bold ">GROSS:</span>
+                  {billDetails?.transaction?.weighBridge?.gross || ""}
+                </p>
+                <p className="mb-2">
+                  <span className="font-bold ">NET:</span>
+                  {billDetails?.transaction?.weighBridge?.net || ""}
+                </p>
+              </div>
+            </div>
 
             {/* Additional Table Section */}
             <table className="w-full mt-6 sm:mt-8 border-collapse border-spacing-0">
