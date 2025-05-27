@@ -234,7 +234,9 @@ const AllGatePass = () => {
       </Table.Root>
 
       {/* Pagination Controls */}
-      <Flex justify="center" align="center" gap="3" className="mt-4">
+      <div className="pagination-fixed">
+
+      {/* <Flex justify="center" align="center" gap="3" className="mt-4"> */}
         <Button disabled={currentPage === 1} onClick={goToPreviousPage}>
           Previous
         </Button>
@@ -244,7 +246,8 @@ const AllGatePass = () => {
         <Button disabled={currentPage === totalPages} onClick={goToNextPage}>
           Next
         </Button>
-      </Flex>
+      {/* </Flex> */}
+      </div>
 
       <Toaster position="top-right" />
     </>

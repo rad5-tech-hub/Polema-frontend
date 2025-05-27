@@ -379,6 +379,7 @@ const GeneralRecordBook = () => {
           </div>
         </div>
       </Modal>
+      <div className="pagination-fixed">
 
       {(showPreviousButton || details?.pagination?.nextPage) && (
         <Flex className="my-6" justify={"between"} gap="3">
@@ -413,6 +414,8 @@ const GeneralRecordBook = () => {
           )}
         </Flex>
       )}
+      </div>
+
 
       <Toaster position="top-right" />
     </>
