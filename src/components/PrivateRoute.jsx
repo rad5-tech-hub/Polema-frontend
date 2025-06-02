@@ -28,7 +28,7 @@ const PrivateRoute = ({ children }) => {
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!isAuthenticated()) {
-      navigate("/login"); // Redirect to login page if not authenticated
+      navigate("/"); // Redirect to login page if not authenticated
     }
   }, [navigate]);
 
