@@ -1,4 +1,5 @@
 import React from "react";
+import ViewLocalPurchaseOrder from "./ViewLocalPurchaseOrder";
 import {
   Heading,
   Separator,
@@ -15,6 +16,8 @@ import { LoaderIcon } from "react-hot-toast";
 import axios from "axios";
 import { Select as AntSelect } from "antd";
 const { Option } = AntSelect;
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toast, { Toaster } from "react-hot-toast";
 const root = import.meta.env.VITE_ROOT;
 import useToast from "../../../../hooks/useToast";
@@ -23,7 +26,6 @@ const LocalPurchaseOrder = () => {
   const [suppliers, setSuppliers] = React.useState([]);
   const [raw, setRaw] = React.useState([]);
   const [buttonLoading, setButtonLoading] = React.useState(false);
-  const [selectedPrice, setSelectedPrice] = React.useState("");
   const showToast = useToast();
 
   // State management for form details
@@ -31,22 +33,18 @@ const LocalPurchaseOrder = () => {
   const [chequeNumber, setChequeNumber] = React.useState("");
   const [voucherNumber, setVoucherNumber] = React.useState("");
   const [supplierId, setSupplierId] = React.useState("");
-  const [rawMaterialId, setRawMaterialId] = React.useState("");
-  const [unitPrice, setUnitPrice] = React.useState("");
-  const [quantityOrdered, setQuantityOrdered] = React.useState("");
   const [expiration, setExpiration] = React.useState("");
   const [comment, setComment] = React.useState("");
   const [period, setPeriod] = React.useState("");
-const [history,setHistory] = React.useState("");
+  const [showViewLPO, setShowViewLPO] = React.useState(false);
   const [superAdmins, setSuperAdmins] = React.useState([]);
   const [adminId, setAdminId] = React.useState("");
   const [ticketId, setTicketId] = React.useState("");
 
-  // State for multiple supplier details
-  const [supplierDetails, setSupplierDetails] = React.useState([
+  // State for multiple raw material details
+  const [materialDetails, setMaterialDetails] = React.useState([
     {
       id: Date.now(),
-      supplierId: "",
       rawMaterialId: "",
       unitPrice: "",
       quantityOrdered: "",
@@ -111,34 +109,35 @@ const [history,setHistory] = React.useState("");
     }
   };
 
-  // Format unitPrice with commas
-  const handleUnitPriceChange = (e) => {
-    const value = e.target.value.replace(/,/g, "");
-    if (!isNaN(value)) {
-      setUnitPrice(
-        parseInt(value, 10).toLocaleString("en-US", {
-          maximumFractionDigits: 0,
-        })
-      );
-    }
+  // Format unit price with commas
+  const formatUnitPrice = (value) => {
+    const cleanValue = value.replace(/[^0-9]/g, "");
+    if (cleanValue === "") return "";
+    return parseInt(cleanValue, 10).toLocaleString("en-US", {
+      maximumFractionDigits: 0,
+    });
   };
 
-  // Handle changes for supplier details
-  const handleSupplierDetailChange = (id, field, value) => {
-    setSupplierDetails((prev) =>
+  // Handle changes for material details
+  const handleMaterialDetailChange = (id, field, value) => {
+    setMaterialDetails((prev) =>
       prev.map((detail) =>
-        detail.id === id ? { ...detail, [field]: value } : detail
+        detail.id === id
+          ? {
+              ...detail,
+              [field]: field === "unitPrice" ? formatUnitPrice(value) : value,
+            }
+          : detail
       )
     );
   };
 
-  // Add new supplier detail box
-  const addSupplierDetail = () => {
-    setSupplierDetails((prev) => [
+  // Add new material detail box
+  const addMaterialDetail = () => {
+    setMaterialDetails((prev) => [
       ...prev,
       {
         id: Date.now(),
-        supplierId: "",
         rawMaterialId: "",
         unitPrice: "",
         quantityOrdered: "",
@@ -146,13 +145,13 @@ const [history,setHistory] = React.useState("");
     ]);
   };
 
-  // Remove supplier detail box
-  const removeSupplierDetail = (id) => {
-    if (supplierDetails.length > 1) {
-      setSupplierDetails((prev) => prev.filter((detail) => detail.id !== id));
+  // Remove material detail box
+  const removeMaterialDetail = (id) => {
+    if (materialDetails.length > 1) {
+      setMaterialDetails((prev) => prev.filter((detail) => detail.id !== id));
     } else {
       showToast({
-        message: "At least one supplier detail is required",
+        message: "At least one material detail is required",
         type: "error",
         duration: 5000,
       });
@@ -168,17 +167,12 @@ const [history,setHistory] = React.useState("");
       setChequeNumber("");
       setVoucherNumber("");
       setSupplierId("");
-      setRawMaterialId("");
-      setSelectedPrice("");
-      setUnitPrice("");
-      setQuantityOrdered("");
       setExpiration("");
       setComment("");
       setPeriod("");
-      setSupplierDetails([
+      setMaterialDetails([
         {
           id: Date.now(),
-          supplierId: "",
           rawMaterialId: "",
           unitPrice: "",
           quantityOrdered: "",
@@ -199,10 +193,10 @@ const [history,setHistory] = React.useState("");
       deliveredTo: receiver,
       chequeNo: chequeNumber,
       chequeVoucherNo: voucherNumber,
-      supplierDetails: supplierDetails.map((detail) => ({
-        supplierId: detail.supplierId,
+      supplierId: supplierId,
+      materialDetails: materialDetails.map((detail) => ({
         rawMaterial: detail.rawMaterialId,
-        unitPrice: detail.unitPrice,
+        unitPrice: detail.unitPrice.replace(/,/g, ""), // Remove commas for API
         quantOrdered: detail.quantityOrdered,
       })),
       expires: expiration,
@@ -257,9 +251,24 @@ const [history,setHistory] = React.useState("");
     fetchRaw();
   }, []);
 
+  if (showViewLPO) {
+    return <ViewLocalPurchaseOrder />;
+  }
+
   return (
     <>
-      <Heading>Local Purchase Order</Heading>
+      <Flex gap="4" align="center" className="mb-4">
+        <div className="cursor-pointer">
+          <FontAwesomeIcon
+            className="cursor-pointer"
+            icon={faArrowLeft}
+            onClick={() => {
+              setShowViewLPO(true);
+            }}
+          />
+        </div>
+        <Heading>Local Purchase Order</Heading>
+      </Flex>
       <Separator className="my-4 w-full" />
       <form action="" onSubmit={handleSubmit}>
         <Flex gap={"5"} className="mt-4">
@@ -271,7 +280,7 @@ const [history,setHistory] = React.useState("");
               value={receiver}
               placeholder="Enter Receiver"
               className="mt-2"
-              required 
+              required
               onChange={(e) => {
                 setReceiver(e.target.value);
               }}
@@ -291,10 +300,10 @@ const [history,setHistory] = React.useState("");
         </Flex>
         <Flex gap={"5"} className="mt-4">
           <div className="w-full">
-            <Text>Cheque Voucher No.</Text>
+            <Text>Seal No.</Text>
             <TextField.Root
               value={voucherNumber}
-              placeholder="Enter Cheque voucher number"
+              placeholder="Enter Seal number"
               className="mt-2 "
               onChange={(e) => {
                 setVoucherNumber(e.target.value);
@@ -317,40 +326,36 @@ const [history,setHistory] = React.useState("");
 
         <Box width="100%">
           <Grid gap={"5"} columns={"2"} className="mt-4">
-            {supplierDetails.map((detail) => (
+            <Flex gap={"5"} className="mt-6">
+              <div className="w-full">
+                <Text>
+                  Name of Supplier <span className="text-red-500">*</span>
+                </Text>
+                <AntSelect
+                  showSearch
+                  className="mt-2"
+                  placeholder={"Select Supplier"}
+                  value={supplierId}
+                  style={{ width: "100%" }}
+                  onChange={(value) => {
+                    setSupplierId(value);
+                  }}
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    option.children.toLowerCase().includes(input.toLowerCase())
+                  }
+                >
+                  {suppliers.map((customer) => (
+                    <Option key={customer.id} value={customer.id}>
+                      {`${customer.firstname} ${customer.lastname}`}
+                    </Option>
+                  ))}
+                </AntSelect>
+              </div>
+            </Flex>
+            {materialDetails.map((detail) => (
               <Box key={detail.id} className="p-4 border rounded">
                 <Flex gap={"5"} direction="column">
-                  <div className="w-full">
-                    <Text>
-                      Name of Supplier <span className="text-red-500">*</span>
-                    </Text>
-                    <AntSelect
-                      showSearch
-                      className="mt-2"
-                      placeholder={"Select Supplier"}
-                      value={detail.supplierId}
-                      style={{ width: "100%" }}
-                      onChange={(value) =>
-                        handleSupplierDetailChange(
-                          detail.id,
-                          "supplierId",
-                          value
-                        )
-                      }
-                      optionFilterProp="children"
-                      filterOption={(input, option) =>
-                        option.children
-                          .toLowerCase()
-                          .includes(input.toLowerCase())
-                      }
-                    >
-                      {suppliers.map((customer) => (
-                        <Option key={customer.id} value={customer.id}>
-                          {`${customer.firstname} ${customer.lastname}`}
-                        </Option>
-                      ))}
-                    </AntSelect>
-                  </div>
                   <div className="w-full">
                     <Text>
                       Raw Materials Needed{" "}
@@ -361,7 +366,7 @@ const [history,setHistory] = React.useState("");
                       required
                       value={detail.rawMaterialId}
                       onValueChange={(value) => {
-                        handleSupplierDetailChange(
+                        handleMaterialDetailChange(
                           detail.id,
                           "rawMaterialId",
                           value
@@ -369,10 +374,14 @@ const [history,setHistory] = React.useState("");
                         const selectedRaw = raw.find(
                           (item) => item.id === value
                         );
-                        handleSupplierDetailChange(
+                        handleMaterialDetailChange(
                           detail.id,
                           "unitPrice",
-                          selectedRaw ? selectedRaw.price[0].amount : ""
+                          selectedRaw
+                            ? formatUnitPrice(
+                                selectedRaw.price[0].amount.toString()
+                              )
+                            : ""
                         );
                       }}
                     >
@@ -401,7 +410,7 @@ const [history,setHistory] = React.useState("");
                         type="text"
                         value={detail.unitPrice}
                         onChange={(e) =>
-                          handleSupplierDetailChange(
+                          handleMaterialDetailChange(
                             detail.id,
                             "unitPrice",
                             e.target.value
@@ -419,7 +428,7 @@ const [history,setHistory] = React.useState("");
                         required
                         value={detail.quantityOrdered}
                         onChange={(e) =>
-                          handleSupplierDetailChange(
+                          handleMaterialDetailChange(
                             detail.id,
                             "quantityOrdered",
                             e.target.value
@@ -430,14 +439,14 @@ const [history,setHistory] = React.useState("");
                       />
                     </div>
                   </Flex>
-                  {supplierDetails.length > 1 && (
+                  {materialDetails.length > 1 && (
                     <Button
                       variant="outline"
                       color="red"
-                      onClick={() => removeSupplierDetail(detail.id)}
+                      onClick={() => removeMaterialDetail(detail.id)}
                       className="mt-2"
                     >
-                      Remove
+                      Remove Material
                     </Button>
                   )}
                 </Flex>
@@ -447,9 +456,9 @@ const [history,setHistory] = React.useState("");
           <Button
             variant="outline"
             className="mt-4"
-            onClick={addSupplierDetail}
+            onClick={addMaterialDetail}
           >
-            Add Supplier
+            Add another raw material
           </Button>
         </Box>
 

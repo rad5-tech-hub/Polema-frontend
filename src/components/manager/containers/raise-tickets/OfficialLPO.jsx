@@ -116,6 +116,25 @@ const OfficialLPO = () => {
         </div>
       ) : (
         <div className="official-lpo">
+          <style>
+            {`
+          
+            *{           
+              box-shadow: none !important;              
+            }
+            /* Ensure borders are visible */
+            table, th, td {
+              border: 1px solid black !important;
+              padding: 8px !important;
+            }
+            table th {
+              background-color: #E1E1E1 !important;
+            }
+
+        
+          
+        `}
+          </style>
           {/* Print Section */}
           <div className="flex justify-between items-center pb-6 border-b border-[#919191]">
             <span className="text-sm sm:text-lg font-semibold text-[#434343]">
@@ -178,7 +197,7 @@ const OfficialLPO = () => {
 
             <Flex gap={"5"} className="mt-4 w-full">
               <div className="w-full">
-                <Text>Cheque Voucher No.</Text>
+                <Text>Seal No.</Text>
                 <TextField.Root
                   value={lpoDetails.chequeVoucherNo}
                   // placeholder="Enter Cheque Voucher Number"
@@ -197,7 +216,6 @@ const OfficialLPO = () => {
               </div>
             </Flex>
 
-            <Separator className="my-10 w-full" />
             <Flex gap={"5"} className="mt-4">
               <div className="w-full">
                 <Text>
@@ -211,7 +229,7 @@ const OfficialLPO = () => {
               <div className="w-full">
                 <Text>
                   Raw Materials Needed
-                   {/* <span className="text-red-500">*</span> */}
+                  {/* <span className="text-red-500">*</span> */}
                 </Text>
                 <TextField.Root disabled value={`${lpoDetails.product.name}`} />
               </div>
@@ -220,7 +238,7 @@ const OfficialLPO = () => {
             <Flex gap={"5"} className="mt-4">
               <div className="w-full">
                 <Text>
-                  Unit Price 
+                  Unit Price
                   {/* <span className="text-red-500">*</span> */}
                 </Text>
                 <TextField.Root
@@ -235,7 +253,7 @@ const OfficialLPO = () => {
               </div>
               <div className="w-full">
                 <Text>
-                  Quantity Ordered 
+                  Quantity Ordered
                   {/* <span className="text-red-500">*</span> */}
                 </Text>
                 <TextField.Root
@@ -248,39 +266,18 @@ const OfficialLPO = () => {
               </div>
             </Flex>
 
-            <Flex gap={"5"} className="mt-4">
-              <div className="w-full">
-                <Text>L.P.O Expires</Text>
-                <TextField.Root
-                  placeholder="Enter Date"
-                  value={refractor(lpoDetails.expires )&& refractor(lpoDetails.expires)}
-                  className="mt-2"
-                  disabled
-                  //   onChange={(e) => setExpiration(e.target.value)}
-                />
-              </div>
-              {/* <div className="w-full">
-                <Text>Period</Text>
-                <TextField.Root
-                  type="date"
-                  value={period}
-                  className="mt-2"
-                  onChange={(e) => setPeriod(e.target.value)}
-                />
-              </div> */}
-            </Flex>
-
-            {/* <Grid gap={"5"} columns={"2"} className="mt-4">
-              <div className="w-full">
-                <Text>Specifications and Comments</Text>
-                <TextField.Root
-                  placeholder="Enter Comments"
-                  onChange={(e) => setComment(e.target.value)}
-                  value={comment}
-                  className="mt-2"
-                />
-              </div>
-            </Grid> */}
+            {/* Table for displaying raw materials  */}
+            <table className="w-full mt-8">
+              <thead>
+                <tr>
+                  <th className="text-left">Raw Material</th>
+                  <th className="text-left">Unit Price</th>
+                  <th className="text-left">Quantity Ordered</th>
+                  <th className="text-left">Total Price</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
           </form>
         </div>
       )}
