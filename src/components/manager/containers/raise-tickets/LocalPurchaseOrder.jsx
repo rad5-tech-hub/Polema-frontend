@@ -179,6 +179,14 @@ const LocalPurchaseOrder = () => {
         },
       ]);
     };
+    if (!adminId) {
+      showToast({
+        message: "Select an admin for it to be sent to.",
+        type: "error",
+        duration: 5000,
+      });
+      return
+    }
 
     setButtonLoading(true); // Start loading state
     const retrToken = localStorage.getItem("token");
@@ -194,13 +202,14 @@ const LocalPurchaseOrder = () => {
       chequeNo: chequeNumber,
       chequeVoucherNo: voucherNumber,
       supplierId: supplierId,
-      materialDetails: materialDetails.map((detail) => ({
-        rawMaterial: detail.rawMaterialId,
+      items: materialDetails.map((detail) => ({
+        rawMaterial:
+          raw.find((item) => item.id === detail.rawMaterialId)?.name || "",
         unitPrice: detail.unitPrice.replace(/,/g, ""), // Remove commas for API
-        quantOrdered: detail.quantityOrdered,
+        quantity: detail.quantityOrdered,
       })),
-      expires: expiration,
-      period: period,
+      // expires: expiration,
+      // period: period,
       comments: comment,
     };
 
@@ -212,8 +221,18 @@ const LocalPurchaseOrder = () => {
         },
       });
 
-      const ticketId = response.data.ticket.id; // Get ticket ID
+      const ticketId = response.data?.lpo?.id ||  response.data?.lpo?.id || "" ; // Get ticket ID
       setTicketId(ticketId);
+
+      if(!ticketId){
+        showToast({
+          type:"error",
+          message: "Not successfuly sent to admin",
+          
+        })
+        return 
+
+      }
 
       // SECOND API REQUEST
       const secondResponse = await axios.post(

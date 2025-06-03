@@ -226,58 +226,38 @@ const OfficialLPO = () => {
                   value={`${lpoDetails.supplier.firstname} ${lpoDetails.supplier.lastname}`}
                 />
               </div>
-              <div className="w-full">
-                <Text>
-                  Raw Materials Needed
-                  {/* <span className="text-red-500">*</span> */}
-                </Text>
-                <TextField.Root disabled value={`${lpoDetails.product.name}`} />
-              </div>
             </Flex>
 
-            <Flex gap={"5"} className="mt-4">
-              <div className="w-full">
-                <Text>
-                  Unit Price
-                  {/* <span className="text-red-500">*</span> */}
-                </Text>
-                <TextField.Root
-                  placeholder="Enter Unit Price"
-                  className="mt-2"
-                  required
-                  value={lpoDetails.unitPrice && lpoDetails.unitPrice}
-                  disabled
-                >
-                  <TextField.Slot>₦</TextField.Slot>
-                </TextField.Root>
-              </div>
-              <div className="w-full">
-                <Text>
-                  Quantity Ordered
-                  {/* <span className="text-red-500">*</span> */}
-                </Text>
-                <TextField.Root
-                  required
-                  value={lpoDetails.quantOrdered && lpoDetails.quantOrdered}
-                  placeholder="Enter Quantity Ordered"
-                  className="mt-2"
-                  disabled
-                />
-              </div>
-            </Flex>
+            <Flex gap={"5"} className="mt-4"></Flex>
+
+            <p>
+              <span className="font-bold">Comment:</span>{" "}
+              {lpoDetails?.comments || ""}
+            </p>
 
             {/* Table for displaying raw materials  */}
-            <table className="w-full mt-8">
-              <thead>
-                <tr>
-                  <th className="text-left">Raw Material</th>
-                  <th className="text-left">Unit Price</th>
-                  <th className="text-left">Quantity Ordered</th>
-                  <th className="text-left">Total Price</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
+            {lpoDetails?.items && (
+              <table className="w-full mt-8">
+                <thead>
+                  <tr>
+                    <th className="text-left">Raw Material</th>
+                    <th className="text-left">Unit Price</th>
+                    <th className="text-left">Quantity Ordered</th>
+                    <th className="text-left">Total Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lpoDetails.items.map((item, index) => (
+                    <tr key={index}>
+                      <td>{item?.rawMaterial || ""}</td>
+                      <td>₦{item?.unitPrice?.toLocaleString() || ""}</td>
+                      <td>{item?.quantity ?? ""}</td>
+                      <td>₦{item?.totalPrice?.toLocaleString() || ""}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </form>
         </div>
       )}
