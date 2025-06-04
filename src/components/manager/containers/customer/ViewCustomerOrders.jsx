@@ -43,7 +43,7 @@ const ViewCustomerOrders = () => {
       {
         response.data?.orders?.length === 0 || response.data.length === 0
           ? setFailedSearch(true)
-          : setStore(response.data);
+          : setStore(response.data.data);
       }
     } catch (error) {
       console.log(error);

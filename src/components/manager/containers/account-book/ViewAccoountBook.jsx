@@ -72,7 +72,7 @@ const ViewAccountBook = () => {
     }
 
     let url;
-    const nameParam = !clearParams && bank !== "all" ? `&name=${encodeURIComponent(bank)}` : "";
+    const nameParam = !clearParams && bank !== "all" ? `&bankId=${encodeURIComponent(bank)}` : "";
 
     if (pageUrl) {
       url = `${root}${pageUrl}${nameParam}`;
@@ -247,7 +247,7 @@ const ViewAccountBook = () => {
       setFailedSearch(rawAccountBook.length === 0);
     } else {
       const filtered = rawAccountBook.filter(
-        (details) => details.bank?.name?.toString() === selectedBank
+        (details) => details.bank?.id?.toString() === selectedBank
       );
       setAccountBook(filtered);
       setFailedSearch(filtered.length === 0);
@@ -326,7 +326,7 @@ const ViewAccountBook = () => {
                 </Select.Item>
               ) : (
                 bankDetails.map((bank) => (
-                  <Select.Item key={bank.id} value={bank.name.toString()}>
+                  <Select.Item key={bank.id} value={bank.id.toString()}>
                     {bank.name}
                   </Select.Item>
                 ))
