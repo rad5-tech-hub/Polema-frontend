@@ -13,7 +13,7 @@ import {
 } from "@radix-ui/themes";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { refractor } from "../../../date";
+import { refractor,formatMoney } from "../../../date";
 const root = import.meta.env.VITE_ROOT;
 
 const OfficialLPO = () => {
@@ -258,6 +258,12 @@ const OfficialLPO = () => {
                 </tbody>
               </table>
             )}
+            <div className="flex justify-end mt-4">
+              <p>
+                <span className="font-bold">Total Amount:</span>{" "}
+                { lpoDetails?.unitPrice ? formatMoney(lpoDetails?.unitPrice) : ""}{" "}
+              </p>
+            </div>
           </form>
         </div>
       )}
