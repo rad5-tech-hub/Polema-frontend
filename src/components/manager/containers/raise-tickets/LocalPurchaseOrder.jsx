@@ -41,6 +41,8 @@ const LocalPurchaseOrder = () => {
   const [adminId, setAdminId] = React.useState("");
   const [ticketId, setTicketId] = React.useState("");
 
+
+
   // State for multiple raw material details
   const [materialDetails, setMaterialDetails] = React.useState([
     {
@@ -208,8 +210,8 @@ const LocalPurchaseOrder = () => {
         unitPrice: detail.unitPrice.replace(/,/g, ""), // Remove commas for API
         quantity: detail.quantityOrdered,
       })),
-      // expires: expiration,
-      // period: period,
+      ...( expiration && {expires: expiration}),
+      ...(period && { period: period }),
       comments: comment,
     };
 
@@ -342,6 +344,8 @@ const LocalPurchaseOrder = () => {
             ></TextField.Root>
           </div>
         </Flex>
+
+        <Separator className="my-8 w-full" />
 
         <Box width="100%">
           <Grid gap={"5"} columns={"2"} className="mt-4">
@@ -481,30 +485,60 @@ const LocalPurchaseOrder = () => {
           </Button>
         </Box>
 
-        <div className="w-full">
-          <Text className="block mt-4">
-            Send To <span className="text-red-500">*</span>{" "}
-          </Text>
-          <Select.Root
-            disabled={superAdmins.length === 0}
-            required
-            onValueChange={(value) => {
-              setAdminId(value);
-            }}
-          >
-            <Select.Trigger className=" mt-2 w-[49%]" placeholder="Send to " />
-            <Select.Content>
-              {superAdmins.map((admin) => {
-                return (
-                  <Select.Item
-                    key={admin.role?.id}
-                    value={admin.role?.id || " "}
-                  >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
-                );
-              })}
-            </Select.Content>
-          </Select.Root>
-        </div>
+        <Grid columns={"2"} gap={"5"} className="mt-8">
+          <div className="w-full">
+            <Text className="block mt-4">LPO Expires</Text>
+            <TextField.Root
+              type="date"
+              value={expiration}
+              onChange={(e) => setExpiration(e.target.value)}
+              placeholder="Enter LPO Expires"
+              className="mt-2"
+            />
+          </div>
+          <div className="w-full">
+            <Text className="block mt-4">Period</Text>
+            <TextField.Root type="date" className="mt-2"
+              value={period}
+              onChange={(e) => setPeriod(e.target.value)}
+              placeholder="Enter Period"
+            />
+          </div>
+          <div className="w-full">
+            <Text className="block mt-4">Specifications and comments</Text>
+            <TextField.Root
+              placeholder="Enter Specifications and comments"
+              className="mt-2"
+            />
+          </div>
+          <div className="w-full">
+            <Text className="block mt-4">
+              Send To <span className="text-red-500">*</span>{" "}
+            </Text>
+            <Select.Root
+              disabled={superAdmins.length === 0}
+              required
+              onValueChange={(value) => {
+                setAdminId(value);
+              }}
+            >
+              <Select.Trigger
+                className=" mt-2 w-full"
+                placeholder="Send to "
+              />
+              <Select.Content>
+                {superAdmins.map((admin) => {
+                  return (
+                    <Select.Item
+                      key={admin.role?.id}
+                      value={admin.role?.id || " "}
+                    >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
+                  );
+                })}
+              </Select.Content>
+            </Select.Root>
+          </div>
+        </Grid>
         <Flex justify={"end"}>
           <Button
             variant="solid"

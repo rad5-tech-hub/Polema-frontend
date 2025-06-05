@@ -10,14 +10,17 @@ import {
   Flex,
   Grid,
   Spinner,
+  DropdownMenu,
 } from "@radix-ui/themes";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { refractor,formatMoney } from "../../../date";
+import { refractor, formatMoney } from "../../../date";
+import useToast from "../../../../hooks/useToast";
 const root = import.meta.env.VITE_ROOT;
 
 const OfficialLPO = () => {
   const { id } = useParams();
+  const showToast = useToast()
   const [suppliers, setSuppliers] = React.useState([]);
   const [raw, setRaw] = React.useState([]);
   const [lpoDetails, setLpoDetails] = useState("");
@@ -76,7 +79,7 @@ const OfficialLPO = () => {
     }
   };
 
-  //   Function to get lpo details
+  // Function to get LPO details
   const getLPODetails = async () => {
     const token = localStorage.getItem("token");
 
@@ -100,52 +103,95 @@ const OfficialLPO = () => {
     }
   };
 
+  // Function to send LPO to print queue
+  const handleSendToPrint = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("Authentication required. Please log in again.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${root}/batch/add-lpo-to-print/${id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      showToast({
+        type: "success",
+        message:"LPO successfully added to print queue."
+      })
+    } catch (error) {
+      console.error("Error sending LPO to print:", error);
+      showToast({
+        message: "Failed to add LPO to print queue. Please try again.",
+        type: "error",
+      });
+      
+    }
+  };
+
+  // Function to print the page
+  const handlePrintPage = () => {
+    window.print();
+  };
+
   React.useEffect(() => {
     getLPODetails();
   }, []);
-
-  const handlePrint = () => {
-    window.print();
-  };
 
   return (
     <>
       {typeof lpoDetails === "string" ? (
         <div className="loader h-screen flex bg-black/50 justify-center items-center">
-          <Spinner size={"3"} />
+          <Spinner size="3" />
         </div>
       ) : (
         <div className="official-lpo">
           <style>
             {`
-          
-            *{           
-              box-shadow: none !important;              
-            }
-            /* Ensure borders are visible */
-            table, th, td {
-              border: 1px solid black !important;
-              padding: 8px !important;
-            }
-            table th {
-              background-color: #E1E1E1 !important;
-            }
-
-        
-          
-        `}
+              * {
+                box-shadow: none !important;
+              }
+              /* Ensure borders are visible */
+              table, th, td {
+                border: 1px solid black !important;
+                padding: 8px !important;
+              }
+              table th {
+                background-color: #E1E1E1 !important;
+              }
+            `}
           </style>
           {/* Print Section */}
           <div className="flex justify-between items-center pb-6 border-b border-[#919191]">
             <span className="text-sm sm:text-lg font-semibold text-[#434343]">
               Approved Local Purchase Order
             </span>
-            <button
-              className="rounded-lg h-[40px] border-[1px] border-[#919191] px-4 sm:px-8 shadow-lg text-sm sm:text-base flex gap-2 items-center"
-              onClick={handlePrint}
-            >
-              Print
-            </button>
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger>
+                <Button
+                  color="brown"
+                  className="rounded-lg h-[40px] border-[1px] border-[#919191] sm:px-8 shadow-lg text-sm sm:text-base flex gap-2 items-center"
+                >
+                  Print
+                  <DropdownMenu.TriggerIcon />
+                </Button>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Content>
+                <DropdownMenu.Item onClick={handleSendToPrint}>
+                  Send to Print
+                </DropdownMenu.Item>
+                <DropdownMenu.Item onClick={handlePrintPage}>
+                  Print
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu.Root>
           </div>
 
           <div className="address flex gap-8 mt-16 lg:px-16">
@@ -173,7 +219,7 @@ const OfficialLPO = () => {
 
           <Heading className="text-center mt-8">Local Purchase Order</Heading>
           <form action="" className="px-16">
-            <Flex gap={"5"} className="mt-4">
+            <Flex gap="5" className="mt-4">
               <div className="w-full">
                 <Text>Delivered To</Text>
                 <TextField.Root
@@ -188,19 +234,17 @@ const OfficialLPO = () => {
                 <Text>Cheque No.</Text>
                 <TextField.Root
                   value={lpoDetails.chequeNo}
-                  // placeholder="Enter Cheque No."
                   className="mt-2"
                   disabled
                 />
               </div>
             </Flex>
 
-            <Flex gap={"5"} className="mt-4 w-full">
+            <Flex gap="5" className="mt-4 w-full">
               <div className="w-full">
                 <Text>Seal No.</Text>
                 <TextField.Root
                   value={lpoDetails.chequeVoucherNo}
-                  // placeholder="Enter Cheque Voucher Number"
                   className="mt-2"
                   disabled
                 />
@@ -216,7 +260,7 @@ const OfficialLPO = () => {
               </div>
             </Flex>
 
-            <Flex gap={"5"} className="mt-4">
+            <Flex gap="5" className="mt-4">
               <div className="w-full">
                 <Text>
                   Name of Supplier <span className="">*</span>
@@ -228,14 +272,9 @@ const OfficialLPO = () => {
               </div>
             </Flex>
 
-            <Flex gap={"5"} className="mt-4"></Flex>
+            <Separator className="my-6 w-full" />
 
-            <p>
-              <span className="font-bold">Comment:</span>{" "}
-              {lpoDetails?.comments || ""}
-            </p>
-
-            {/* Table for displaying raw materials  */}
+            {/* Table for displaying raw materials */}
             {lpoDetails?.items && (
               <table className="w-full mt-8">
                 <thead>
@@ -258,11 +297,43 @@ const OfficialLPO = () => {
                 </tbody>
               </table>
             )}
+
+            <p className="mt-4">
+              <span className="font-bold">Comment:</span>{" "}
+              {lpoDetails?.comments || ""}
+            </p>
             <div className="flex justify-end mt-4">
               <p>
-                <span className="font-bold">Total Amount:</span>{" "}
-                { lpoDetails?.unitPrice ? formatMoney(lpoDetails?.unitPrice) : ""}{" "}
+                <span className="font-bold">Total Amount:</span> ₦
+                {lpoDetails?.unitPrice
+                  ? formatMoney(lpoDetails?.unitPrice)
+                  : ""}
               </p>
+            </div>
+            <Separator className="my-6 w-full" />
+            <p className="my-4 mx-4 text-center">
+              Goods supplied must meet with the Company’s requirement and part
+              be properly signed. Goods not delivered with L.P.O. Period will
+              not be accepted by the Company. Our payment will be made as
+              signed.
+            </p>
+
+            <div className="signature-section flex font-bold mt-6 justify-between">
+              <div>
+                {/* <p className="text-center">For Polema Industries Ltd</p> */}
+                <p className="text-center">_________________________</p>
+                <p className="text-center">Prepared by Sales Clerk</p>
+              </div>
+              <div>
+                {/* <p className="text-center">For Polema Industries Ltd</p> */}
+                <p className="text-center">_________________________</p>
+                <p className="text-center">Approved By</p>
+              </div>
+              <div>
+                {/* <p className="text-center">For Polema Industries Ltd</p> */}
+                <p className="text-center">_________________________</p>
+                <p className="text-center">Authorised by CEO/GM</p>
+              </div>
             </div>
           </form>
         </div>
