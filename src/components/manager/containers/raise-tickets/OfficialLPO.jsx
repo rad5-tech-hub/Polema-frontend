@@ -20,7 +20,7 @@ const root = import.meta.env.VITE_ROOT;
 
 const OfficialLPO = () => {
   const { id } = useParams();
-  const showToast = useToast()
+  const showToast = useToast();
   const [suppliers, setSuppliers] = React.useState([]);
   const [raw, setRaw] = React.useState([]);
   const [lpoDetails, setLpoDetails] = useState("");
@@ -36,7 +36,7 @@ const OfficialLPO = () => {
   const [expiration, setExpiration] = React.useState("");
   const [comment, setComment] = React.useState("");
   const [period, setPeriod] = React.useState("");
-
+  const [admins, setAdmins] = React.useState([]);
   // Function to fetch suppliers
   const fetchSuppliers = async () => {
     const retrToken = localStorage.getItem("token");
@@ -124,15 +124,14 @@ const OfficialLPO = () => {
       );
       showToast({
         type: "success",
-        message:"LPO successfully added to print queue."
-      })
+        message: "LPO successfully added to print queue.",
+      });
     } catch (error) {
       console.error("Error sending LPO to print:", error);
       showToast({
         message: "Failed to add LPO to print queue. Please try again.",
         type: "error",
       });
-      
     }
   };
 
@@ -141,8 +140,44 @@ const OfficialLPO = () => {
     window.print();
   };
 
+  // Function to get details of all admins
+  const getAdmins = async () => {
+    const retrToken = localStorage.getItem("token");
+
+    // Check if the token is available
+    if (!retrToken) {
+      toast.error("An error occurred. Try logging in again");
+
+      return;
+    }
+    try {
+      const response = await axios.get(`${root}/admin/all-admin`, {
+        headers: {
+          Authorization: `Bearer ${retrToken}`,
+        },
+      });
+
+      setAdmins(response.data.staffList);
+    } catch (error) {
+      console.error(error);
+      {
+        error.message
+          ? toast.error(error.message)
+          : toast.error("An Error Occured");
+      }
+    } finally {
+      console.log("Fetch function complete");
+    }
+  };
+
+  const getAdminNameByID = (id) => {
+    const admin = admins.find((admin) => admin.id === id);
+    return admin ? admin : null
+  }
+
   React.useEffect(() => {
     getLPODetails();
+    getAdmins();
   }, []);
 
   return (
@@ -262,13 +297,31 @@ const OfficialLPO = () => {
 
             <Flex gap="5" className="mt-4">
               <div className="w-full">
-                <Text>
-                  Name of Supplier <span className="">*</span>
-                </Text>
+                <Text>Name of Supplier</Text>
                 <TextField.Root
                   disabled
                   value={`${lpoDetails.supplier.firstname} ${lpoDetails.supplier.lastname}`}
                 />
+              </div>
+
+              <div className="w-full">
+                <Text>
+                  Comment <span className=""></span>
+                </Text>
+                <TextField.Root disabled value={lpoDetails?.comments || ""} />
+              </div>
+            </Flex>
+
+            <Flex gap="5" className="mt-4">
+              <div className="w-full">
+                <Text>
+                  LPO Expires <span className=""></span>
+                </Text>
+                <TextField.Root disabled value={lpoDetails?.expires || ""} />
+              </div>
+              <div className="w-full">
+                <Text>Period</Text>
+                <TextField.Root disabled value={lpoDetails?.period || ""} />
               </div>
             </Flex>
 
@@ -299,8 +352,8 @@ const OfficialLPO = () => {
             )}
 
             <p className="mt-4">
-              <span className="font-bold">Comment:</span>{" "}
-              {lpoDetails?.comments || ""}
+              <span className="font-bold">Specifications & Comments:</span>{" "}
+              {lpoDetails?.specifications || ""}
             </p>
             <div className="flex justify-end mt-4">
               <p>
@@ -318,15 +371,35 @@ const OfficialLPO = () => {
               signed.
             </p>
 
-            <div className="signature-section flex font-bold mt-6 justify-between">
+            <div className="signature-section flex  mt-6 justify-between">
               <div>
                 {/* <p className="text-center">For Polema Industries Ltd</p> */}
-                <p className="text-center">_________________________</p>
+                
+                <img
+                  src={lpoDetails.role?.admins[0].signature || ""}
+                  width={"100px"}
+                />
+
+                <p className="text-center font-bold">
+                  {`${lpoDetails.role?.admins[0].firstname || ""} ${
+                    lpoDetails.role?.admins[0].lastname || ""
+                  }`}
+                </p>
+
                 <p className="text-center">Prepared by Sales Clerk</p>
               </div>
               <div>
-                {/* <p className="text-center">For Polema Industries Ltd</p> */}
-                <p className="text-center">_________________________</p>
+
+                <p className="text-center font-bold">
+                  {`${
+                    getAdminNameByID(lpoDetails.approvedBySuperAdminId)
+                      ?.firstname || ""
+                  }
+                      ${
+                        getAdminNameByID(lpoDetails.approvedBySuperAdminId)
+                          ?.lastname || ""
+                      }`}
+                </p>
                 <p className="text-center">Approved By</p>
               </div>
               <div>

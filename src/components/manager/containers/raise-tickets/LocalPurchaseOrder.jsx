@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import ViewLocalPurchaseOrder from "./ViewLocalPurchaseOrder";
 import {
   Heading,
@@ -40,8 +40,7 @@ const LocalPurchaseOrder = () => {
   const [superAdmins, setSuperAdmins] = React.useState([]);
   const [adminId, setAdminId] = React.useState("");
   const [ticketId, setTicketId] = React.useState("");
-
-
+  const [specifications, setSpecifications] = useState("");
 
   // State for multiple raw material details
   const [materialDetails, setMaterialDetails] = React.useState([
@@ -50,6 +49,7 @@ const LocalPurchaseOrder = () => {
       rawMaterialId: "",
       unitPrice: "",
       quantityOrdered: "",
+      unit: "",
     },
   ]);
 
@@ -74,7 +74,7 @@ const LocalPurchaseOrder = () => {
     }
   };
 
-  // Function to fetch to all super admins
+  // Function to fetch all super admins
   const fetchSuperAdmins = async () => {
     const token = localStorage.getItem("token");
 
@@ -128,6 +128,9 @@ const LocalPurchaseOrder = () => {
           ? {
               ...detail,
               [field]: field === "unitPrice" ? formatUnitPrice(value) : value,
+              ...(field === "rawMaterialId" && {
+                unit: raw.find((item) => item.id === value)?.price[0]?.unit || "",
+              }),
             }
           : detail
       )
@@ -143,6 +146,7 @@ const LocalPurchaseOrder = () => {
         rawMaterialId: "",
         unitPrice: "",
         quantityOrdered: "",
+        unit: "",
       },
     ]);
   };
@@ -172,22 +176,26 @@ const LocalPurchaseOrder = () => {
       setExpiration("");
       setComment("");
       setPeriod("");
+      setSpecifications("");
+      setAdminId("");
       setMaterialDetails([
         {
           id: Date.now(),
           rawMaterialId: "",
           unitPrice: "",
           quantityOrdered: "",
+          unit: "",
         },
       ]);
     };
+
     if (!adminId) {
       showToast({
         message: "Select an admin for it to be sent to.",
         type: "error",
         duration: 5000,
       });
-      return
+      return;
     }
 
     setButtonLoading(true); // Start loading state
@@ -207,11 +215,13 @@ const LocalPurchaseOrder = () => {
       items: materialDetails.map((detail) => ({
         rawMaterial:
           raw.find((item) => item.id === detail.rawMaterialId)?.name || "",
-        unitPrice: detail.unitPrice.replace(/,/g, ""), // Remove commas for API
+        unit: detail.unit,
+        unitPrice: detail.unitPrice.replace(/,/g, ""),
         quantity: detail.quantityOrdered,
       })),
-      ...( expiration && {expires: expiration}),
+      ...(expiration && { expires: expiration }),
       ...(period && { period: period }),
+      ...(specifications && { specifications: specifications }),
       comments: comment,
     };
 
@@ -223,17 +233,15 @@ const LocalPurchaseOrder = () => {
         },
       });
 
-      const ticketId = response.data?.lpo?.id ||  response.data?.lpo?.id || "" ; // Get ticket ID
+      const ticketId = response.data?.lpo?.id || "";
       setTicketId(ticketId);
 
-      if(!ticketId){
+      if (!ticketId) {
         showToast({
-          type:"error",
-          message: "Not successfuly sent to admin",
-          
-        })
-        return 
-
+          type: "error",
+          message: "Not successfully sent to admin",
+        });
+        return;
       }
 
       // SECOND API REQUEST
@@ -292,7 +300,7 @@ const LocalPurchaseOrder = () => {
       </Flex>
       <Separator className="my-4 w-full" />
       <form action="" onSubmit={handleSubmit}>
-        <Flex gap={"5"} className="mt-4">
+        <Flex gap="5" className="mt-4">
           <div className="w-full">
             <Text>
               Delivered To <span className="text-red-500">*</span>
@@ -319,13 +327,13 @@ const LocalPurchaseOrder = () => {
             />
           </div>
         </Flex>
-        <Flex gap={"5"} className="mt-4">
+        <Flex gap="5" className="mt-4">
           <div className="w-full">
             <Text>Seal No.</Text>
             <TextField.Root
               value={voucherNumber}
               placeholder="Enter Seal number"
-              className="mt-2 "
+              className="mt-2"
               onChange={(e) => {
                 setVoucherNumber(e.target.value);
               }}
@@ -340,16 +348,15 @@ const LocalPurchaseOrder = () => {
               }}
               value={comment}
               className="mt-2"
-              asChild
-            ></TextField.Root>
+            />
           </div>
         </Flex>
 
         <Separator className="my-8 w-full" />
 
         <Box width="100%">
-          <Grid gap={"5"} columns={"2"} className="mt-4">
-            <Flex gap={"5"} className="mt-6">
+          <Grid gap="5" columns="2" className="mt-4">
+            <Flex gap="5" className="mt-6">
               <div className="w-full">
                 <Text>
                   Name of Supplier <span className="text-red-500">*</span>
@@ -357,7 +364,7 @@ const LocalPurchaseOrder = () => {
                 <AntSelect
                   showSearch
                   className="mt-2"
-                  placeholder={"Select Supplier"}
+                  placeholder="Select Supplier"
                   value={supplierId}
                   style={{ width: "100%" }}
                   onChange={(value) => {
@@ -378,7 +385,7 @@ const LocalPurchaseOrder = () => {
             </Flex>
             {materialDetails.map((detail) => (
               <Box key={detail.id} className="p-4 border rounded">
-                <Flex gap={"5"} direction="column">
+                <Flex gap="5" direction="column">
                   <div className="w-full">
                     <Text>
                       Raw Materials Needed{" "}
@@ -421,7 +428,7 @@ const LocalPurchaseOrder = () => {
                       </Select.Content>
                     </Select.Root>
                   </div>
-                  <Flex gap={"5"}>
+                  <Flex gap="5">
                     <div className="w-full">
                       <Text>
                         Unit Price <span className="text-red-500">*</span>
@@ -449,6 +456,7 @@ const LocalPurchaseOrder = () => {
                       </Text>
                       <TextField.Root
                         required
+                        type="number"
                         value={detail.quantityOrdered}
                         onChange={(e) =>
                           handleMaterialDetailChange(
@@ -485,7 +493,7 @@ const LocalPurchaseOrder = () => {
           </Button>
         </Box>
 
-        <Grid columns={"2"} gap={"5"} className="mt-8">
+        <Grid columns="2" gap="5" className="mt-8">
           <div className="w-full">
             <Text className="block mt-4">LPO Expires</Text>
             <TextField.Root
@@ -498,7 +506,9 @@ const LocalPurchaseOrder = () => {
           </div>
           <div className="w-full">
             <Text className="block mt-4">Period</Text>
-            <TextField.Root type="date" className="mt-2"
+            <TextField.Root
+              type="date"
+              className="mt-2"
               value={period}
               onChange={(e) => setPeriod(e.target.value)}
               placeholder="Enter Period"
@@ -507,31 +517,33 @@ const LocalPurchaseOrder = () => {
           <div className="w-full">
             <Text className="block mt-4">Specifications and comments</Text>
             <TextField.Root
+              value={specifications}
+              onChange={(e) => setSpecifications(e.target.value)}
               placeholder="Enter Specifications and comments"
               className="mt-2"
             />
           </div>
           <div className="w-full">
             <Text className="block mt-4">
-              Send To <span className="text-red-500">*</span>{" "}
+              Send To <span className="text-red-500">*</span>
             </Text>
             <Select.Root
               disabled={superAdmins.length === 0}
               required
-              onValueChange={(value) => {
-                setAdminId(value);
+              onValueChange={(val)=>{
+                setAdminId(val);
               }}
             >
               <Select.Trigger
-                className=" mt-2 w-full"
-                placeholder="Send to "
+                className="mt-2 w-full"
+                placeholder="Select an admin"
               />
               <Select.Content>
                 {superAdmins.map((admin) => {
                   return (
                     <Select.Item
                       key={admin.role?.id}
-                      value={admin.role?.id || " "}
+                      value={admin.role?.id || ""}
                     >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
                   );
                 })}
@@ -539,7 +551,7 @@ const LocalPurchaseOrder = () => {
             </Select.Root>
           </div>
         </Grid>
-        <Flex justify={"end"}>
+        <Flex justify="end">
           <Button
             variant="solid"
             className="mt-4 !bg-theme cursor-pointer"
@@ -554,4 +566,4 @@ const LocalPurchaseOrder = () => {
   );
 };
 
-export default LocalPurchaseOrder;
+export default LocalPurchaseOrder
