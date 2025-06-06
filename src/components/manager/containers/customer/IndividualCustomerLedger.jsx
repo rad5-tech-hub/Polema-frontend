@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { jwtDecode } from "jwt-decode";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faStop, faRedo } from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faStop, faRedo, faRedoAlt } from "@fortawesome/free-solid-svg-icons";
 import DocumentsModal from "./DocumentsModal";
 import toast, { Toaster } from "react-hot-toast";
 import { refractor, formatMoney } from "../../../date";
@@ -14,12 +14,14 @@ import {
   Flex,
   Button,
   TextField,
+  Text,
 } from "@radix-ui/themes";
 import axios from "axios";
-import { Modal, Select } from "antd"; // Import Select from antd
+import { Modal, Select, DatePicker } from "antd";
 import { StopOutlined } from "@ant-design/icons";
 import useToast from "../../../../hooks/useToast";
 
+const { RangePicker } = DatePicker;
 const root = import.meta.env.VITE_ROOT;
 
 const IndividualCustomerLedger = () => {
@@ -36,7 +38,11 @@ const IndividualCustomerLedger = () => {
   const [searchInput, setSearchInput] = useState("");
   const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [creditCustomerModalOpen, setCreditCustomerModalOpen] = useState(false);
-  const [loadingStates, setLoadingStates] = useState({}); // Track loading per transaction
+  const [loadingStates, setLoadingStates] = useState({});
+  const [dateRange, setDateRange] = useState(null);
+  const [paginationUrls, setPaginationUrls] = useState([]);
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const searchInputRef = useRef(null);
   const formatNumberWithCommas = (value) => {
@@ -51,16 +57,23 @@ const IndividualCustomerLedger = () => {
   const fetchCustomers = async () => {
     const retrToken = localStorage.getItem("token");
     if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
+      showToast({
+        message: "An error occurred. Try logging in again",
+        type: "error",
+      });
       return;
     }
     try {
       const { data } = await axios.get(`${root}/customer/get-customers`, {
         headers: { Authorization: `Bearer ${retrToken}` },
       });
-      setCustomers(data.customers);
+      setCustomers(data.customers || []);
     } catch (error) {
       console.error("Error fetching customers:", error);
+      showToast({
+        message: "Failed to fetch customers",
+        type: "error",
+      });
     }
   };
 
@@ -68,36 +81,87 @@ const IndividualCustomerLedger = () => {
   const fetchProducts = async () => {
     const retrToken = localStorage.getItem("token");
     if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
+      showToast({
+        message: "An error occurred. Try logging in again",
+        type: "error",
+      });
       return;
     }
     try {
       const { data } = await axios.get(`${root}/admin/get-products`, {
         headers: { Authorization: `Bearer ${retrToken}` },
       });
-      setProducts(data.products);
+      setProducts(data.products || []);
     } catch (error) {
       console.error("Error fetching products:", error);
+      showToast({
+        message: "Failed to fetch products",
+        type: "error",
+      });
     }
   };
 
   // Fetch customer ledger
-  const getCustomerLedger = async () => {
+  const getCustomerLedger = async (startDate = null, endDate = null, pageUrl = null) => {
+    setLoading(true);
+    setEntries([]);
+    setFailedSearch(false);
     const retrToken = localStorage.getItem("token");
     if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
+      showToast({
+        message: "An error occurred. Try logging in again",
+        type: "error",
+      });
+      setLoading(false);
       return;
     }
+
+    let url;
+    if (pageUrl) {
+      url = `${root}${pageUrl}`;
+    } else if (startDate && endDate) {
+      url = `${root}/customer/get-customer-ledger/${id}?startDate=${startDate}&endDate=${endDate}`;
+    } else {
+      url = `${root}/customer/get-customer-ledger/${id}`;
+    }
+
     try {
-      const { data } = await axios.get(
-        `${root}/customer/get-customer-ledger/${id}`,
-        { headers: { Authorization: `Bearer ${retrToken}` } }
-      );
-      setEntries(data.ledgerEntries);
-      setFailedSearch(false);
+      const { data } = await axios.get(url, {
+        headers: { Authorization: `Bearer ${retrToken}` },
+      });
+
+      const output = data.data || [];
+      if (output.length === 0) {
+        setFailedSearch(true);
+        setEntries([]);
+      } else {
+        setEntries(output);
+        setFailedSearch(false);
+      }
+
+      if (data.pagination?.nextPage) {
+        setPaginationUrls((prev) => {
+          const newUrl = data.pagination.nextPage;
+          if (!prev.includes(newUrl)) {
+            return pageUrl && currentPageIndex >= prev.length - 1
+              ? [...prev, newUrl]
+              : [newUrl];
+          }
+          return prev;
+        });
+      } else {
+        setPaginationUrls((prev) => prev.slice(0, currentPageIndex + 1));
+      }
+
+      setLoading(false);
     } catch (error) {
-      setFailedSearch(true);
       console.error("Error fetching customer ledger:", error);
+      showToast({
+        message: "Failed to fetch customer ledger",
+        type: "error",
+      });
+      setFailedSearch(true);
+      setLoading(false);
     }
   };
 
@@ -105,7 +169,10 @@ const IndividualCustomerLedger = () => {
   const handleEndTransaction = async (tranxId) => {
     const retrToken = localStorage.getItem("token");
     if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
+      showToast({
+        message: "An error occurred. Try logging in again",
+        type: "error",
+      });
       return;
     }
 
@@ -124,10 +191,16 @@ const IndividualCustomerLedger = () => {
         duration: 5000,
       });
 
-      getCustomerLedger(); // Refresh ledger
+      getCustomerLedger(
+        dateRange?.[0]?.format("YYYY-MM-DD"),
+        dateRange?.[1]?.format("YYYY-MM-DD")
+      );
     } catch (error) {
       console.error("Error ending transaction:", error);
-      toast.error("Failed to end transaction");
+      showToast({
+        message: "Failed to end transaction",
+        type: "error",
+      });
     } finally {
       setLoadingStates((prev) => ({ ...prev, [tranxId]: false }));
     }
@@ -137,7 +210,10 @@ const IndividualCustomerLedger = () => {
   const handleRestartTransaction = async (tranxId) => {
     const retrToken = localStorage.getItem("token");
     if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
+      showToast({
+        message: "An error occurred. Try logging in again",
+        type: "error",
+      });
       return;
     }
 
@@ -156,10 +232,16 @@ const IndividualCustomerLedger = () => {
         type: "success",
         duration: 5000,
       });
-      getCustomerLedger(); // Refresh ledger
+      getCustomerLedger(
+        dateRange?.[0]?.format("YYYY-MM-DD"),
+        dateRange?.[1]?.format("YYYY-MM-DD")
+      );
     } catch (error) {
       console.error("Error restarting transaction:", error);
-      toast.error("Failed to restart transaction");
+      showToast({
+        message: "Failed to restart transaction",
+        type: "error",
+      });
     } finally {
       setLoadingStates((prev) => ({ ...prev, [tranxId]: false }));
     }
@@ -187,7 +269,7 @@ const IndividualCustomerLedger = () => {
     const [transactionType, setTransactionType] = useState("credit");
     const [creditAmount, setCreditAmount] = useState("");
     const [buttonLoading, setButtonLoading] = useState(false);
-    const [comments,setComments] = useState("")
+    const [comments, setComments] = useState("");
 
     const handlePriceChange = (e) => {
       const value = e.target.value.replace(/,/g, "");
@@ -215,13 +297,11 @@ const IndividualCustomerLedger = () => {
         });
         return;
       }
-
-      if(!creditAmount){
+      if (!creditAmount) {
         showToast({
-          type:"error",
-          message:"Enter an amount first"
-        })
-        
+          message: "Enter an amount first",
+          type: "error",
+        });
         return;
       }
       setButtonLoading(true);
@@ -246,14 +326,16 @@ const IndividualCustomerLedger = () => {
 
         setButtonLoading(false);
         setCreditCustomerModalOpen(false);
-        if (id) getCustomerLedger();
+        getCustomerLedger(
+          dateRange?.[0]?.format("YYYY-MM-DD"),
+          dateRange?.[1]?.format("YYYY-MM-DD")
+        );
       } catch (err) {
         showToast({
           type: "error",
           message:
             err.message || "An error occurred while trying to update ledger",
         });
-
         setButtonLoading(false);
       }
     };
@@ -270,6 +352,8 @@ const IndividualCustomerLedger = () => {
         onCancel={() => {
           setCreditCustomerModalOpen(false);
           setProductId("");
+          setCreditAmount("");
+          setComments("");
         }}
       >
         <form action="" onSubmit={handleCreditSubmit}>
@@ -320,18 +404,15 @@ const IndividualCustomerLedger = () => {
             />
           </div>
           <div className="mt-4">
-            <label htmlFor="amount" className="font-bold mt-4">
+            <label htmlFor="comments" className="font-bold mt-4">
               Comments
             </label>
             <TextField.Root
-              id="amount"
+              id="comments"
               placeholder="Enter Comments"
               className="p-3"
-              required
               value={comments}
-              onChange={(e) => {
-                setComments(e.target.value)
-              }}
+              onChange={(e) => setComments(e.target.value)}
             />
           </div>
 
@@ -356,6 +437,32 @@ const IndividualCustomerLedger = () => {
     setFilteredCustomers(filtered);
   };
 
+  const handleClearDateRange = () => {
+    setDateRange(null);
+    setPaginationUrls([]);
+    setCurrentPageIndex(0);
+    getCustomerLedger();
+  };
+
+  const handleNextPage = () => {
+    if (currentPageIndex < paginationUrls.length - 1) {
+      const nextIndex = currentPageIndex + 1;
+      setCurrentPageIndex(nextIndex);
+      getCustomerLedger(null, null, paginationUrls[nextIndex]);
+    } else if (paginationUrls[currentPageIndex]) {
+      setCurrentPageIndex((prev) => prev + 1);
+      getCustomerLedger(null, null, paginationUrls[currentPageIndex]);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPageIndex > 0) {
+      const prevIndex = currentPageIndex - 1;
+      setCurrentPageIndex(prevIndex);
+      getCustomerLedger(null, null, paginationUrls[prevIndex]);
+    }
+  };
+
   const handleModal = (tranxId) => {
     if (!tranxId) return;
 
@@ -371,7 +478,7 @@ const IndividualCustomerLedger = () => {
 
   return (
     <>
-      <Flex justify="between" align="center">
+      <Flex justify="between" align="center" className="mb-4">
         <div className="w-full">
           {!customer.length ? (
             <Skeleton className="p-4 w-[150px]" />
@@ -380,7 +487,6 @@ const IndividualCustomerLedger = () => {
               getCustomerByID(id).firstname
             } ${getCustomerByID(id).lastname}`}</Heading>
           )}
-
           {!customer.length ? (
             <Skeleton className="p-1 w-[150px] mt-4 h-[15px] rounded-full" />
           ) : (
@@ -401,41 +507,65 @@ const IndividualCustomerLedger = () => {
         </div>
 
         <div className="w-[70%]">
-          <div className="relative w-full max-w-md" ref={searchInputRef}>
-            <TextField.Root
-              placeholder="Enter Customer Name"
-              size="3"
-              className="mx-auto"
-              value={searchInput}
-              onChange={handleSearchInput}
-            >
-              <TextField.Slot>
-                <FontAwesomeIcon icon={faSearch} />
-              </TextField.Slot>
-            </TextField.Root>
-
-            {searchInput && (
-              <ul className="absolute z-10 bg-white border border-gray-200 rounded mt-1 max-h-48 overflow-y-auto w-full">
-                {filteredCustomers.map((customer) => (
-                  <li
-                    key={customer.id}
-                    className="p-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => {
-                      setSearchInput(
-                        `${customer.firstname} ${customer.lastname}`
-                      );
-                      setFilteredCustomers([]);
-                      navigate(
-                        `/admin/customers/customer-ledger/${customer.id}`
-                      );
-                    }}
-                  >
-                    {customer.firstname} {customer.lastname}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+          <Flex gap="3" align="center">
+            <div className="relative w-full max-w-md" ref={searchInputRef}>
+              <TextField.Root
+                placeholder="Enter Customer Name"
+                size="3"
+                className="mx-auto"
+                value={searchInput}
+                onChange={handleSearchInput}
+              >
+                <TextField.Slot>
+                  <FontAwesomeIcon icon={faSearch} />
+                </TextField.Slot>
+              </TextField.Root>
+              {searchInput && (
+                <ul className="absolute z-10 bg-white border border-gray-200 rounded mt-1 max-h-48 overflow-y-auto w-full">
+                  {filteredCustomers.map((customer) => (
+                    <li
+                      key={customer.id}
+                      className="p-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={() => {
+                        setSearchInput(
+                          `${customer.firstname} ${customer.lastname}`
+                        );
+                        setFilteredCustomers([]);
+                        navigate(
+                          `/admin/customers/customer-ledger/${customer.id}`
+                        );
+                      }}
+                    >
+                      {customer.firstname} {customer.lastname}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div className="date-picker">
+              <RangePicker
+                value={dateRange}
+                onCalendarChange={(dates) => {
+                  setDateRange(dates);
+                  if (dates && dates[0] && dates[1]) {
+                    setPaginationUrls([]);
+                    setCurrentPageIndex(0);
+                    getCustomerLedger(
+                      dates[0].format("YYYY-MM-DD"),
+                      dates[1].format("YYYY-MM-DD")
+                    );
+                  }
+                }}
+              />
+              {dateRange !== null && (
+                <FontAwesomeIcon
+                  icon={faRedoAlt}
+                  className="ml-2 cursor-pointer"
+                  onClick={handleClearDateRange}
+                />
+              )}
+            </div>
+          </Flex>
         </div>
       </Flex>
 
@@ -448,7 +578,6 @@ const IndividualCustomerLedger = () => {
             <Table.ColumnHeaderCell>QUANTITY</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>UNIT PRICE</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>COMMENTS</Table.ColumnHeaderCell>
-
             <Table.ColumnHeaderCell className="text-green-500">
               CREDIT(₦)
             </Table.ColumnHeaderCell>
@@ -460,16 +589,22 @@ const IndividualCustomerLedger = () => {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {!entries.length ? (
+          {loading ? (
             <Table.Row>
-              <Table.Cell colSpan={9} className="p-4 text-center">
-                {failedSearch ? "No records found" : <Spinner />}
+              <Table.Cell colSpan="10">
+                <Spinner />
+              </Table.Cell>
+            </Table.Row>
+          ) : entries.length === 0 ? (
+            <Table.Row>
+              <Table.Cell colSpan="10" className="p-4 text-center">
+                {failedSearch ? "No records found" : "No data available"}
               </Table.Cell>
             </Table.Row>
           ) : (
-            entries.map((entry, index) => (
+            entries.map((entry) => (
               <Table.Row
-                key={index}
+                key={entry.id || entry.tranxId}
                 className="cursor-pointer hover:bg-gray-300/10"
                 onClick={() => handleModal(entry.tranxId)}
               >
@@ -484,10 +619,10 @@ const IndividualCustomerLedger = () => {
                   {entry.comments !== null ? entry.comments : ""}
                 </Table.Cell>
                 <Table.Cell className="text-green-500 font-bold">
-                  {formatMoney(entry.credit > entry.debit ? entry.credit : " ")}
+                  {formatMoney(entry.credit > entry.debit ? entry.credit : "")}
                 </Table.Cell>
                 <Table.Cell className="text-red-500 font-bold">
-                  {formatMoney(entry.debit > entry.credit ? entry.debit : " ")}
+                  {formatMoney(entry.debit > entry.credit ? entry.debit : "")}
                 </Table.Cell>
                 <Table.Cell>{formatMoney(entry.balance)}</Table.Cell>
                 <Table.Cell>
@@ -534,6 +669,31 @@ const IndividualCustomerLedger = () => {
           )}
         </Table.Body>
       </Table.Root>
+
+      {paginationUrls.length > 0 && (
+        <Flex justify="center" className="mt-4">
+          <Flex gap="2" align="center">
+            <Button
+              variant="soft"
+              disabled={currentPageIndex === 0}
+              onClick={handlePrevPage}
+              className="!bg-blue-50 hover:!bg-blue-100"
+            >
+              Previous
+            </Button>
+            <Text>Page {currentPageIndex + 1}</Text>
+            <Button
+              variant="soft"
+              disabled={currentPageIndex >= paginationUrls.length}
+              onClick={handleNextPage}
+              className="!bg-blue-50 hover:!bg-blue-100"
+            >
+              Next
+            </Button>
+          </Flex>
+        </Flex>
+      )}
+
       <CreditCustomerModal />
       <DocumentsModal
         isOpen={isModalOpen}
@@ -543,7 +703,7 @@ const IndividualCustomerLedger = () => {
           getCustomerByID(id).lastname
         }`}
       />
-      {/* <Toaster /> */}
+      <Toaster position="top-right" />
     </>
   );
 };

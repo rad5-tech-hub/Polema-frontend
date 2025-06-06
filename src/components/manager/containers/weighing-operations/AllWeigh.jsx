@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { refractor } from "../../../date";
-import { faSquare, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
+import {
+  faSquare,
+  faEllipsisV,
+  faRedoAlt,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toast, { Toaster } from "react-hot-toast";
 import {
@@ -19,6 +23,9 @@ import {
 import axios from "axios";
 import _ from "lodash";
 import useToast from "../../../../hooks/useToast";
+import { DatePicker } from "antd";
+
+const { RangePicker } = DatePicker;
 const root = import.meta.env.VITE_ROOT;
 
 const WeighDetailsDialog = ({ isOpen, onClose, selectedWeigh }) => {
@@ -151,13 +158,14 @@ const AllWeigh = ({ onWeighAction }) => {
   const [weighDetails, setWeighDetails] = useState([]);
   const [failedSearch, setFailedSearch] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState("all");
   const [selectedWeigh, setSelectedWeigh] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedRoleId, setSelectedRoleId] = useState(null);
   const [selectedWeighId, setSelectedWeighId] = useState(null);
-  const itemsPerPage = 10;
+  const [dateRange, setDateRange] = useState(null);
+  const [paginationUrls, setPaginationUrls] = useState([]);
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
   // Helper to determine status class
   const checkStatus = (status) =>
@@ -165,15 +173,18 @@ const AllWeigh = ({ onWeighAction }) => {
       ? "text-red-500 bg-red-100"
       : "text-green-500 bg-green-100";
 
-  // Fetch weigh details based on filter
-  const fetchWeighDetails = async () => {
+  // Fetch weigh details based on filter and date range
+  const fetchWeighDetails = async (
+    startDate = null,
+    endDate = null,
+    pageUrl = null
+  ) => {
     const token = localStorage.getItem("token");
     if (!token) {
       showToast({
         message: "Please log in to continue",
         type: "error",
       });
-
       setIsFetching(false);
       return;
     }
@@ -182,13 +193,20 @@ const AllWeigh = ({ onWeighAction }) => {
       setIsFetching(true);
       let allWeighs = [];
 
+      const buildUrl = (baseUrl) => {
+        if (pageUrl) return `${root}${pageUrl}`;
+        if (startDate && endDate)
+          return `${root}${baseUrl}?startDate=${startDate}&endDate=${endDate}`;
+        return `${root}${baseUrl}`;
+      };
+
       if (filter === "all") {
         const [completedCustomerResponse, uncompletedCustomerResponse] =
           await Promise.all([
-            axios.get(`${root}/customer/view-weighs`, {
+            axios.get(buildUrl("/customer/view-weighs"), {
               headers: { Authorization: `Bearer ${token}` },
             }),
-            axios.get(`${root}/customer/view-saved`, {
+            axios.get(buildUrl("/customer/view-saved"), {
               headers: { Authorization: `Bearer ${token}` },
             }),
           ]);
@@ -208,26 +226,61 @@ const AllWeigh = ({ onWeighAction }) => {
             status: "uncompleted",
           })),
         ];
+
+        // Store pagination URLs
+        const completedNextPage =
+          completedCustomerResponse.data.pagination?.nextPage;
+        const uncompletedNextPage =
+          uncompletedCustomerResponse.data.pagination?.nextPage;
+        setPaginationUrls((prev) => {
+          const newUrls = [];
+          if (completedNextPage && !prev.includes(completedNextPage))
+            newUrls.push(completedNextPage);
+          if (uncompletedNextPage && !prev.includes(uncompletedNextPage))
+            newUrls.push(uncompletedNextPage);
+          if (newUrls.length > 0) {
+            return pageUrl && currentPageIndex >= prev.length - 1
+              ? [...prev, ...newUrls]
+              : newUrls;
+          }
+          return prev;
+        });
       } else if (filter === "completed") {
-        const [customerResponse] = await Promise.all([
-          axios.get(`${root}/customer/view-weighs`, {
-            headers: { Authorization: `Bearer ${filter}` },
-          }),
-        ]);
-        allWeighs = (customerResponse.data.data || []).map((item) => ({
+        const response = await axios.get(buildUrl("/customer/view-weighs"), {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        allWeighs = (response.data.data || []).map((item) => ({
           ...item,
           status: "completed",
         }));
+
+        setPaginationUrls((prev) => {
+          const newUrl = response.data.pagination?.nextPage;
+          if (newUrl && !prev.includes(newUrl)) {
+            return pageUrl && currentPageIndex >= prev.length - 1
+              ? [...prev, newUrl]
+              : [newUrl];
+          }
+          return prev.slice(0, currentPageIndex + 1);
+        });
       } else if (filter === "uncompleted") {
-        const [customerResponse] = await Promise.all([
-          axios.get(`${root}/customer/view-saved`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
-        allWeighs = (customerResponse.data.data || []).map((item) => ({
+        const response = await axios.get(buildUrl("/customer/view-saved"), {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        allWeighs = (response.data.data || []).map((item) => ({
           ...item,
           status: "uncompleted",
         }));
+
+        setPaginationUrls((prev) => {
+          const newUrl = response.data.pagination?.nextPage;
+          if (newUrl && !prev.includes(newUrl)) {
+            return pageUrl && currentPageIndex >= prev.length - 1
+              ? [...prev, newUrl]
+              : [newUrl];
+          }
+          return prev.slice(0, currentPageIndex + 1);
+        });
       }
 
       if (allWeighs.length === 0) {
@@ -254,28 +307,41 @@ const AllWeigh = ({ onWeighAction }) => {
     }
   };
 
-  // Handle send to admin dialog submit
-  const handleSendToAdminSubmit = async () => {
-    if (selectedWeighId && selectedRoleId) {
-      await sendToAdmin(selectedWeighId, selectedRoleId);
-      setIsSendToAdminDialogOpen(false);
-      setSelectedRoleId(null);
-      setIsDialogOpen(false);
-      setSelectedWeighId(null);
+  // Handle clear date range
+  const handleClearDateRange = () => {
+    setDateRange(null);
+    setPaginationUrls([]);
+    setCurrentPageIndex(0);
+    fetchWeighDetails();
+  };
+
+  // Handle next page
+  const handleNextPage = () => {
+    if (currentPageIndex < paginationUrls.length - 1) {
+      const nextIndex = currentPageIndex + 1;
+      setCurrentPageIndex(nextIndex);
+      fetchWeighDetails(null, null, paginationUrls[nextIndex]);
+    } else if (paginationUrls[currentPageIndex]) {
+      setCurrentPageIndex((prev) => prev + 1);
+      fetchWeighDetails(null, null, paginationUrls[currentPageIndex]);
     }
   };
 
-  // Fetch admins and weigh details on mount
+  // Handle previous page
+  const handlePrevPage = () => {
+    if (currentPageIndex > 0) {
+      const prevIndex = currentPageIndex - 1;
+      setCurrentPageIndex(prevIndex);
+      fetchWeighDetails(null, null, paginationUrls[prevIndex]);
+    }
+  };
+
+  // Fetch weighs when filter or date range changes
   useEffect(() => {
-    setCurrentPage(1);
+    setCurrentPageIndex(0);
+    setPaginationUrls([]);
     fetchWeighDetails();
   }, [filter]);
-
-  // Pagination calculations
-  const totalPages = Math.ceil(weighDetails.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedWeighDetails = weighDetails.slice(startIndex, endIndex);
 
   // Custom loader
   const Loader = () => (
@@ -300,14 +366,39 @@ const AllWeigh = ({ onWeighAction }) => {
     <>
       <Flex justify="between" align="center" className="mb-4">
         <Heading>View Weighs</Heading>
-        <Select.Root value={filter} onValueChange={setFilter}>
-          <Select.Trigger placeholder="Filter weighs" />
-          <Select.Content>
-            <Select.Item value="all">All</Select.Item>
-            <Select.Item value="completed">Completed</Select.Item>
-            <Select.Item value="uncompleted">Uncompleted</Select.Item>
-          </Select.Content>
-        </Select.Root>
+        <Flex gap="4">
+          <div className="date-picker">
+            <RangePicker
+              value={dateRange}
+              onCalendarChange={(dates) => {
+                setDateRange(dates);
+                if (dates && dates[0] && dates[1]) {
+                  setPaginationUrls([]);
+                  setCurrentPageIndex(0);
+                  fetchWeighDetails(
+                    dates[0].format("YYYY-MM-DD"),
+                    dates[1].format("YYYY-MM-DD")
+                  );
+                }
+              }}
+            />
+            {dateRange !== null && (
+              <FontAwesomeIcon
+                icon={faRedoAlt}
+                className="ml-2 cursor-pointer"
+                onClick={handleClearDateRange}
+              />
+            )}
+          </div>
+          <Select.Root value={filter} onValueChange={setFilter}>
+            <Select.Trigger placeholder="Filter weighs" />
+            <Select.Content>
+              <Select.Item value="all">All</Select.Item>
+              <Select.Item value="completed">Completed</Select.Item>
+              <Select.Item value="uncompleted">Uncompleted</Select.Item>
+            </Select.Content>
+          </Select.Root>
+        </Flex>
       </Flex>
       <Separator className="my-4 w-full" />
 
@@ -332,14 +423,14 @@ const AllWeigh = ({ onWeighAction }) => {
                 <Loader />
               </Table.Cell>
             </Table.Row>
-          ) : paginatedWeighDetails.length === 0 ? (
+          ) : weighDetails.length === 0 ? (
             <Table.Row>
               <Table.Cell colSpan={9} className="text-center p-4">
                 {failedSearch ? "No weighs found" : "No data"}
               </Table.Cell>
             </Table.Row>
           ) : (
-            paginatedWeighDetails.map((item) => (
+            weighDetails.map((item) => (
               <Table.Row
                 key={item.id}
                 onClick={() => handleRowClick(item)}
@@ -425,35 +516,22 @@ const AllWeigh = ({ onWeighAction }) => {
       />
 
       {/* Pagination Controls */}
-      {totalPages > 1 && (
+      {paginationUrls.length > 0 && (
         <Flex justify="center" className="mt-4">
           <Flex gap="2" align="center">
             <Button
               variant="soft"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((prev) => prev - 1)}
+              disabled={currentPageIndex === 0}
+              onClick={handlePrevPage}
               className="!bg-blue-50 hover:!bg-blue-100"
             >
               Previous
             </Button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <Button
-                key={page}
-                variant={page === currentPage ? "solid" : "soft"}
-                onClick={() => setCurrentPage(page)}
-                className={
-                  page === currentPage
-                    ? "!bg-blue-600 !text-white"
-                    : "!bg-blue-50 hover:!bg-blue-100"
-                }
-              >
-                {page}
-              </Button>
-            ))}
+            <Text>Page {currentPageIndex + 1}</Text>
             <Button
               variant="soft"
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((prev) => prev + 1)}
+              disabled={currentPageIndex >= paginationUrls.length}
+              onClick={handleNextPage}
               className="!bg-blue-50 hover:!bg-blue-100"
             >
               Next

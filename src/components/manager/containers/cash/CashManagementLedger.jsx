@@ -9,6 +9,7 @@ import {
   Separator,
   Spinner,
   Button,
+  Flex,
 } from "@radix-ui/themes";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
@@ -19,9 +20,12 @@ import {
   faArrowLeft,
   faEllipsisV,
   faArrowRight,
+  faRedoAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import useToast from "../../../../hooks/useToast";
+import { DatePicker } from "antd";
 
+const { RangePicker } = DatePicker;
 const root = import.meta.env.VITE_ROOT;
 
 const CashManagementLedger = () => {
@@ -29,11 +33,13 @@ const CashManagementLedger = () => {
   const showToast = useToast();
   const [ledger, setLedger] = useState([]);
   const [admins, setAdmins] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
   const [failedSearch, setFailedSearch] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
-  const itemsPerPage = 17;
+  const [dateRange, setDateRange] = useState(null);
+  const [paginationUrls, setPaginationUrls] = useState([]);
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const getToken = () => {
     const token = localStorage.getItem("token");
@@ -47,27 +53,71 @@ const CashManagementLedger = () => {
     return jwtDecode(token);
   };
 
-  const fetchCashManagementLedger = async () => {
+  const fetchCashManagementLedger = async (
+    startDate = null,
+    endDate = null,
+    pageUrl = null
+  ) => {
+    setLoading(true);
+    setLedger([]);
+    setFailedSearch(false);
     const retrToken = localStorage.getItem("token");
     if (!retrToken) {
       toast.error("An error occurred. Try logging in again");
+      setLoading(false);
       return;
     }
 
+    let url;
+    if (pageUrl) {
+      url = `${root}${pageUrl}`;
+    } else if (startDate && endDate) {
+      url = `${root}/admin/cashier-ledger?startDate=${startDate}&endDate=${endDate}`;
+    } else {
+      url = `${root}/admin/cashier-ledger`;
+    }
+
     try {
-      const response = await axios.get(`${root}/admin/cashier-ledger`, {
+      const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${retrToken}` },
       });
 
-      response.data.entries.length === 0
-        ? setFailedSearch(true)
-        : setLedger(response.data.entries);
+      const output = response.data.data || [];
+
+      if (output.length === 0) {
+        setFailedSearch(true);
+        setLedger([]);
+      } else {
+        setLedger(output);
+        setFailedSearch(false);
+      }
+
+      if (response.data.pagination?.nextPage) {
+        setPaginationUrls((prev) => {
+          const newUrl = response.data.pagination.nextPage;
+          if (!prev.includes(newUrl)) {
+            if (!pageUrl || currentPageIndex >= prev.length - 1) {
+              return pageUrl && currentPageIndex >= prev.length - 1
+                ? [...prev, newUrl]
+                : [newUrl];
+            }
+            return prev;
+          }
+          return prev;
+        });
+      } else {
+        setPaginationUrls((prev) => prev.slice(0, currentPageIndex + 1));
+      }
+
+      setLoading(false);
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching ledger:", error);
+      setLoading(false);
       showToast({
         message: "Failed to fetch ledger data",
         type: "error",
       });
+      setFailedSearch(true);
     }
   };
 
@@ -93,10 +143,12 @@ const CashManagementLedger = () => {
         } successfully`,
         type: "success",
       });
-      // Refresh the ledger data
-      fetchCashManagementLedger();
+      fetchCashManagementLedger(
+        dateRange?.[0]?.format("YYYY-MM-DD"),
+        dateRange?.[1]?.format("YYYY-MM-DD")
+      );
     } catch (error) {
-      console.log(error);
+      console.error("Error updating highlight:", error);
       showToast({
         message: "Failed to update highlight status",
         type: "error",
@@ -122,29 +174,64 @@ const CashManagementLedger = () => {
     setSelectedEntry(null);
   };
 
+  const handleClearDateRange = () => {
+    setDateRange(null);
+    setPaginationUrls([]);
+    setCurrentPageIndex(0);
+    fetchCashManagementLedger();
+  };
+
+  const handleNextPage = () => {
+    if (currentPageIndex < paginationUrls.length - 1) {
+      const nextIndex = currentPageIndex + 1;
+      setCurrentPageIndex(nextIndex);
+      fetchCashManagementLedger(null, null, paginationUrls[nextIndex]);
+    } else if (paginationUrls[currentPageIndex]) {
+      setCurrentPageIndex((prev) => prev + 1);
+      fetchCashManagementLedger(null, null, paginationUrls[currentPageIndex]);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPageIndex > 0) {
+      const prevIndex = currentPageIndex - 1;
+      setCurrentPageIndex(prevIndex);
+      fetchCashManagementLedger(null, null, paginationUrls[prevIndex]);
+    }
+  };
+
   useEffect(() => {
     fetchCashManagementLedger();
   }, []);
 
-  // Pagination helpers
-  const totalPages = Math.ceil(ledger.length / itemsPerPage);
-
-  const currentPageData = ledger.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  const handleNextPage = () => {
-    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
-  };
-
-  const handlePrevPage = () => {
-    setCurrentPage((prev) => Math.max(prev - 1, 1));
-  };
-
   return (
     <>
-      <Heading>Cash Ledger</Heading>
+      <Flex justify="between" align="center" className="mb-4">
+        <Heading>Cash Ledger</Heading>
+        <div className="date-picker">
+          <RangePicker
+            value={dateRange}
+            onCalendarChange={(dates) => {
+              setDateRange(dates);
+              if (dates && dates[0] && dates[1]) {
+                setPaginationUrls([]);
+                setCurrentPageIndex(0);
+                fetchCashManagementLedger(
+                  dates[0].format("YYYY-MM-DD"),
+                  dates[1].format("YYYY-MM-DD")
+                );
+              }
+            }}
+          />
+          {dateRange !== null && (
+            <FontAwesomeIcon
+              icon={faRedoAlt}
+              className="ml-2 cursor-pointer"
+              onClick={handleClearDateRange}
+            />
+          )}
+        </div>
+      </Flex>
 
       <Separator className="my-4 w-full" />
 
@@ -167,14 +254,22 @@ const CashManagementLedger = () => {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {currentPageData.length === 0 ? (
-            <div className="p-4">
-              {failedSearch ? "No records Found" : <Spinner />}
-            </div>
+          {loading ? (
+            <Table.Row>
+              <Table.Cell colSpan="9">
+                <Spinner />
+              </Table.Cell>
+            </Table.Row>
+          ) : ledger.length === 0 ? (
+            <Table.Row>
+              <Table.Cell colSpan="9">
+                {failedSearch ? "No Records Found" : "No Data Available"}
+              </Table.Cell>
+            </Table.Row>
           ) : (
-            currentPageData.map((entry, index) => (
+            ledger.map((entry) => (
               <Table.Row
-                key={index}
+                key={entry.id}
                 className={`${
                   getToken()?.isAdmin
                     ? "cursor-pointer hover:bg-gray-400/10"
@@ -182,7 +277,7 @@ const CashManagementLedger = () => {
                 }`}
                 onClick={() => getToken()?.isAdmin && showHighlightModal(entry)}
                 style={{
-                  backgroundColor: entry.isQuery && "#ffeb3b33" ,
+                  backgroundColor: entry.isQuery ? "#ffeb3b33" : "",
                 }}
               >
                 <Table.RowHeaderCell>
@@ -255,24 +350,25 @@ const CashManagementLedger = () => {
       <div className="flex justify-center items-center mt-4 gap-4">
         <Button
           onClick={handlePrevPage}
-          disabled={currentPage === 1}
+          disabled={currentPageIndex === 0}
           className="cursor-pointer"
         >
           <FontAwesomeIcon icon={faArrowLeft} />
         </Button>
         <span>
-          Page {currentPage} of {totalPages}
+          Page {currentPageIndex + 1} of{" "}
+          {paginationUrls.length > 0 ? "many" : 1}
         </span>
         <Button
           onClick={handleNextPage}
-          disabled={currentPage === totalPages}
+          disabled={currentPageIndex >= paginationUrls.length}
           className="cursor-pointer"
         >
           <FontAwesomeIcon icon={faArrowRight} />
         </Button>
       </div>
 
-      
+      <Toaster position="top-right" />
     </>
   );
 };

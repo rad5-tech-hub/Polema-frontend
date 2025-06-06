@@ -104,7 +104,7 @@ const ViewLocalPurchaseOrder = () => {
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
             {/* <Table.ColumnHeaderCell>LPO ID</Table.ColumnHeaderCell> */}
             <Table.ColumnHeaderCell>DELIVERED TO</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>LPO EXPIRES</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>SUPPLIER NAME</Table.ColumnHeaderCell>
 
             <Table.ColumnHeaderCell>TICKET STATUS</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
@@ -121,7 +121,7 @@ const ViewLocalPurchaseOrder = () => {
                 <Table.Cell>{refractor(order.createdAt)}</Table.Cell>
                 {/* <Table.Cell>{order.lpoId}</Table.Cell> */}
                 <Table.Cell>{order.deliveredTo}</Table.Cell>
-                <Table.Cell>{refractor(order.expires)}</Table.Cell>
+                <Table.Cell>{`${order.supplier?.firstname || ""} ${order.supplier?.lastname || ""}`}</Table.Cell>
 
                 <Table.Cell>
                   {" "}

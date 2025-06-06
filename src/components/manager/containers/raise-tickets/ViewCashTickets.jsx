@@ -26,8 +26,8 @@ const CashTickets = () => {
         },
       });
       setIsFetching(false);
-      setTicketDetails(data.records);
-      data.records.length === 0 && setFetchError(true);
+      setTicketDetails(data.data);
+      data.data.length === 0 && setFetchError(true);
     } catch (err) {
       showToast({
         type: "error",

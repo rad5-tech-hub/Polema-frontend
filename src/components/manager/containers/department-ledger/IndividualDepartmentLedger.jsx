@@ -3,11 +3,24 @@ import { refractor, formatMoney } from "../../../date";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
-import { Spinner, Heading, Table, TextField, Button } from "@radix-ui/themes";
+import {
+  Spinner,
+  Heading,
+  Table,
+  TextField,
+  Button,
+  Flex,
+  Text,
+} from "@radix-ui/themes";
 const root = import.meta.env.VITE_ROOT;
-import { Modal, Select } from "antd"; // Import Select from antd
+import { Modal, Select } from "antd";
 import { jwtDecode } from "jwt-decode";
 import useToast from "../../../../hooks/useToast";
+import { DatePicker } from "antd";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faRedoAlt } from "@fortawesome/free-solid-svg-icons";
+
+const { RangePicker } = DatePicker;
 
 const IndividualDepartmentLedger = () => {
   const { id, ledgerName } = useParams();
@@ -17,6 +30,10 @@ const IndividualDepartmentLedger = () => {
   const [failedSearch, setFailedSearch] = React.useState(false);
   const [creditCustomerModalOpen, setCreditCustomerModalOpen] = useState(false);
   const [customerData, setCustomerData] = useState([]);
+  const [dateRange, setDateRange] = useState(null);
+  const [paginationUrls, setPaginationUrls] = useState([]);
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const decodeToken = () => {
     return jwtDecode(localStorage.getItem("token"));
@@ -28,27 +45,77 @@ const IndividualDepartmentLedger = () => {
   };
 
   // Function to get a department ledger
-  const getDeptLedger = async () => {
+  const getDeptLedger = async (
+    startDate = null,
+    endDate = null,
+    pageUrl = null
+  ) => {
+    setLoading(true);
+    setLedger([]);
+    setFailedSearch(false);
     const retrToken = localStorage.getItem("token");
 
     if (!retrToken) {
-      console.error("An error occurred. Try logging in again");
+      showToast({
+        message: "An error occurred. Try logging in again",
+        type: "error",
+      });
+      setLoading(false);
       return;
     }
+
+    let url;
+    if (pageUrl) {
+      url = `${root}${pageUrl}`;
+    } else if (startDate && endDate) {
+      url = `${root}/dept/department-ledger/${id}?startDate=${startDate}&endDate=${endDate}`;
+    } else {
+      url = `${root}/dept/department-ledger/${id}`;
+    }
+
     try {
-      const response = await axios.get(`${root}/dept/department-ledger/${id}`, {
+      const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      Array.isArray(response.data)
-        ? setLedger(response.data)
-        : setFailedSearch(true);
-    } catch (error) {
-      console.log(error);
-      {
-        error.response.status === 404 && setFailedSearch(true);
+
+      const output = response.data.data || [];
+
+      if (!Array.isArray(output) || output.length === 0) {
+        setFailedSearch(true);
+        setLedger([]);
+      } else {
+        setLedger(output);
+        setFailedSearch(false);
       }
+
+      if (response.data.pagination?.nextPage) {
+        setPaginationUrls((prev) => {
+          const newUrl = response.data.pagination.nextPage;
+          if (!prev.includes(newUrl)) {
+            if (!pageUrl || currentPageIndex >= prev.length - 1) {
+              return pageUrl && currentPageIndex >= prev.length - 1
+                ? [...prev, newUrl]
+                : [newUrl];
+            }
+            return prev;
+          }
+          return prev;
+        });
+      } else {
+        setPaginationUrls((prev) => prev.slice(0, currentPageIndex + 1));
+      }
+
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching ledger:", error);
+      setLoading(false);
+      showToast({
+        message: "Failed to fetch ledger data",
+        type: "error",
+      });
+      setFailedSearch(error.response?.status === 404);
     }
   };
 
@@ -63,9 +130,10 @@ const IndividualDepartmentLedger = () => {
       const { data } = await axios.get(`${root}/admin/get-products`, {
         headers: { Authorization: `Bearer ${retrToken}` },
       });
-      setProducts(data.products);
+      setProducts(data.products || []);
     } catch (error) {
       console.error("Error fetching products:", error);
+      toast.error("Failed to fetch products");
     }
   };
 
@@ -86,32 +154,50 @@ const IndividualDepartmentLedger = () => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      {
-        response.data.customers.length === 0
-          ? setCustomerData([])
-          : setCustomerData(response.data.customers);
-      }
+      setCustomerData(response.data.customers || []);
     } catch (error) {
-      {
-        error.message
-          ? toast.error(error.message, {
-              duration: 6500,
-              style: {
-                padding: "30px",
-              },
-            })
-          : toast.error("An Error Occurred", {
-              duration: 6500,
-              style: {
-                padding: "30px",
-              },
-            });
-      }
+      showToast({
+        message: error.message || "An error occurred while fetching customers",
+        type: "error",
+        duration: 6500,
+        style: { padding: "30px" },
+      });
+    }
+  };
+
+  // Handle clear date range
+  const handleClearDateRange = () => {
+    setDateRange(null);
+    setPaginationUrls([]);
+    setCurrentPageIndex(0);
+    getDeptLedger();
+  };
+
+  // Handle next page
+  const handleNextPage = () => {
+    if (currentPageIndex < paginationUrls.length - 1) {
+      const nextIndex = currentPageIndex + 1;
+      setCurrentPageIndex(nextIndex);
+      getDeptLedger(null, null, paginationUrls[nextIndex]);
+    } else if (paginationUrls[currentPageIndex]) {
+      setCurrentPageIndex((prev) => prev + 1);
+      getDeptLedger(null, null, paginationUrls[currentPageIndex]);
+    }
+  };
+
+  // Handle previous page
+  const handlePrevPage = () => {
+    if (currentPageIndex > 0) {
+      const prevIndex = currentPageIndex - 1;
+      setCurrentPageIndex(prevIndex);
+      getDeptLedger(null, null, paginationUrls[prevIndex]);
     }
   };
 
   React.useEffect(() => {
     fetchCustomers();
+    fetchProducts();
+    getDeptLedger();
   }, []);
 
   // Modal for crediting customer
@@ -121,9 +207,9 @@ const IndividualDepartmentLedger = () => {
     const [customerName, setCustomerName] = useState("");
     const [comments, setComments] = useState("");
     const [creditAmount, setCreditAmount] = useState("");
-    const [itemName, setItemName] = useState(""); // New state for Item Name
+    const [itemName, setItemName] = useState("");
     const [buttonLoading, setButtonLoading] = useState(false);
-    const [selectedField, setSelectedField] = useState("product"); // Track active field: 'product' or 'itemName'
+    const [selectedField, setSelectedField] = useState("product");
 
     const handlePriceChange = (e) => {
       const value = e.target.value.replace(/,/g, "");
@@ -143,7 +229,6 @@ const IndividualDepartmentLedger = () => {
 
     const handleFieldToggle = (field) => {
       setSelectedField(field);
-      // Clear the other field's value when toggling
       if (field === "product") {
         setItemName("");
       } else {
@@ -168,13 +253,6 @@ const IndividualDepartmentLedger = () => {
         });
         return;
       }
-      // if (selectedField === "product" && !productId) {
-      //   showToast({
-      //     message: "Select a product first",
-      //     type: "error",
-      //   });
-      //   return;
-      // }
       if (!itemName) {
         showToast({
           message: "Enter an item name",
@@ -195,7 +273,6 @@ const IndividualDepartmentLedger = () => {
         name: customerName,
         [transactionType]: creditAmount,
         comments: comments,
-        // ...(selectedField === "product" && { productId: productId }),
         productName: itemName,
       };
 
@@ -213,7 +290,10 @@ const IndividualDepartmentLedger = () => {
 
         setButtonLoading(false);
         setCreditCustomerModalOpen(false);
-        if (id) getDeptLedger();
+        getDeptLedger(
+          dateRange?.[0]?.format("YYYY-MM-DD"),
+          dateRange?.[1]?.format("YYYY-MM-DD")
+        );
       } catch (err) {
         showToast({
           type: "error",
@@ -223,14 +303,6 @@ const IndividualDepartmentLedger = () => {
         setButtonLoading(false);
       }
     };
-
-    // Custom filter function for customer search
-    const filterCustomerOption = (input, option) =>
-      (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
-
-    // Custom filter function for product search
-    const filterProductOption = (input, option) =>
-      (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
     return (
       <Modal
@@ -251,23 +323,8 @@ const IndividualDepartmentLedger = () => {
             <label htmlFor="customer-select" className="font-bold">
               Customer Name
             </label>
-            {/* <Select
-              id="customer-select"
-              showSearch
-              placeholder="Search for a customer"
-              optionFilterProp="children"
-              onChange={(value) => setCustomerId(value)}
-              value={customerName || undefined}
-              filterOption={filterCustomerOption}
-              options={customerData.map((customer) => ({
-                value: customer.id,
-                label: `${customer.firstname} ${customer.lastname}`,
-              }))}
-              style={{ width: "100%", marginTop: 8 }}
-              allowClear
-            /> */}
             <TextField.Root
-              id="item-name"
+              id="customer-name"
               placeholder="Enter Customer Name"
               className="p-3"
               value={customerName}
@@ -276,44 +333,11 @@ const IndividualDepartmentLedger = () => {
               }}
             />
           </div>
-          {/* <div className="mt-4">
-            <div className="flex justify-between">
-              <label htmlFor="product-select" className="font-bold">
-                Product
-              </label>
-              <input
-                type="checkbox"
-                checked={selectedField === "product"}
-                onChange={() => handleFieldToggle("product")}
-              />
-            </div>
-            <Select
-              id="product-select"
-              showSearch
-              placeholder="Search for a product"
-              optionFilterProp="children"
-              onChange={(value) => setProductId(value)}
-              value={productId || undefined}
-              filterOption={filterProductOption}
-              options={products.map((product) => ({
-                value: product.id,
-                label: product.name,
-              }))}
-              style={{ width: "100%", marginTop: 8 }}
-              allowClear
-              disabled={selectedField !== "product"}
-            />
-          </div> */}
           <div className="mt-4">
             <div className="flex justify-between">
               <label htmlFor="item-name" className="font-bold">
                 Item Name
               </label>
-              {/* <input
-                type="checkbox"
-                checked={selectedField === "itemName"}
-                onChange={() => handleFieldToggle("itemName")}
-              /> */}
             </div>
             <TextField.Root
               id="item-name"
@@ -374,25 +398,49 @@ const IndividualDepartmentLedger = () => {
     );
   };
 
-  React.useEffect(() => {
-    getDeptLedger();
-    fetchProducts();
-  }, []);
-
   return (
     <>
-      <Heading>{ledgerName}</Heading>
-      <p className="text-sm opacity-40">Department Ledger</p>
-      {decodeToken().isAdmin && ledger.length > 0 && (
-        <Button
-          className="mt-4 cursor-pointer"
-          onClick={() => {
-            setCreditCustomerModalOpen(true);
-          }}
-        >
-          Credit Ledger
-        </Button>
-      )}
+      <Flex justify="between" align="center" className="mb-4">
+        <div>
+          <Heading>{ledgerName}</Heading>
+          <p className="text-sm opacity-40">Department Ledger</p>
+          {decodeToken().isAdmin && ledger.length > 0 && (
+            <Button
+              className="cursor-pointer mt-2"
+              onClick={() => {
+                setCreditCustomerModalOpen(true);
+              }}
+            >
+              Credit Ledger
+            </Button>
+          )}
+        </div>
+        <Flex gap="4">
+          <div className="date-picker">
+            <RangePicker
+              value={dateRange}
+              onCalendarChange={(dates) => {
+                setDateRange(dates);
+                if (dates && dates[0] && dates[1]) {
+                  setPaginationUrls([]);
+                  setCurrentPageIndex(0);
+                  getDeptLedger(
+                    dates[0].format("YYYY-MM-DD"),
+                    dates[1].format("YYYY-MM-DD")
+                  );
+                }
+              }}
+            />
+            {dateRange !== null && (
+              <FontAwesomeIcon
+                icon={faRedoAlt}
+                className="ml-2 cursor-pointer"
+                onClick={handleClearDateRange}
+              />
+            )}
+          </div>
+        </Flex>
+      </Flex>
 
       {/* Table for ledger details */}
       <Table.Root variant="surface" className="mt-4">
@@ -415,35 +463,67 @@ const IndividualDepartmentLedger = () => {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {ledger.length === 0 ? (
-            <div className="p-4">
-              {failedSearch ? <p>No records found.</p> : <Spinner />}
-            </div>
+          {loading ? (
+            <Table.Row>
+              <Table.Cell colSpan="10">
+                <Spinner />
+              </Table.Cell>
+            </Table.Row>
+          ) : ledger.length === 0 ? (
+            <Table.Row>
+              <Table.Cell colSpan="10" className="p-4">
+                {failedSearch ? "No records found." : "No data available."}
+              </Table.Cell>
+            </Table.Row>
           ) : (
-            ledger.map((item, index) => {
-              return (
-                <Table.Row key={index}>
-                  <Table.Cell>{refractor(item.createdAt)}</Table.Cell>
-                  <Table.Cell>{item.name}</Table.Cell>
-                  <Table.Cell>{item.comments}</Table.Cell>
-                  <Table.Cell>{item.productName}</Table.Cell>
-                  <Table.Cell>{item.unit}</Table.Cell>
-                  <Table.Cell>{item.quantity}</Table.Cell>
-                  <Table.Cell>{item.unitPrice}</Table.Cell>
-                  <Table.Cell className="text-green-500 font-bold">
-                    {formatMoney(item.credit > item.debit ? item.credit : "")}
-                  </Table.Cell>
-                  <Table.Cell className="text-red-500 font-bold">
-                    {formatMoney(item.debit > item.credit ? item.debit : "")}
-                  </Table.Cell>
-                  <Table.Cell>{formatMoney(item.balance)}</Table.Cell>
-                </Table.Row>
-              );
-            })
+            ledger.map((item) => (
+              <Table.Row key={item.id || item.createdAt + item.name}>
+                <Table.Cell>{refractor(item.createdAt)}</Table.Cell>
+                <Table.Cell>{item.name}</Table.Cell>
+                <Table.Cell>{item.comments}</Table.Cell>
+                <Table.Cell>{item.productName}</Table.Cell>
+                <Table.Cell>{item.unit}</Table.Cell>
+                <Table.Cell>{item.quantity}</Table.Cell>
+                <Table.Cell>{item.unitPrice}</Table.Cell>
+                <Table.Cell className="text-green-500 font-bold">
+                  {formatMoney(item.credit > item.debit ? item.credit : "")}
+                </Table.Cell>
+                <Table.Cell className="text-red-500 font-bold">
+                  {formatMoney(item.debit > item.credit ? item.debit : "")}
+                </Table.Cell>
+                <Table.Cell>{formatMoney(item.price)}</Table.Cell>
+              </Table.Row>
+            ))
           )}
         </Table.Body>
       </Table.Root>
+
+      {paginationUrls.length > 0 && (
+        <Flex justify="end" className="mt-4">
+          <Flex gap="2" align="center">
+            <Button
+              variant="soft"
+              disabled={currentPageIndex === 0}
+              onClick={handlePrevPage}
+              className="!bg-blue-50 hover:!bg-blue-100"
+            >
+              Previous
+            </Button>
+            <Text>Page {currentPageIndex + 1}</Text>
+            <Button
+              variant="soft"
+              disabled={currentPageIndex >= paginationUrls.length}
+              onClick={handleNextPage}
+              className="!bg-blue-50 hover:!bg-blue-100"
+            >
+              Next
+            </Button>
+          </Flex>
+        </Flex>
+      )}
+
       <CreditDeptModal />
+      <Toaster position="top-right" />
     </>
   );
 };

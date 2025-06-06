@@ -525,22 +525,22 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                           {`${ticketDetails?.supplier?.firstname} ${ticketDetails?.supplier?.lastname}`}
                         </p>
                       </div>
-                      <div className="flex justify-between">
+                      {/* <div className="flex justify-between">
                         <Text className="text-[1rem] font-bold tracking-wide">
                           PRODUCT
                         </Text>
                         <p className="text-[.7rem]">
                           {ticketDetails?.product?.name || ""}
                         </p>
-                      </div>
-                      <div className="flex justify-between">
+                      </div> */}
+                      {/* <div className="flex justify-between">
                         <Text className="text-[1rem] font-bold tracking-wide">
                           QUANTITY ORDERED
                         </Text>
                         <p className="text-[.7rem]">
                           {ticketDetails.quantOrdered}
                         </p>
-                      </div>
+                      </div> */}
                       <div className="flex justify-between">
                         <Text className="text-[1rem] font-bold tracking-wide">
                           UNIT PRICE
@@ -561,7 +561,26 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                         <Text className="text-[1rem] font-bold tracking-wide">
                           COMMENT
                         </Text>
-                        <p className="text-[.7rem]">{ticketDetails.comments}</p>
+                        <p className="text-[.7rem]">{ticketDetails?.comments || ""}</p>
+                      </div>
+                      <div className="flex justify-between">
+                        <Text className="text-[1rem] font-bold tracking-wide">
+                          DETAILS
+                        </Text>
+                          <p className="text-[.7rem]">
+                            {Array.isArray(ticketDetails.items) ? ticketDetails.items.map((item) => {
+                               return (
+                                 <>
+                                   <span>
+                                     {item?.quantity || ""} {" "}
+                                     {item?.rawMaterial || ""} at {" "}
+                                     {item?.unitPrice ? formatMoney(item.unitPrice):""} each
+                                   </span>
+                                   <br />
+                                 </>
+                               );
+                            }) : "No Details Found."}
+                        </p>
                       </div>
                     </>
                   )}

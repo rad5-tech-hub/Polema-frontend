@@ -400,7 +400,8 @@ const DepartmentRecordBook = () => {
           )}
         </Table.Body>
       </Table.Root>
-
+      <div className="pagination-fixed">
+        
       {(showPreviousButton || details?.pagination?.nextPage) && (
         <Flex className="my-6" justify={"end"} gap="3">
           {showPreviousButton && (
@@ -433,6 +434,7 @@ const DepartmentRecordBook = () => {
           )}
         </Flex>
       )}
+</div>
 
       <DetailsModal />
       <Toaster position="top-right" />

@@ -112,6 +112,7 @@ const App = () => {
         {/* Create new password */}
         <Route path="/create-new-password" element={<NewPassword />} />
 
+
         {/* Protected Routes */}
         <Route
           path="/admin"
