@@ -14,12 +14,14 @@ import {
 import { Modal } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquare } from "@fortawesome/free-solid-svg-icons";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 
 const DepartmentRecordBook = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const showToast = useToast()
 
   const [details, setDetails] = useState(null);
   const [recordBookDetails, setRecordBookDetails] = useState([]);
