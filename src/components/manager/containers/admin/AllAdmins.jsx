@@ -112,6 +112,8 @@ const AllAdmins = () => {
   const [rolesList, setRolesList] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const showToast = useToast();
+
 
   // State management for the suspend dialog boxes
   const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
@@ -193,6 +195,29 @@ const AllAdmins = () => {
     setEditDialogOpen(true);
     setAdminForEdit(admin);
   };
+
+  const makeAdmin = async(id)=>{
+    const token = localStorage.getItem("token");
+
+    try{
+      const response = await axios.patch(`${root}/admin/make-semiAdmin/${id}`,{}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      showToast({
+        type:"success",
+        message: "Admin made successfully",
+      })
+    }catch(err){
+      console.log(err)
+      showToast({
+        message:"An error occurred or user is already an admin",
+        type:"error"
+      })
+    }
+  }
 
   useEffect(() => {
     fetchRoles();
@@ -314,6 +339,13 @@ const AllAdmins = () => {
                             onClick={() => handleSuspendClick(staff)}
                           >
                             Suspend
+                          </DropdownMenu.Item>
+                          <DropdownMenu.Item
+                            color="green"
+                            // shortcut={<Suspend />}
+                            onClick={() => makeAdmin(staff.id)}
+                          >
+                            Make Admin
                           </DropdownMenu.Item>
                         </DropdownMenu.Content>
                       </DropdownMenu.Root>

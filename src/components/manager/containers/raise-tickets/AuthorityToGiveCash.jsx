@@ -44,6 +44,7 @@ const AuthorityToGiveCash = () => {
   const [comments, setComments] = useState("");
   const [departmentId, setDepartmentId] = useState("");
   const [staffAmount, setStaffAmount] = useState("");
+  const [freshPayment,setFreshPayment] = useState(true)
 
   const showToast = useToast();
 
@@ -632,6 +633,22 @@ const AuthorityToGiveCash = () => {
                   ))}
                 </Select.Content>
               </Select.Root>
+
+              <div className="mt-6 w-[49%]">
+                <p className="font-bold">
+                  Is this a new payment or a balance payment on an existing
+                  payment?
+                </p>
+                <div className="flex">
+                  <input type="radio" name="payment" id="np" />
+                  <label for="np">New Payment</label>
+                </div>
+                
+                <div className="flex">
+                  <input type="radio" name="payment" id="bp" />
+                  <label for="bp">Balance Payment</label>
+                </div>
+              </div>
             </div>
 
             <Flex justify={"end"} className="mt-4">
