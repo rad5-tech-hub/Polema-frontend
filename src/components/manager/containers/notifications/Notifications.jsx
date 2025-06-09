@@ -241,6 +241,8 @@ const Notifications = () => {
     return jwtDecode(localStorage.getItem("token"));
   };
 
+  
+
   const confirmCashTicket = async (ticketId) => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -810,7 +812,7 @@ const Notifications = () => {
                                     </Text>
 
                                     {notification.ticketStatus === "pending" &&
-                                      (decodeToken().isAdmin ||
+                                      (decodeToken().isAdmin || decodeToken().isSemiAdmin) && (
                                         ["waybill", "gatepass"].includes(
                                           notification.type
                                         )) && (

@@ -18,7 +18,7 @@ import toast, { Toaster } from "react-hot-toast";
 const root = import.meta.env.VITE_ROOT;
 
 const AuthorityToGiveCash = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [customers, setCustomers] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [products, setProducts] = useState([]);
@@ -44,7 +44,7 @@ const AuthorityToGiveCash = () => {
   const [comments, setComments] = useState("");
   const [departmentId, setDepartmentId] = useState("");
   const [staffAmount, setStaffAmount] = useState("");
-  const [freshPayment,setFreshPayment] = useState(true)
+  const [newPayment, setNewPayment] = useState(null);
 
   const showToast = useToast();
 
@@ -194,7 +194,15 @@ const AuthorityToGiveCash = () => {
 
   const handleCustomersSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    
+    if (newPayment === null) { 
+      showToast({
+        message: "Please select if this is a new payment or a balance payment",
+        type: "error",
+      });
+      return;
+    }
+
 
     const retrToken = localStorage.getItem("token");
 
@@ -216,20 +224,24 @@ const AuthorityToGiveCash = () => {
       return;
     }
 
+
     const resetForm = () => {
       setAmount("");
       setSelectedCustomer(null);
       setSelectedProduct(null);
       setComments("");
       setAdminId("");
+      setNewPayment(null); // Reset newPayment state
     };
 
+    setLoading(true);
     const body = {
       amount: amount.replaceAll(",", ""),
       customerId: selectedCustomer,
       comments,
       productId: selectedProduct,
       creditOrDebit: authorityType,
+      isFreshPayment: newPayment, // Add newPayment to the body
     };
 
     try {
@@ -633,21 +645,34 @@ const AuthorityToGiveCash = () => {
                   ))}
                 </Select.Content>
               </Select.Root>
+            </div>
 
-              <div className="mt-6 w-[49%]">
-                <p className="font-bold">
-                  Is this a new payment or a balance payment on an existing
-                  payment?
-                </p>
-                <div className="flex">
-                  <input type="radio" name="payment" id="np" />
-                  <label for="np">New Payment</label>
-                </div>
-                
-                <div className="flex">
-                  <input type="radio" name="payment" id="bp" />
-                  <label for="bp">Balance Payment</label>
-                </div>
+            <div className="mt-6 w-[50%]">
+              <p className="font-bold">
+                Is this a new payment or a balance payment on an existing
+                payment?
+              </p>
+              <div className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="payment"
+                  id="np"
+                  value="new"
+                  checked={newPayment === true}
+                  onChange={() => setNewPayment(true)}
+                />
+                <label htmlFor="np">New Payment</label>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="payment"
+                  id="bp"
+                  value="balance"
+                  checked={newPayment === false}
+                  onChange={() => setNewPayment(false)}
+                />
+                <label htmlFor="bp">Balance Payment</label>
               </div>
             </div>
 
