@@ -812,7 +812,7 @@ const Notifications = () => {
                                     </Text>
 
                                     {notification.ticketStatus === "pending" &&
-                                      (decodeToken().isAdmin || decodeToken().isSemiAdmin) && (
+                                      (decodeToken().isAdmin || decodeToken().isSemiAdmin) || (
                                         ["waybill", "gatepass","cash","weigh","invoice","lpo","store"].includes(
                                           notification.type
                                         )) && (
