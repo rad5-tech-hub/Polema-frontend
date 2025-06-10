@@ -491,7 +491,7 @@ const IndividualDepartmentLedger = () => {
                 <Table.Cell className="text-red-500 font-bold">
                   {formatMoney(item.debit > item.credit ? item.debit : "")}
                 </Table.Cell>
-                <Table.Cell>{formatMoney(item.price)}</Table.Cell>
+                <Table.Cell>{formatMoney(item.balance)}</Table.Cell>
               </Table.Row>
             ))
           )}

@@ -174,17 +174,30 @@ const GatepassReceipt = () => {
                     [
                       "Goods/Invoice No",
                       passDetails.transaction
-                        ? `${
-                            passDetails.transaction?.quantityloaded
-                              ?.quantityLoaded || "-"
-                          }  ${passDetails.transaction?.unit || "-"}  of  ${
-                            passDetails.transaction?.porders?.name
-                          } /
-                          ${
-                            passDetails.transaction.invoice?.invoiceNumber
-                              ? `000${passDetails.transaction.invoice.invoiceNumber}`
-                              : ""
-                          }`
+                        ? passDetails?.transactionEntries
+                          ? passDetails?.transactionEntries.map((item,index)=>{
+                            return (
+                              <>
+                                <span>
+                                  {item?.quantity || ""} {item?.unit || ""} of{" "}
+                                  {item?.product || ""} item
+                                  {index <
+                                  passDetails?.transactionEntries.length - 1
+                                    ? ", "
+                                    : ""}
+                                  {index <
+                                  passDetails?.transactionEntries.length - 1
+                                    ? ""
+                                    : " / "}
+                                  {passDetails.transaction.invoice
+                                    ?.invoiceNumber
+                                    ? `000${passDetails.transaction.invoice.invoiceNumber}`
+                                    : ""}
+                                </span>
+                              </>
+                            );
+                          })
+                          : ""
                         : passDetails.rawMaterial?.name || "-",
                     ],
                     [
@@ -204,7 +217,7 @@ const GatepassReceipt = () => {
                       "Seal",
                       passDetails.seal && passDetails.seal.length > 0
                         ? passDetails.seal.join(", ")
-                        : "-"
+                        : "-",
                     ],
                     [
                       "Authorized By",
@@ -221,7 +234,7 @@ const GatepassReceipt = () => {
                         {label}:
                       </label>
                       <p className="border-b border-black border-dotted flex-grow text-sm sm:text-base">
-                        {value}
+                        {value} 
                       </p>
                     </div>
                   ))}

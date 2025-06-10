@@ -241,6 +241,8 @@ const Notifications = () => {
     return jwtDecode(localStorage.getItem("token"));
   };
 
+  
+
   const confirmCashTicket = async (ticketId) => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -810,8 +812,8 @@ const Notifications = () => {
                                     </Text>
 
                                     {notification.ticketStatus === "pending" &&
-                                      (decodeToken().isAdmin ||
-                                        ["waybill", "gatepass"].includes(
+                                      (decodeToken().isAdmin || decodeToken().isSemiAdmin) && (
+                                        ["waybill", "gatepass","cash"].includes(
                                           notification.type
                                         )) && (
                                         <div className="button-groups flex gap-4 mt-4">
