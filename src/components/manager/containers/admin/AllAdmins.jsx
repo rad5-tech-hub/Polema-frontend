@@ -196,7 +196,7 @@ const AllAdmins = () => {
     setAdminForEdit(admin);
   };
 
-  const makeAdmin = async(id)=>{
+  const makeAdmin = async(id,status)=>{
     const token = localStorage.getItem("token");
 
     try{
@@ -208,8 +208,10 @@ const AllAdmins = () => {
 
       showToast({
         type:"success",
-        message: "Admin made successfully",
+        message: status ? "Admin removed successfully" : "Admin made successfully",
       })
+
+      fetchStaffData();
     }catch(err){
       console.log(err)
       showToast({
@@ -341,11 +343,15 @@ const AllAdmins = () => {
                             Suspend
                           </DropdownMenu.Item>
                           <DropdownMenu.Item
-                            color="green"
+                            color={staff.isSemiAdmin ? "red" : "green"}
                             // shortcut={<Suspend />}
-                            onClick={() => makeAdmin(staff.id)}
+                            onClick={() =>
+                              makeAdmin(staff.id, staff.isSemiAdmin)
+                            }
                           >
-                            Make Admin
+                            {staff.isSemiAdmin
+                              ? "Remove as an Admin"
+                              : "Make Admin"}
                           </DropdownMenu.Item>
                         </DropdownMenu.Content>
                       </DropdownMenu.Root>

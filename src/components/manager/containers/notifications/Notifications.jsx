@@ -813,7 +813,7 @@ const Notifications = () => {
 
                                     {notification.ticketStatus === "pending" &&
                                       (decodeToken().isAdmin || decodeToken().isSemiAdmin) && (
-                                        ["waybill", "gatepass"].includes(
+                                        ["waybill", "gatepass","cash"].includes(
                                           notification.type
                                         )) && (
                                         <div className="button-groups flex gap-4 mt-4">
