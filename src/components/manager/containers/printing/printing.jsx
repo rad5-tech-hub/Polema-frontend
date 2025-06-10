@@ -12,7 +12,7 @@ const root = import.meta.env.VITE_ROOT;
 
 const PrintingRecords = () => {
   const navigate = useNavigate();
-  const showToast = useToast()
+  const showToast = useToast();
   const [printingRecords, setPrintingRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -108,17 +108,15 @@ const PrintingRecords = () => {
       fetchPrintingRecords(); // Re-fetch records to update the list
       setSelectedIds([]);
       showToast({
-        type:"success",
-        message:"Selected records deleted successfully."
-      })
-      
+        type: "success",
+        message: "Selected records deleted successfully.",
+      });
     } catch (error) {
       console.error("Error deleting records:", error);
       showToast({
-        message:error.response?.data?.message || "Failed to delete records.",
-        type:"error"
-      })
-      
+        message: error.response?.data?.message || "Failed to delete records.",
+        type: "error",
+      });
     } finally {
       setDeleteLoading(false);
     }
@@ -143,6 +141,10 @@ const PrintingRecords = () => {
       case "officialReceipt":
         url = `/admin/receipt/official-receipt/${id}`;
         break;
+      case "lpo":
+        url = `/admin/receipt/official-receipt/${id}`;
+        break;
+
       default:
         toast.error("Unknown receipt type.");
         return;
@@ -160,7 +162,7 @@ const PrintingRecords = () => {
       <Toaster position="top-right" />
       <Flex justify="between" align="center" className="mb-4">
         <Heading size="6">View All Printing Records</Heading>
-        {selectedIds.length > 0 &&
+        {selectedIds.length > 0 && (
           <Button
             variant="solid"
             color="red"
@@ -170,7 +172,7 @@ const PrintingRecords = () => {
           >
             {deleteLoading ? <Spinner size="2" /> : "Delete Selected"}
           </Button>
-        }
+        )}
       </Flex>
 
       {/* Table showing printing records */}
