@@ -143,8 +143,15 @@ const PrintingRecords = () => {
       case "officialReceipt":
         url = `/admin/receipt/official-receipt/${id}`;
         break;
+      case "lpo":
+        url =`/admin/raise-ticket/officialLPO/${id}`;
+        break;
       default:
-        toast.error("Unknown receipt type.");
+        showToast({
+          type:"error",
+          message:"Unknown receipt type."
+        })
+        
         return;
     }
     navigate(url);
