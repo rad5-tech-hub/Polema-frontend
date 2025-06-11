@@ -175,7 +175,7 @@ const SupplierPlaceOrder = () => {
       price: basePrice.replace(/,/g, ""),
       ...(comment && { comments: comment }),
       ...(subCharge && { discount: subCharge.replace(/,/g, "") }),
-      unit: selectedUnit?.price[0]?.unit || "",
+      ...(unit && {unit: selectedUnit?.price[0]?.unit || ""}),
     };
 
     try {
