@@ -78,7 +78,6 @@ const SupplierPlaceOrder = () => {
   // Fetch products
   const fetchProducts = async () => {
     const token = localStorage.getItem("token");
-    
 
     if (!token) {
       toast.error("Please log in again.");
@@ -105,21 +104,21 @@ const SupplierPlaceOrder = () => {
       url += `/admin/view-auth-weigh/${id.replace("-not-weigh", "")}`;
     } else {
       url += `/customer/view-weigh/${id}`;
-
-
     }
-      if (!token || !id) {
-        toast.error("Invalid session or ticket ID.");
-        setTicketLoading(false);
-        return;
-      }
+    if (!token || !id) {
+      toast.error("Invalid session or ticket ID.");
+      setTicketLoading(false);
+      return;
+    }
 
     try {
       const { data } = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const ticket = data.data;
-      setSelectedCustomerId(ticket?.authToWeigh?.supplierId || data.ticket.supplierId); // Supplier ID
+      setSelectedCustomerId(
+        ticket?.authToWeigh?.supplierId || data.ticket.supplierId
+      ); // Supplier ID
       setSelectedProductId(
         ticket?.authToWeigh?.productId || data.ticket.productId
       ); // Product ID
@@ -166,15 +165,17 @@ const SupplierPlaceOrder = () => {
     }
 
     const orderData = {
-      ...(id.includes("-not-weigh") && { atwWeighId: id.replace("-not-weigh", "") }),
-      ...(!id.includes("-not-weigh") && {supplierWeighId : id}),
+      ...(id.includes("-not-weigh") && {
+        atwWeighId: id.replace("-not-weigh", ""),
+      }),
+      ...(!id.includes("-not-weigh") && { supplierWeighId: id }),
       // supplierWeighId:id.includes("-not-weigh") ? id.replace("-not-weigh",""):id ,
-      ...(id.includes("-not-weigh") ? {atw:true}:{atw:false}),
+      ...(id.includes("-not-weigh") ? { atw: true } : { atw: false }),
       // quantity,
       price: basePrice.replace(/,/g, ""),
       ...(comment && { comments: comment }),
       ...(subCharge && { discount: subCharge.replace(/,/g, "") }),
-      unit: selectedUnit?.price[0]?.unit || "",
+      ...(unit && {unit: selectedUnit?.price[0]?.unit || ""}),
     };
 
     try {
@@ -182,11 +183,11 @@ const SupplierPlaceOrder = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       showToast({
-        message:"Order Placed Successfully",
-        type:"success",
-        duration:5000
-      })
-      
+        message: "Order Placed Successfully",
+        type: "success",
+        duration: 5000,
+      });
+
       setBasePrice("");
       setSelectedCustomerId("");
       setSelectedProductId("");
@@ -197,12 +198,12 @@ const SupplierPlaceOrder = () => {
 
       setTimeout(() => {
         navigate(`/admin/supplier/supplier-ledger/${selectedCustomerId}`);
-      },3000)
-
+      }, 3000);
     } catch (error) {
       console.error("Error placing order:", error);
       toast.error(
-        error.response?.data?.message || "Failed to place order. Please check your inputs."
+        error.response?.data?.message ||
+          "Failed to place order. Please check your inputs."
       );
     } finally {
       setButtonLoading(false);
@@ -230,10 +231,15 @@ const SupplierPlaceOrder = () => {
                 onChange={(value) => setSelectedCustomerId(value)}
                 value={selectedCustomerId || undefined}
                 className={`w-full mt-2 text-bold text-lg disabled:text-gray-800 ${
-                  customers.length === 0 || !!id ? "bg-gray-100 text-black font-bold" : ""
+                  customers.length === 0 || !!id
+                    ? "bg-gray-100 text-black font-bold"
+                    : ""
                 }`}
                 filterOption={(input, option) =>
-                  option?.children?.toString().toLowerCase().includes(input.toLowerCase())
+                  option?.children
+                    ?.toString()
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
                 }
                 disabled={customers.length === 0 || !!id} // Disable if no customers or id exists
                 required
@@ -256,7 +262,9 @@ const SupplierPlaceOrder = () => {
                 onChange={(value) => setSelectedProductId(value)}
                 value={selectedProductId || undefined}
                 className={`w-full mt-2 placeholder:text-black ${
-                  products.length === 0 || !!id ? "bg-gray-100 text-black font-bold" : ""
+                  products.length === 0 || !!id
+                    ? "bg-gray-100 text-black font-bold"
+                    : ""
                 }`}
                 filterOption={(input, option) =>
                   option.children.toLowerCase().includes(input.toLowerCase())

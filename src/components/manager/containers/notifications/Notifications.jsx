@@ -39,7 +39,7 @@ const root = import.meta.env.VITE_ROOT;
 import useToast from "../../../../hooks/useToast";
 const Notifications = () => {
   const navigate = useNavigate(); // Initialize navigate hook
-  const showToast = useToast()
+  const showToast = useToast();
   const getToken = () => {
     const token = localStorage.getItem("token");
     return jwtDecode(token);
@@ -133,11 +133,11 @@ const Notifications = () => {
         }
       );
       showToast({
-        message:"Notification marked as read",
-        duration:3000,
-        type:"success"
-      })
-      
+        message: "Notification marked as read",
+        duration: 3000,
+        type: "success",
+      });
+
       return true;
     } catch (error) {
       console.error("Error marking notification as read:", error);
@@ -183,10 +183,10 @@ const Notifications = () => {
 
     if (!endpoint || endpoint === null || endpoint === undefined) {
       showToast({
-        message:"Ticket type does not exist",
-        type:"error"
-      })
-      
+        message: "Ticket type does not exist",
+        type: "error",
+      });
+
       return;
     }
 
@@ -199,10 +199,10 @@ const Notifications = () => {
         }
       );
       showToast({
-        message:"Ticket Denied Successfully",
-        duration:3000,
-        type:"sucess"
-      })
+        message: "Ticket Denied Successfully",
+        duration: 3000,
+        type: "sucess",
+      });
       fetchNotifications();
     } catch (e) {
       console.log(e);
@@ -241,8 +241,6 @@ const Notifications = () => {
     return jwtDecode(localStorage.getItem("token"));
   };
 
-  
-
   const confirmCashTicket = async (ticketId) => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -260,9 +258,9 @@ const Notifications = () => {
         }
       );
       showToast({
-        message:response.data.message || "Cash ticket confirmed successfully",
-        type:"success"
-      })
+        message: response.data.message || "Cash ticket confirmed successfully",
+        type: "success",
+      });
       fetchNotifications();
       setConfirmBtnLoading((prev) => ({ ...prev, [ticketId]: false }));
     } catch (error) {
@@ -309,16 +307,18 @@ const Notifications = () => {
     }
 
     try {
-      const response = await axios.delete(`${root}/admin/delete-notifications`, {
-        headers: { Authorization: `Bearer ${token}` },
-        data: { notificationIds: selectedNotificationIds },
-      });
+      const response = await axios.delete(
+        `${root}/admin/delete-notifications`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          data: { notificationIds: selectedNotificationIds },
+        }
+      );
       showToast({
         message: "Notifications deleted Successfully",
-        type:"success"
-      })
-        
-      
+        type: "success",
+      });
+
       fetchNotifications();
       setSelectedNotificationIds([]);
     } catch (error) {
@@ -395,20 +395,18 @@ const Notifications = () => {
           await sendApprovedTicket(type, ticketID, selectedAdmins);
           showToast({
             message: "Ticket already approved, sending details",
-            duration:3000,
-            type:"success"
-          })
-          
+            duration: 3000,
+            type: "success",
+          });
         } else {
           const firstRequest = await approveTicket(type, ticketID);
           if (firstRequest === 200) {
             await sendApprovedTicket(type, ticketID, selectedAdmins);
             showToast({
               message: "Ticket approved and sent successfully",
-              type:"success",
-              duration:3000
+              type: "success",
+              duration: 3000,
             });
-            
           } else {
             throw new Error("Error occurred in approving ticket");
           }
@@ -522,9 +520,9 @@ const Notifications = () => {
         showToast({
           message: "Ticket Sent Successfully",
           type: "success",
-          duration:3000
-        })
-        
+          duration: 3000,
+        });
+
         fetchNotifications();
         setButtonLoading(false);
         setQuantity("");
@@ -857,7 +855,57 @@ const Notifications = () => {
                                             Deny
                                           </AntButton>
                                         </div>
+                                      )} 
+
+                                    {notification.ticketStatus === "pending" &&
+                                      (decodeToken().isAdmin ||
+                                        decodeToken().isSemiAdmin || decodeToken().id) &&
+                                      [
+                                        "weigh",
+                                        "waybill",
+                                        "gatepass",
+                                        "cash",
+                                        "invoice",
+                                        "lpo",
+                                        "store",
+                                      ].includes(notification.type) && (
+                                        <div className="button-groups flex gap-4 mt-4">
+                                          <AntButton
+                                            className="bg-theme text-white hover:!bg-theme hover:text-white"
+                                            onClick={(e) => {
+                                              e.preventDefault();
+                                              setSidePaneState({
+                                                openId: notification.id,
+                                                type: notification.type,
+                                                ticketId: notification.ticketId,
+                                                ticketStatus:
+                                                  notification.ticketStatus,
+                                              });
+                                            }}
+                                          >
+                                            {approveButtonLoading[
+                                              notification?.ticketId
+                                            ] ? (
+                                              <Spinner />
+                                            ) : (
+                                              "Approve"
+                                            )}
+                                          </AntButton>
+                                          <AntButton
+                                            onClick={(e) => {
+                                              e.preventDefault();
+                                              denyTicket(
+                                                notification.type,
+                                                notification?.ticketId || null
+                                              );
+                                            }}
+                                          >
+                                            Deny
+                                          </AntButton>
+                                        </div>
                                       )}
+
+                                      
 
                                     {notification.type === "cash" &&
                                       notification.ticketStatus ==

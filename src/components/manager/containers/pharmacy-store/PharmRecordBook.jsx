@@ -13,11 +13,13 @@ import {
 } from "@radix-ui/themes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquare } from "@fortawesome/free-solid-svg-icons";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 
 const PharmRecordBook = () => {
   const [searchParams] = useSearchParams();
+  const showToast = useToast()
   const navigate = useNavigate();
 
   const [details, setDetails] = useState(null);
