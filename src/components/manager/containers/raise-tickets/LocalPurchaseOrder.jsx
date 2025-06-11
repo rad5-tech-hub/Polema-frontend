@@ -544,7 +544,9 @@ const LocalPurchaseOrder = () => {
                     <Select.Item
                       key={admin.role?.id}
                       value={admin.role?.id || ""}
-                    >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
+                    >{`${
+                      admin?.role?.name || ""
+                    } (${admin.firstname} ${admin.lastname}) `}</Select.Item>
                   );
                 })}
               </Select.Content>

@@ -16,6 +16,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen ,faTrash} from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import {jwtDecode} from "jwt-decode"
 import toast, { Toaster } from "react-hot-toast";
 import DeleteDialog from "./DeleteDialog"; // Import DeleteDialog
 import EditDialog from "./EditDialog"; // Import EditDialog
@@ -29,6 +30,14 @@ const AllProducts = () => {
   const [selectedEditProduct, setSelectedEditProduct] = useState(null);
   const [displayPricePlan, setDisplayPricePlan] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const decodeToken = () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) return null
+    
+    return jwtDecode(token)
+  }
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -204,11 +213,14 @@ const AllProducts = () => {
                           >
                             <FontAwesomeIcon icon={faPen} /> Edit
                           </DropdownMenu.Item>
-                          <DropdownMenu.Item
-                            onClick={() => handleDeleteClick(product)}
-                          >
-                            <FontAwesomeIcon icon={faTrash} /> Delete
-                          </DropdownMenu.Item>
+                          {decodeToken().isAdmin ||
+                            (decodeToken().isSemiAdmin && (
+                              <DropdownMenu.Item
+                                onClick={() => handleDeleteClick(product)}
+                              >
+                                <FontAwesomeIcon icon={faTrash} /> Delete
+                              </DropdownMenu.Item>
+                            ))}
                         </DropdownMenu.Content>
                       </DropdownMenu.Root>
                     </Table.Cell>

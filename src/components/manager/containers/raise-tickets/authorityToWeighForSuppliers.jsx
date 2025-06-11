@@ -277,15 +277,15 @@ const NewAuthorityToWeigh = () => {
               required
             />
             {isDropdownOpen && filteredSuppliers.length > 0 && (
-              <Box
-                className="absolute top-full left-0 right-0 max-h-48 overflow-y-auto bg-white border border-gray-300 rounded-md z-10"
-              >
+              <Box className="absolute top-full left-0 right-0 max-h-48 overflow-y-auto bg-white border border-gray-300 rounded-md z-10">
                 {filteredSuppliers.map((supplier) => (
                   <Box
                     key={supplier.id}
                     onClick={() => handleSelectSupplier(supplier)}
                     className={`p-2 cursor-pointer ${
-                      selectedSupplierId === supplier.id ? "bg-gray-100" : "bg-white"
+                      selectedSupplierId === supplier.id
+                        ? "bg-gray-100"
+                        : "bg-white"
                     } hover:bg-gray-100`}
                     onMouseDown={(e) => e.preventDefault()}
                   >
@@ -316,12 +316,15 @@ const NewAuthorityToWeigh = () => {
               Raw Material<span className="text-red-500">*</span>
             </Text>
             <Select.Root
-              value={selectedProductId || ''}
+              value={selectedProductId || ""}
               onValueChange={(value) => setSelectedProductId(value)}
               disabled={products.length === 0}
               required
             >
-              <Select.Trigger placeholder="Select Raw Material" className="w-full mt-2" />
+              <Select.Trigger
+                placeholder="Select Raw Material"
+                className="w-full mt-2"
+              />
               <Select.Content position="popper">
                 {products.map((product) => (
                   <Select.Item key={product.id} value={product.id}>
@@ -342,7 +345,10 @@ const NewAuthorityToWeigh = () => {
               onValueChange={(value) => setTransportedBy(value)}
               required
             >
-              <Select.Trigger placeholder="Select Transport Option" className="w-full mt-2" />
+              <Select.Trigger
+                placeholder="Select Transport Option"
+                className="w-full mt-2"
+              />
               <Select.Content position="popper">
                 <Select.Item value="Company">Company</Select.Item>
                 <Select.Item value="Supplier">Supplier</Select.Item>
@@ -361,11 +367,19 @@ const NewAuthorityToWeigh = () => {
               disabled={adminDropdownDisabled}
               required
             >
-              <Select.Trigger placeholder="Select Admin" className="w-full mt-2" />
+              <Select.Trigger
+                placeholder="Select Admin"
+                className="w-full mt-2"
+              />
               <Select.Content position="popper">
                 {admins.map((admin) => (
-                  <Select.Item key={admin.role?.id || admin.id} value={admin.role?.id || admin.id}>
-                    {admin.firstname} {admin.lastname}
+                  <Select.Item
+                    key={admin.role?.id || admin.id}
+                    value={admin.role?.id || admin.id}
+                  >
+                    {`${admin?.role?.name || ""} (${admin.firstname} ${
+                      admin.lastname
+                    }) `}
                   </Select.Item>
                 ))}
               </Select.Content>

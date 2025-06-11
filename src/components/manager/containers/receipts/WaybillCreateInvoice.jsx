@@ -68,7 +68,7 @@ const WaybillCreateInvoice = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       const customerInfo = response.data.customer;
-      setAddress(customerInfo.address || "Loading");
+      setAddress(customerInfo?.address || "");
       
     } catch (error) {
       console.log(error);
@@ -259,7 +259,6 @@ const WaybillCreateInvoice = () => {
               placeholder="Input Driver License"
               value={driverLicense}
               onChange={(e) => setDriverLicense(e.target.value)}
-              
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
@@ -298,10 +297,9 @@ const WaybillCreateInvoice = () => {
               />
               <Select.Content position="popper">
                 {superAdmins.map((admin) => (
-                  <Select.Item
-                    key={admin.id}
-                    value={admin.role?.id || " "}
-                  >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
+                  <Select.Item key={admin.id} value={admin.role?.id || " "}>{`${
+                    admin?.role?.name || ""
+                  } (${admin.firstname} ${admin.lastname}) `}</Select.Item>
                 ))}
               </Select.Content>
             </Select.Root>

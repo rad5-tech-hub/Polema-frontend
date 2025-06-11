@@ -85,7 +85,7 @@ const CashTickets = () => {
       case "completed":
         return "text-black";
       case "pending":
-        return "text-[rgb(250,204,21)]";
+        return "text-yellow-500";
       case "approved":
         return "text-green-400";
       case "rejected":
@@ -184,6 +184,7 @@ const CashTickets = () => {
     const baseCells = [
       <Table.Cell key="amount">{formatMoney(item.amount)}</Table.Cell>,
       <Table.Cell key="status" className={colorCode(item.status)}>
+        <FontAwesomeIcon icon={ faSquare} className={`mr-2 ${colorCode(item?.status || "")}`} />
         {upperFirst(item?.status) || ""}
       </Table.Cell>,
     ];

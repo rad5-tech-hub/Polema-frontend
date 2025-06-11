@@ -400,7 +400,7 @@ const BlankLPO = () => {
                   return (
                     <Select.Item
                       value={admin.role?.id}
-                    >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
+                    >{`${admin.firstname} ${admin.lastname} (${admin?.role?.name || ""})`}</Select.Item>
                   );
                 })}
               </Select.Content>

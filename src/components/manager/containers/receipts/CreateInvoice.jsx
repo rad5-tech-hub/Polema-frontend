@@ -54,7 +54,7 @@ const CreateInvoice = () => {
       const customerInfo = response.data.customer;
       setCustomerData(customerInfo);
       setCustomer(`${customerInfo.firstname} ${customerInfo.lastname}`);
-      setAddress(customerInfo.address || "loading");
+      setAddress(customerInfo.address || "");
     } catch (error) {
       console.error(error);
       toast.error("Failed to fetch customer details.");
@@ -185,15 +185,23 @@ const CreateInvoice = () => {
               value={adminId} // Bind the value to adminId state
               onValueChange={(val) => setAdminId(val)} // Update adminId on change
             >
-              <Select.Trigger className="w-full mt-2" placeholder="Select Admin" />
+              <Select.Trigger
+                className="w-full mt-2"
+                placeholder="Select Admin"
+              />
               <Select.Content position="popper">
                 {superAdmins.map((admin) => (
-                  <Select.Item key={admin.role?.id} value={admin.role?.id || " "}>
-                    {`${admin.firstname} ${admin.lastname}`}
+                  <Select.Item
+                    key={admin.role?.id}
+                    value={admin.role?.id || " "}
+                  >
+                    {`${admin?.role?.name || ""} (${admin.firstname} ${
+                      admin.lastname
+                    }) `}
                   </Select.Item>
                 ))}
               </Select.Content>
-            </Select.Root> 
+            </Select.Root>
           </div>
         </div>
         <div className="btn flex justify-end max-sm:flex-col">

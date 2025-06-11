@@ -808,7 +808,7 @@ const Notifications = () => {
                                         </span>
                                       </div>
                                     </Text>
-
+{/* 
                                     {notification.ticketStatus === "pending" &&
                                       (decodeToken().isAdmin ||
                                         decodeToken().isSemiAdmin) &&
@@ -855,7 +855,7 @@ const Notifications = () => {
                                             Deny
                                           </AntButton>
                                         </div>
-                                      )} 
+                                      )}  */}
 
                                     {notification.ticketStatus === "pending" &&
                                       (decodeToken().isAdmin ||

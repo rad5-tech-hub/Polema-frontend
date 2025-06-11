@@ -247,9 +247,7 @@ const CreateGatepass = () => {
           </div>
 
           <div className="input-field ">
-            <label>
-              Seal Number
-            </label>
+            <label>Seal Number</label>
             {sealNo.map((number, index) => (
               <div
                 className="flex items-center gap-2 w-full relative mt-2"
@@ -287,11 +285,13 @@ const CreateGatepass = () => {
               onValueChange={setSelectedAdminId}
               disabled={superAdmins.length === 0}
             >
-              <Select.Trigger className='w-full mt-2' />
+              <Select.Trigger className="w-full mt-2" />
               <Select.Content>
                 {superAdmins.map((admin) => (
                   <Select.Item key={admin.id} value={admin.id}>
-                    {`${admin.firstname} ${admin.lastname}`} ({admin.role?.name})
+                    {`${admin?.role?.name || ""} (${admin.firstname} ${
+                      admin.lastname
+                    }) `}
                   </Select.Item>
                 ))}
               </Select.Content>
