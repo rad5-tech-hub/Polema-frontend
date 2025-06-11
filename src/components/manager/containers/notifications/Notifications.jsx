@@ -812,10 +812,17 @@ const Notifications = () => {
                                     </Text>
 
                                     {notification.ticketStatus === "pending" &&
-                                      (decodeToken().isAdmin || decodeToken().isSemiAdmin) && (
-                                        ["waybill", "gatepass","cash","weigh","invoice","lpo","store"].includes(
-                                          notification.type
-                                        )) && (
+                                      (decodeToken().isAdmin ||
+                                        decodeToken().isSemiAdmin) &&
+                                      [
+                                        "waybill",
+                                        "gatepass",
+                                        "cash",
+                                        "weigh",
+                                        "invoice",
+                                        "lpo",                                                                                                                                               
+                                        "store",
+                                      ].includes(notification.type) && (
                                         <div className="button-groups flex gap-4 mt-4">
                                           <AntButton
                                             className="bg-theme text-white hover:!bg-theme hover:text-white"
