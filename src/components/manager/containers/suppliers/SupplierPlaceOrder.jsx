@@ -155,7 +155,7 @@ const SupplierPlaceOrder = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setButtonLoading(true);
+    
 
     const token = localStorage.getItem("token");
     if (!token) {
@@ -175,9 +175,10 @@ const SupplierPlaceOrder = () => {
       price: basePrice.replace(/,/g, ""),
       ...(comment && { comments: comment }),
       ...(subCharge && { discount: subCharge.replace(/,/g, "") }),
-      ...(unit && {unit: selectedUnit?.price[0]?.unit || ""}),
+      ...(selectedUnit?.price[0]?.unit && {unit: selectedUnit?.price[0]?.unit || ""}),
     };
 
+    setButtonLoading(true);
     try {
       await axios.post(`${API_ROOT}/customer/raise-supplier-order`, orderData, {
         headers: { Authorization: `Bearer ${token}` },
@@ -319,7 +320,7 @@ const SupplierPlaceOrder = () => {
 
             {/* Sub Charge */}
             <div className="w-full">
-              <Text>Sub Charge</Text>
+              <Text>SUR CHARGE</Text>
               <Input
                 addonBefore="₦"
                 className="mt-2"

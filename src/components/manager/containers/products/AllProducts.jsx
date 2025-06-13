@@ -213,14 +213,14 @@ const AllProducts = () => {
                           >
                             <FontAwesomeIcon icon={faPen} /> Edit
                           </DropdownMenu.Item>
-                          {decodeToken().isAdmin ||
-                            (decodeToken().isSemiAdmin && (
+                          {decodeToken().isAdmin 
+                            && (
                               <DropdownMenu.Item
                                 onClick={() => handleDeleteClick(product)}
                               >
                                 <FontAwesomeIcon icon={faTrash} /> Delete
                               </DropdownMenu.Item>
-                            ))}
+                            )}
                         </DropdownMenu.Content>
                       </DropdownMenu.Root>
                     </Table.Cell>
