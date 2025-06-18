@@ -324,7 +324,7 @@ const Dipping = () => {
     <>
       <Flex justify="between" align="center" className="mb-4">
         <Heading>Dipping Records</Heading>
-        <Button color="brown" className="cursor-pointer" onClick={showModal}>
+        <Button className="cursor-pointer bg-theme" onClick={showModal}>
           New Dip
         </Button>
       </Flex>
@@ -438,7 +438,7 @@ const Dipping = () => {
       )}
 
       <Modal
-        title="New Dip Record"
+        title="New Dip"
         open={isModalVisible}
         onCancel={handleCancel}
         footer={[
@@ -461,23 +461,23 @@ const Dipping = () => {
         ]}
       >
         <Form form={form} layout="vertical">
-          <Form.Item
+          {/* <Form.Item
             name="date"
             label="Date"
             rules={[{ required: true, message: "Please select a date" }]}
           >
             <DateInput />
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item
             name="morningDip"
             label="Morning Dip (Tons)"
-            rules={[{ required: true, message: "Please input morning dip" }]}
+            rules={[{ required: false, message: "Please input morning dip" }]}
           >
             <Input type="number" />
           </Form.Item>
-          {/* <Form.Item name="eveningDip" label="Evening Dip (Tons)">
-            <Input type="number" />
-          </Form.Item> */}
+          <Form.Item name="eveningDip" label="Evening Dip (Tons)" >
+            <Input type="number" disabled={true} />
+          </Form.Item>
         </Form>
       </Modal>
 
@@ -495,7 +495,7 @@ const Dipping = () => {
             onClick={handleCompleteDip}
             loading={completeButtonLoading}
           >
-            Complete
+            Finish
           </AntButton>,
         ]}
       >
@@ -503,21 +503,21 @@ const Dipping = () => {
           <Form.Item
             name="date"
             label="Date"
-            rules={[{ required: true, message: "Please select a date" }]}
+            rules={[{ required: false, message: "Please select a date" }]}
           >
             <DateInput disabled />
           </Form.Item>
           <Form.Item
             name="morningDip"
             label="Morning Dip (Tons)"
-            rules={[{ required: true, message: "Please input morning dip" }]}
+            rules={[{ required: false, message: "Please input morning dip" }]}
           >
             <Input type="number" />
           </Form.Item>
           <Form.Item
             name="eveningDip"
             label="Evening Dip (Tons)"
-            rules={[{ required: true, message: "Please input evening dip" }]}
+            rules={[{ required: false, message: "Please input evening dip" }]}
           >
             <Input type="number" />
           </Form.Item>
