@@ -381,11 +381,11 @@ const Dipping = () => {
                 <Table.Cell>
                   <FontAwesomeIcon
                     className={`${
-                      item.status ? "text-green-500" : "text-yellow-500"
+                      item.status ? "text-yellow-500" : "text-green-500"
                     } mr-2`}
                     icon={faSquare}
                   />
-                  {item.status ? "Completed" : "Ongoing"}
+                  {item.status ? "Ongoing" : "Completed"}
                 </Table.Cell>
                 <Table.Cell>
                   {!item.status && (
