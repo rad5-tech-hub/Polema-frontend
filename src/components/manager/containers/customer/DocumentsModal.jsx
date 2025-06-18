@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import TransactionTag from "../template/TransactionTag";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toast, { Toaster } from "react-hot-toast";
@@ -327,16 +328,8 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
                       `${entry.quantity} ${entry.unit} of`}{" "}
                     {(entry.quantity && entry?.quantity) || ""}{" "}
                     {(entry.unit && entry?.unit) || ""} of {entry.product?.name}
-                    {/* {entry.unit !== null && " ordered"} */}
-                    {entry.unit === null
-                      ? ""
-                      : entry.unit === "" || entry.unit === "N/A"
-                      ? ""
-                      : " ordered"}
-                    {entry.order == null && entry.debit > entry.credit && " (extra)"}
-                    {entry.order == null &&
-                      entry.credit > entry.debit &&
-                      " (returned)"}
+                    
+                    <TransactionTag entry={entry}/>
                   </p>
                   <p className="text-xs">
                     {entry.creditType && `Paid with ${entry.creditType}`}

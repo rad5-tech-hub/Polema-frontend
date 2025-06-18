@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import TransactionTag from "../template/TransactionTag";
 import { jwtDecode } from "jwt-decode";
 import _ from "lodash";
 import axios from "axios";
@@ -422,17 +423,7 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                                   <p className="text-[.5rem]">
                                     {entry.quantity} {entry.unit} of{" "}
                                     {entry.productName}{" "}
-                                    {entry.unit === null
-                                      ? ""
-                                      : entry.unit === "" || entry.unit === "N/A"
-                                      ? ""
-                                      : " ordered"}
-                                    {entry.order == null &&
-                                      entry.debit > entry.credit &&
-                                      " (extra)"}
-                                    {entry.order == null &&
-                                      entry.credit > entry.debit &&
-                                      " (returned)"}
+                                    <TransactionTag entry={entry} />
                                   </p>{" "}
                                 </>
                               );
@@ -561,25 +552,32 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                         <Text className="text-[1rem] font-bold tracking-wide">
                           COMMENT
                         </Text>
-                        <p className="text-[.7rem]">{ticketDetails?.comments || ""}</p>
+                        <p className="text-[.7rem]">
+                          {ticketDetails?.comments || ""}
+                        </p>
                       </div>
                       <div className="flex justify-between">
                         <Text className="text-[1rem] font-bold tracking-wide">
                           DETAILS
                         </Text>
-                          <p className="text-[.7rem]">
-                            {Array.isArray(ticketDetails.items) ? ticketDetails.items.map((item) => {
-                               return (
-                                 <>
-                                   <span>
-                                     {item?.quantity || ""} {" "}
-                                     {item?.rawMaterial || ""} at {" "}
-                                     {item?.unitPrice ? formatMoney(item.unitPrice):""} each
-                                   </span>
-                                   <br />
-                                 </>
-                               );
-                            }) : "No Details Found."}
+                        <p className="text-[.7rem]">
+                          {Array.isArray(ticketDetails.items)
+                            ? ticketDetails.items.map((item) => {
+                                return (
+                                  <>
+                                    <span>
+                                      {item?.quantity || ""}{" "}
+                                      {item?.rawMaterial || ""} at{" "}
+                                      {item?.unitPrice
+                                        ? formatMoney(item.unitPrice)
+                                        : ""}{" "}
+                                      each
+                                    </span>
+                                    <br />
+                                  </>
+                                );
+                              })
+                            : "No Details Found."}
                         </p>
                       </div>
                     </>

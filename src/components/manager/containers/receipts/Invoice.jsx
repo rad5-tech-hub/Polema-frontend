@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { formatMoney, refractor, refractorToTime,isNegative } from "../../../date";
+import TransactionTag from "../template/TransactionTag";
+import {
+  formatMoney,
+  refractor,
+  refractorToTime,
+  isNegative,
+} from "../../../date";
 import { Switch, Dropdown, Menu } from "antd";
 import axios from "axios";
 import { useParams } from "react-router-dom";
@@ -296,17 +302,7 @@ const Invoice = () => {
                       {row?.quantity && row.quantity}{" "}
                       {row?.unit ? row.unit : ""} {row?.unit ? "of " : ""}
                       {row.productName && row.productName}
-                      
-                      
-                      {row.unit === null
-                        ? ""
-                        : row.unit === "" || row.unit === "N/A"
-                        ? ""
-                          : " ordered"}
-                            
-                      {row.order == null && row.debit> row.credit && " (extra)"}
-                      {row.order == null && row.credit> row.debit && " (returned)"}
-                      
+                      <TransactionTag entry={row} />
                     </td>
                     <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                       {formatMoney(row?.order?.rate) || ""}

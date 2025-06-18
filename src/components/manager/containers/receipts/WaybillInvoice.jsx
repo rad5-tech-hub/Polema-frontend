@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import useToast from "../../../../hooks/useToast";
-
+import TransactionTag from "../template/TransactionTag";
 import { faPrint } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useParams } from "react-router-dom";
@@ -352,18 +352,9 @@ const WaybillInvoice = () => {
                       <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                         {`  ${row.unit} of ${
                           row.product?.name || "PKC"
-                        }`}
-                        {row.unit === null
-                          ? ""
-                          : row.unit === "" || row.unit === "N/A"
-                          ? ""
-                          : " ordered"}
-                        {row.order == null &&
-                          row.debit > row.credit &&
-                          " (extra)"}
-                        {row.order == null &&
-                          row.credit > row.debit &&
-                          " (returned)"}
+                          }`}
+                        <TransactionTag entry={row}/>
+                       
                       </td>
                       {/* <td className="border border-[#43434380] px-4 py-2 text-xs sm:text-sm">
                         {formatMoney(row.order?.rate) || ""}
