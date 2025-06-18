@@ -3,6 +3,8 @@ import OfficialLPO from "./raise-tickets/OfficialLPO";
 // import WelcomeComponent from "./WelcomeComponent";
 // import WelcomeComponent from "./dashbaord/WelcomeComponent";
 import BlankLPO from "./raise-tickets/BlankLPO";
+import Batching from "./department-store/Batching";
+import Dipping from "./department-store/Dipping";
 import EditDialog from "./products/EditDialog";
 import EditProducts from "./products/EditProducts";
 import AuthorityToGiveCash from "./raise-tickets/AuthorityToGiveCash";
@@ -90,6 +92,7 @@ import PrintingRecords from "./printing/printing";
 export {
   // OfficialLPO,
   ManageDeptStore,
+  Batching,
   ManagePharmacyStore,
   DepartmentRecordBook,
   ManageGenStore,
@@ -173,5 +176,6 @@ export {
   Onboarding,
   OfficialLPO,
   EditProducts,
-  PrintingRecords
+  PrintingRecords,
+  Dipping,
 };

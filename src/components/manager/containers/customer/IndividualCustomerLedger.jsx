@@ -495,14 +495,28 @@ const IndividualCustomerLedger = () => {
             </p>
           )}
           {decodeToken().isAdmin && customer.length > 0 && (
-            <Button
-              className="mt-4 cursor-pointer"
-              onClick={() => {
-                setCreditCustomerModalOpen(true);
-              }}
-            >
-              Credit Customer
-            </Button>
+            <div className="flex gap-4">
+              <Button
+                className="mt-4 cursor-pointer"
+                onClick={() => {
+                  setCreditCustomerModalOpen(true);
+                }}
+              >
+                Credit Customer
+              </Button>
+              <Button
+                className="mt-4 cursor-pointer"
+                color="green"
+                onClick={() => {
+                  showToast({
+                    type:"error",
+                    message:"Feature not yet available."
+                  })
+                }}
+              >
+                Generate Statement
+              </Button>
+            </div>
           )}
         </div>
 
@@ -703,7 +717,7 @@ const IndividualCustomerLedger = () => {
           getCustomerByID(id).lastname
         }`}
       />
-      <Toaster position="top-right" />
+      {/* <Toaster position="top-right" /> */}
     </>
   );
 };

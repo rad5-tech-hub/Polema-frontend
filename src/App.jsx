@@ -24,6 +24,8 @@ import {
   PharmacyPlaceOrder,
   CashManagementLedger,
   InvoiceAuthorityToWeigh,
+  Batching,
+  Dipping,
   AuthorityToLoad,
   AllReceipts,
   ViewPharmacyStore,
@@ -111,7 +113,6 @@ const App = () => {
         <Route path="/confirm-email" element={<ConfirmEmail />} />
         {/* Create new password */}
         <Route path="/create-new-password" element={<NewPassword />} />
-
 
         {/* Protected Routes */}
         <Route
@@ -367,6 +368,14 @@ const App = () => {
                   <Route
                     path="/department-store/manage-store"
                     element={<ManageDeptStore />}
+                  />
+                  <Route
+                    path="/department-store/batching"
+                    element={<Batching />}
+                  />
+                  <Route
+                    path="/department-store/dipping"
+                    element={<Dipping />}
                   />
 
                   {/* Weighing operations routes     */}
