@@ -107,9 +107,9 @@ const NewWeigh = () => {
       setVehicleNumber(ticket.vehicleNo || "");
       setSaveAuthId(ticket.authToWeighId || "");
       setTar(ticket.tar || "");
-      setIsTarDisabled(!!ticket.tar);
+      // setIsTarDisabled(!!ticket.tar);
       setGross(ticket.gross || "");
-      setIsGrossDisabled(!!ticket.gross);
+      // setIsGrossDisabled(!!ticket.gross);
       setQuantityNet(ticket.net || "");
       setInitialQuantity(
         ticket.transaction?.quantity
