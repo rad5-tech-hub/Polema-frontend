@@ -47,6 +47,8 @@ const Dipping = () => {
   const [isCompleteModalVisible, setIsCompleteModalVisible] = useState(false);
   const [selectedDip, setSelectedDip] = useState(null);
   const [saveButtonLoading, setSaveButtonLoading] = useState(false);
+  const [secondSaveButtonLoading, setSecondSaveButtonLoading] = useState(false);
+
   const [finishButtonLoading, setFinishButtonLoading] = useState(false);
   const [completeButtonLoading, setCompleteButtonLoading] = useState(false);
   const [failedSearch, setFailedSearch] = useState(false);
@@ -131,10 +133,73 @@ const Dipping = () => {
     form.resetFields();
   };
 
-  const handleCompleteCancel = () => {
-    setIsCompleteModalVisible(false);
-    setSelectedDip(null);
-    completeForm.resetFields();
+  const handleCompleteCancel = async () => {
+    try {
+      const values = await completeForm.validateFields();
+      if (!values.morningDip || values.eveningDip) {
+        completeForm.setFields([
+          {
+            name: "morningDip",
+            errors: !values.morningDip
+              ? ["Morning Dip is required for saving"]
+              : [],
+          },
+          {
+            name: "eveningDip",
+            errors: values.eveningDip
+              ? ["Evening Dip is not required for Saving"]
+              : [],
+          },
+        ]);
+        return;
+      }
+      setSecondSaveButtonLoading(true);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        showToast({
+          type: "error",
+          message: "An error occurred, try logging in again",
+        });
+        setSecondSaveButtonLoading(false);
+        return;
+      }
+
+      if(values.eveningDip){
+        showToast({
+          type: "error",
+          message: "Evening Dip is not required for Saving",
+        });
+        return
+      }
+      await axios.patch(
+        `${root}/batch/edit-dip/${selectedDip.id}`,
+        {
+          ...(values.morningDip && { morning: values.morningDip }),
+          // ...(values.eveningDip && { evening: values.eveningDip }),
+          // date: values.date?.toISOString(),
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setIsCompleteModalVisible(false);
+      completeForm.resetFields();
+      setSelectedDip(null);
+      showToast({
+        message: "Dip Record Saved Successfully",
+        type: "success",
+      });
+      setCurrentPageIndex(0);
+      setPaginationUrls([]);
+      fetchDipping();
+    } catch (err) {
+      showToast({
+        type: "error",
+        message:
+          err?.response?.data?.message ||
+          "An error occurred, please try again.",
+      });
+    } finally {
+      setSecondSaveButtonLoading(false);
+    }
   };
 
   const handleSave = async () => {
@@ -161,7 +226,7 @@ const Dipping = () => {
       }
       await axios.post(
         `${root}/batch/create-dip`,
-        { morning: values.morningDip},
+        { morning: values.morningDip },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setIsModalVisible(false);
@@ -278,8 +343,8 @@ const Dipping = () => {
       await axios.patch(
         `${root}/batch/edit-dip/${selectedDip.id}`,
         {
-          ...(values.morningDip && {morning:values.morningDip }),
-          ...(values.eveningDip  && {evening: values.eveningDip}),
+          ...(values.morningDip && { morning: values.morningDip }),
+          ...(values.eveningDip && { evening: values.eveningDip }),
           // date: values.date?.toISOString(),
         },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -475,7 +540,7 @@ const Dipping = () => {
           >
             <Input type="number" />
           </Form.Item>
-          <Form.Item name="eveningDip" label="Evening Dip (Tons)" >
+          <Form.Item name="eveningDip" label="Evening Dip (Tons)">
             <Input type="number" disabled={true} />
           </Form.Item>
         </Form>
@@ -486,7 +551,11 @@ const Dipping = () => {
         open={isCompleteModalVisible}
         onCancel={handleCompleteCancel}
         footer={[
-          <AntButton key="cancel" onClick={handleCompleteCancel}>
+          <AntButton
+            key="cancel"
+            onClick={handleCompleteCancel}
+            loading={secondSaveButtonLoading}
+          >
             Save
           </AntButton>,
           <AntButton
