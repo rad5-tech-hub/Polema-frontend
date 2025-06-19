@@ -5,7 +5,7 @@ const Batching = () => {
     <>
       <Flex justify={"between"}>
         <Heading>Batching Records</Heading>
-        <Button color="brown" className="cursor-pointer">New Batch</Button>
+        <Button  className="cursor-pointer bg-theme">New Batch</Button>
       </Flex>
 
       <Table.Root className="mt-4" variant="surface">

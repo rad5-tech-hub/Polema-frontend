@@ -259,7 +259,7 @@ const Dipping = () => {
           {
             name: "eveningDip",
             errors: !values.eveningDip
-              ? ["Evening Dip is required for completing"]
+              ? ["Evening Dip is required for Finishing"]
               : [],
           },
         ]);
@@ -381,14 +381,14 @@ const Dipping = () => {
                 <Table.Cell>
                   <FontAwesomeIcon
                     className={`${
-                      item.status ? "text-yellow-500" : "text-green-500"
+                      item.isActive ? "text-yellow-500" : "text-green-500"
                     } mr-2`}
                     icon={faSquare}
                   />
-                  {item.status ? "Ongoing" : "Completed"}
+                  {item.isActive ? "Ongoing" : "Completed"}
                 </Table.Cell>
                 <Table.Cell>
-                  {!item.status && (
+                  {item.isActive && (
                     <DropdownMenu.Root>
                       <DropdownMenu.Trigger>
                         <Button variant="surface" className="cursor-pointer">
@@ -487,7 +487,7 @@ const Dipping = () => {
         onCancel={handleCompleteCancel}
         footer={[
           <AntButton key="cancel" onClick={handleCompleteCancel}>
-            Cancel
+            Save
           </AntButton>,
           <AntButton
             key="complete"
