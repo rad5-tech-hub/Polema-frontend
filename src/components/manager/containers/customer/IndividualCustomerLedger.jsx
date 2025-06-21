@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { jwtDecode } from "jwt-decode";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faStop, faRedo, faRedoAlt } from "@fortawesome/free-solid-svg-icons";
+import {
+  faSearch,
+  faStop,
+  faRedo,
+  faRedoAlt,
+} from "@fortawesome/free-solid-svg-icons";
 import DocumentsModal from "./DocumentsModal";
 import toast, { Toaster } from "react-hot-toast";
 import { refractor, formatMoney } from "../../../date";
@@ -20,6 +25,8 @@ import axios from "axios";
 import { Modal, Select, DatePicker } from "antd";
 import { StopOutlined } from "@ant-design/icons";
 import useToast from "../../../../hooks/useToast";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const { RangePicker } = DatePicker;
 const root = import.meta.env.VITE_ROOT;
@@ -43,6 +50,11 @@ const IndividualCustomerLedger = () => {
   const [paginationUrls, setPaginationUrls] = useState([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [generatingPDF, setGeneratingPDF] = useState(false);
+  const [startingDateRange, setStartingDateRange] = useState({
+    start: "",
+    end: "",
+  });
 
   const searchInputRef = useRef(null);
   const formatNumberWithCommas = (value) => {
@@ -102,7 +114,11 @@ const IndividualCustomerLedger = () => {
   };
 
   // Fetch customer ledger
-  const getCustomerLedger = async (startDate = null, endDate = null, pageUrl = null) => {
+  const getCustomerLedger = async (
+    startDate = null,
+    endDate = null,
+    pageUrl = null
+  ) => {
     setLoading(true);
     setEntries([]);
     setFailedSearch(false);
@@ -163,6 +179,87 @@ const IndividualCustomerLedger = () => {
       setFailedSearch(true);
       setLoading(false);
     }
+  };
+
+  // Update startingDateRange when entries change
+  useEffect(() => {
+    if (entries.length > 0) {
+      setStartingDateRange({
+        start: refractor(entries[0]?.createdAt) || "",
+        end: refractor(entries[entries.length - 1]?.createdAt) || "",
+      });
+    } else {
+      setStartingDateRange({ start: "", end: "" });
+    }
+  }, [entries]);
+
+  // Generate PDF
+  const generatePDF = () => {
+    setGeneratingPDF(true);
+    const customerName = `${getCustomerByID(id).firstname} ${
+      getCustomerByID(id).lastname
+    }`;
+    const dateRangeStr = dateRange
+      ? `${dateRange[0].format("YYYY-MM-DD")}_to_${dateRange[1].format(
+          "YYYY-MM-DD"
+        )}`
+      : `${startingDateRange.start} to ${startingDateRange.end}`;
+    const fileName = `${customerName}-${dateRangeStr}.pdf`;
+
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text(`Transaction Statement for ${customerName}`, 14, 20);
+    doc.setFontSize(12);
+    doc.text(
+      `Date Range: ${
+        dateRange
+          ? dateRangeStr.replace("_to_", " to ")
+          : `${startingDateRange.start} to ${startingDateRange.end}`
+      }`,
+      14,
+      30
+    );
+
+    const tableData = entries.map((entry) => [
+      refractor(entry.createdAt),
+      getProductByID(entry.productId),
+      entry.unit,
+      entry.quantity,
+      entry.unitPrice ? formatMoney(entry.unitPrice) : "",
+      entry.comments || "",
+      formatMoney(entry.credit > entry.debit ? entry.credit : ""),
+      formatMoney(entry.debit > entry.credit ? entry.debit : ""),
+      formatMoney(entry.balance),
+    ]);
+
+    autoTable(doc, {
+      startY: 40,
+      head: [
+        [
+          "Date",
+          "Product",
+          "Unit",
+          "Quantity",
+          "Unit Price",
+          "Comments",
+          "Credit (₦)",
+          "Debit (₦)",
+          "Balance (₦)",
+        ],
+      ],
+      body: tableData,
+      theme: "grid",
+      headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+      styles: { fontSize: 10 },
+    });
+
+    doc.save(fileName);
+    setGeneratingPDF(false);
+    showToast({
+      message: "PDF generated successfully",
+      type: "success",
+      duration: 5000,
+    });
   };
 
   // End transaction
@@ -356,7 +453,7 @@ const IndividualCustomerLedger = () => {
           setComments("");
         }}
       >
-        <form action="" onSubmit={handleCreditSubmit}>
+        <form onSubmit={handleCreditSubmit}>
           <div className="mt-4">
             <label htmlFor="product-select" className="font-bold">
               Product
@@ -507,21 +604,17 @@ const IndividualCustomerLedger = () => {
               <Button
                 className="mt-4 cursor-pointer"
                 color="green"
-                onClick={() => {
-                  showToast({
-                    type:"error",
-                    message:"Feature not yet available."
-                  })
-                }}
+                onClick={generatePDF}
+                disabled={generatingPDF || loading || entries.length === 0}
               >
-                Generate Statement
+                {generatingPDF ? "Generating..." : "Generate Statement"}
               </Button>
             </div>
           )}
         </div>
 
         <div className="w-[70%]">
-          <Flex gap="3" align="center">
+          <Flex gap="3" align="center" direction="column">
             <div className="relative w-full max-w-md" ref={searchInputRef}>
               <TextField.Root
                 placeholder="Enter Customer Name"
