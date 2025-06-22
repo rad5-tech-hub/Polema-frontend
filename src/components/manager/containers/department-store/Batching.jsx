@@ -99,7 +99,8 @@ const Batching = () => {
       );
       showToast({
         type: "success",
-        message: "New Batch started successfully.",
+        message:
+          "🎉 Batch Started Successfully \n \n Your batch has been opened. To monitor or update records , head over to 'Opened Batches' and select 'View Records' to get started",
       });
       setCurrentPageIndex(0);
       setPaginationUrls([]);
