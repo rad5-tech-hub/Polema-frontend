@@ -474,16 +474,16 @@ const Batching = () => {
           </Flex>
           <Flex justify="end" gap="3" className="mt-4">
             <Button
-              variant="soft"
+              variant="surface"
               onClick={handleSaveLikeThat}
-              className="cursor-pointer"
+              className="cursor-pointer !bg-theme/75 text-white"
             >
               Finish
             </Button>
             <Button
               variant="solid"
               onClick={handleSave}
-              className="cursor-pointer"
+              className="cursor-pointer !bg-theme "
             >
               Save
             </Button>

@@ -106,7 +106,7 @@ const BatchingRecords = () => {
         </Table.Header>
         </Table.Root>
         
-        <Table.Root
+        {/* <Table.Root
         className="mt-4 table-fixed w-full"
         variant="surface"
         size="2"
@@ -122,7 +122,7 @@ const BatchingRecords = () => {
             </Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
-      </Table.Root>
+      </Table.Root> */}
       </div>
 
     </>
