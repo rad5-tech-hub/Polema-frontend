@@ -1863,6 +1863,10 @@ video {
   background-color: rgb(67 67 67 / var(--tw-bg-opacity, 1)) !important;
 }
 
+.\!bg-theme\/70 {
+  background-color: rgb(67 67 67 / 0.7) !important;
+}
+
 .\!bg-transparent {
   background-color: transparent !important;
 }
@@ -2074,10 +2078,6 @@ video {
   background-color: rgb(253 224 71 / var(--tw-bg-opacity, 1));
 }
 
-.\!bg-theme\/70 {
-  background-color: rgb(67 67 67 / 0.7) !important;
-}
-
 .bg-opacity-50 {
   --tw-bg-opacity: 0.5;
 }
@@ -2286,6 +2286,11 @@ video {
 
 .font-space {
   font-family: Inter, sans-serif;
+}
+
+.\!text-sm {
+  font-size: 0.875rem !important;
+  line-height: 1.25rem !important;
 }
 
 .text-2xl {
