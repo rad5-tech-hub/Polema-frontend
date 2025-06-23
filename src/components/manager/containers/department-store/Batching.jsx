@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSquare, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
+import {
+  faSquare,
+  faEllipsisV,
+  faTimes,
+} from "@fortawesome/free-solid-svg-icons";
 import { refractor } from "../../../date";
 import {
   Heading,
@@ -11,6 +15,8 @@ import {
   Text,
   Spinner,
   DropdownMenu,
+  Dialog,
+  TextField,
 } from "@radix-ui/themes";
 import axios from "axios";
 import useToast from "../../../../hooks/useToast";
@@ -19,7 +25,7 @@ const root = import.meta.env.VITE_ROOT;
 
 const Batching = () => {
   const showToast = useToast();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [batches, setBatches] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [newBatchButtonLoading, setNewBatchButtonLoading] = useState(false);
@@ -27,6 +33,39 @@ const Batching = () => {
   const [newestRecordRunnning, setNewestRecordRunning] = useState(false);
   const [paginationUrls, setPaginationUrls] = useState([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [batchProducts, setBatchProducts] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedBatchId, setSelectedBatchId] = useState(null);
+  const [quantities, setQuantities] = useState({});
+
+  const fetchBatchProducts = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      showToast({
+        type: "error",
+        message: "An error occurred, try logging in again.",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const { data } = await axios.get(`${root}/batch/batch-products`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setBatchProducts(data.data);
+    } catch (error) {
+      showToast({
+        type: "error",
+        message:
+          error?.response?.data?.message ||
+          "An error occurred, please try again.",
+      });
+    }
+  };
 
   const fetchBatches = async (pageUrl = null) => {
     setIsLoading(true);
@@ -99,6 +138,7 @@ const Batching = () => {
       );
       showToast({
         type: "success",
+        position: "top-center",
         message:
           "🎉 Batch Started Successfully \n \n Your batch has been opened. To monitor or update records , head over to 'Opened Batches' and select 'View Records' to get started",
       });
@@ -117,7 +157,13 @@ const Batching = () => {
     }
   };
 
-  const statusFunction = async (id) => {
+  const handleEndBatchClick = (batchId) => {
+    setSelectedBatchId(batchId);
+    setQuantities({});
+    setIsModalOpen(true);
+  };
+
+  const handleSaveLikeThat = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
       showToast({
@@ -128,7 +174,7 @@ const Batching = () => {
     }
     try {
       await axios.patch(
-        `${root}/batch/end-batch/${id}`,
+        `${root}/batch/end-batch/${selectedBatchId}`,
         {},
         {
           headers: {
@@ -140,6 +186,7 @@ const Batching = () => {
         type: "success",
         message: "Batch ended successfully.",
       });
+      setIsModalOpen(false);
       setCurrentPageIndex(0);
       setPaginationUrls([]);
       fetchBatches();
@@ -151,6 +198,76 @@ const Batching = () => {
           "An error occurred while trying to end batch.",
       });
     }
+  };
+
+  const handleSave = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      showToast({
+        type: "error",
+        message: "An error occurred, try logging in again.",
+      });
+      return;
+    }
+    const payload = Object.keys(quantities).reduce((acc, productId) => {
+      if (quantities[productId]) {
+        acc[productId] = Number(quantities[productId]);
+      }
+      return acc;
+    }, {});
+
+    if (Object.keys(payload).length === 0) {
+      showToast({
+        type: "warning",
+        message: "Please enter at least one quantity.",
+      });
+      return;
+    }
+
+    try {
+      await axios.patch(
+        `${root}/batch/update-batchProd/${selectedBatchId}`,
+        {
+          updates: payload,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      await axios.patch(
+        `${root}/batch/end-batch/${selectedBatchId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      showToast({
+        type: "success",
+        message: "Batch updated and ended successfully.",
+      });
+      setIsModalOpen(false);
+      setCurrentPageIndex(0);
+      setPaginationUrls([]);
+      fetchBatches();
+    } catch (err) {
+      showToast({
+        type: "error",
+        message:
+          err?.response?.data?.message ||
+          "An error occurred while trying to update and end batch.",
+      });
+    }
+  };
+
+  const handleQuantityChange = (productId, value) => {
+    setQuantities((prev) => ({
+      ...prev,
+      [productId]: value,
+    }));
   };
 
   const handleNextPage = () => {
@@ -174,6 +291,7 @@ const Batching = () => {
 
   useEffect(() => {
     fetchBatches();
+    fetchBatchProducts();
   }, []);
 
   return (
@@ -182,12 +300,13 @@ const Batching = () => {
         <Heading>Batching Records</Heading>
         <Button
           className={` text-white hover:!bg-brown-500 ${
-            newestRecordRunnning ? "!bg-theme/70 cursor-not-allowed" : "!bg-theme cursor-pointer"
+            newestRecordRunnning
+              ? "!bg-theme/70 cursor-not-allowed"
+              : "!bg-theme cursor-pointer"
           }`}
           disabled={newestRecordRunnning}
           onClick={startNewBatch}
         >
-          
           {newBatchButtonLoading ? <Spinner size="1" /> : "New Batch"}
         </Button>
       </Flex>
@@ -273,14 +392,16 @@ const Batching = () => {
                       <DropdownMenu.Content variant="solid">
                         <DropdownMenu.Item
                           onClick={() =>
-                            navigate(`/admin/department-store/batching/${batch.id}`)
+                            navigate(
+                              `/admin/department-store/batching/${batch.id}`
+                            )
                           }
                         >
                           View Batch Records
                         </DropdownMenu.Item>
                         {batch?.isActive && (
                           <DropdownMenu.Item
-                            onClick={() => statusFunction(batch.id)}
+                            onClick={() => handleEndBatchClick(batch.id)}
                           >
                             End Batch
                           </DropdownMenu.Item>
@@ -320,6 +441,55 @@ const Batching = () => {
           </Flex>
         </Flex>
       )}
+
+      <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <Dialog.Content className="max-w-lg">
+          <Flex justify="between" align="center" className="mb-4">
+            <Dialog.Title>End Batch</Dialog.Title>
+            <Button
+              variant="ghost"
+              onClick={() => setIsModalOpen(false)}
+              className="cursor-pointer absolute top-4 right-4"
+            >
+              <FontAwesomeIcon icon={faTimes} />
+            </Button>
+          </Flex>
+          <Flex direction="column" gap="3">
+            {batchProducts.map((product) => (
+              <div className="flex gap-4 items-center mb-4">
+                <p className="text-[15px] w-[40%]"> {product.name}</p>
+                <TextField.Root
+                  key={product.id}
+                  className="w-full"
+                  placeholder={`Enter quantity for ${product.name} in TONS`}
+                  value={quantities[product.id] || ""}
+                  onChange={(e) =>
+                    handleQuantityChange(product.id, e.target.value)
+                  }
+                >
+               
+                </TextField.Root>
+              </div>
+            ))}
+          </Flex>
+          <Flex justify="end" gap="3" className="mt-4">
+            <Button
+              variant="soft"
+              onClick={handleSaveLikeThat}
+              className="cursor-pointer"
+            >
+              Finish
+            </Button>
+            <Button
+              variant="solid"
+              onClick={handleSave}
+              className="cursor-pointer"
+            >
+              Save
+            </Button>
+          </Flex>
+        </Dialog.Content>
+      </Dialog.Root>
     </>
   );
 };
