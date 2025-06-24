@@ -1,23 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faSquare,
-  faEllipsisV,
-  faTimes,
-} from "@fortawesome/free-solid-svg-icons";
+import { faSquare, faEllipsisV, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { refractor } from "../../../date";
-import {
-  Heading,
-  Flex,
-  Button,
-  Table,
-  Text,
-  Spinner,
-  DropdownMenu,
-  Dialog,
-  TextField,
-} from "@radix-ui/themes";
+import { Heading, Flex, Button, Table, Text, Spinner, DropdownMenu, Dialog, TextField } from "@radix-ui/themes";
 import axios from "axios";
 import useToast from "../../../../hooks/useToast";
 
@@ -40,29 +26,20 @@ const Batching = () => {
 
   const fetchBatchProducts = async () => {
     const token = localStorage.getItem("token");
-
     if (!token) {
-      showToast({
-        type: "error",
-        message: "An error occurred, try logging in again.",
-      });
+      showToast({ type: "error", message: "An error occurred, try logging in again." });
       setIsLoading(false);
       return;
     }
-
     try {
       const { data } = await axios.get(`${root}/batch/batch-products`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setBatchProducts(data.data);
     } catch (error) {
       showToast({
         type: "error",
-        message:
-          error?.response?.data?.message ||
-          "An error occurred, please try again.",
+        message: error?.response?.data?.message || "An error occurred, please try again.",
       });
     }
   };
@@ -73,22 +50,36 @@ const Batching = () => {
     setError(null);
     const token = localStorage.getItem("token");
     if (!token) {
-      showToast({
-        type: "error",
-        message: "An error occurred, try logging in again.",
-      });
+      showToast({ type: "error", message: "An error occurred, try logging in again." });
       setIsLoading(false);
       return;
     }
     try {
       const url = pageUrl ? `${root}${pageUrl}` : `${root}/batch/all-batch`;
       const response = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-      setBatches(response.data.data || []);
-      setNewestRecordRunning(response.data.data[0].isActive);
+
+      // Process batches to extract first occurrence of each raw material and product
+      const processedBatches = response.data.data.map((batch) => {
+        // Extract first occurrence from raw-material
+        const cpko = batch["raw-material"]?.find((item) => item.rawName.toLowerCase() === "cpko");
+        const fvo = batch["raw-material"]?.find((item) => item.rawName.toLowerCase() === "fvo");
+        // Extract first occurrence from products
+        const sludge = batch.products?.find((item) => item.rawName.toLowerCase() === "sludge");
+        const fattyAcid = batch.products?.find((item) => item.rawName.toLowerCase() === "fatty acid");
+
+        return {
+          ...batch,
+          totalCPKOBought: cpko ? cpko.totalQuantity : "N/A",
+          totalFVOSold: fvo ? fvo.totalQuantity : "N/A",
+          totalSludgeSold: sludge ? sludge.totalQuantity : "N/A",
+          totalFattyAcidSold: fattyAcid ? fattyAcid.totalQuantity : "N/A",
+        };
+      });
+
+      setBatches(processedBatches || []);
+      setNewestRecordRunning(response.data.data[0]?.isActive || false);
       if (response.data.pagination?.nextPage) {
         setPaginationUrls((prev) => {
           const newUrl = response.data.pagination.nextPage;
@@ -102,14 +93,10 @@ const Batching = () => {
         setPaginationUrls((prev) => prev.slice(0, currentPageIndex + 1));
       }
     } catch (err) {
-      setError(
-        err?.response?.data?.message || "An error occurred, please try again."
-      );
+      setError(err?.response?.data?.message || "An error occurred, please try again.");
       showToast({
         type: "error",
-        message:
-          err?.response?.data?.message ||
-          "An error occurred, please try again.",
+        message: err?.response?.data?.message || "An error occurred, please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -119,28 +106,19 @@ const Batching = () => {
   const startNewBatch = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      showToast({
-        type: "error",
-        message: "An error occurred, try logging in again.",
-      });
+      showToast({ type: "error", message: "An error occurred, try logging in again." });
       return;
     }
     setNewBatchButtonLoading(true);
     try {
-      await axios.post(
-        `${root}/batch/start-batch`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await axios.post(`${root}/batch/start-batch`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       showToast({
         type: "success",
         position: "top-center",
         message:
-          "🎉 Batch Started Successfully \n \n Your batch has been opened. To monitor or update records , head over to 'Opened Batches' and select 'View Records' to get started",
+          "🎉 Batch Started Successfully \n \n Your batch has been opened. To monitor or update records, head over to 'Opened Batches' and select 'View Records' to get started",
       });
       setCurrentPageIndex(0);
       setPaginationUrls([]);
@@ -148,9 +126,7 @@ const Batching = () => {
     } catch (err) {
       showToast({
         type: "error",
-        message:
-          err?.response?.data?.message ||
-          "An error occurred when starting new batch.",
+        message: err?.response?.data?.message || "An error occurred when starting new batch.",
       });
     } finally {
       setNewBatchButtonLoading(false);
@@ -166,26 +142,14 @@ const Batching = () => {
   const handleSaveLikeThat = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      showToast({
-        type: "error",
-        message: "An error occurred, try logging in again.",
-      });
+      showToast({ type: "error", message: "An error occurred, try logging in again." });
       return;
     }
     try {
-      await axios.patch(
-        `${root}/batch/end-batch/${selectedBatchId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      showToast({
-        type: "success",
-        message: "Batch ended successfully.",
+      await axios.patch(`${root}/batch/end-batch/${selectedBatchId}`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
       });
+      showToast({ type: "success", message: "Batch ended successfully." });
       setIsModalOpen(false);
       setCurrentPageIndex(0);
       setPaginationUrls([]);
@@ -193,9 +157,7 @@ const Batching = () => {
     } catch (err) {
       showToast({
         type: "error",
-        message:
-          err?.response?.data?.message ||
-          "An error occurred while trying to end batch.",
+        message: err?.response?.data?.message || "An error occurred while trying to end batch.",
       });
     }
   };
@@ -203,10 +165,7 @@ const Batching = () => {
   const handleSave = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      showToast({
-        type: "error",
-        message: "An error occurred, try logging in again.",
-      });
+      showToast({ type: "error", message: "An error occurred, try logging in again." });
       return;
     }
     const payload = Object.keys(quantities).reduce((acc, productId) => {
@@ -217,38 +176,18 @@ const Batching = () => {
     }, {});
 
     if (Object.keys(payload).length === 0) {
-      showToast({
-        type: "warning",
-        message: "Please enter at least one quantity.",
-      });
+      showToast({ type: "warning", message: "Please enter at least one quantity." });
       return;
     }
 
     try {
-      await axios.patch(
-        `${root}/batch/update-batchProd/${selectedBatchId}`,
-        {
-          updates: payload,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      await axios.patch(
-        `${root}/batch/end-batch/${selectedBatchId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      showToast({
-        type: "success",
-        message: "Batch updated and ended successfully.",
+      await axios.patch(`${root}/batch/update-batchProd/${selectedBatchId}`, { updates: payload }, {
+        headers: { Authorization: `Bearer ${token}` },
       });
+      await axios.patch(`${root}/batch/end-batch/${selectedBatchId}`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      showToast({ type: "success", message: "Batch updated and ended successfully." });
       setIsModalOpen(false);
       setCurrentPageIndex(0);
       setPaginationUrls([]);
@@ -256,9 +195,7 @@ const Batching = () => {
     } catch (err) {
       showToast({
         type: "error",
-        message:
-          err?.response?.data?.message ||
-          "An error occurred while trying to update and end batch.",
+        message: err?.response?.data?.message || "An error occurred while trying to update and end batch.",
       });
     }
   };
@@ -300,9 +237,7 @@ const Batching = () => {
         <Heading>Batching Records</Heading>
         <Button
           className={` text-white hover:!bg-brown-500 ${
-            newestRecordRunnning
-              ? "!bg-theme/70 cursor-not-allowed"
-              : "!bg-theme cursor-pointer"
+            newestRecordRunnning ? "!bg-theme/70 cursor-not-allowed" : "!bg-theme cursor-pointer"
           }`}
           disabled={newestRecordRunnning}
           onClick={startNewBatch}
@@ -311,31 +246,15 @@ const Batching = () => {
         </Button>
       </Flex>
 
-      <Table.Root
-        className="mt-4 table-fixed w-full"
-        variant="surface"
-        size="2"
-      >
+      <Table.Root className="mt-4 table-fixed w-full" variant="surface" size="2">
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeaderCell className="text-left">
-              PERIOD
-            </Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">
-              TOTAL FVO SOLD (TONS)
-            </Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">
-              TOTAL CPKO BOUGHT (TONS)
-            </Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">
-              TOTAL FATTY ACID SOLD
-            </Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">
-              TOTAL SLUDGE SOLD
-            </Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">
-              STATUS
-            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">PERIOD</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">TOTAL FVO SOLD (TONS)</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">TOTAL CPKO BOUGHT (TONS)</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">TOTAL FATTY ACID SOLD</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">TOTAL SLUDGE SOLD</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">STATUS</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell className="text-left"></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
@@ -359,59 +278,43 @@ const Batching = () => {
               </Table.Cell>
             </Table.Row>
           ) : (
-            batches.map((batch) => {
-              return (
-                <Table.Row
-                  key={batch.id || `${batch.startDate}-${batch.endDate}`}
-                >
-                  <Table.Cell>
-                    {`${refractor(batch?.startDate) || "N/A"} - ${
-                      batch?.endDate ? refractor(batch?.endDate) : ""
-                    }`}
-                  </Table.Cell>
-                  <Table.Cell>{batch?.totalFVOSold || "N/A"}</Table.Cell>
-                  <Table.Cell>{batch?.totalCPKOBought || "N/A"}</Table.Cell>
-                  <Table.Cell>{batch?.totalFattyAcidSold || "N/A"}</Table.Cell>
-                  <Table.Cell>{batch?.totalSludgeSold || "N/A"}</Table.Cell>
-                  <Table.Cell className="text-sm">
-                    <FontAwesomeIcon
-                      className={`${
-                        batch?.isActive ? "text-green-500" : "text-red-500"
-                      } mr-2`}
-                      icon={faSquare}
-                    />
-                    {batch?.isActive ? "Open" : "Closed"}
-                  </Table.Cell>
-                  <Table.Cell>
-                    <DropdownMenu.Root>
-                      <DropdownMenu.Trigger>
-                        <Button variant="surface" className="cursor-pointer">
-                          <FontAwesomeIcon icon={faEllipsisV} />
-                        </Button>
-                      </DropdownMenu.Trigger>
-                      <DropdownMenu.Content variant="solid">
-                        <DropdownMenu.Item
-                          onClick={() =>
-                            navigate(
-                              `/admin/department-store/batching/${batch.id}`
-                            )
-                          }
-                        >
-                          View Batch Records
+            batches.map((batch) => (
+              <Table.Row key={batch.id || `${batch.startDate}-${batch.endDate}`}>
+                <Table.Cell>{`${refractor(batch?.startDate) || "N/A"} - ${batch?.endDate ? refractor(batch?.endDate) : ""}`}</Table.Cell>
+                <Table.Cell>{batch?.totalFVOSold || "N/A"}</Table.Cell>
+                <Table.Cell>{batch?.totalCPKOBought || "N/A"}</Table.Cell>
+                <Table.Cell>{batch?.totalFattyAcidSold || "N/A"}</Table.Cell>
+                <Table.Cell>{batch?.totalSludgeSold || "N/A"}</Table.Cell>
+                <Table.Cell className="text-sm">
+                  <FontAwesomeIcon
+                    className={`${batch?.isActive ? "text-green-500" : "text-red-500"} mr-2`}
+                    icon={faSquare}
+                  />
+                  {batch?.isActive ? "Open" : "Closed"}
+                </Table.Cell>
+                <Table.Cell>
+                  <DropdownMenu.Root>
+                    <DropdownMenu.Trigger>
+                      <Button variant="surface" className="cursor-pointer">
+                        <FontAwesomeIcon icon={faEllipsisV} />
+                      </Button>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Content variant="solid">
+                      <DropdownMenu.Item
+                        onClick={() => navigate(`/admin/department-store/batching/${batch.id}`)}
+                      >
+                        View Batch Records
+                      </DropdownMenu.Item>
+                      {batch?.isActive && (
+                        <DropdownMenu.Item onClick={() => handleEndBatchClick(batch.id)}>
+                          End Batch
                         </DropdownMenu.Item>
-                        {batch?.isActive && (
-                          <DropdownMenu.Item
-                            onClick={() => handleEndBatchClick(batch.id)}
-                          >
-                            End Batch
-                          </DropdownMenu.Item>
-                        )}
-                      </DropdownMenu.Content>
-                    </DropdownMenu.Root>
-                  </Table.Cell>
-                </Table.Row>
-              );
-            })
+                      )}
+                    </DropdownMenu.Content>
+                  </DropdownMenu.Root>
+                </Table.Cell>
+              </Table.Row>
+            ))
           )}
         </Table.Body>
       </Table.Root>
@@ -456,19 +359,14 @@ const Batching = () => {
           </Flex>
           <Flex direction="column" gap="3">
             {batchProducts.map((product) => (
-              <div className="flex gap-4 items-center mb-4">
-                <p className="text-[15px] w-[40%]"> {product.name}</p>
+              <div className="flex gap-4 items-center mb-4" key={product.id}>
+                <p className="text-[15px] w-[40%]">{product.name}</p>
                 <TextField.Root
-                  key={product.id}
                   className="w-full"
                   placeholder={`Enter quantity for ${product.name} in TONS`}
                   value={quantities[product.id] || ""}
-                  onChange={(e) =>
-                    handleQuantityChange(product.id, e.target.value)
-                  }
-                >
-               
-                </TextField.Root>
+                  onChange={(e) => handleQuantityChange(product.id, e.target.value)}
+                />
               </div>
             ))}
           </Flex>
@@ -483,7 +381,7 @@ const Batching = () => {
             <Button
               variant="solid"
               onClick={handleSave}
-              className="cursor-pointer !bg-theme "
+              className="cursor-pointer !bg-theme"
             >
               Save
             </Button>

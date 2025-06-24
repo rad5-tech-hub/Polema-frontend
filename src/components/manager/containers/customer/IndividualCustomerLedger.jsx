@@ -613,7 +613,7 @@ const IndividualCustomerLedger = () => {
         }`}
       >
         <form onSubmit={handleSubmit}>
-          <FontAwesomeIcon icon={faClose} className="absolute top-4 right-4" onClick={()=>{
+          <FontAwesomeIcon icon={faClose} className="absolute top-4 right-4 cursor-pointer" onClick={()=>{
             setIsStatementDateModalOpen(false)
           }}/>
           <div className="mb-4">
