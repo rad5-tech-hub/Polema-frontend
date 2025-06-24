@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toast from "react-hot-toast";
 
 const useToast = () => {
-  const showToast = ({ message, type = "success", duration = 4000 }) => {
+  const showToast = ({ message, type = "success", duration = 4000,position="top-right" }) => {
     const icons = {
       success: (
         <FontAwesomeIcon icon={faCheckCircle} className="text-green-500 mr-2" />
@@ -48,6 +48,7 @@ const useToast = () => {
       ),
       {
         duration,
+        position:position,
         style: {
           background: "transparent",
           boxShadow: "none",

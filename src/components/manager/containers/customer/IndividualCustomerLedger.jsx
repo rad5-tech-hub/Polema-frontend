@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
+import Image from "../../../../static/image/polema-logo.png";
 import { jwtDecode } from "jwt-decode";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faSearch,
   faStop,
   faRedo,
+  faClose,
   faRedoAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import DocumentsModal from "./DocumentsModal";
@@ -55,12 +57,16 @@ const IndividualCustomerLedger = () => {
     start: "",
     end: "",
   });
+  const [statementDetails, setStatementDetails] = useState([]);
+  const [isStatementDateModalOpen, setIsStatementDateModalOpen] = useState(false);
 
   const searchInputRef = useRef(null);
+
   const formatNumberWithCommas = (value) => {
     if (!value) return "";
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
+
   const decodeToken = () => {
     return jwtDecode(localStorage.getItem("token"));
   };
@@ -113,7 +119,7 @@ const IndividualCustomerLedger = () => {
     }
   };
 
-  // Fetch customer ledger
+  // Fetch customer ledger for displayed transactions
   const getCustomerLedger = async (
     startDate = null,
     endDate = null,
@@ -181,6 +187,43 @@ const IndividualCustomerLedger = () => {
     }
   };
 
+  // Fetch statement details for PDF
+  const fetchStatementDetails = async (startDate, endDate) => {
+    const retrToken = localStorage.getItem("token");
+    if (!retrToken) {
+      showToast({
+        message: "An error occurred. Try logging in again",
+        type: "error",
+      });
+      return;
+    }
+
+    try {
+      const { data } = await axios.get(
+        `${root}/customer/get-customer-ledger/${id}?startDate=${startDate}&endDate=${endDate}`,
+        {
+          headers: { Authorization: `Bearer ${retrToken}` },
+        }
+      );
+
+      const output = data.data || [];
+      setStatementDetails(output);
+      if (output.length === 0) {
+        showToast({
+          message: "No records found for the selected date range",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching statement details:", error);
+      showToast({
+        message: "Failed to fetch statement details",
+        type: "error",
+      });
+      setStatementDetails([]);
+    }
+  };
+
   // Update startingDateRange when entries change
   useEffect(() => {
     if (entries.length > 0) {
@@ -194,46 +237,57 @@ const IndividualCustomerLedger = () => {
   }, [entries]);
 
   // Generate PDF
-  const generatePDF = () => {
+  const generatePDF = (startDate, endDate) => {
     setGeneratingPDF(true);
     const customerName = `${getCustomerByID(id).firstname} ${
       getCustomerByID(id).lastname
     }`;
-    const dateRangeStr = dateRange
+    const dateRangeStr = startDate && endDate
+      ? `${startDate}_to_${endDate}`
+      : dateRange
       ? `${dateRange[0].format("YYYY-MM-DD")}_to_${dateRange[1].format(
           "YYYY-MM-DD"
         )}`
-      : `${startingDateRange.start} to ${startingDateRange.end}`;
+      : `${startingDateRange.start}_to_${startingDateRange.end}`;
     const fileName = `${customerName}-${dateRangeStr}.pdf`;
 
     const doc = new jsPDF();
+
+    // Add image to the PDF
+    const imgWidth = 50;
+    const imgHeight = 20;
+    doc.addImage(Image, "PNG", 14, 10, imgWidth, imgHeight);
+
+    // Add text below the image
     doc.setFontSize(16);
-    doc.text(`Transaction Statement for ${customerName}`, 14, 20);
+    doc.text(`Transaction Statement for ${customerName}`, 14, 35);
     doc.setFontSize(12);
     doc.text(
       `Date Range: ${
-        dateRange
+        startDate && endDate
+          ? `${startDate} to ${endDate}`
+          : dateRange
           ? dateRangeStr.replace("_to_", " to ")
           : `${startingDateRange.start} to ${startingDateRange.end}`
       }`,
       14,
-      30
+      45
     );
 
-    const tableData = entries.map((entry) => [
+    const tableData = statementDetails.map((entry) => [
       refractor(entry.createdAt),
       getProductByID(entry.productId),
       entry.unit,
       entry.quantity,
       entry.unitPrice ? formatMoney(entry.unitPrice) : "",
       entry.comments || "",
-      formatMoney(entry.credit > entry.debit ? entry.credit : ""),
-      formatMoney(entry.debit > entry.credit ? entry.debit : ""),
-      formatMoney(entry.balance),
+      `${formatMoney(entry.credit > entry.debit ? entry.credit : "")}`,
+      `${formatMoney(entry.debit > entry.credit ? entry.debit : "")}`,
+      `${formatMoney(entry.balance)}`,
     ]);
 
     autoTable(doc, {
-      startY: 40,
+      startY: 55,
       head: [
         [
           "Date",
@@ -242,14 +296,14 @@ const IndividualCustomerLedger = () => {
           "Quantity",
           "Unit Price",
           "Comments",
-          "Credit (₦)",
-          "Debit (₦)",
-          "Balance (₦)",
+          "Credit",
+          "Debit",
+          "Balance",
         ],
       ],
       body: tableData,
-      theme: "grid",
-      headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+      theme: "striped",
+      headStyles: { fillColor: [67, 67, 67], textColor: 255 },
       styles: { fontSize: 10 },
     });
 
@@ -260,6 +314,7 @@ const IndividualCustomerLedger = () => {
       type: "success",
       duration: 5000,
     });
+    setIsStatementDateModalOpen(false); // Close the modal after generating PDF
   };
 
   // End transaction
@@ -437,7 +492,6 @@ const IndividualCustomerLedger = () => {
       }
     };
 
-    // Custom filter function for product search
     const filterProductOption = (input, option) =>
       (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
@@ -525,6 +579,83 @@ const IndividualCustomerLedger = () => {
     );
   };
 
+  const StatementDateDetails = () => {
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      if (!startDate || !endDate) {
+        showToast({
+          message: "Please select both start and end dates",
+          type: "error",
+        });
+        return;
+      }
+      if (new Date(startDate) > new Date(endDate)) {
+        showToast({
+          message: "Start date cannot be after end date",
+          type: "error",
+        });
+        return;
+      }
+      fetchStatementDetails(startDate, endDate).then(() => {
+        if (statementDetails.length > 0) {
+          generatePDF(startDate, endDate);
+        }
+      });
+    };
+
+    return (
+      <div
+        className={`p-4 shadow-md rounded absolute z-[999] bg-white ${
+          isStatementDateModalOpen ? "block" : "hidden"
+        }`}
+      >
+        <form onSubmit={handleSubmit}>
+          <FontAwesomeIcon icon={faClose} className="absolute top-4 right-4" onClick={()=>{
+            setIsStatementDateModalOpen(false)
+          }}/>
+          <div className="mb-4">
+            <label htmlFor="start-date" className="block font-bold">
+              Start Date
+            </label>
+            <input
+              type="date"
+              id="start-date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="border-2 border-gray-300 rounded p-2 w-full"
+              required
+            />
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="end-date" className="block font-bold">
+              End Date
+            </label>
+            <input
+              type="date"
+              id="end-date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="border-2 border-gray-300 rounded p-2 w-full"
+              required
+            />
+          </div>
+
+          <Button
+            type="submit"
+            className="!bg-blue-400 text-white"
+            disabled={generatingPDF}
+          >
+            {generatingPDF ? "Generating..." : "Submit"}
+          </Button>
+        </form>
+      </div>
+    );
+  };
+
   const handleSearchInput = (event) => {
     const value = event.target.value;
     setSearchInput(value);
@@ -592,7 +723,7 @@ const IndividualCustomerLedger = () => {
             </p>
           )}
           {decodeToken().isAdmin && customer.length > 0 && (
-            <div className="flex gap-4">
+            <div className="flex gap-4 relative">
               <Button
                 className="mt-4 cursor-pointer"
                 onClick={() => {
@@ -604,11 +735,12 @@ const IndividualCustomerLedger = () => {
               <Button
                 className="mt-4 cursor-pointer"
                 color="green"
-                onClick={generatePDF}
-                disabled={generatingPDF || loading || entries.length === 0}
+                onClick={() => setIsStatementDateModalOpen(true)}
+                disabled={loading || entries.length === 0}
               >
-                {generatingPDF ? "Generating..." : "Generate Statement"}
+                Generate Statement
               </Button>
+              <StatementDateDetails />
             </div>
           )}
         </div>
