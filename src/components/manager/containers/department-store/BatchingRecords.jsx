@@ -10,7 +10,7 @@ import {
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import useToast from "../../../../hooks/useToast";
-import React from "react";
+import React, { useState } from "react";
 const root = import.meta.env.VITE_ROOT;
 
 const BatchingRecords = () => {
@@ -20,6 +20,13 @@ const BatchingRecords = () => {
   const [batchDetails, setBatchDetails] = React.useState(null);
   const [CPKODetails, setCPKODetails] = React.useState([]);
   const [FVODetails, setFVODetails] = React.useState([]);
+  const [sludgeDetails, setSludgeDetails] = React.useState([]);
+
+  const [fattyAcidDetails, setFaatyAcidDetails] = React.useState([]);
+
+  const [fetchComplete, setFetchComplete] = useState(false);
+  const sludgeRegex = /^slu/i;
+  const fattyAcidRegex = /^fat/i;
 
   const getBatchDetails = async () => {
     const token = localStorage.getItem("token");
@@ -37,6 +44,8 @@ const BatchingRecords = () => {
         },
       });
 
+      setFetchComplete(true);
+
       let info = data.data.filter((item) => item.id === id);
       setBatchDetails(info);
 
@@ -44,12 +53,22 @@ const BatchingRecords = () => {
         (item) => item.rawName.toLowerCase() === "cpko"
       );
 
-      const fvo = info[0]["raw-material"].filter(
+      const fvo = info[0]["products"].filter(
         (item) => item.rawName.toLowerCase() === "fvo"
+      );
+
+      const sludge = info[0]["raw-material"].filter((item) =>
+        sludgeRegex.test(item.rawName)
+      );
+
+      const fattyAcid = info[0]["raw-material"].filter((item) =>
+        fattyAcidRegex.test(item.rawName)
       );
 
       setCPKODetails(cpko || []);
       setFVODetails(fvo || []);
+      setSludgeDetails(sludge || []);
+      setFaatyAcidDetails(fattyAcid || []);
     } catch (err) {
       console.log(err);
       showToast({
@@ -57,8 +76,29 @@ const BatchingRecords = () => {
         message: "An error occurred while trying to get batch summary",
       });
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
+  };
+
+  const InfoBox = ({ message, unitPrice, quantity }) => {
+    return (
+      <>
+        <div className="mb-4">
+          <h1 className="text-center font-bold">{message}</h1>
+          <div className="flex gap-4">
+            <div className="w-fit p-4 border-theme rounded border-2  justify-center items-center">
+              <span className="text-[1.7rem] font-bold">{quantity}</span>
+              <p className="text-sm opacity-40">Quantity</p>
+            </div>
+
+            <div className="w-[120px] p-4 border-theme rounded border-2  justify-center items-center">
+              <span className="text-[1.7rem] font-bold">{unitPrice}</span>
+              <p className="text-sm opacity-40">Unit Price</p>
+            </div>
+          </div>
+        </div>
+      </>
+    );
   };
 
   React.useEffect(() => {
@@ -82,11 +122,9 @@ const BatchingRecords = () => {
         </p>
       </Flex>
 
-      {loading && <Spinner size="3" className="mt-4" />}
-
-      <div className="flex gap-4 !text-sm">
+      <div className="flex gap-4 !text-sm ">
         <Table.Root
-          className="mt-4 table-fixed w-full"
+          className="mt-4 table-fixed w-full place-items-start"
           variant="surface"
           size="2"
         >
@@ -120,19 +158,62 @@ const BatchingRecords = () => {
               </Table.ColumnHeaderCell>
             </Table.Row>
           </Table.Header>
-          <Table.Body>
-            {Array.from({
-              length: Math.max(CPKODetails.length, FVODetails.length),
-            }).map((_, index) => (
-              <Table.Row key={index}>
-                <Table.Cell>{FVODetails[index]?.quantity || "-"}</Table.Cell>
-                <Table.Cell>{FVODetails[index]?.price || "-"}</Table.Cell>
-                <Table.Cell>{CPKODetails[index]?.quantity || "-"}</Table.Cell>
-                <Table.Cell>{CPKODetails[index]?.price || "-"}</Table.Cell>
-              </Table.Row>
-            ))}
-          </Table.Body>
+          {!fetchComplete && (
+            <p className="p-4">
+              <Spinner />
+            </p>
+          )}
+          {fetchComplete && (
+            <Table.Body>
+              {Array.from({
+                length: Math.max(CPKODetails.length, FVODetails.length),
+              }).map((_, index) => (
+                <Table.Row key={index}>
+                  <Table.Cell>{FVODetails[index]?.quantity || "-"}</Table.Cell>
+                  <Table.Cell>{FVODetails[index]?.price || "-"}</Table.Cell>
+                  <Table.Cell>{CPKODetails[index]?.quantity || "-"}</Table.Cell>
+                  <Table.Cell>{CPKODetails[index]?.price || "-"}</Table.Cell>
+                </Table.Row>
+              ))}
+            </Table.Body>
+          )}
         </Table.Root>
+
+        {/* Information boxes  */}
+        {fetchComplete && (
+          <div className="info-boxes p-4">
+            {FVODetails.length !== 0 && (
+              <InfoBox
+                message={"TOTAL FOR FVO"}
+                unitPrice={2000}
+                quantity={50}
+              />
+            )}
+            {CPKODetails.length !== 0 && (
+              <InfoBox
+                message={"TOTAL FOR CPKO"}
+                unitPrice={CPKODetails[0]?.price || 0}
+                quantity={CPKODetails[0]?.quantity || 0}
+              />
+            )}
+
+            {fattyAcidDetails.length !== 0 && (
+              <InfoBox
+                message={"TOTAL FOR FATTY ACID"}
+                unitPrice={2000}
+                quantity={50}
+              />
+            )}
+
+            {sludgeDetails.length !== 0 && (
+              <InfoBox
+                message={"TOTAL FOR SLUDGE"}
+                unitPrice={2000}
+                quantity={50}
+              />
+            )}
+          </div>
+        )}
       </div>
     </>
   );
