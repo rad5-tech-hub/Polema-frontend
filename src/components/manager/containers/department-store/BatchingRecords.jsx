@@ -18,7 +18,7 @@ const BatchingRecords = () => {
   const showToast = useToast();
   const [loading, setLoading] = React.useState(true);
   const [batchDetails, setBatchDetails] = React.useState(null);
-  const CPKO
+  // const CPKO
 
   const getBatchDetails = async () => {
     const token = localStorage.getItem("token");
