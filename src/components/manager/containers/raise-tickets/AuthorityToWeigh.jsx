@@ -380,7 +380,7 @@ const AuthorityToWeigh = () => {
                         key={item.role?.id}
                         value={item.role?.id || " "}
                       >
-                        {item.firstname} {item.lastname}
+                        {item.firstname} {item.lastname} ({item.role?.name})
                       </Select.Item>
                     );
                   })}
