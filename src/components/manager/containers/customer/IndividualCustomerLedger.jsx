@@ -608,14 +608,19 @@ const IndividualCustomerLedger = () => {
 
     return (
       <div
-        className={`p-4 shadow-md rounded absolute z-[999] bg-white ${
+        className={`p-4 shadow-md w-[450px] rounded absolute z-[999] bg-white ${
           isStatementDateModalOpen ? "block" : "hidden"
         }`}
       >
+        <h1 className="font-bold text-lg mb-0">Generate Account Statement</h1>
+        <p className="mb-4 opacity-80">{`${
+              getCustomerByID(id).firstname
+            } ${getCustomerByID(id).lastname}`}</p>
         <form onSubmit={handleSubmit}>
           <FontAwesomeIcon icon={faClose} className="absolute top-4 right-4 cursor-pointer" onClick={()=>{
             setIsStatementDateModalOpen(false)
-          }}/>
+          }} />
+          
           <div className="mb-4">
             <label htmlFor="start-date" className="block font-bold">
               Start Date

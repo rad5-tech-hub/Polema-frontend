@@ -214,6 +214,14 @@ const Dipping = () => {
         ]);
         return;
       }
+
+      if(isNaN(values.morningDip)){
+        showToast({
+          type:"error",
+          message:"Morning Dip must be a number"
+        })
+        return
+      }
       setSaveButtonLoading(true);
       const token = localStorage.getItem("token");
       if (!token) {
@@ -538,7 +546,7 @@ const Dipping = () => {
             label="Morning Dip (Tons)"
             rules={[{ required: false, message: "Please input morning dip" }]}
           >
-            <Input type="number" />
+            <Input type="text" />
           </Form.Item>
           <Form.Item name="eveningDip" label="Evening Dip (Tons)">
             <Input type="number" disabled={true} />
