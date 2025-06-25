@@ -153,6 +153,17 @@ const Dipping = () => {
         ]);
         return;
       }
+
+      if (isNaN(values.morningDip)) {
+        showToast({ type: "error", nessage: "Morning Dip must be a number" });
+        return;
+      }
+
+      if (isNaN(values.eveningDip)) {
+        showToast({ type: "error", nessage: "Evening Dip must be a number" });
+        return;
+      }
+
       setSecondSaveButtonLoading(true);
       const token = localStorage.getItem("token");
       if (!token) {
@@ -164,12 +175,12 @@ const Dipping = () => {
         return;
       }
 
-      if(values.eveningDip){
+      if (values.eveningDip) {
         showToast({
           type: "error",
           message: "Evening Dip is not required for Saving",
         });
-        return
+        return;
       }
       await axios.patch(
         `${root}/batch/edit-dip/${selectedDip.id}`,
@@ -215,12 +226,12 @@ const Dipping = () => {
         return;
       }
 
-      if(isNaN(values.morningDip)){
+      if (isNaN(values.morningDip)) {
         showToast({
-          type:"error",
-          message:"Morning Dip must be a number"
-        })
-        return
+          type: "error",
+          message: "Morning Dip must be a number",
+        });
+        return;
       }
       setSaveButtonLoading(true);
       const token = localStorage.getItem("token");
@@ -326,7 +337,7 @@ const Dipping = () => {
           {
             name: "morningDip",
             errors: !values.morningDip
-              ? ["Morning Dip is required for completing"]
+              ? ["Morning Dip is required for Finishing"]
               : [],
           },
           {
@@ -338,6 +349,17 @@ const Dipping = () => {
         ]);
         return;
       }
+      if (isNaN(values.morningDip)) {
+        showToast({ type: "error", message: "Morning Dip must be a number" });
+        return;
+      }
+
+      if (isNaN(values.eveningDip)) {
+        console.log("Data type error")
+        showToast({ type: "error", message: "Evening Dip must be a number" });
+        return;
+      }
+
       setCompleteButtonLoading(true);
       const token = localStorage.getItem("token");
       if (!token) {
@@ -513,7 +535,10 @@ const Dipping = () => {
       <Modal
         title="New Dip"
         open={isModalVisible}
-        onCancel={handleCancel}
+        onCancel={()=>{
+          setIsModalVisible(false)
+        }}
+        
         footer={[
           // <AntButton
           //   key="finish"
@@ -589,14 +614,14 @@ const Dipping = () => {
             label="Morning Dip (Tons)"
             rules={[{ required: false, message: "Please input morning dip" }]}
           >
-            <Input type="number" />
+            <Input type="text" />
           </Form.Item>
           <Form.Item
             name="eveningDip"
             label="Evening Dip (Tons)"
             rules={[{ required: false, message: "Please input evening dip" }]}
           >
-            <Input type="number" />
+            <Input type="text" />
           </Form.Item>
         </Form>
       </Modal>
