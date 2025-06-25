@@ -87,13 +87,13 @@ const BatchingRecords = ({ data, setSelectedRecord }) => {
       <div className="mb-4">
         <h1 className="text-center font-bold">{message}</h1>
         <div className="flex gap-4">
-          <div className="w-fit p-4 border-theme rounded border-2 justify-center items-center">
-            <span className="text-[1.7rem] font-bold">{quantity}</span>
-            <p className="text-sm opacity-40">Quantity</p>
+          <div className="w-fit p-4 border-theme rounded border-2 justify-center items-center relative">
+            <span className="text-[1.5rem] font-bold">{quantity}</span>
+            <p className="text-sm opacity-40">Quantity(TONS)</p>
           </div>
-          <div className="w-[120px] p-4 border-theme rounded border-2 justify-center items-center">
-            <span className="text-[1.7rem] font-bold">{unitPrice}</span>
-            <p className="text-sm opacity-40">Total Price</p>
+          <div className="w-fit p-4 border-theme rounded border-2 justify-center items-center">
+            <span className="text-[1.5rem] font-bold">{unitPrice}</span>
+            <p className="text-sm opacity-40">Total Price(₦)</p>
           </div>
         </div>
       </div>

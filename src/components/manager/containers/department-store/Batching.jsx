@@ -38,7 +38,8 @@ const Batching = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBatchId, setSelectedBatchId] = useState(null);
   const [quantities, setQuantities] = useState({});
-  const [selectedRecord, setSelectedRecord] = useState({}); // Fixed typo: selectedRecords -> selectedRecord
+  const [selectedRecord, setSelectedRecord] = useState({}); 
+  const [isSuccessModalOpen,setIsSuccessModalOpen] = useState(false)
 
   const fetchBatchProducts = async () => {
     const token = localStorage.getItem("token");
@@ -168,12 +169,13 @@ const Batching = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      showToast({
-        type: "success",
-        position: "top-center",
-        message:
-          "🎉 Batch Started Successfully \n \n Your batch has been opened. To monitor or update records, head over to 'Opened Batches' and select 'View Records' to get started",
-      });
+      setIsSuccessModalOpen(true)
+      // showToast({
+      //   type: "success",
+      //   position: "top-center",
+      //   message:
+      //     "🎉 Batch Started Successfully \n \n Your batch has been opened. To monitor or update records, head over to 'Opened Batches' and select 'View Records' to get started",
+      // });
       setCurrentPageIndex(0);
       setPaginationUrls([]);
       fetchBatches();
@@ -319,7 +321,10 @@ const Batching = () => {
   return (
     <>
       {Object.keys(selectedRecord).length > 0 ? (
-        <BatchingRecords data={selectedRecord} setSelectedRecord={setSelectedRecord}/>
+        <BatchingRecords
+          data={selectedRecord}
+          setSelectedRecord={setSelectedRecord}
+        />
       ) : (
         <>
           <Flex justify="between" align="center" className="mb-4">
@@ -357,7 +362,7 @@ const Batching = () => {
                   TOTAL FATTY ACID PRODUCED
                 </Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell className="text-left">
-                  TOTAL SLUDGE SOLD
+                  TOTAL SLUDGE PRODUCED
                 </Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell className="text-left">
                   STATUS
@@ -464,6 +469,31 @@ const Batching = () => {
               </Flex>
             </Flex>
           )}
+
+          {/* //Success Modal after starting batch */}
+          <Dialog.Root
+            open={isSuccessModalOpen}
+            onOpenChange={setIsSuccessModalOpen}
+          >
+            <Dialog.Content>
+              <Flex justify="between" align="center" className="mb-4">
+                <Dialog.Title>Successfully Started Batch!</Dialog.Title>
+                <Button
+                  variant="ghost"
+                  onClick={() => setIsSuccessModalOpen(false)}
+                  className="cursor-pointer absolute top-4 right-4"
+                >
+                  <FontAwesomeIcon icon={faTimes} />
+                </Button>
+              </Flex>
+
+              <p className="my-4">
+                🎉 Batch Started Successfully <br /> Your batch has been opened.
+                To monitor or update records, head over to 'Opened Batches' and
+                select 'View Records' to get started
+              </p>
+            </Dialog.Content>
+          </Dialog.Root>
 
           <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
             <Dialog.Content className="max-w-lg">
