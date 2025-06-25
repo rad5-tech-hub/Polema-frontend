@@ -49,20 +49,22 @@ const BatchingRecords = () => {
       let info = data.data.filter((item) => item.id === id);
       setBatchDetails(info);
 
-      const cpko = info[0]["raw-material"].filter(
-        (item) => item.rawName.toLowerCase() === "cpko"
+      const cpko =
+        info[0]["raw-material"].length > 0 &&
+        info[0]["raw-material"].filter(
+          (item) => item.rawName.toLowerCase() === "cpko"
+        );
+
+      const fvo = info[0].products.length > 0 && info[0].products.filter(
+        (item) => item.otherProduct.toLowerCase() === "fvo"
+      )
+
+      const sludge = info[0].products > 0 && info[0].products.filter((item) =>
+        sludgeRegex.test(item.otherProduct)
       );
 
-      const fvo = info[0].products.filter(
-        (item) => item.otherProducts.toLowerCase() === "fvo"
-      );
-
-      const sludge = info[0].products.filter((item) =>
-        sludgeRegex.test(item.otherProducts)
-      );
-
-      const fattyAcid = info[0].products.filter((item) =>
-        fattyAcidRegex.test(item.otherProducts)
+      const fattyAcid = info[0].products && info[0].products.filter((item) =>
+        fattyAcidRegex.test(item.otherProduct)
       );
 
       setCPKODetails(cpko || []);
