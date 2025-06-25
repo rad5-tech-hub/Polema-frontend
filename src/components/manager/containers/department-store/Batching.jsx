@@ -70,6 +70,10 @@ const Batching = () => {
     setIsLoading(true);
     setBatches([]);
     setError(null);
+
+  
+    const fvoRegex = /^fvo/i;
+
     const token = localStorage.getItem("token");
     if (!token) {
       showToast({
@@ -92,11 +96,11 @@ const Batching = () => {
             ? batch["raw-material"]?.find(
                 (item) => item.rawName.toLowerCase() === "cpko"
               )
-            : {};
+            : {}; 
         const fvo =
-          batch["raw-material"]?.length > 0
-            ? batch["raw-material"]?.find(
-                (item) => item.rawName.toLowerCase() === "fvo"
+          batch.products?.length > 0
+            ? batch.products?.find(
+                (item) => fvoRegex.test(item.otherProduct)
               )
             : {};
         const sludge =
@@ -111,6 +115,9 @@ const Batching = () => {
                 (item) => item.otherProduct.toLowerCase() === "fatty acid"
               )
             : {};
+            
+            console.log(fvo);
+            
 
         return {
           ...batch,
