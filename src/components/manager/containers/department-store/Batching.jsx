@@ -1,9 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSquare, faEllipsisV, faTimes } from "@fortawesome/free-solid-svg-icons";
+import {
+  faSquare,
+  faEllipsisV,
+  faTimes,
+} from "@fortawesome/free-solid-svg-icons";
 import { refractor } from "../../../date";
-import { Heading, Flex, Button, Table, Text, Spinner, DropdownMenu, Dialog, TextField } from "@radix-ui/themes";
+import {
+  Heading,
+  Flex,
+  Button,
+  Table,
+  Text,
+  Spinner,
+  DropdownMenu,
+  Dialog,
+  TextField,
+} from "@radix-ui/themes";
 import axios from "axios";
 import useToast from "../../../../hooks/useToast";
 
@@ -27,7 +41,10 @@ const Batching = () => {
   const fetchBatchProducts = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      showToast({ type: "error", message: "An error occurred, try logging in again." });
+      showToast({
+        type: "error",
+        message: "An error occurred, try logging in again.",
+      });
       setIsLoading(false);
       return;
     }
@@ -39,7 +56,9 @@ const Batching = () => {
     } catch (error) {
       showToast({
         type: "error",
-        message: error?.response?.data?.message || "An error occurred, please try again.",
+        message:
+          error?.response?.data?.message ||
+          "An error occurred, please try again.",
       });
     }
   };
@@ -50,7 +69,10 @@ const Batching = () => {
     setError(null);
     const token = localStorage.getItem("token");
     if (!token) {
-      showToast({ type: "error", message: "An error occurred, try logging in again." });
+      showToast({
+        type: "error",
+        message: "An error occurred, try logging in again.",
+      });
       setIsLoading(false);
       return;
     }
@@ -63,15 +85,35 @@ const Batching = () => {
       // Process batches to extract first occurrence of each raw material and product
       const processedBatches = response.data.data.map((batch) => {
         // Extract first occurrence from raw-material
-        const cpko = batch["raw-material"]?.find((item) => item.rawName.toLowerCase() === "cpko");
-        const fvo = batch["raw-material"]?.find((item) => item.rawName.toLowerCase() === "fvo");
+        const cpko =
+          batch["raw-material"].length > 0
+            ? batch["raw-material"]?.find(
+                (item) => item.rawName.toLowerCase() === "cpko"
+              )
+            : {};
+        const fvo =
+          batch.products?.length > 0
+            ? batch["raw-material"]?.find(
+                (item) => item.rawName.toLowerCase() === "fvo"
+              )
+            : {};
         // Extract first occurrence from products
-        const sludge = batch.products?.find((item) => item.rawName.toLowerCase() === "sludge");
-        const fattyAcid = batch.products?.find((item) => item.rawName.toLowerCase() === "fatty acid");
+        const sludge =
+          batch?.products?.length > 0
+            ? batch.products?.find(
+                (item) => item.otherProduct.toLowerCase() === "sludge"
+              )
+            : {};
+        const fattyAcid =
+          batch?.products?.length > 0
+            ? batch.products?.find(
+                (item) => item.otherProduct.toLowerCase() === "fatty acid"
+              )
+            : {};
 
         return {
           ...batch,
-          totalCPKOBought: cpko ? cpko.totalQuantity : "N/A",
+          totalCPKOBought: cpko ? cpko?.totalQuantity || "" : "N/A",
           totalFVOSold: fvo ? fvo.totalQuantity : "N/A",
           totalSludgeSold: sludge ? sludge.totalQuantity : "N/A",
           totalFattyAcidSold: fattyAcid ? fattyAcid.totalQuantity : "N/A",
@@ -93,10 +135,15 @@ const Batching = () => {
         setPaginationUrls((prev) => prev.slice(0, currentPageIndex + 1));
       }
     } catch (err) {
-      setError(err?.response?.data?.message || "An error occurred, please try again.");
+      console.log(err);
+      setError(
+        err?.response?.data?.message || "An error occurred, please try again."
+      );
       showToast({
         type: "error",
-        message: err?.response?.data?.message || "An error occurred, please try again.",
+        message:
+          err?.response?.data?.message ||
+          "An error occurred, please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -106,14 +153,21 @@ const Batching = () => {
   const startNewBatch = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      showToast({ type: "error", message: "An error occurred, try logging in again." });
+      showToast({
+        type: "error",
+        message: "An error occurred, try logging in again.",
+      });
       return;
     }
     setNewBatchButtonLoading(true);
     try {
-      await axios.post(`${root}/batch/start-batch`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.post(
+        `${root}/batch/start-batch`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       showToast({
         type: "success",
         position: "top-center",
@@ -126,7 +180,9 @@ const Batching = () => {
     } catch (err) {
       showToast({
         type: "error",
-        message: err?.response?.data?.message || "An error occurred when starting new batch.",
+        message:
+          err?.response?.data?.message ||
+          "An error occurred when starting new batch.",
       });
     } finally {
       setNewBatchButtonLoading(false);
@@ -142,13 +198,20 @@ const Batching = () => {
   const handleSaveLikeThat = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      showToast({ type: "error", message: "An error occurred, try logging in again." });
+      showToast({
+        type: "error",
+        message: "An error occurred, try logging in again.",
+      });
       return;
     }
     try {
-      await axios.patch(`${root}/batch/end-batch/${selectedBatchId}`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.patch(
+        `${root}/batch/end-batch/${selectedBatchId}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       showToast({ type: "success", message: "Batch ended successfully." });
       setIsModalOpen(false);
       setCurrentPageIndex(0);
@@ -157,7 +220,9 @@ const Batching = () => {
     } catch (err) {
       showToast({
         type: "error",
-        message: err?.response?.data?.message || "An error occurred while trying to end batch.",
+        message:
+          err?.response?.data?.message ||
+          "An error occurred while trying to end batch.",
       });
     }
   };
@@ -165,7 +230,10 @@ const Batching = () => {
   const handleSave = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      showToast({ type: "error", message: "An error occurred, try logging in again." });
+      showToast({
+        type: "error",
+        message: "An error occurred, try logging in again.",
+      });
       return;
     }
     const payload = Object.keys(quantities).reduce((acc, productId) => {
@@ -176,18 +244,32 @@ const Batching = () => {
     }, {});
 
     if (Object.keys(payload).length === 0) {
-      showToast({ type: "warning", message: "Please enter at least one quantity." });
+      showToast({
+        type: "warning",
+        message: "Please enter at least one quantity.",
+      });
       return;
     }
 
     try {
-      await axios.patch(`${root}/batch/update-batchProd/${selectedBatchId}`, { updates: payload }, {
-        headers: { Authorization: `Bearer ${token}` },
+      await axios.patch(
+        `${root}/batch/update-batchProd/${selectedBatchId}`,
+        { updates: payload },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      await axios.patch(
+        `${root}/batch/end-batch/${selectedBatchId}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      showToast({
+        type: "success",
+        message: "Batch updated and ended successfully.",
       });
-      await axios.patch(`${root}/batch/end-batch/${selectedBatchId}`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      showToast({ type: "success", message: "Batch updated and ended successfully." });
       setIsModalOpen(false);
       setCurrentPageIndex(0);
       setPaginationUrls([]);
@@ -195,7 +277,9 @@ const Batching = () => {
     } catch (err) {
       showToast({
         type: "error",
-        message: err?.response?.data?.message || "An error occurred while trying to update and end batch.",
+        message:
+          err?.response?.data?.message ||
+          "An error occurred while trying to update and end batch.",
       });
     }
   };
@@ -237,7 +321,9 @@ const Batching = () => {
         <Heading>Batching Records</Heading>
         <Button
           className={` text-white hover:!bg-brown-500 ${
-            newestRecordRunnning ? "!bg-theme/70 cursor-not-allowed" : "!bg-theme cursor-pointer"
+            newestRecordRunnning
+              ? "!bg-theme/70 cursor-not-allowed"
+              : "!bg-theme cursor-pointer"
           }`}
           disabled={newestRecordRunnning}
           onClick={startNewBatch}
@@ -246,15 +332,31 @@ const Batching = () => {
         </Button>
       </Flex>
 
-      <Table.Root className="mt-4 table-fixed w-full" variant="surface" size="2">
+      <Table.Root
+        className="mt-4 table-fixed w-full"
+        variant="surface"
+        size="2"
+      >
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeaderCell className="text-left">PERIOD</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">TOTAL FVO SOLD (TONS)</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">TOTAL CPKO BOUGHT (TONS)</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">TOTAL FATTY ACID SOLD</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">TOTAL SLUDGE SOLD</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">STATUS</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              PERIOD
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              TOTAL FVO SOLD (TONS)
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              TOTAL CPKO BOUGHT (TONS)
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              TOTAL FATTY ACID SOLD
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              TOTAL SLUDGE SOLD
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              STATUS
+            </Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell className="text-left"></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
@@ -279,15 +381,21 @@ const Batching = () => {
             </Table.Row>
           ) : (
             batches.map((batch) => (
-              <Table.Row key={batch.id || `${batch.startDate}-${batch.endDate}`}>
-                <Table.Cell>{`${refractor(batch?.startDate) || "N/A"} - ${batch?.endDate ? refractor(batch?.endDate) : ""}`}</Table.Cell>
+              <Table.Row
+                key={batch.id || `${batch.startDate}-${batch.endDate}`}
+              >
+                <Table.Cell>{`${refractor(batch?.startDate) || "N/A"} - ${
+                  batch?.endDate ? refractor(batch?.endDate) : ""
+                }`}</Table.Cell>
                 <Table.Cell>{batch?.totalFVOSold || "N/A"}</Table.Cell>
                 <Table.Cell>{batch?.totalCPKOBought || "N/A"}</Table.Cell>
                 <Table.Cell>{batch?.totalFattyAcidSold || "N/A"}</Table.Cell>
                 <Table.Cell>{batch?.totalSludgeSold || "N/A"}</Table.Cell>
                 <Table.Cell className="text-sm">
                   <FontAwesomeIcon
-                    className={`${batch?.isActive ? "text-green-500" : "text-red-500"} mr-2`}
+                    className={`${
+                      batch?.isActive ? "text-green-500" : "text-red-500"
+                    } mr-2`}
                     icon={faSquare}
                   />
                   {batch?.isActive ? "Open" : "Closed"}
@@ -301,12 +409,18 @@ const Batching = () => {
                     </DropdownMenu.Trigger>
                     <DropdownMenu.Content variant="solid">
                       <DropdownMenu.Item
-                        onClick={() => navigate(`/admin/department-store/batching/${batch.id}`)}
+                        onClick={() =>
+                          navigate(
+                            `/admin/department-store/batching/${batch.id}`
+                          )
+                        }
                       >
                         View Batch Records
                       </DropdownMenu.Item>
                       {batch?.isActive && (
-                        <DropdownMenu.Item onClick={() => handleEndBatchClick(batch.id)}>
+                        <DropdownMenu.Item
+                          onClick={() => handleEndBatchClick(batch.id)}
+                        >
                           End Batch
                         </DropdownMenu.Item>
                       )}
@@ -365,7 +479,9 @@ const Batching = () => {
                   className="w-full"
                   placeholder={`Enter quantity for ${product.name} in TONS`}
                   value={quantities[product.id] || ""}
-                  onChange={(e) => handleQuantityChange(product.id, e.target.value)}
+                  onChange={(e) =>
+                    handleQuantityChange(product.id, e.target.value)
+                  }
                 />
               </div>
             ))}

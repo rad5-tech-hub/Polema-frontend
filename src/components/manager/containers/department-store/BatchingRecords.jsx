@@ -93,7 +93,7 @@ const BatchingRecords = () => {
 
             <div className="w-[120px] p-4 border-theme rounded border-2  justify-center items-center">
               <span className="text-[1.7rem] font-bold">{unitPrice}</span>
-              <p className="text-sm opacity-40">Unit Price</p>
+              <p className="text-sm opacity-40">Total Price</p>
             </div>
           </div>
         </div>
