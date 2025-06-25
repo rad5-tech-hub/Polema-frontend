@@ -114,9 +114,9 @@ const Batching = () => {
         return {
           ...batch,
           totalCPKOBought: cpko ? cpko?.totalQuantity || "" : "N/A",
-          totalFVOSold: fvo ? fvo.totalQuantity : "N/A",
-          totalSludgeSold: sludge ? sludge.totalQuantity : "N/A",
-          totalFattyAcidSold: fattyAcid ? fattyAcid.totalQuantity : "N/A",
+          totalFVOSold: fvo ? fvo?.totalQuantity || "" : "N/A",
+          totalSludgeSold: sludge ? sludge?.totalQuantity || "" : "N/A",
+          totalFattyAcidSold: fattyAcid ? fattyAcid?.totalQuantity || "" : "N/A",
         };
       });
 
