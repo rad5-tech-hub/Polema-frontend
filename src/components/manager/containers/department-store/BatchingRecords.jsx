@@ -8,6 +8,8 @@ import {
   DropdownMenu,
 } from "@radix-ui/themes";
 import axios from "axios";
+import { formatMoney } from "../../../date";
+
 import { useParams } from "react-router-dom";
 import useToast from "../../../../hooks/useToast";
 import React, { useState } from "react";
@@ -165,7 +167,7 @@ const BatchingRecords = () => {
               <Spinner />
             </p>
           )}
-          {fetchComplete && (
+          {fetchComplete &&  (
             <Table.Body>
               {Array.from({
                 length: Math.max(CPKODetails.length, FVODetails.length),
@@ -182,20 +184,20 @@ const BatchingRecords = () => {
         </Table.Root>
 
         {/* Information boxes  */}
-        {fetchComplete && (
+        {fetchComplete && !batchDetails[0].isActive &&(
           <div className="info-boxes p-4">
             {FVODetails.length !== 0 && (
               <InfoBox
                 message={"TOTAL FOR FVO"}
-                unitPrice={2000}
-                quantity={50}
+                unitPrice={formatMoney(FVODetails[0]?.price || 0)}
+                quantity={formatMoney(FVODetails[0]?.quantity || 0)}
               />
             )}
             {CPKODetails.length !== 0 && (
               <InfoBox
                 message={"TOTAL FOR CPKO"}
-                unitPrice={CPKODetails[0]?.price || 0}
-                quantity={CPKODetails[0]?.quantity || 0}
+                unitPrice={formatMoney(CPKODetails[0]?.price || 0)}
+                quantity={formatMoney(CPKODetails[0]?.quantity || 0)}
               />
             )}
 
