@@ -9,6 +9,7 @@ import {
   Button,
   TextField,
   DropdownMenu,
+  Select
 } from "@radix-ui/themes";
 import { isNegative } from "../../../date";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
@@ -93,21 +94,38 @@ const AllSuppliers = () => {
 
   // Use this function to derive the filtered customer data
   const filteredCustomers = filterCustomers(suppliers, searchTerm);
+  const term = "Suppliers"
 
   return (
     <>
       <div>
-        <Heading className="mb-3">All Suppliers</Heading>
-        <TextField.Root
-          placeholder="Search suppliers"
-          className="mb-4 w-[60%]"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        >
-          <TextField.Slot>
-            <MagnifyingGlassIcon height="16" width="16" />
-          </TextField.Slot>
-        </TextField.Root>
+        <div className="flex w-full justify-between">
+          <div className="w-full">
+            <Heading className="mb-3">All Suppliers</Heading>
+            <TextField.Root
+              placeholder="Search suppliers"
+              className="mb-4 w-[60%]"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            >
+              <TextField.Slot>
+                <MagnifyingGlassIcon height="16" width="16" />
+              </TextField.Slot>
+            </TextField.Root>
+          </div>
+          <div>
+          <Select.Root size="2">
+            <Select.Trigger placeholder={`Filter ${term}`} />
+            <Select.Content>
+              <Select.Item value="debt">{`${term} we owe`}</Select.Item>
+                <Select.Item value="no-debt">{ `${term} we don't owe`}</Select.Item>
+            </Select.Content>
+          </Select.Root>
+        </div>
+
+        </div>
+
+       
         <Separator className="my-4 w-full" />
         <Table.Root size="3" variant="surface">
           <Table.Header>

@@ -1,19 +1,36 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { formatMoney, refractor } from "../../../date";
-import { Table, Spinner, TextField, Flex, Text, Card } from "@radix-ui/themes";
+import {
+  Table,
+  Spinner,
+  TextField,
+  Flex,
+  Text,
+  Card,
+  Select,
+} from "@radix-ui/themes";
 import axios from "axios";
 
 // All imports for the dropdown menu
 import { isNegative } from "../../../date";
 import { DropdownMenu, Button, Heading } from "@radix-ui/themes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPen, faUser, faEllipsisV,faBook} from "@fortawesome/free-solid-svg-icons";
+import {
+  faPen,
+  faUser,
+  faEllipsisV,
+  faBook,
+} from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 
 //All imports for the Dialog Box
 
 import toast, { LoaderIcon, Toaster } from "react-hot-toast";
-import { MagnifyingGlassIcon, TrashIcon,PlusIcon } from "@radix-ui/react-icons";
+import {
+  MagnifyingGlassIcon,
+  TrashIcon,
+  PlusIcon,
+} from "@radix-ui/react-icons";
 
 import useToast from "../../../../hooks/useToast";
 
@@ -21,7 +38,7 @@ const root = import.meta.env.VITE_ROOT;
 
 //Edit Dialog Box $//
 const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
-  const showToast = useToast()
+  const showToast = useToast();
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [changedFirstName, setChangedFirstName] = useState(id.firstname);
   const [changedLastName, setChangedLastName] = useState(id.lastname);
@@ -59,19 +76,20 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
       setDeleteLoading(false);
       onClose();
       showToast({
-        message:response.data.message,
-        type:"success"
-      })
-      
+        message: response.data.message,
+        type: "success",
+      });
+
       fetchCustomers();
     } catch (error) {
       console.log(error);
       setDeleteLoading(false);
       onClose();
       showToast({
-        message:error?.message || "An error occurred while trying to edit customer",
-        type:"error"
-      })
+        message:
+          error?.message || "An error occurred while trying to edit customer",
+        type: "error",
+      });
     }
   };
 
@@ -112,7 +130,6 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
             type="text"
             className="w-full p-2 mb-5 rounded-sm border"
           />
-
           <label className="text-sm font-medium text-black leading-[35px]">
             Last Name
           </label>
@@ -123,7 +140,6 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
             type="text"
             className="w-full p-2 mb-5 rounded-sm border"
           />
-
           <label className="text-sm font-medium text-black leading-[35px]">
             Email
           </label>
@@ -134,7 +150,6 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
             type="text"
             className="w-full p-2 mb-5 rounded-sm border"
           />
-
           <label className="text-sm font-medium text-black leading-[35px]">
             Phone Numbers
           </label>
@@ -162,8 +177,8 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
             className="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-md mt-2 mb-5"
           >
             <PlusIcon className="text-white" />
-          </button> <br/>
-
+          </button>{" "}
+          <br />
           <label className="text-sm font-medium text-black leading-[35px]">
             Address
           </label>
@@ -204,10 +219,9 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
   );
 };
 
-
 const AllCustomers = () => {
   const [customerData, setCustomerData] = useState([]);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
 
@@ -305,17 +319,35 @@ const AllCustomers = () => {
 
   return (
     <>
-      <Heading className="mb-4">Customers</Heading>
-      <TextField.Root
-        placeholder="Search customers"
-        className="mb-4 w-[60%]"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      >
-        <TextField.Slot>
-          <MagnifyingGlassIcon height="16" width="16" />
-        </TextField.Slot>
-      </TextField.Root>
+      <div className="flex w-full justify-between">
+        <div className="w-full">
+          <Heading className="mb-4">Customers</Heading>
+          <TextField.Root
+            placeholder="Search customers"
+            className="mb-4 w-[60%]"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          >
+            <TextField.Slot>
+              <MagnifyingGlassIcon height="16" width="16" />
+            </TextField.Slot>
+          </TextField.Root>
+        </div>
+        <div>
+          <Select.Root size="2">
+            <Select.Trigger placeholder="Filter Customers" />
+            <Select.Content>
+              
+              <Select.Item value="debt" >
+                Indebted Customers
+              </Select.Item>
+              <Select.Item value="no-debt" >
+                Non-Indebted Customers
+              </Select.Item>
+            </Select.Content>
+          </Select.Root>
+        </div>
+      </div>
 
       <Table.Root size={"3"} variant="surface">
         <Table.Header>
@@ -391,7 +423,9 @@ const AllCustomers = () => {
                           <DropdownMenu.Item
                             shortcut={<FontAwesomeIcon icon={faBook} />}
                             onClick={() =>
-                              navigate(`/admin/customers/customer-ledger/${customer.id}`)
+                              navigate(
+                                `/admin/customers/customer-ledger/${customer.id}`
+                              )
                             }
                           >
                             View Ledger
