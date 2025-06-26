@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { formatMoney, refractor } from "../../../date";
+import { formatMoney, refractor, isNegative } from "../../../date";
 import {
   Table,
   Spinner,
@@ -8,35 +8,20 @@ import {
   Text,
   Card,
   Select,
+  DropdownMenu,
+  Button,
+  Heading,
 } from "@radix-ui/themes";
-import axios from "axios";
-
-// All imports for the dropdown menu
-import { isNegative } from "../../../date";
-import { DropdownMenu, Button, Heading } from "@radix-ui/themes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faPen,
-  faUser,
-  faEllipsisV,
-  faBook,
-} from "@fortawesome/free-solid-svg-icons";
-import { useNavigate } from "react-router-dom";
-
-//All imports for the Dialog Box
-
-import toast, { LoaderIcon, Toaster } from "react-hot-toast";
-import {
-  MagnifyingGlassIcon,
-  TrashIcon,
-  PlusIcon,
-} from "@radix-ui/react-icons";
-
+import { faPen, faBook, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
+import { MagnifyingGlassIcon, TrashIcon, PlusIcon } from "@radix-ui/react-icons";
+import axios from "axios";
 import useToast from "../../../../hooks/useToast";
+import { useNavigate } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 
 const root = import.meta.env.VITE_ROOT;
 
-//Edit Dialog Box $//
 const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
   const showToast = useToast();
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -49,12 +34,14 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
   const editCustomer = async (id) => {
     setDeleteLoading(true);
     const retrToken = localStorage.getItem("token");
-
     if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
+      showToast({
+        type: "error",
+        message: "An error occurred. Try logging in again.",
+      });
+      setDeleteLoading(false);
       return;
     }
-
     const body = {
       firstname: changedFirstName,
       lastname: changedLastName,
@@ -62,7 +49,6 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
       ...(changedEmail && { email: changedEmail }),
       phoneNumber: changedPhone.filter((phone) => phone.trim() !== ""),
     };
-
     try {
       const response = await axios.patch(
         `${root}/customer/edit-customer/${id.id}`,
@@ -73,37 +59,30 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
           },
         }
       );
-      setDeleteLoading(false);
-      onClose();
       showToast({
-        message: response.data.message,
         type: "success",
+        message: response.data.message || "Customer updated successfully.",
       });
-
+      onClose();
       fetchCustomers();
     } catch (error) {
-      console.log(error);
-      setDeleteLoading(false);
-      onClose();
       showToast({
-        message:
-          error?.message || "An error occurred while trying to edit customer",
         type: "error",
+        message: error?.response?.data?.message || "An error occurred while trying to edit customer.",
       });
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
-  // Add a new phone number input
   const addPhoneNumber = () => {
     setChangedPhone([...changedPhone, ""]);
   };
 
-  // Delete a phone number by index
   const deletePhoneNumber = (index) => {
     setChangedPhone(changedPhone.filter((_, i) => i !== index));
   };
 
-  // Update a phone number by index
   const updatePhoneNumber = (index, value) => {
     const newPhoneNumbers = [...changedPhone];
     newPhoneNumbers[index] = value;
@@ -118,7 +97,6 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
         <Heading as="h1" className="text-2xl font-semibold mb-4 text-black">
           Edit Customer
         </Heading>
-
         <form className="mt-4">
           <label className="text-sm font-medium text-black leading-[35px]">
             First Name
@@ -177,7 +155,7 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
             className="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-md mt-2 mb-5"
           >
             <PlusIcon className="text-white" />
-          </button>{" "}
+          </button>
           <br />
           <label className="text-sm font-medium text-black leading-[35px]">
             Address
@@ -190,7 +168,6 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
             className="w-full p-2 mb-5 rounded-sm border"
           />
         </form>
-
         <div className="mt-6 flex justify-end">
           <button
             onClick={onClose}
@@ -203,10 +180,9 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
             onClick={() => editCustomer(id)}
             className="bg-green-700 hover:bg-green-600 text-white px-4 py-2 rounded-md"
           >
-            {deleteLoading ? "Loading..." : "Save Changes"}
+            {deleteLoading ? <Spinner size="1" /> : "Save Changes"}
           </button>
         </div>
-
         <button
           onClick={onClose}
           className="absolute top-2 right-2 text-gray-700 hover:bg-gray-200 rounded-full p-1"
@@ -221,97 +197,91 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
 
 const AllCustomers = () => {
   const [customerData, setCustomerData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [selectEditCustomer, setSelectEditCustomer] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [paginationUrls, setPaginationUrls] = useState([]);
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const showToast = useToast();
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(true);
-
-  // State management for the delete dialog
-  const [selectCustomer, setSelectedCustomer] = useState(null);
-
-  // Handle opening the delete dialog for a specific customer
-  const handleDeleteClick = (staff) => {
-    setSelectedCustomer(staff);
-  };
-
-  const [selectEditCustomer, setSelectEditCustomer] = useState(null);
-  // Handle opening the edit  dialog for a specific customer
-  const handleEditClcik = (staff) => {
-    setSelectEditCustomer(staff);
-  };
-
-  const fetchCustomers = async () => {
+  const fetchCustomers = async (pageUrl = null) => {
+    setLoading(true);
+    setCustomerData([]);
     const retrToken = localStorage.getItem("token");
-
-    // Check if the token is available
     if (!retrToken) {
-      toast.error("An error occurred. Try logging in again", {
-        duration: 6500,
-        style: {
-          padding: "30px",
-        },
+      showToast({
+        type: "error",
+        message: "An error occurred. Try logging in again.",
       });
-
+      setLoading(false);
       return;
     }
     try {
-      const response = await axios.get(`${root}/customer/all-customers`, {
+      const url = pageUrl ? `${root}${pageUrl}` : `${root}/customer/all-customers`;
+      const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-
-      {
-        response.data.customers.length === 0
-          ? setCustomerData([])
-          : setCustomerData(response.data.customers);
+      setCustomerData(response.data.customers || []);
+      if (response.data.pagination?.nextPage && response.data.pagination.nextPage !== "/customer/all-customers") {
+        setPaginationUrls((prev) => {
+          const newUrls = [...prev];
+          newUrls[currentPageIndex] = response.data.pagination.nextPage;
+          return newUrls;
+        });
+      } else {
+        setPaginationUrls((prev) => prev.slice(0, currentPageIndex));
       }
-
-      setLoading(false);
     } catch (error) {
+      showToast({
+        type: "error",
+        message: error?.response?.data?.message || "An error occurred while fetching customers.",
+      });
+    } finally {
       setLoading(false);
-      {
-        error.message
-          ? toast.error(error.message, {
-              duration: 6500,
-              style: {
-                padding: "30px",
-              },
-            })
-          : toast.error("An Error Occured", {
-              duration: 6500,
-              style: {
-                padding: "30px",
-              },
-            });
-      }
     }
   };
 
-  const [searchTerm, setSearchTerm] = useState("");
   const filterCustomers = (customers, searchTerm) => {
     if (!searchTerm.trim()) {
-      return customers; // Return all customers if searchTerm is empty
+      return customers;
     }
-
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
-
     return customers.filter((customer) =>
-      // Check each relevant field for a match
       [
-        customer.customerTag, // ID
-        customer.firstname, //First Name
-        customer.lastnmae, //Last Name
-        customer.email, // Email
-        customer.address, // Address
-        ...customer.phoneNumber, // Phone (spread for array fields)
-      ].some((field) =>
-        String(field).toLowerCase().includes(lowerCaseSearchTerm)
-      )
+        customer.customerTag,
+        customer.firstname,
+        customer.lastname, // Fixed typo: lastnmae -> lastname
+        customer.email,
+        customer.address,
+        ...(customer.phoneNumber || []),
+      ].some((field) => String(field || "").toLowerCase().includes(lowerCaseSearchTerm))
     );
   };
 
-  // Use this function to derive the filtered customer data
-  const filteredCustomers = filterCustomers(customerData, searchTerm);
+  const filteredCustomers = useMemo(() => filterCustomers(customerData, searchTerm), [customerData, searchTerm]);
+
+  const handleNextPage = () => {
+    if (currentPageIndex <= paginationUrls.length) {
+      const nextIndex = currentPageIndex + 1;
+      setCurrentPageIndex(nextIndex);
+      fetchCustomers(paginationUrls[currentPageIndex] || null);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPageIndex > 0) {
+      const prevIndex = currentPageIndex - 1;
+      setCurrentPageIndex(prevIndex);
+      fetchCustomers(prevIndex === 0 ? null : paginationUrls[prevIndex - 1]);
+    }
+  };
+
+  const handleEditClick = (customer) => {
+    setSelectEditCustomer(customer);
+  };
 
   useEffect(() => {
     fetchCustomers();
@@ -319,7 +289,7 @@ const AllCustomers = () => {
 
   return (
     <>
-      <div className="flex w-full justify-between">
+      <div className="flex w-full justify-between mb-4">
         <div className="w-full">
           <Heading className="mb-4">Customers</Heading>
           <TextField.Root
@@ -337,116 +307,135 @@ const AllCustomers = () => {
           <Select.Root size="2">
             <Select.Trigger placeholder="Filter Customers" />
             <Select.Content>
-              
-              <Select.Item value="debt" >
-                Indebted Customers
-              </Select.Item>
-              <Select.Item value="no-debt" >
-                Non-Indebted Customers
-              </Select.Item>
+              <Select.Item value="debt">Indebted Customers</Select.Item>
+              <Select.Item value="no-debt">Non-Indebted Customers</Select.Item>
             </Select.Content>
           </Select.Root>
         </div>
       </div>
 
-      <Table.Root size={"3"} variant="surface">
+      <Table.Root className="mt-4 table-fixed w-full" variant="surface" size="2">
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>ID</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>NAME</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>EMAIL</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>ADDRESS</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>PHONE</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>BALANCE(₦)</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">DATE</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">ID</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">NAME</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">EMAIL</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">ADDRESS</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">PHONE</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">BALANCE(₦)</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left"></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
-
-        {loading ? (
-          <div className="p-4">
-            <Spinner />
-          </div>
-        ) : (
-          <Table.Body>
-            {filteredCustomers.length === 0 ? (
-              <Table.Cell colSpan={6} className="text-center">
+        <Table.Body aria-live="polite">
+          {loading ? (
+            <Table.Row>
+              <Table.Cell colSpan={8} className="text-center p-4">
+                <Spinner size="2" />
+              </Table.Cell>
+            </Table.Row>
+          ) : filteredCustomers.length === 0 ? (
+            <Table.Row>
+              <Table.Cell colSpan={8} className="text-center p-4">
                 No Customers Found
               </Table.Cell>
-            ) : (
-              filteredCustomers.map((customer) => (
-                <Table.Row
-                  key={customer.id}
-                  className="relative cursor-pointer"
+            </Table.Row>
+          ) : (
+            filteredCustomers.map((customer) => (
+              <Table.Row key={customer.id || `${customer.customerTag}-${customer.createdAt}`} className="relative cursor-pointer">
+                <Table.Cell>{refractor(customer.createdAt) || "N/A"}</Table.Cell>
+                <Table.Cell>{customer.customerTag || "N/A"}</Table.Cell>
+                <Table.RowHeaderCell>
+                  {customer.firstname || "N/A"} {customer.lastname || "N/A"}
+                </Table.RowHeaderCell>
+                <Table.Cell>{customer.email || "N/A"}</Table.Cell>
+                <Table.Cell>{customer.address || "N/A"}</Table.Cell>
+                <Table.Cell>
+                  {(customer?.phoneNumber || []).map((item, index) => (
+                    <span key={index}>
+                      {item || "N/A"} <br />
+                    </span>
+                  ))}
+                </Table.Cell>
+                <Table.Cell
+                  className={
+                    isNegative(customer?.latestBalance || 0)
+                      ? "text-red-500"
+                      : "text-green-500"
+                  }
                 >
-                  <Table.Cell>{refractor(customer.createdAt)}</Table.Cell>
-                  <Table.Cell>{customer.customerTag}</Table.Cell>
-                  <Table.RowHeaderCell>
-                    {/* Render highlighted name */}
-                    {customer.firstname} {customer.lastname}
-                  </Table.RowHeaderCell>
-                  <Table.Cell>{customer.email}</Table.Cell>
-                  <Table.Cell>{customer.address}</Table.Cell>
-
-                  <Table.Cell>
-                    {customer?.phoneNumber &&
-                      customer.phoneNumber.map((item, index) => (
-                        <span key={index}>
-                          {item} <br />
-                        </span>
-                      ))}
-                  </Table.Cell>
-                  <Table.Cell
-                    className={
-                      isNegative(customer?.latestBalance || 0)
-                        ? "text-red-500"
-                        : "text-green-500"
-                    }
-                  >
-                    {formatMoney(customer?.latestBalance || 0)}
-                  </Table.Cell>
-                  <Table.Cell>
-                    <div className="right-4 top-2">
-                      <DropdownMenu.Root>
-                        <DropdownMenu.Trigger>
-                          <Button variant="surface" className="cursor-pointer">
-                            <FontAwesomeIcon icon={faEllipsisV} />
-                          </Button>
-                        </DropdownMenu.Trigger>
-                        <DropdownMenu.Content variant="solid">
-                          <DropdownMenu.Item
-                            shortcut={<FontAwesomeIcon icon={faPen} />}
-                            onClick={() => handleEditClcik(customer)}
-                          >
-                            Edit
-                          </DropdownMenu.Item>
-                          <DropdownMenu.Item
-                            shortcut={<FontAwesomeIcon icon={faBook} />}
-                            onClick={() =>
-                              navigate(
-                                `/admin/customers/customer-ledger/${customer.id}`
-                              )
-                            }
-                          >
-                            View Ledger
-                          </DropdownMenu.Item>
-                        </DropdownMenu.Content>
-                      </DropdownMenu.Root>
-                    </div>
-                  </Table.Cell>
-                </Table.Row>
-              ))
-            )}
-          </Table.Body>
-        )}
+                  {formatMoney(customer?.latestBalance || 0)}
+                </Table.Cell>
+                <Table.Cell>
+                  <DropdownMenu.Root>
+                    <DropdownMenu.Trigger>
+                      <Button variant="surface" className="cursor-pointer">
+                        <FontAwesomeIcon icon={faEllipsisV} />
+                      </Button>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Content variant="solid">
+                      <DropdownMenu.Item
+                        shortcut={<FontAwesomeIcon icon={faPen} />}
+                        onClick={() => handleEditClick(customer)}
+                      >
+                        Edit
+                      </DropdownMenu.Item>
+                      <DropdownMenu.Item
+                        shortcut={<FontAwesomeIcon icon={faBook} />}
+                        onClick={() => navigate(`/admin/customers/customer-ledger/${customer.id}`)}
+                      >
+                        View Ledger
+                      </DropdownMenu.Item>
+                    </DropdownMenu.Content>
+                  </DropdownMenu.Root>
+                </Table.Cell>
+              </Table.Row>
+            ))
+          )}
+        </Table.Body>
       </Table.Root>
+
+      {(paginationUrls.length > 0 || currentPageIndex > 0) && (
+        <Flex justify="center" className="mt-4">
+          <Flex gap="2" align="center">
+            <Button
+              variant="soft"
+              disabled={currentPageIndex === 0}
+              onClick={handlePrevPage}
+              className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
+              aria-label="Previous page"
+            >
+              Previous
+            </Button>
+            <Text>Page {currentPageIndex + 1}</Text>
+            <Button
+              variant="soft"
+              disabled={currentPageIndex >= paginationUrls.length && !paginationUrls[currentPageIndex - 1]}
+              onClick={handleNextPage}
+              className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
+              aria-label="Next page"
+            >
+              Next
+            </Button>
+          </Flex>
+        </Flex>
+      )}
 
       {selectEditCustomer && (
         <EditDialog
           isOpen={!!selectEditCustomer}
-          onClose={() => setSelectEditCustomer(null)}
+          onClose={() => {
+            setSelectEditCustomer(null);
+            setCurrentPageIndex(0);
+            setPaginationUrls([]);
+            fetchCustomers();
+          }}
           id={selectEditCustomer}
-          fetchCustomers={fetchCustomers}
+          fetchCustomers={() => {
+            setCurrentPageIndex(0);
+            setPaginationUrls([]);
+            fetchCustomers();
+          }}
         />
       )}
       <Toaster position="top-right" />
