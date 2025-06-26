@@ -400,7 +400,9 @@ const IndividualDepartmentLedger = () => {
 
   return (
     <>
-      <Flex justify="between" align="center" className="mb-4">
+      <div className="sticky top-0 z-[1001] bg-[#f9fafb] p-2">
+        
+      <Flex justify="between" align="center" className="mb-4 top-0 left-0">
         <div>
           <Heading>{ledgerName}</Heading>
           <p className="text-sm opacity-40">Department Ledger</p>
@@ -441,6 +443,8 @@ const IndividualDepartmentLedger = () => {
           </div>
         </Flex>
       </Flex>
+      
+    </div>
 
       {/* Table for ledger details */}
       <Table.Root variant="surface" className="mt-4">
