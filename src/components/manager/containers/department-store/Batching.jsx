@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Cascader, Input, Select, Space } from "antd";
 import BatchingRecords from "./BatchingRecords";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -38,8 +39,8 @@ const Batching = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBatchId, setSelectedBatchId] = useState(null);
   const [quantities, setQuantities] = useState({});
-  const [selectedRecord, setSelectedRecord] = useState({}); 
-  const [isSuccessModalOpen,setIsSuccessModalOpen] = useState(false)
+  const [selectedRecord, setSelectedRecord] = useState({});
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
   const fetchBatchProducts = async () => {
     const token = localStorage.getItem("token");
@@ -71,7 +72,6 @@ const Batching = () => {
     setBatches([]);
     setError(null);
 
-  
     const fvoRegex = /^fvo/i;
 
     const token = localStorage.getItem("token");
@@ -96,12 +96,10 @@ const Batching = () => {
             ? batch["raw-material"]?.find(
                 (item) => item.rawName.toLowerCase() === "cpko"
               )
-            : {}; 
+            : {};
         const fvo =
           batch.products?.length > 0
-            ? batch.products?.find(
-                (item) => fvoRegex.test(item.otherProduct)
-              )
+            ? batch.products?.find((item) => fvoRegex.test(item.otherProduct))
             : {};
         const sludge =
           batch?.products?.length > 0
@@ -115,16 +113,15 @@ const Batching = () => {
                 (item) => item.otherProduct.toLowerCase() === "fatty acid"
               )
             : {};
-            
-            console.log(fvo);
-            
 
         return {
           ...batch,
           totalCPKOBought: cpko ? cpko?.totalQuantity || "" : "N/A",
           totalFVOSold: fvo ? fvo?.totalQuantity || "" : "N/A",
           totalSludgeSold: sludge ? sludge?.totalQuantity || "" : "N/A",
-          totalFattyAcidSold: fattyAcid ? fattyAcid?.totalQuantity || "" : "N/A",
+          totalFattyAcidSold: fattyAcid
+            ? fattyAcid?.totalQuantity || ""
+            : "N/A",
         };
       });
 
@@ -176,7 +173,7 @@ const Batching = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setIsSuccessModalOpen(true)
+      setIsSuccessModalOpen(true);
       // showToast({
       //   type: "success",
       //   position: "top-center",
@@ -210,6 +207,14 @@ const Batching = () => {
       showToast({
         type: "error",
         message: "An error occurred, try logging in again.",
+      });
+      return;
+    }
+
+    if (Object.keys(quantities).length > 0) {
+      showToast({
+        type: "error",
+        message: "You cannot submit form with input values ",
       });
       return;
     }
@@ -319,7 +324,6 @@ const Batching = () => {
     }
   };
 
-  
   useEffect(() => {
     fetchBatches();
     fetchBatchProducts();
@@ -521,14 +525,26 @@ const Batching = () => {
                     key={product.id}
                   >
                     <p className="text-[15px] w-[40%]">{product.name}</p>
-                    <TextField.Root
+                    {/* <TextField.Root
                       className="w-full"
                       placeholder={`Enter quantity for ${product.name} in TONS`}
                       value={quantities[product.id] || ""}
                       onChange={(e) =>
                         handleQuantityChange(product.id, e.target.value)
                       }
-                    />
+                    /> */}
+                    <Space direction="vertical" className="w-full">
+                      
+                      <Input
+                        addonAfter={"TONS"}
+                        value={quantities[product.id] || ""}
+                        className="w-full"
+                        placeholder={`Enter quantity for ${product.name}`}
+                        onChange={(e) =>
+                          handleQuantityChange(product.id, e.target.value)
+                        }
+                      />
+                    </Space>
                   </div>
                 ))}
               </Flex>
@@ -538,14 +554,14 @@ const Batching = () => {
                   onClick={handleSaveLikeThat}
                   className="cursor-pointer !bg-theme text-white"
                 >
-                  End Batch
+                  Continue
                 </Button>
                 <Button
                   variant="solid"
                   onClick={handleSave}
                   className="cursor-pointer !bg-theme"
                 >
-                  Save
+                  End Batch
                 </Button>
               </Flex>
             </Dialog.Content>
