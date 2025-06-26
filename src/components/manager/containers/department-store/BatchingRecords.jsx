@@ -176,7 +176,7 @@ const BatchingRecords = ({ data, setSelectedRecord }) => {
                         {CPKODetails[index]?.quantity || "-"}
                       </Table.Cell>
                       <Table.Cell>
-                        {formatMoney(CPKODetails[index]?.price) || "-"}
+                        {formatMoney(CPKODetails[index]?.unit) || "-"}
                       </Table.Cell>
                     </Table.Row>
                   ))}
