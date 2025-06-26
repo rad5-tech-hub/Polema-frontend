@@ -55,6 +55,12 @@ const Dipping = () => {
   const [isFetching, setIsFetching] = useState(false);
   const [paginationUrls, setPaginationUrls] = useState([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [FVOQuantity, setFVOQuantity] = useState("")
+  const [storeRemnant, setStoreRemnant] = useState([{
+    fvo: "",
+    sludge: '',
+    fatty: ""
+  }])
   const [form] = Form.useForm();
   const [completeForm] = Form.useForm();
 
@@ -104,6 +110,41 @@ const Dipping = () => {
       setIsFetching(false);
     }
   };
+
+  const fetchStoreRemnant = async () => {
+    const token = localStorage.getItem("token");
+    const sludgeRegex = /^slu/i;
+    const fattyAcidRegex = /^fat/i;
+
+    if (!token) {
+      if (!token) {
+        showToast({
+          type: "error",
+          message: error?.response?.message || "An error occurred ,try logging in again."
+        })
+      }
+    }
+    try {
+
+      const { data } = await axios.get(`${root}/batch/left-instore`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      const sludgeArray = data.data.find((item) => sludgeRegex.test(item.name))
+
+      const fattyAcidArray = data.data.find((item) => fattyAcidRegex.test(item.name))
+
+      setStoreRemnant({ sludge: sludgeArray, fatty: fattyAcidArray })
+    } catch (error) {
+      showToast({
+        type: "error",
+        message: error?.response?.message || "An error occurred while get store remnant"
+      })
+    }
+  }
+
 
   const handleNextPage = () => {
     if (currentPageIndex < paginationUrls.length - 1) {
@@ -411,8 +452,69 @@ const Dipping = () => {
     });
   };
 
+  //Get quantity left in FVO
+  const getFVOLeft = async () => {
+    let FVORegex = /^fvo/i;
+    let url = `${root}/batch/all-batch`
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      showToast({
+        message: "An error occurred , try login in again.",
+        type: "error"
+      })
+      return
+    }
+
+    try {
+      const { data } = await axios.get(`${url}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      // const fvo = data.data.products.filter((item) =>
+      //   FVORegex.test(item.otherProduct)
+      // );
+      const ItemsWithFVORecords = data.data.filter(batch =>
+        batch.products.some(product => FVORegex.test(product.otherProduct))
+      );
+
+      // Get first Record 
+      const firstFVORecord = ItemsWithFVORecords[0].products || []
+
+      const quantityLeft = firstFVORecord.find((item) => {
+        return FVORegex.test(item.otherProduct)
+      })
+
+      setFVOQuantity(quantityLeft)
+    } catch (error) {
+      console.log(error);
+
+      showToast({
+        message: "An error occurred in getting FVO Remnant Details",
+        type: "error"
+      })
+    }
+  }
+
+  const RemnantBox = ({ message, value }) => {
+    return <>
+      <div className="p-4 border-black border-2 w-full shadow-md rounded-md">
+        <h1 className="p-2 font-bold text-lg font-amsterdam min-h-8">{message}</h1>
+        <div className="flex items-center">
+          <p className="p-2 text-3xl font-black min-h-4">{value}</p>
+        <span className="text-[12px] justify-end opacity-70 ">(TONS)</span>
+        </div>
+      </div>
+    </>
+  }
+
   useEffect(() => {
     fetchDipping();
+    // getFVOLeft();
+    fetchStoreRemnant()
   }, []);
 
   return (
@@ -423,6 +525,16 @@ const Dipping = () => {
           New Dip
         </Button>
       </Flex>
+      
+
+
+      {Object.values(storeRemnant).length > 0 ? <div className="flex gap-4">
+        <RemnantBox message={"QUANTTIY OF FVO IN STOCK"} value={dipingDetails[0]?.remaining || 0} />
+        <RemnantBox message={"QUANTITY OF FATTY ACID IN STOCK"} value={storeRemnant?.sludge?.totalRemainingQuantity || 0} />
+        <RemnantBox message={"QUANTITY OF SLUDGE IN STOCK"} value={storeRemnant?.fatty?.totalRemainingQuantity || 0} />
+
+      </div>
+        : ""}
 
       <Table.Root
         className="mt-4 table-fixed w-full"
@@ -475,9 +587,8 @@ const Dipping = () => {
                 <Table.Cell>{item.production || "N/A"}</Table.Cell>
                 <Table.Cell>
                   <FontAwesomeIcon
-                    className={`${
-                      item.isActive ? "text-yellow-500" : "text-green-500"
-                    } mr-2`}
+                    className={`${item.isActive ? "text-yellow-500" : "text-green-500"
+                      } mr-2`}
                     icon={faSquare}
                   />
                   {item.isActive ? "Ongoing" : "Completed"}
@@ -535,10 +646,10 @@ const Dipping = () => {
       <Modal
         title="New Dip"
         open={isModalVisible}
-        onCancel={()=>{
+        onCancel={() => {
           setIsModalVisible(false)
         }}
-        
+
         footer={[
           // <AntButton
           //   key="finish"

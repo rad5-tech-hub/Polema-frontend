@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { formatMoney } from "../../../../date";
 import { refractor } from "../../../../date";
 import {
   BarChart,
@@ -52,8 +53,8 @@ const CustomerPerformanceChart = () => {
       // Transform the API response to match the chart format
       const formattedData = detailsArray.map((customer) => ({
         name: `${customer.firstName} ${customer.lastName}`,
-        totalCredit: parseFloat(customer.totalCredit),
-        totalDebit: parseFloat(customer.totalDebit),
+        totalCredit: formatMoney(parseFloat(customer.totalCredit)),
+        totalDebit: formatMoney(parseFloat(customer.totalDebit)),
       }));
 
       setChartData(formattedData);

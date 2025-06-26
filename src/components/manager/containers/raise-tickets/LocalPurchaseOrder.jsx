@@ -497,7 +497,7 @@ const LocalPurchaseOrder = () => {
           <div className="w-full">
             <Text className="block mt-4">LPO Expires</Text>
             <TextField.Root
-              type="date"
+              // type="date"
               value={expiration}
               onChange={(e) => setExpiration(e.target.value)}
               placeholder="Enter LPO Expires"
@@ -507,7 +507,7 @@ const LocalPurchaseOrder = () => {
           <div className="w-full">
             <Text className="block mt-4">Period</Text>
             <TextField.Root
-              type="date"
+              // type="date"
               className="mt-2"
               value={period}
               onChange={(e) => setPeriod(e.target.value)}

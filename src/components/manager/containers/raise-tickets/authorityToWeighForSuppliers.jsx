@@ -19,6 +19,7 @@ import {
 // Constants
 const API_ROOT = import.meta.env.VITE_ROOT;
 
+
 // Utility Functions
 const getAuthToken = () => localStorage.getItem("token");
 
@@ -30,7 +31,7 @@ const getSupplierName = (supplier) =>
 // Main Component
 const NewAuthorityToWeigh = () => {
   // State Management
-  const showToast = useToast()
+  const showToast = useToast();
   const [suppliers, setSuppliers] = useState([]);
   const [selectedSupplierId, setSelectedSupplierId] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -202,6 +203,9 @@ const NewAuthorityToWeigh = () => {
       })
  
       resetForm();
+
+
+      navigate("/admin/raise-ticket/authority-to-weigh")
     } catch (error) {
       console.error("Submission error:", error);
       showToast({
