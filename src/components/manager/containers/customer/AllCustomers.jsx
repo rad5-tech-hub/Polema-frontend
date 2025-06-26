@@ -202,6 +202,7 @@ const AllCustomers = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [paginationUrls, setPaginationUrls] = useState([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [arrangeType,setArrangeType] = useState(null)
   const showToast = useToast();
   const navigate = useNavigate();
 
@@ -283,9 +284,44 @@ const AllCustomers = () => {
     setSelectEditCustomer(customer);
   };
 
+
+  const arrangeList = async () => {
+    const retrToken = localStorage.getItem("token");
+    if (!retrToken) {
+      showToast({
+        type: "error",
+        message: "An error occurred. Try logging in again.",
+      });
+      setLoading(false);
+      return;
+    }
+    try {
+      const response = await axios.get(`${root}/customer/all-customers?sortByBalance=true&sortOrder=${arrangeType === "asc" ? "ASC" : "DESC"}`,{
+        headers: {
+          Authorization:`Bearer ${retrToken}`
+        }
+      })
+      setCustomerData(response.data.customers || []);
+    } catch (err) {
+      showToast({
+        type: "error",
+        message:
+          err?.response?.data?.message ||
+          "An error occurred while fetching customers.",
+      });
+    }
+  }
+  useEffect(() => {
+    if (arrangeType !== null) {
+      arrangeList();
+    }
+  }, [arrangeType]);
   useEffect(() => {
     fetchCustomers();
   }, []);
+
+
+
 
   return (
     <>
@@ -304,11 +340,14 @@ const AllCustomers = () => {
           </TextField.Root>
         </div>
         <div>
-          <Select.Root size="2">
-            <Select.Trigger placeholder="Filter Customers" />
+          
+          <Select.Root size="2"  onValueChange={(val)=>{
+              setArrangeType(val)
+            }}>
+            <Select.Trigger placeholder="Arrange List By:" />
             <Select.Content>
-              <Select.Item value="debt">Indebted Customers</Select.Item>
-              <Select.Item value="no-debt">Non-Indebted Customers</Select.Item>
+              <Select.Item value="asc">Highest Indebted Customers</Select.Item>
+              <Select.Item value="desc">Lowest Indebted Customers</Select.Item>
             </Select.Content>
           </Select.Root>
         </div>
@@ -323,7 +362,7 @@ const AllCustomers = () => {
             <Table.ColumnHeaderCell className="text-left">EMAIL</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell className="text-left">ADDRESS</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell className="text-left">PHONE</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">BALANCE(₦)</Table.ColumnHeaderCell>
+            {/* <Table.ColumnHeaderCell className="text-left">BALANCE(₦)</Table.ColumnHeaderCell> */}
             <Table.ColumnHeaderCell className="text-left"></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
@@ -357,7 +396,7 @@ const AllCustomers = () => {
                     </span>
                   ))}
                 </Table.Cell>
-                <Table.Cell
+                {/* <Table.Cell
                   className={
                     isNegative(customer?.latestBalance || 0)
                       ? "text-red-500"
@@ -365,7 +404,7 @@ const AllCustomers = () => {
                   }
                 >
                   {formatMoney(customer?.latestBalance || 0)}
-                </Table.Cell>
+                </Table.Cell> */}
                 <Table.Cell>
                   <DropdownMenu.Root>
                     <DropdownMenu.Trigger>
