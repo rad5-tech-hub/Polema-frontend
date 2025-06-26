@@ -29,6 +29,7 @@ const BatchingRecords = ({ data, setSelectedRecord }) => {
 
   const sludgeRegex = /^slu/i;
   const fattyAcidRegex = /^fat/i;
+  const fvoRegex = /^fvo/i;
 
   const getBatchDetails = () => {
     setFetchComplete(false);
@@ -52,8 +53,8 @@ const BatchingRecords = ({ data, setSelectedRecord }) => {
       );
 
       // Filter FVO from raw-material, aligning with Batching.jsx
-      const fvo = data["raw-material"].filter(
-        (item) => item.rawName.toLowerCase() === "fvo"
+      const fvo = data.products.filter((item) =>
+        fvoRegex.test(item.otherProduct)
       );
 
       const sludge = data.products.filter((item) =>
@@ -64,7 +65,6 @@ const BatchingRecords = ({ data, setSelectedRecord }) => {
         fattyAcidRegex.test(item.otherProduct)
       );
 
-      
       setCPKODetails([...(cpko || [])]);
       setFVODetails([...(fvo || [])]);
       setSludgeDetails([...(sludge || [])]);
@@ -188,65 +188,30 @@ const BatchingRecords = ({ data, setSelectedRecord }) => {
                 {FVODetails.length > 0 && (
                   <InfoBox
                     message="TOTAL FOR FVO"
-                    unitPrice={formatMoney(
-                      FVODetails.reduce(
-                        (sum, item) => sum + (item.totalAmount || 0),
-                        0
-                      )
-                    )}
-                    quantity={formatMoney(
-                      FVODetails.reduce(
-                        (sum, item) => sum + (item.totalQuantity || 0),
-                        0
-                      )
-                    )}
+                    unitPrice={formatMoney(FVODetails[0].totalAmount)}
+                    quantity={formatMoney(FVODetails[0].totalQuantity)}
                   />
                 )}
                 {CPKODetails.length > 0 && (
                   <InfoBox
                     message="TOTAL FOR CPKO"
-                    unitPrice={formatMoney(
-                      CPKODetails.reduce(
-                        (sum, item) => sum + (item.totalAmount || 0),
-                        0
-                      )
-                    )}
-                    quantity={formatMoney(
-                      CPKODetails.reduce(
-                        (sum, item) => sum + (item.totalQuantity || 0),
-                        0
-                      )
-                    )}
+                    unitPrice={formatMoney(CPKODetails[0].totalAmount)}
+                    quantity={formatMoney(CPKODetails[0].totalQuantity)}
                   />
                 )}
                 {fattyAcidDetails.length > 0 && (
                   <InfoBox
                     message="TOTAL FOR FATTY ACID"
-                    unitPrice={formatMoney(
-                      fattyAcidDetails.reduce(
-                        (sum, item) => sum + (item.totalAmount || 0),
-                        0
-                      )
-                    )}
-                    quantity={formatMoney(
-                      fattyAcidDetails.reduce(
-                        (sum, item) => sum + (item.totalQuantity || 0),
-                        0
-                      )
-                    )}
+                    unitPrice={formatMoney(fattyAcidDetails[0].totalAmount)}
+                    quantity={formatMoney(fattyAcidDetails[0].totalQuantity)}
                   />
                 )}
-                
+
                 {sludgeDetails.length > 0 && (
                   <InfoBox
                     message="TOTAL FOR SLUDGE"
-                    unitPrice={sludgeDetails[0].price}
-                    quantity={formatMoney(
-                      sludgeDetails.reduce(
-                        (sum, item) => sum + (item.totalQuantity || 0),
-                        0
-                      )
-                    )}
+                    unitPrice={formatMoney(sludgeDetails[0].totalAmount)}
+                    quantity={formatMoney(sludgeDetails[0].totalQuantity)}
                   />
                 )}
               </div>
