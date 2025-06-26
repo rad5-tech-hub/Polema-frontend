@@ -41,6 +41,8 @@ const BatchingRecords = ({ data, setSelectedRecord }) => {
         showToast({
           type: "error",
           message: "Invalid batch data structure.",
+
+            
         });
         setLoading(false);
         setFetchComplete(true);
@@ -52,8 +54,8 @@ const BatchingRecords = ({ data, setSelectedRecord }) => {
       );
 
       // Filter FVO from raw-material, aligning with Batching.jsx
-      const fvo = data["raw-material"].filter(
-        (item) => item.rawName.toLowerCase() === "fvo"
+      const fvo = data.products.filter(
+        (item) => item.otherProduct.toLowerCase() === "fvo"
       );
 
       const sludge = data.products.filter((item) =>

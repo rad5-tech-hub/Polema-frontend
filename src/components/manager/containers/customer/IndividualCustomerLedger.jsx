@@ -603,7 +603,12 @@ const IndividualCustomerLedger = () => {
         if (statementDetails.length > 0) {
           generatePDF(startDate, endDate);
         }
-      });
+      }).catch((err)=>{
+        showToast({
+          type:"error",
+          message:"An error occurred in fetching statement details"
+        })  
+      })
     };
 
     return (
