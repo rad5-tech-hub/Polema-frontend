@@ -576,7 +576,7 @@ const IndividualCustomerLedger = () => {
 
           <Button
             type="submit"
-            className="mt-4 p-2 text-white !bg-blue-400"
+            className="mt-4 p-2 text-white !bg-blue-600"
             disabled={buttonLoading}
           >
             {buttonLoading ? "Please Wait..." : "Submit"}
@@ -664,7 +664,7 @@ const IndividualCustomerLedger = () => {
 
           <Button
             type="submit"
-            className="!bg-blue-400 text-white"
+            className="!bg-blue-600 text-white"
             disabled={generatingPDF}
           >
             {generatingPDF ? "Generating..." : "Submit"}

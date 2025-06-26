@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { refractor } from "../../../date";
+import { formatMoney, refractor } from "../../../date";
 import { Table, Spinner, TextField, Flex, Text, Card } from "@radix-ui/themes";
 import axios from "axios";
 
 // All imports for the dropdown menu
-import { DeleteIcon, DropDownIcon } from "../../../icons";
+import { isNegative } from "../../../date";
 import { DropdownMenu, Button, Heading } from "@radix-ui/themes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPen, faUser, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
-import { Suspend } from "../../../icons";
+import { faPen, faUser, faEllipsisV,faBook} from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
 
 //All imports for the Dialog Box
 
@@ -207,6 +207,7 @@ const EditDialog = ({ isOpen, onClose, fetchCustomers, id }) => {
 
 const AllCustomers = () => {
   const [customerData, setCustomerData] = useState([]);
+  const navigate = useNavigate()
 
   const [loading, setLoading] = useState(true);
 
@@ -239,7 +240,7 @@ const AllCustomers = () => {
       return;
     }
     try {
-      const response = await axios.get(`${root}/customer/get-customers`, {
+      const response = await axios.get(`${root}/customer/all-customers`, {
         headers: {
           Authorization: `Bearer ${retrToken}`,
         },
@@ -325,6 +326,7 @@ const AllCustomers = () => {
             <Table.ColumnHeaderCell>EMAIL</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>ADDRESS</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>PHONE</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>BALANCE(₦)</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
@@ -353,12 +355,23 @@ const AllCustomers = () => {
                   </Table.RowHeaderCell>
                   <Table.Cell>{customer.email}</Table.Cell>
                   <Table.Cell>{customer.address}</Table.Cell>
+
                   <Table.Cell>
-                    {customer.phoneNumber.map((item, index) => (
-                      <span key={index}>
-                        {item} <br />
-                      </span>
-                    ))}
+                    {customer?.phoneNumber &&
+                      customer.phoneNumber.map((item, index) => (
+                        <span key={index}>
+                          {item} <br />
+                        </span>
+                      ))}
+                  </Table.Cell>
+                  <Table.Cell
+                    className={
+                      isNegative(customer?.latestBalance || 0)
+                        ? "text-red-500"
+                        : "text-green-500"
+                    }
+                  >
+                    {formatMoney(customer?.latestBalance || 0)}
                   </Table.Cell>
                   <Table.Cell>
                     <div className="right-4 top-2">
@@ -374,6 +387,14 @@ const AllCustomers = () => {
                             onClick={() => handleEditClcik(customer)}
                           >
                             Edit
+                          </DropdownMenu.Item>
+                          <DropdownMenu.Item
+                            shortcut={<FontAwesomeIcon icon={faBook} />}
+                            onClick={() =>
+                              navigate(`/admin/customers/customer-ledger/${customer.id}`)
+                            }
+                          >
+                            View Ledger
                           </DropdownMenu.Item>
                         </DropdownMenu.Content>
                       </DropdownMenu.Root>

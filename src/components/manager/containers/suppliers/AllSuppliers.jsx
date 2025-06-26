@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
+
 import {
   Table,
   Spinner,
@@ -9,17 +10,23 @@ import {
   TextField,
   DropdownMenu,
 } from "@radix-ui/themes";
+import { isNegative } from "../../../date";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBook,faPen } from "@fortawesome/free-solid-svg-icons";
 import { DropDownIcon } from "../../../icons";
-import { refractor } from "../../../date";
+import { refractor, formatMoney } from "../../../date";
 import toast, { Toaster } from "react-hot-toast";
 import EditSuppliers from "./EditSuppliers";
 import { usePagination } from "../../../../hooks/usePagination";
+import { useNavigate } from "react-router-dom";
+
 
 const root = import.meta.env.VITE_ROOT;
 
 const AllSuppliers = () => {
   const [suppliers, setSuppliers] = useState([]);
+  const navigate = useNavigate()
   const [pageLoading, setPageLoading] = useState(true);
   const [viewStaff, setViewStaff] = useState(null);
 
@@ -43,11 +50,11 @@ const AllSuppliers = () => {
 
     setPageLoading(true);
     try {
-      const response = await axios.get(`${root}/customer/get-suppliers`, {
+      const response = await axios.get(`${root}/customer/all-suppliers`, {
         headers: { Authorization: `Bearer ${retrToken}` },
       });
       setPageLoading(false);
-      setSuppliers(response.data.customers || []);
+      setSuppliers(response.data.suppliers || []);
     } catch (error) {
       setPageLoading(false);
       setSuppliers([]);
@@ -111,6 +118,7 @@ const AllSuppliers = () => {
               <Table.ColumnHeaderCell>EMAIL</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell>ADDRESS</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell>PHONE</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>BALANCE(₦)</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
             </Table.Row>
           </Table.Header>
@@ -135,6 +143,15 @@ const AllSuppliers = () => {
                     <Table.Cell>{supplier.email}</Table.Cell>
                     <Table.Cell>{supplier.address}</Table.Cell>
                     <Table.Cell>{supplier.phoneNumber}</Table.Cell>
+                    <Table.Cell
+                      className={
+                        isNegative(supplier.latestBalance)
+                          ? "text-red-500"
+                          : "text-green-500"
+                      }
+                    >
+                      {formatMoney(supplier?.latestBalance || 0)}
+                    </Table.Cell>
                     <Table.Cell>
                       <DropdownMenu.Root>
                         <DropdownMenu.Trigger>
@@ -144,11 +161,22 @@ const AllSuppliers = () => {
                         </DropdownMenu.Trigger>
                         <DropdownMenu.Content variant="solid">
                           <DropdownMenu.Item
+                            shortcut={<FontAwesomeIcon icon={faPen} />}
                             onClick={() => {
                               setViewStaff(supplier);
                             }}
                           >
                             Edit
+                          </DropdownMenu.Item>
+                          <DropdownMenu.Item
+                            shortcut={<FontAwesomeIcon icon={faBook} />}
+                            onClick={() => {
+                              navigate(
+                                `/admin/supplier/supplier-ledger/${supplier.id}`
+                              );
+                            }}
+                          >
+                            View Ledger
                           </DropdownMenu.Item>
                         </DropdownMenu.Content>
                       </DropdownMenu.Root>
@@ -159,22 +187,7 @@ const AllSuppliers = () => {
             </Table.Body>
           )}
         </Table.Root>
-        {/* <div className="flex justify-center  items-center mt-4">
-          <div className="flex gap-2 items-center">
-            <Button disabled={currentPage === 1} onClick={goToPreviousPage}>
-              Previous
-            </Button>
-            <span>
-              Page {currentPage} of {totalPages}
-            </span>
-            <Button
-              disabled={currentPage === totalPages}
-              onClick={goToNextPage}
-            >
-              Next
-            </Button>
-          </div>
-        </div> */}
+
         {viewStaff && (
           <EditSuppliers
             isOpen={!!viewStaff}
