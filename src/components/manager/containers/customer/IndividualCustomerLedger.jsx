@@ -236,6 +236,13 @@ const IndividualCustomerLedger = () => {
     }
   }, [entries]);
 
+  // Generate PDF when statementDetails is updated
+  useEffect(() => {
+    if (statementDetails.length > 0 && isStatementDateModalOpen && generatingPDF) {
+      generatePDF(startingDateRange.start, startingDateRange.end);
+    }
+  }, [statementDetails, isStatementDateModalOpen, generatingPDF]);
+
   // Generate PDF
   const generatePDF = (startDate, endDate) => {
     setGeneratingPDF(true);
@@ -579,6 +586,7 @@ const IndividualCustomerLedger = () => {
     );
   };
 
+  // Modal for selecting statement date range
   const StatementDateDetails = () => {
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
@@ -599,11 +607,12 @@ const IndividualCustomerLedger = () => {
         });
         return;
       }
-      fetchStatementDetails(startDate, endDate).then(() => {
-        if (statementDetails.length > 0) {
-          generatePDF(startDate, endDate);
-        }
-      });
+      // Set generatingPDF to true to trigger useEffect when statementDetails updates
+      setGeneratingPDF(true);
+      // Update startingDateRange to ensure correct dates are used in generatePDF
+      setStartingDateRange({ start: startDate, end: endDate });
+      // Fetch statement details
+      fetchStatementDetails(startDate, endDate);
     };
 
     return (
@@ -614,13 +623,17 @@ const IndividualCustomerLedger = () => {
       >
         <h1 className="font-bold text-lg mb-0">Generate Account Statement</h1>
         <p className="mb-4 opacity-80">{`${
-              getCustomerByID(id).firstname
-            } ${getCustomerByID(id).lastname}`}</p>
+          getCustomerByID(id).firstname
+        } ${getCustomerByID(id).lastname}`}</p>
         <form onSubmit={handleSubmit}>
-          <FontAwesomeIcon icon={faClose} className="absolute top-4 right-4 cursor-pointer" onClick={()=>{
-            setIsStatementDateModalOpen(false)
-          }} />
-          
+          <FontAwesomeIcon
+            icon={faClose}
+            className="absolute top-4 right-4 cursor-pointer"
+            onClick={() => {
+              setIsStatementDateModalOpen(false);
+            }}
+          />
+
           <div className="mb-4">
             <label htmlFor="start-date" className="block font-bold">
               Start Date

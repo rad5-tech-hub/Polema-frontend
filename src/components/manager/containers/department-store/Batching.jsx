@@ -174,12 +174,6 @@ const Batching = () => {
         }
       );
       setIsSuccessModalOpen(true);
-      // showToast({
-      //   type: "success",
-      //   position: "top-center",
-      //   message:
-      //     "🎉 Batch Started Successfully \n \n Your batch has been opened. To monitor or update records, head over to 'Opened Batches' and select 'View Records' to get started",
-      // });
       setCurrentPageIndex(0);
       setPaginationUrls([]);
       fetchBatches();
@@ -211,7 +205,7 @@ const Batching = () => {
       return;
     }
 
-    if (Object.keys(quantities).length > 0) {
+    if (Object.values(quantities).some((value) => value && value !== "")) {
       showToast({
         type: "error",
         message: "You cannot submit form with input values ",
@@ -251,7 +245,7 @@ const Batching = () => {
       return;
     }
     const payload = Object.keys(quantities).reduce((acc, productId) => {
-      if (quantities[productId]) {
+      if (quantities[productId] && quantities[productId] !== "") {
         acc[productId] = Number(quantities[productId]);
       }
       return acc;
@@ -259,7 +253,7 @@ const Batching = () => {
 
     if (Object.keys(payload).length === 0) {
       showToast({
-        type: "warning",
+        type: "error",
         message: "Please enter at least one quantity.",
       });
       return;
@@ -299,10 +293,15 @@ const Batching = () => {
   };
 
   const handleQuantityChange = (productId, value) => {
-    setQuantities((prev) => ({
-      ...prev,
-      [productId]: value,
-    }));
+    setQuantities((prev) => {
+      const newQuantities = { ...prev };
+      if (value && value.trim() !== "") {
+        newQuantities[productId] = value;
+      } else {
+        delete newQuantities[productId]; // Remove key if value is empty
+      }
+      return newQuantities;
+    });
   };
 
   const handleNextPage = () => {
@@ -433,8 +432,7 @@ const Batching = () => {
                         <DropdownMenu.Content variant="solid">
                           <DropdownMenu.Item
                             onClick={() => {
-                              setSelectedRecord(batch); // Fixed typo: setSelectedRecords -> setSelectedRecord
-                              // navigate(`/admin/department-store/batching/${batch.id}`);
+                              setSelectedRecord(batch);
                             }}
                           >
                             View Batch Records
@@ -481,7 +479,7 @@ const Batching = () => {
             </Flex>
           )}
 
-          {/* //Success Modal after starting batch */}
+          {/* Success Modal after starting batch */}
           <Dialog.Root
             open={isSuccessModalOpen}
             onOpenChange={setIsSuccessModalOpen}
@@ -525,16 +523,7 @@ const Batching = () => {
                     key={product.id}
                   >
                     <p className="text-[15px] w-[40%]">{product.name}</p>
-                    {/* <TextField.Root
-                      className="w-full"
-                      placeholder={`Enter quantity for ${product.name} in TONS`}
-                      value={quantities[product.id] || ""}
-                      onChange={(e) =>
-                        handleQuantityChange(product.id, e.target.value)
-                      }
-                    /> */}
                     <Space direction="vertical" className="w-full">
-                      
                       <Input
                         addonAfter={"TONS"}
                         value={quantities[product.id] || ""}
@@ -552,7 +541,16 @@ const Batching = () => {
                 <Button
                   variant="surface"
                   onClick={handleSaveLikeThat}
-                  className="cursor-pointer !bg-theme text-white"
+                  disabled={Object.values(quantities).some(
+                    (value) => value && value.trim() !== ""
+                  )}
+                  className={` ${
+                    Object.values(quantities).some(
+                      (value) => value && value.trim() !== ""
+                    )
+                      ? "!bg-theme/70 cursor-not-allowed"
+                      : "!bg-theme cursor-pointer"
+                  } text-white`}
                 >
                   Continue
                 </Button>
