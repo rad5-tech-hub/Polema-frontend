@@ -489,8 +489,6 @@ const Dipping = () => {
       })
 
       setFVOQuantity(quantityLeft)
-
-      
     } catch (error) {
       console.log(error);
 
@@ -505,7 +503,10 @@ const Dipping = () => {
     return <>
       <div className="p-4 border-black border-2 w-full shadow-md rounded-md">
         <h1 className="p-2 font-bold text-lg font-amsterdam">{message}</h1>
-        <p className="p-2 text-3xl font-black">{value}</p>
+        <div className="flex items-center">
+          <p className="p-2 text-3xl font-black">{value}</p>
+        <span className="text-[12px] justify-end opacity-70 ">(TONS)</span>
+        </div>
       </div>
     </>
   }
@@ -528,9 +529,9 @@ const Dipping = () => {
 
 
       {Object.values(storeRemnant).length > 0 ? <div className="flex gap-4">
-        <RemnantBox message={"FVO LEFT"} value={FVOQuantity?.remainingQuantity || 0} />
-        <RemnantBox message={"FATTY ACID LEFT"} value={storeRemnant?.sludge?.totalRemainingQuantity || 0} />
-        <RemnantBox message={"SLUDGE LEFT"} value={storeRemnant?.fatty?.totalRemainingQuantity || 0} />
+        <RemnantBox message={"QUANTTIY OF FVO IN STOCK"} value={FVOQuantity?.remainingQuantity || 0} />
+        <RemnantBox message={"QUANTITY OF FATTY ACID IN STOCK"} value={storeRemnant?.sludge?.totalRemainingQuantity || 0} />
+        <RemnantBox message={"QUANTITY OF SLUDGE IN STOCK"} value={storeRemnant?.fatty?.totalRemainingQuantity || 0} />
 
       </div>
         : ""}
