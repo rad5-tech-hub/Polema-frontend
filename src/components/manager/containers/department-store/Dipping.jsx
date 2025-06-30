@@ -502,9 +502,9 @@ const Dipping = () => {
   const RemnantBox = ({ message, value }) => {
     return <>
       <div className="p-4 border-black border-2 w-full shadow-md rounded-md">
-        <h1 className="p-2 font-bold text-lg font-amsterdam">{message}</h1>
+        <h1 className="p-2 font-bold text-lg font-amsterdam min-h-8">{message}</h1>
         <div className="flex items-center">
-          <p className="p-2 text-3xl font-black">{value}</p>
+          <p className="p-2 text-3xl font-black min-h-4">{value}</p>
         <span className="text-[12px] justify-end opacity-70 ">(TONS)</span>
         </div>
       </div>
@@ -513,7 +513,7 @@ const Dipping = () => {
 
   useEffect(() => {
     fetchDipping();
-    getFVOLeft();
+    // getFVOLeft();
     fetchStoreRemnant()
   }, []);
 
