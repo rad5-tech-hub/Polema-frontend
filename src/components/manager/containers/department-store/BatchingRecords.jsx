@@ -13,12 +13,16 @@ import { formatMoney } from "../../../date";
 import { useParams } from "react-router-dom";
 import useToast from "../../../../hooks/useToast";
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const root = import.meta.env.VITE_ROOT;
 
-const BatchingRecords = ({ data, setSelectedRecord }) => {
+const BatchingRecords = ({ setSelectedRecord }) => {
+  const navigate = useNavigate()
   const { id } = useParams();
   const showToast = useToast();
+  const [data, setData] = useState([])
   const [loading, setLoading] = useState(true);
   const [batchDetails, setBatchDetails] = useState(null);
   const [CPKODetails, setCPKODetails] = useState([]);
@@ -31,11 +35,30 @@ const BatchingRecords = ({ data, setSelectedRecord }) => {
   const fattyAcidRegex = /^fat/i;
   const fvoRegex = /^fvo/i;
 
-  const getBatchDetails = () => {
+  const getBatchDetails = async () => {
     setFetchComplete(false);
     setLoading(true);
 
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      showToast({
+        type: "error",
+        message: "An error occurred , try loggin in again."
+      })
+      return;
+    }
+
     try {
+      const response = await axios.get(`${root}/batch/a-batch/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      const data = response.data.data
+      
+
+
       // Ensure data has expected structure
       if (!data || !data["raw-material"] || !data.products) {
         console.error("Invalid data structure:", data);
@@ -64,7 +87,7 @@ const BatchingRecords = ({ data, setSelectedRecord }) => {
       const fattyAcid = data.products.filter((item) =>
         fattyAcidRegex.test(item.otherProduct)
       );
-
+      setData(data)
       setCPKODetails([...(cpko || [])]);
       setFVODetails([...(fvo || [])]);
       setSludgeDetails([...(sludge || [])]);
@@ -102,7 +125,7 @@ const BatchingRecords = ({ data, setSelectedRecord }) => {
 
   useEffect(() => {
     getBatchDetails();
-  }, [data]); // Added data as dependency
+  }, []); 
 
   return (
     <>
@@ -114,7 +137,9 @@ const BatchingRecords = ({ data, setSelectedRecord }) => {
               <FontAwesomeIcon
                 className="cursor-pointer"
                 icon={faArrowLeft}
-                onClick={() => setSelectedRecord({})}
+                onClick={() => {
+                  navigate("/admin/department-store/batching")
+                }}
               />
               <Heading>Batch Summary</Heading>
             </Flex>

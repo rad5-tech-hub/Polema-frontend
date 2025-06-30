@@ -432,6 +432,7 @@ const Batching = () => {
                         <DropdownMenu.Content variant="solid">
                           <DropdownMenu.Item
                             onClick={() => {
+                              navigate(`/admin/department-store/batching/${batch.id}`)
                               setSelectedRecord(batch);
                             }}
                           >
