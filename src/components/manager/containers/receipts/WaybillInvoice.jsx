@@ -16,24 +16,24 @@ const WaybillInvoice = () => {
   const showToast = useToast();
 
   // State for table data
-  const [tableData, setTableData] = useState([
-    { item: "1", description: "Cement", rate: 3500, amount: 7000 },
-    { item: "2", description: "Sand", rate: 500, amount: 2500 },
-    { item: "3", description: "Gravel", rate: 800, amount: 3200 },
-    { item: "4", description: "Iron Rod", rate: 4500, amount: 9000 },
-    { item: "5", description: "Blocks", rate: 200, amount: 1000 },
-    { item: "6", description: "Water", rate: 150, amount: 300 },
-  ]);
+  // const [tableData, setTableData] = useState([
+  //   { item: "1", description: "Cement", rate: 3500, amount: 7000 },
+  //   { item: "2", description: "Sand", rate: 500, amount: 2500 },
+  //   { item: "3", description: "Gravel", rate: 800, amount: 3200 },
+  //   { item: "4", description: "Iron Rod", rate: 4500, amount: 9000 },
+  //   { item: "5", description: "Blocks", rate: 200, amount: 1000 },
+  //   { item: "6", description: "Water", rate: 150, amount: 300 },
+  // ]);
   const [isMobison, setIsMobison] = useState(false); // State for Switch
   const [billDetails, setBillDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [entries, setEntries] = useState([]);
   const [apiResponse,setApiResponse] = useState([])
 
-  const totalCreditBalance = tableData.reduce(
-    (total, row) => total + row.amount,
-    0
-  );
+  // const totalCreditBalance = tableData.reduce(
+  //   (total, row) => total + row.amount,
+  //   0
+  // );
 
   const handlePrint = () => {
     window.print();
@@ -58,8 +58,8 @@ const WaybillInvoice = () => {
       // const { waybill } = response.data;
       const waybill = response.data.parse;
       const invoiceDetails =
-        response.data.parse?.invoice.ledgerEntries ||
-        response.data?.ledgerEntries ||
+        response.data.parse?.transactionEntries ||
+        response.data?.transactionEntries ||
         [];
 
       const detailsEntries = invoiceDetails.filter(
@@ -74,7 +74,7 @@ const WaybillInvoice = () => {
         // setFailedSearch(false);
         setBillDetails(waybill);
         setApiResponse(response.data)
-        setEntries(detailsEntries || []);
+        setEntries(invoiceDetails || []);
       }
     } catch (error) {
       console.error("Error fetching waybills:", error);

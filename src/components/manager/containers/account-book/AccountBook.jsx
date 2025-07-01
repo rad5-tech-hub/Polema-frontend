@@ -57,7 +57,7 @@ const ConfirmModal = ({
         >
           {_.upperCase(transactionType)}
         </span>{" "}
-        {formattedAmount} from {customerName}?
+        {formattedAmount} {transactionType === "credit" ? "to" :"from"} {customerName}?
       </Heading>
       <Flex justify={"end"} className="mt-4">
         <Flex gap="3">

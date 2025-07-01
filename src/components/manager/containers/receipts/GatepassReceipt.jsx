@@ -161,50 +161,39 @@ const GatepassReceipt = () => {
                     [
                       "Driver's Name",
                       passDetails.transaction?.authToWeighTickets?.driver ||
-                        passDetails.driver ||
-                        "-",
+                      passDetails.driver ||
+                      "-",
                     ],
                     ["Escort's Name", passDetails.escortName || "-"],
                     [
                       "Vehicle No",
                       passDetails.transaction?.authToWeighTickets?.vehicleNo ||
-                        passDetails.vehicleNo ||
-                        "-",
+                      passDetails.vehicleNo ||
+                      "-",
                     ],
                     [
                       "Goods/Invoice No",
                       passDetails.transaction
                         ? passDetails?.transactionEntries
-                          ? passDetails?.transactionEntries.map((item,index)=>{
-                            return (
-                              <>
-                                <span>
-                                  {item?.quantity || ""} {item?.unit || ""} of{" "}
-                                  {item?.product || ""} item
-                                  {index <
-                                  passDetails?.transactionEntries.length - 1
-                                    ? ", "
-                                    : ""}
-                                  {index <
-                                  passDetails?.transactionEntries.length - 1
-                                    ? ""
-                                    : " / "}
-                                  {passDetails.transaction.invoice
-                                    ?.invoiceNumber
-                                    ? `000${passDetails.transaction.invoice.invoiceNumber}`
-                                    : ""}
-                                </span>
-                              </>
-                            );
-                          })
+                          ? <span>
+                            {passDetails?.transactionEntries
+                              ?.map((item) => {
+                                return `${item?.quantity || ""} ${item?.unit || ""} of ${item?.product || ""}`;
+                              })
+                              .join(", ")}
+                            {" / "}
+                            {passDetails?.transaction?.invoice?.invoiceNumber
+                              ? `000${passDetails.transaction.invoice.invoiceNumber}`
+                              : ""}
+                          </span>
+
                           : ""
                         : passDetails.rawMaterial?.name || "-",
                     ],
                     [
                       "Owner of Goods",
                       passDetails.transaction
-                        ? `${passDetails.transaction.corder?.firstname || ""} ${
-                            passDetails.transaction.corder?.lastname || ""
+                        ? `${passDetails.transaction.corder?.firstname || ""} ${passDetails.transaction.corder?.lastname || ""
                           }`.trim() || "-"
                         : passDetails.owner || "-",
                     ],
@@ -234,7 +223,7 @@ const GatepassReceipt = () => {
                         {label}:
                       </label>
                       <p className="border-b border-black border-dotted flex-grow text-sm sm:text-base">
-                        {value} 
+                        {value}
                       </p>
                     </div>
                   ))}

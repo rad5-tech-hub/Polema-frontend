@@ -213,9 +213,9 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
       setRejectLoading(false);
       toast.error(
         error.response?.data?.message ||
-          error.response?.data.error ||
-          error.response?.message ||
-          "An error occurred while trying ot reject ticket"
+        error.response?.data.error ||
+        error.response?.message ||
+        "An error occurred while trying ot reject ticket"
       );
     }
   };
@@ -458,12 +458,12 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                         </Text>
                         <p className="text-[.9rem]">
                           {ticketDetails.customerId &&
-                          ticketDetails.transactions?.corder
+                            ticketDetails.transactions?.corder
                             ? `${ticketDetails.transactions.corder.firstname} ${ticketDetails.transactions.corder.lastname}`
                             : ticketDetails?.supplierId &&
                               ticketDetails?.supplier
-                            ? `${ticketDetails?.supplier.firstname} ${ticketDetails?.supplier.lastname}`
-                            : "Name not available"}
+                              ? `${ticketDetails?.supplier.firstname} ${ticketDetails?.supplier.lastname}`
+                              : "Name not available"}
                         </p>
                       </div>
 
@@ -563,20 +563,20 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                         <p className="text-[.7rem]">
                           {Array.isArray(ticketDetails.items)
                             ? ticketDetails.items.map((item) => {
-                                return (
-                                  <>
-                                    <span>
-                                      {item?.quantity || ""}{" "}
-                                      {item?.rawMaterial || ""} at{" "}
-                                      {item?.unitPrice
-                                        ? formatMoney(item.unitPrice)
-                                        : ""}{" "}
-                                      each
-                                    </span>
-                                    <br />
-                                  </>
-                                );
-                              })
+                              return (
+                                <>
+                                  <span>
+                                    {item?.quantity || ""}{" "}
+                                    {item?.rawMaterial || ""} at{" "}
+                                    {item?.unitPrice
+                                      ? formatMoney(item.unitPrice)
+                                      : ""}{" "}
+                                    each
+                                  </span>
+                                  <br />
+                                </>
+                              );
+                            })
                             : "No Details Found."}
                         </p>
                       </div>
@@ -648,8 +648,8 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                             {ticketDetails.staffName !== null
                               ? ticketDetails.staffName
                               : ticketDetails.customer !== null
-                              ? `${ticketDetails.customer.firstname} ${ticketDetails.customer.lastname}`
-                              : `${ticketDetails.supplier.firstname} ${ticketDetails.supplier.lastname}`}
+                                ? `${ticketDetails.customer.firstname} ${ticketDetails.customer.lastname}`
+                                : `${ticketDetails.supplier.firstname} ${ticketDetails.supplier.lastname}`}
                           </p>
                         </div>
                       )}
@@ -699,7 +699,10 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                           PRODUCT ORDERED
                         </Text>
                         <p className="text-[.9rem]">
-                          {ticketDetails.transaction.porders.name}
+                          {ticketDetails?.transactionEntries?.map((item, index) =>
+                            `${item.product}${index !== ticketDetails.transactionEntries.length - 1 ? ", " : ""}`
+                          ) || ""}
+
                         </p>
                       </div>
                       <div className="flex items-center gap-6 justify-between">

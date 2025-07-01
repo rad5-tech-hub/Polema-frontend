@@ -264,7 +264,7 @@ const SupplierPlaceOrder = () => {
                 value={selectedProductId || undefined}
                 className={`w-full mt-2 placeholder:text-black ${
                   products.length === 0 || !!id
-                    ? "bg-gray-100 text-black font-bold"
+                    ? "bg-gray-100 text-black font-black"
                     : ""
                 }`}
                 filterOption={(input, option) =>

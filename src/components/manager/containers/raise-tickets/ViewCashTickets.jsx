@@ -232,7 +232,7 @@ const CashTickets = () => {
       <div className="flex justify-between items-center mb-4">
         <Heading>Cash Tickets</Heading>
         <Button
-          onClick={() => navigate("/admin/raise-ticket/cash-ticket")}
+          onClick={() => navigate("/admin/raise-ticket/cash-authority")}
           className="cursor-pointer"
         >
           Create Cash Ticket
