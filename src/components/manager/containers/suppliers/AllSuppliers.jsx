@@ -16,7 +16,7 @@ import { isNegative, refractor, formatMoney } from "../../../date";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBook, faPen, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
-import { Toaster } from "react-hot-toast";
+import toast,{ Toaster } from "react-hot-toast";
 import EditSuppliers from "./EditSuppliers";
 import { useNavigate } from "react-router-dom";
 
@@ -79,10 +79,10 @@ const AllSuppliers = () => {
       [
         customer.supplierTag,
         customer.firstname,
-        customer.lastname, // Fixed typo: lastnmae -> lastname
+        customer.lastname,
         customer.email,
         customer.address,
-        ...(customer.phoneNumber || []),
+        customer.phoneNumber || [],
       ].some((field) => String(field || "").toLowerCase().includes(lowerCaseSearchTerm))
     );
   };
