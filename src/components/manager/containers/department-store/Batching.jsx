@@ -41,6 +41,7 @@ const Batching = () => {
   const [quantities, setQuantities] = useState({});
   const [selectedRecord, setSelectedRecord] = useState({});
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   const fetchBatchProducts = async () => {
     const token = localStorage.getItem("token");
@@ -186,6 +187,7 @@ const Batching = () => {
       });
     } finally {
       setNewBatchButtonLoading(false);
+      setIsConfirmModalOpen(false);
     }
   };
 
@@ -346,7 +348,7 @@ const Batching = () => {
                   : "!bg-theme cursor-pointer"
               }`}
               disabled={newestRecordRunnning}
-              onClick={startNewBatch}
+              onClick={() => setIsConfirmModalOpen(true)}
             >
               {newBatchButtonLoading ? <Spinner size="1" /> : "New Batch"}
             </Button>
@@ -479,6 +481,44 @@ const Batching = () => {
               </Flex>
             </Flex>
           )}
+
+          {/* Confirmation Modal for New Batch */}
+          <Dialog.Root
+            open={isConfirmModalOpen}
+            onOpenChange={setIsConfirmModalOpen}
+          >
+            <Dialog.Content className="max-w-md">
+              <Flex justify="between" align="center" className="mb-4">
+                <Dialog.Title>Confirm New Batch</Dialog.Title>
+                <Button
+                  variant="ghost"
+                  onClick={() => setIsConfirmModalOpen(false)}
+                  className="cursor-pointer absolute top-4 right-4"
+                >
+                  <FontAwesomeIcon icon={faTimes} />
+                </Button>
+              </Flex>
+              <Text className="my-4">
+                Are you sure you want to start a new batch?
+              </Text>
+              <Flex justify="end" gap="3" className="mt-4">
+                <Button
+                  variant="surface"
+                  onClick={() => setIsConfirmModalOpen(false)}
+                  className="cursor-pointer"
+                >
+                  No
+                </Button>
+                <Button
+                  variant="solid"
+                  onClick={startNewBatch}
+                  className="cursor-pointer !bg-theme"
+                >
+                  Yes
+                </Button>
+              </Flex>
+            </Dialog.Content>
+          </Dialog.Root>
 
           {/* Success Modal after starting batch */}
           <Dialog.Root

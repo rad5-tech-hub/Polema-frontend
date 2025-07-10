@@ -530,7 +530,7 @@ const Dipping = () => {
 
       {Object.values(storeRemnant).length > 0 ? <div className="flex gap-4">
         <RemnantBox message={"QUANTTIY OF FVO IN STOCK"} value={dipingDetails[0]?.remaining || 0} />
-        <RemnantBox message={"QUANTITY OF FATTY ACID IN STOCK"} value={storeRemnant?.sludge?.totalRemainingQuantity || 0} />
+        <RemnantBox message={"QUANTITY OF FATTY ACID IN STOCK"} value={storeRemnant?.fatty?.totalRemainingQuantity || 0} />
         {/* <RemnantBox message={"QUANTITY OF SLUDGE IN STOCK"} value={storeRemnant?.fatty?.totalRemainingQuantity || 0} /> */}
 
       </div>

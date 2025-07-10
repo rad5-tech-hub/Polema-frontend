@@ -346,8 +346,12 @@ const AllCustomers = () => {
             }}>
             <Select.Trigger placeholder="Arrange List By:" />
             <Select.Content>
-              <Select.Item value="asc">Highest Indebted Customers</Select.Item>
-              <Select.Item value="desc">Lowest Indebted Customers</Select.Item>
+              {/* <Select.Item value="asc">Highest Indebted Customers</Select.Item> */}
+              <Select.Item value="asc">Customers in Debt</Select.Item>
+
+              {/* <Select.Item value="desc">Lowest Indebted Customers</Select.Item> */}
+              <Select.Item value="desc">Debt-free Customers</Select.Item>
+
             </Select.Content>
           </Select.Root>
         </div>
