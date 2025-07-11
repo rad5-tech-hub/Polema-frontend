@@ -234,13 +234,13 @@ const BatchingRecords = ({ setSelectedRecord }) => {
                   />
                 )}
 
-                {sludgeDetails.length > 0 && (
+                {/* {sludgeDetails.length > 0 && (
                   <InfoBox
                     message="TOTAL FOR SLUDGE"
                     unitPrice={formatMoney(sludgeDetails[0].totalAmount)}
                     quantity={formatMoney(sludgeDetails[0].totalQuantity)}
                   />
-                )}
+                )} */}
               </div>
             )}
           </div>
