@@ -12,6 +12,7 @@ import {
   BatchingRecords,
   ManagePharmacyStore,
   ViewSupplierOrder,
+  Cheque,
   ManageDeptStore,
   // WelcomeComponent,
   PharmRecordBook,
@@ -436,6 +437,10 @@ const App = () => {
                   <Route
                     path="/receipts/official-receipt"
                     element={<AllReceipts />}
+                  />
+                    <Route
+                    path="/receipts/cheques"
+                    element={<Cheque />}
                   />
 
                   <Route

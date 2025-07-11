@@ -345,12 +345,12 @@ const AllCustomers = () => {
               setArrangeType(val)
             }}>
             <Select.Trigger placeholder="Arrange List By:" />
-            <Select.Content>
+            <Select.Content position="popper">
               {/* <Select.Item value="asc">Highest Indebted Customers</Select.Item> */}
-              <Select.Item value="asc">Customers in Debt</Select.Item>
+              <Select.Item value="asc">Debt</Select.Item>
 
               {/* <Select.Item value="desc">Lowest Indebted Customers</Select.Item> */}
-              <Select.Item value="desc">Debt-free Customers</Select.Item>
+              <Select.Item value="desc">Credit</Select.Item>
 
             </Select.Content>
           </Select.Root>

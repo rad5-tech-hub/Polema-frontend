@@ -1,5 +1,6 @@
 import Onboarding from "./dashboard/Onboarding";
 import OfficialLPO from "./raise-tickets/OfficialLPO";
+import Cheque from "./receipts/Cheques";
 // import WelcomeComponent from "./WelcomeComponent";
 // import WelcomeComponent from "./dashbaord/WelcomeComponent";
 import BlankLPO from "./raise-tickets/BlankLPO";
@@ -179,5 +180,6 @@ export {
   OfficialLPO,
   EditProducts,
   PrintingRecords,
+  Cheque,
   Dipping,
 };

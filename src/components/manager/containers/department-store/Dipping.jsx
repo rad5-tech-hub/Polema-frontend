@@ -521,7 +521,7 @@ const Dipping = () => {
     <>
       <Flex justify="between" align="center" className="mb-4">
         <Heading>Dipping Records</Heading>
-        <Button className="cursor-pointer bg-theme" onClick={showModal}>
+        <Button className={`bg-theme  ${dipingDetails[0]?.isActive ? "cursor-not-allowed text-white/70" :"cursor-pointer"}`} disabled={dipingDetails[0]?.isActive} onClick={showModal}>
           New Dip
         </Button>
       </Flex>
