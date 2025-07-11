@@ -90,9 +90,11 @@ import DepartmentRecordBook from "./department-store/DepartmentRecordBook";
 import ManageGenStore from "./general-store/ManageGenStore";
 import ManageDeptStore from "./department-store/ManageDeptStore";
 import PrintingRecords from "./printing/printing";
-import BatchingRecords from  "./department-store/BatchingRecords";  
+import BatchingRecords from  "./department-store/BatchingRecords"; 
+import AllChequeRecords from "./receipts/AllChequeRecords"; 
 export {
   // OfficialLPO,
+  AllChequeRecords,
   ManageDeptStore,
   BatchingRecords,
   Batching,

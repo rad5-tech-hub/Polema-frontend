@@ -6,8 +6,8 @@ const TransactionTag = ({ entry }) => {
         : entry.unit === "" || entry.unit === "N/A"
         ? ""
         : " ordered"}
-      {entry.order == null && entry.debit > entry.credit && " (extra)"}
-      {entry.order == null && entry.credit > entry.debit && " (returned)"}
+      {entry.order == null && entry.debit > entry.credit && " (excess)"}
+      {entry.order == null && entry.credit > entry.debit && " (shortage)"}
     </>
   );
 };

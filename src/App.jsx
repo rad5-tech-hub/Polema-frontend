@@ -78,6 +78,7 @@ import {
   CreateDispatchNote,
   CreateGatepass,
   CreateGatepassForSupplier,
+  AllChequeRecords,
   CreateInvoice,
   GatepassReceipt,
   Invoice,
@@ -441,6 +442,10 @@ const App = () => {
                     <Route
                     path="/receipts/cheques"
                     element={<Cheque />}
+                  />
+                     <Route
+                    path="/receipts/all-cheques"
+                    element={<AllChequeRecords />}
                   />
 
                   <Route
