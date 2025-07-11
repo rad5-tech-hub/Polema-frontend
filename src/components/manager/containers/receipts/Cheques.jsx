@@ -1,21 +1,20 @@
-import React from "react";
-import { Flex ,Select as AntSelect} from "antd";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { Flex, Select as AntSelect } from "antd";
 import axios from "axios";
 import useToast from "../../../../hooks/useToast";
-import { Button, TextField, Heading, Separator, Grid ,Text} from "@radix-ui/themes";
+import { Button, TextField, Heading, Separator, Grid, Text } from "@radix-ui/themes";
 import { useNavigate } from "react-router-dom";
 
-const root =  import.meta.env.VITE_ROOT
+const root = import.meta.env.VITE_ROOT;
 
 const Cheque = () => {
   const showToast = useToast();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [bankDetails, setBankDetails] = useState([]);
   const [bankId, setBankId] = useState("");
+  const [amount, setAmount] = useState("");
 
-
-  //Function to fetch bank details
+  // Function to fetch bank details
   const fetchBankDetails = async () => {
     const token = localStorage.getItem("token");
 
@@ -44,17 +43,36 @@ const Cheque = () => {
     }
   };
 
+  // Format number with commas
+  const formatNumber = (value) => {
+    if (!value) return "";
+    const number = value.replace(/\D/g, "");
+    return number.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
+  // Handle amount input change
+  const handleAmountChange = (e) => {
+    const value = e.target.value.replace(/,/g, "");
+    if (/^\d*$/.test(value)) {
+      setAmount(formatNumber(value));
+    }
+  };
+
   useEffect(() => {
     fetchBankDetails();
   }, []);
+
   return (
     <>
       <Flex justify="space-between" align="center">
-        <Heading>Cheques</Heading>
-        <Button className="!bg-theme cursor-pointer" onClick={()=>{
-          navigate("/admin/receipts/all-cheques")
-        }}>
-          View Cheque Records
+        <Heading>Add Cheque</Heading>
+        <Button
+          className="!bg-theme cursor-pointer"
+          onClick={() => {
+            navigate("/admin/receipts/all-cheques");
+          }}
+        >
+          Cheque Records
         </Button>
       </Flex>
       <Separator className="w-full mt-4" />
@@ -74,7 +92,6 @@ const Cheque = () => {
             <Text>
               Bank Name <span className="text-red-500">*</span>
             </Text>
-
             <AntSelect
               showSearch
               className="mt-4"
@@ -90,12 +107,12 @@ const Cheque = () => {
               }
             >
               {bankDetails.map((bank) => (
-                <Option key={bank.id} value={bank.id}>
+                <AntSelect.Option key={bank.id} value={bank.id}>
                   {bank.name}
-                </Option>
+                </AntSelect.Option>
               ))}
             </AntSelect>
-          </div>{" "}
+          </div>
           <div className="w-full">
             <label htmlFor="cheque" className="mb-4">
               Cheque No.
@@ -105,7 +122,7 @@ const Cheque = () => {
               id="cheque"
               className="w-full mt-4"
             />
-          </div>{" "}
+          </div>
           <div className="w-full">
             <label htmlFor="amount" className="mb-4">
               Amount
@@ -114,7 +131,13 @@ const Cheque = () => {
               placeholder="Enter Amount"
               id="amount"
               className="w-full mt-4"
-            />
+              value={amount}
+              onChange={handleAmountChange}
+            >
+              <TextField.Slot>
+                <Text>₦</Text>
+              </TextField.Slot>
+            </TextField.Root>
           </div>
           <div className="w-full">
             <label htmlFor="description" className="mb-4">
@@ -132,7 +155,6 @@ const Cheque = () => {
             className="mt-4 bg-theme hover:bg-theme/85"
             size={"4"}
             type="submit"
-            // disabled={isLoading}
           >
             Submit
           </Button>

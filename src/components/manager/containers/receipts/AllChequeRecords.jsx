@@ -13,7 +13,7 @@ const AllChequeRecords = () => {
             navigate("/admin/receipts/cheques");
           }}
         >
-          Create Cheque Record
+           Cheque Record
         </Button>
       </Flex>
       <Table.Root variant="surface">
@@ -21,11 +21,11 @@ const AllChequeRecords = () => {
           <Table.Row>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>NAME</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>CHEQUE NUMBER</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>BANK</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>AMOUNT</Table.ColumnHeaderCell>
 
             <Table.ColumnHeaderCell>PURPOSE OF PAYMENT</Table.ColumnHeaderCell>
-            {/* <Table.ColumnHeaderCell>Price(₦)</Table.ColumnHeaderCell> */}
             <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
