@@ -373,9 +373,9 @@ const Batching = () => {
                 <Table.ColumnHeaderCell className="text-left">
                   TOTAL FATTY ACID PRODUCED
                 </Table.ColumnHeaderCell>
-                <Table.ColumnHeaderCell className="text-left">
+                {/* <Table.ColumnHeaderCell className="text-left">
                   TOTAL SLUDGE PRODUCED
-                </Table.ColumnHeaderCell>
+                </Table.ColumnHeaderCell> */}
                 <Table.ColumnHeaderCell className="text-left">
                   STATUS
                 </Table.ColumnHeaderCell>
@@ -414,7 +414,7 @@ const Batching = () => {
                     <Table.Cell>
                       {batch?.totalFattyAcidSold || "N/A"}
                     </Table.Cell>
-                    <Table.Cell>{batch?.totalSludgeSold || "N/A"}</Table.Cell>
+                    {/* <Table.Cell>{batch?.totalSludgeSold || "N/A"}</Table.Cell> */}
                     <Table.Cell className="text-sm">
                       <FontAwesomeIcon
                         className={`${

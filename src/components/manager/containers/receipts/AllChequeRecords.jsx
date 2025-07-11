@@ -24,7 +24,6 @@ const AllChequeRecords = () => {
             <Table.ColumnHeaderCell>CHEQUE NUMBER</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>BANK</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>AMOUNT</Table.ColumnHeaderCell>
-
             <Table.ColumnHeaderCell>PURPOSE OF PAYMENT</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
           </Table.Row>
