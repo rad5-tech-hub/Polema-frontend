@@ -32,8 +32,8 @@ const AllInvoice = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const { invoices } = response.data;
-      setInvoices(invoices);
+      const { records } = response.data;
+      setInvoices(records || []);
 
       if (invoices.length === 0) {
         setFailedSearch(true);

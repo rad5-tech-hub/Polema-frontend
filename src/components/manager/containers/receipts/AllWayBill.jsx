@@ -1,95 +1,113 @@
-import React, { useEffect, useState } from "react";
-import useToast from "../../../../hooks/useToast";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { DropdownMenu, Heading, Spinner, Table, Button, Text, Flex, Separator } from "@radix-ui/themes";
+import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquare, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
-import { DropdownMenu, Heading, Spinner, Table, Button, Text, Flex } from "@radix-ui/themes";
-import axios from "axios";
-import toast, { Toaster } from "react-hot-toast";
 import _ from "lodash";
 import { refractor } from "../../../date";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 
 const AllWayBill = () => {
   const navigate = useNavigate();
-  const [billDetails, setBillDetails] = useState([]);
   const showToast = useToast();
+  const [billDetails, setBillDetails] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [failedSearch, setFailedSearch] = useState(false);
   const [failedText, setFailedText] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [loadingId, setLoadingId] = useState(null); // Tracks the ID of the loading item
+  const [loadingId, setLoadingId] = useState(null);
+  const [paginationUrls, setPaginationUrls] = useState([]);
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
-  // Fetch all waybills
-  const fetchWaybills = async () => {
+  const fetchWaybills = async (pageUrl = null) => {
+    setLoading(true);
+    setBillDetails([]);
+    setFailedSearch(false);
+    setFailedText("");
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("Please log in again.", { style: { padding: "20px" }, duration: 5000 });
+      showToast({
+        message: "Please log in again.",
+        type: "error",
+        duration: 10000,
+      });
+      setFailedSearch(true);
+      setFailedText("Authentication required.");
+      setLoading(false);
       return;
     }
-
     try {
-      const response = await axios.get(`${root}/customer/get-all-waybill`, {
+      const url = pageUrl ? `${root}${pageUrl}` : `${root}/customer/get-all-waybill`;
+      const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      const { waybills } = response.data;
-      setBillDetails(waybills);
-
-      if (!waybills || waybills.length === 0) {
+      const records = response.data.records || [];
+      setBillDetails(records);
+      if (records.length === 0) {
         setFailedSearch(true);
-        setFailedText("No records found.");
+        setFailedText("No waybill records found.");
+      }
+      const nextPage = response.data.pagination?.nextPage;
+      if (nextPage && typeof nextPage === "string" && nextPage !== "/customer/get-all-waybill") {
+        setPaginationUrls((prev) => {
+          const newUrls = [...prev];
+          newUrls[currentPageIndex] = nextPage;
+          return newUrls;
+        });
       } else {
-        setFailedSearch(false);
+        setPaginationUrls((prev) => prev.slice(0, currentPageIndex));
       }
     } catch (error) {
-      console.error("Error fetching waybills:", error);
+      const errorMessage = error?.response?.data?.message || "Failed to fetch waybill records.";
       setFailedSearch(true);
-      setFailedText("Failed to fetch waybills.");
-      toast.error(error.response?.data?.message || "Failed to fetch waybills.");
+      setFailedText(errorMessage);
+      showToast({
+        message: errorMessage,
+        type: "error",
+        duration: 10000,
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle sending waybill to print
   const handleSendToPrintWaybill = async (id) => {
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("Please log in again.", { style: { padding: "20px" }, duration: 5000 });
+      showToast({
+        message: "Please log in again.",
+        type: "error",
+        duration: 10000,
+      });
       return;
     }
-
     setLoadingId(id);
     try {
-      const response = await axios.post(
-        `${root}/batch/add-waybill-to-print/${id}`, // Adjust endpoint as needed
-        {}, // Empty body if no data is required
+      await axios.post(
+        `${root}/batch/add-waybill-to-print/${id}`,
+        {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
       showToast({
         message: "Waybill sent to print successfully!",
-        type:"success",
-        duration:4000
-      })
-      
-      console.log("Waybill Response:", response.data);
+        type: "success",
+        duration: 5000,
+      });
     } catch (error) {
-      console.error("Error sending waybill to print:", error);
       showToast({
+        message: error?.response?.data?.message || "Failed to send waybill to print.",
         type: "error",
-        message: error.response?.data?.message || "Failed to send waybill to print.",
-        duration: 4000,
-      })
-      
+        duration: 5000,
+      });
     } finally {
       setLoadingId(null);
     }
   };
 
-  // Determine square color based on status
   const getStatusColor = (status) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case "pending":
         return "text-yellow-500";
       case "approved":
@@ -101,37 +119,60 @@ const AllWayBill = () => {
     }
   };
 
-  // Check if dropdown should be disabled
   const isDropdownDisabled = (status) => status === "pending" || status === "rejected";
 
-  // Fetch waybills on component mount
+  const handleNextPage = () => {
+    const nextIndex = currentPageIndex + 1;
+    setCurrentPageIndex(nextIndex);
+    fetchWaybills(paginationUrls[currentPageIndex] || null);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPageIndex > 0) {
+      const prevIndex = currentPageIndex - 1;
+      setCurrentPageIndex(prevIndex);
+      fetchWaybills(prevIndex === 0 ? null : paginationUrls[prevIndex - 1]);
+    }
+  };
+
   useEffect(() => {
     fetchWaybills();
   }, []);
 
   return (
     <>
-      <Heading>View All Waybills</Heading>
+      <Flex justify="between" align="center" className="my-5 gap-4">
+        <Heading size="5">View All Waybills</Heading>
+        <Button
+          size="3"
+          title="Create New Waybill"
+          className="!bg-theme !text-white hover:!bg-brown-500 cursor-pointer px-5"
+          onClick={() => navigate("/admin/receipts/create-waybill")}
+        >
+          Create New Waybill
+        </Button>
+      </Flex>
 
-      {/* Table showing waybill details */}
-      <Table.Root variant="surface" className="mt-3">
+      <Separator className="my-4 w-full" />
+
+      <Table.Root variant="surface" className="mt-4 table-fixed w-full" size="2">
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>BAGS (PKC)</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>TO</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>ADDRESS</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>TRANSPORT CARRIED OUT BY</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>VEHICLE NO.</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>STATUS</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">DATE</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">BAGS (PKC)</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">TO</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">ADDRESS</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">TRANSPORT CARRIED OUT BY</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">VEHICLE NO.</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">STATUS</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left"></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
-        <Table.Body>
+        <Table.Body aria-live="polite">
           {loading ? (
             <Table.Row>
               <Table.Cell colSpan={8} className="p-4 text-center">
-                <Spinner />
+                <Spinner size="2" />
               </Table.Cell>
             </Table.Row>
           ) : failedSearch ? (
@@ -140,73 +181,61 @@ const AllWayBill = () => {
                 <Text>{failedText}</Text>
               </Table.Cell>
             </Table.Row>
+          ) : billDetails.length === 0 ? (
+            <Table.Row>
+              <Table.Cell colSpan={8} className="p-4 text-center">
+                <Text>No waybill records found</Text>
+              </Table.Cell>
+            </Table.Row>
           ) : (
             billDetails.map((item) => (
-              <Table.Row key={item.id}>
-                <Table.RowHeaderCell>{refractor(item.createdAt)}</Table.RowHeaderCell>
-                <Table.Cell>{item.bags ? `${item.bags} bags` : ""}</Table.Cell>
+              <Table.Row key={item.id || `${item.invoice?.vehicleNo || "unknown"}-${item.createdAt}`}>
+                <Table.Cell>{refractor(item.createdAt) || "N/A"}</Table.Cell>
+                <Table.Cell>{item.bags ? `${item.bags} bags` : "N/A"}</Table.Cell>
                 <Table.Cell>
-                  {`${item?.transaction?.corder?.firstname || ""} ${
-                    item?.transaction?.corder?.lastname || ""
-                  }`}
+                  {`${item?.transaction?.corder?.firstname || "N/A"} ${item?.transaction?.corder?.lastname || "N/A"}`.trim()}
                 </Table.Cell>
-                <Table.Cell>{item.address || ""}</Table.Cell>
-                <Table.Cell>{item.transportedBy || ""}</Table.Cell>
-                <Table.Cell>{item.invoice?.vehicleNo || ""}</Table.Cell>
+                <Table.Cell>{item.address || "N/A"}</Table.Cell>
+                <Table.Cell>{item.transportedBy || "N/A"}</Table.Cell>
+                <Table.Cell>{item.invoice?.vehicleNo || "N/A"}</Table.Cell>
                 <Table.Cell>
                   <Flex align="center" gap="1">
                     <FontAwesomeIcon
                       icon={faSquare}
                       className={getStatusColor(item.status)}
                     />
-                    {_.upperFirst(item.status) || ""}
+                    <Text>{_.upperFirst(item.status || "N/A")}</Text>
                   </Flex>
                 </Table.Cell>
                 <Table.Cell>
-                  {isDropdownDisabled(item.status) ? (
-                    <Button
-                      variant="soft"
-                      disabled={loadingId === item.id || isDropdownDisabled(item.status)}
-                    >
-                      {loadingId === item.id ? (
-                        <Spinner size="1" />
-                      ) : (
-                        <FontAwesomeIcon icon={faEllipsisV} />
-                      )}
-                    </Button>
-                  ) : (
-                    <DropdownMenu.Root>
-                      <DropdownMenu.Trigger>
-                        <Button
-                          variant="soft"
-                          disabled={loadingId === item.id}
-                        >
-                          {loadingId === item.id ? (
-                            <Spinner size="1" />
-                          ) : (
-                            <FontAwesomeIcon icon={faEllipsisV} />
-                          )}
-                        </Button>
-                      </DropdownMenu.Trigger>
-                      <DropdownMenu.Content>
-                        <DropdownMenu.Item
-                          onSelect={() => navigate(`/admin/receipts/waybill-invoice/${item.id}`)}
-                        >
-                          View Approved Waybill
-                        </DropdownMenu.Item>
-                        <DropdownMenu.Item
-                          onSelect={() => handleSendToPrintWaybill(item.id)}
-                          disabled={loadingId === item.id}
-                        >
-                          {loadingId === item.id ? (
-                            <Spinner size="1" />
-                          ) : (
-                            "Send To Print"
-                          )}
-                        </DropdownMenu.Item>
-                      </DropdownMenu.Content>
-                    </DropdownMenu.Root>
-                  )}
+                  <DropdownMenu.Root>
+                    <DropdownMenu.Trigger>
+                      <Button
+                        variant="soft"
+                        disabled={loadingId === item.id || isDropdownDisabled(item.status)}
+                        className="cursor-pointer"
+                      >
+                        {loadingId === item.id ? (
+                          <Spinner size="1" />
+                        ) : (
+                          <FontAwesomeIcon icon={faEllipsisV} />
+                        )}
+                      </Button>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Content>
+                      <DropdownMenu.Item
+                        onSelect={() => navigate(`/admin/receipts/waybill-invoice/${item.id}`)}
+                      >
+                        View Approved Waybill
+                      </DropdownMenu.Item>
+                      <DropdownMenu.Item
+                        onSelect={() => handleSendToPrintWaybill(item.id)}
+                        disabled={loadingId === item.id}
+                      >
+                        {loadingId === item.id ? <Spinner size="1" /> : "Send To Print"}
+                      </DropdownMenu.Item>
+                    </DropdownMenu.Content>
+                  </DropdownMenu.Root>
                 </Table.Cell>
               </Table.Row>
             ))
@@ -214,7 +243,29 @@ const AllWayBill = () => {
         </Table.Body>
       </Table.Root>
 
-      <Toaster position="top-right" />
+      <Flex justify="center" align="center" gap="2" className="mt-4">
+        <Button
+          variant="soft"
+          disabled={currentPageIndex === 0}
+          onClick={handlePrevPage}
+          className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
+          aria-label="Previous page"
+        >
+          Previous
+        </Button>
+        <Text>Page {currentPageIndex + 1}</Text>
+        <Button
+          variant="soft"
+          disabled={!paginationUrls[currentPageIndex]}
+          onClick={handleNextPage}
+          className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
+          aria-label="Next page"
+        >
+          Next
+        </Button>
+      </Flex>
+
+      <Separator className="my-4 w-full" />
     </>
   );
 };

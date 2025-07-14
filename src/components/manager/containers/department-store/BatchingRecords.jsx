@@ -33,7 +33,7 @@ const BatchingRecords = ({ setSelectedRecord }) => {
 
   const sludgeRegex = /^slu/i;
   const fattyAcidRegex = /^fat/i;
-  const fvoRegex = /^fvo/i;
+  const fvoRegex = /^fvo/i && /^fine/i;
 
   const getBatchDetails = async () => {
     setFetchComplete(false);

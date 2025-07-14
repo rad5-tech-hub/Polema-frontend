@@ -73,7 +73,7 @@ const Batching = () => {
     setBatches([]);
     setError(null);
 
-    const fvoRegex = /^fvo/i;
+    const fvoRegex = /^fvo/i && /^fine/i;
 
     const token = localStorage.getItem("token");
     if (!token) {
