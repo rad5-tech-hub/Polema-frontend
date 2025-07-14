@@ -162,7 +162,7 @@ const ViewAuthorityToWeigh = () => {
         <Heading size="5">Authority to Weigh</Heading>
         <Button
           size="3"
-          className="!bg-brown-400 !text-white hover:!bg-brown-500"
+          className="!bg-theme !text-white hover:!bg-brown-500"
           onClick={() => navigate("/admin/raise-ticket/new-authority-to-weigh")}
         >
           New Authority
@@ -295,6 +295,8 @@ const ViewAuthorityToWeigh = () => {
               )}
             </Table.Body>
           </Table.Root>
+          <div className="pagination-fixed">
+
           <Flex justify="center" align="center" gap="2" className="mt-4">
             <Button
               variant="soft"
@@ -314,6 +316,7 @@ const ViewAuthorityToWeigh = () => {
               Next
             </Button>
           </Flex>
+          </div>
         </Tabs.Content>
       </Tabs.Root>
     </>

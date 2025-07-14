@@ -400,7 +400,8 @@ const IndividualDepartmentLedger = () => {
 
   return (
     <>
-      <div className="sticky top-0 z-[1001] bg-[#f9fafb] p-2">
+      <div className="">
+        {/* <div className="sticky top-0 z-[1001] bg-[#f9fafb] p-2"> */}
         
       <Flex justify="between" align="center" className="mb-4 top-0 left-0">
         <div>
@@ -501,6 +502,7 @@ const IndividualDepartmentLedger = () => {
           )}
         </Table.Body>
       </Table.Root>
+<div className="pagination-fixed">
 
       {paginationUrls.length > 0 && (
         <Flex justify="end" className="mt-4">
@@ -525,6 +527,7 @@ const IndividualDepartmentLedger = () => {
           </Flex>
         </Flex>
       )}
+</div>
 
       <CreditDeptModal />
       <Toaster position="top-right" />

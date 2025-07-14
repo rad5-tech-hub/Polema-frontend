@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Table, Heading, Button, Flex, Text, Spinner, Separator } from "@radix-ui/themes";
+import {
+  Table,
+  Heading,
+  Button,
+  Flex,
+  Text,
+  Spinner,
+  Separator,
+} from "@radix-ui/themes";
 import axios from "axios";
 import { formatMoney, refractor } from "../../../date";
 import useToast from "../../../../hooks/useToast";
@@ -38,7 +46,10 @@ const AllChequeRecords = () => {
         },
       });
       setCheques(response.data.data || []);
-      if (response.data.pagination?.nextPage && response.data.pagination.nextPage !== "/admin/get-cheques") {
+      if (
+        response.data.pagination?.nextPage &&
+        response.data.pagination.nextPage !== "/admin/get-cheques"
+      ) {
         setPaginationUrls((prev) => {
           const newUrls = [...prev];
           newUrls[currentPageIndex] = response.data.pagination.nextPage;
@@ -48,7 +59,8 @@ const AllChequeRecords = () => {
         setPaginationUrls((prev) => prev.slice(0, currentPageIndex));
       }
     } catch (error) {
-      const errorMessage = error?.response?.data?.message || "Error fetching cheque records";
+      const errorMessage =
+        error?.response?.data?.message || "Error fetching cheque records";
       setError(errorMessage);
       showToast({
         message: errorMessage,
@@ -82,8 +94,7 @@ const AllChequeRecords = () => {
 
   return (
     <>
-    <div className="flex justify-between items-center">
-
+      <div className="flex justify-between items-center">
         <Heading className="mb-4">All Cheque Records</Heading>
         <Button
           className="!bg-theme !text-white hover:!bg-brown-500 cursor-pointer"
@@ -91,17 +102,33 @@ const AllChequeRecords = () => {
         >
           New Cheque Record
         </Button>
-    </div>
+      </div>
       <Separator className="my-4 w-full" />
-      <Table.Root className="mt-4 table-fixed w-full" variant="surface" size="2">
+      <Table.Root
+        className="mt-4 table-fixed w-full"
+        variant="surface"
+        size="2"
+      >
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeaderCell className="text-left">DATE</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">NAME</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">CHEQUE NUMBER</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">BANK</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">AMOUNT(₦)</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">PURPOSE OF PAYMENT</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              DATE
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              NAME
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              CHEQUE NUMBER
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              BANK
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              AMOUNT(₦)
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              PURPOSE OF PAYMENT
+            </Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell className="text-left"></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
@@ -126,8 +153,12 @@ const AllChequeRecords = () => {
             </Table.Row>
           ) : (
             cheques.map((cheque) => (
-              <Table.Row key={cheque.id || `${cheque.chequeNo}-${cheque.createdAt}`}>
-                <Table.Cell>{cheque.createdAt ? refractor(cheque.createdAt) : "N/A"}</Table.Cell>
+              <Table.Row
+                key={cheque.id || `${cheque.chequeNo}-${cheque.createdAt}`}
+              >
+                <Table.Cell>
+                  {cheque.createdAt ? refractor(cheque.createdAt) : "N/A"}
+                </Table.Cell>
                 <Table.Cell>{cheque.name || "N/A"}</Table.Cell>
                 <Table.Cell>{cheque.chequeNo || "N/A"}</Table.Cell>
                 <Table.Cell>{cheque.bank?.name || "N/A"}</Table.Cell>
@@ -139,32 +170,36 @@ const AllChequeRecords = () => {
           )}
         </Table.Body>
       </Table.Root>
-
-      {(paginationUrls.length > 0 || currentPageIndex > 0) && (
-        <Flex justify="center" className="mt-4">
-          <Flex gap="2" align="center">
-            <Button
-              variant="soft"
-              disabled={currentPageIndex === 0}
-              onClick={handlePrevPage}
-              className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
-              aria-label="Previous page"
-            >
-              Previous
-            </Button>
-            <Text>Page {currentPageIndex + 1}</Text>
-            <Button
-              variant="soft"
-              disabled={currentPageIndex >= paginationUrls.length && !paginationUrls[currentPageIndex - 1]}
-              onClick={handleNextPage}
-              className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
-              aria-label="Next page"
-            >
-              Next
-            </Button>
+      <div className="pagination-fixed">
+        {(paginationUrls.length > 0 || currentPageIndex > 0) && (
+          <Flex justify="center" className="mt-4">
+            <Flex gap="2" align="center">
+              <Button
+                variant="soft"
+                disabled={currentPageIndex === 0}
+                onClick={handlePrevPage}
+                className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
+                aria-label="Previous page"
+              >
+                Previous
+              </Button>
+              <Text>Page {currentPageIndex + 1}</Text>
+              <Button
+                variant="soft"
+                disabled={
+                  currentPageIndex >= paginationUrls.length &&
+                  !paginationUrls[currentPageIndex - 1]
+                }
+                onClick={handleNextPage}
+                className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
+                aria-label="Next page"
+              >
+                Next
+              </Button>
+            </Flex>
           </Flex>
-        </Flex>
-      )}
+        )}
+      </div>
     </>
   );
 };
