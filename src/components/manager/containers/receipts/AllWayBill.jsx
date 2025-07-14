@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { DropdownMenu, Heading, Spinner, Table, Button, Text, Flex, Separator } from "@radix-ui/themes";
+import {
+  DropdownMenu,
+  Heading,
+  Spinner,
+  Table,
+  Button,
+  Text,
+  Flex,
+  Separator,
+} from "@radix-ui/themes";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquare, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
@@ -39,7 +48,9 @@ const AllWayBill = () => {
       return;
     }
     try {
-      const url = pageUrl ? `${root}${pageUrl}` : `${root}/customer/get-all-waybill`;
+      const url = pageUrl
+        ? `${root}${pageUrl}`
+        : `${root}/customer/get-all-waybill`;
       const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -50,7 +61,11 @@ const AllWayBill = () => {
         setFailedText("No waybill records found.");
       }
       const nextPage = response.data.pagination?.nextPage;
-      if (nextPage && typeof nextPage === "string" && nextPage !== "/customer/get-all-waybill") {
+      if (
+        nextPage &&
+        typeof nextPage === "string" &&
+        nextPage !== "/customer/get-all-waybill"
+      ) {
         setPaginationUrls((prev) => {
           const newUrls = [...prev];
           newUrls[currentPageIndex] = nextPage;
@@ -60,7 +75,8 @@ const AllWayBill = () => {
         setPaginationUrls((prev) => prev.slice(0, currentPageIndex));
       }
     } catch (error) {
-      const errorMessage = error?.response?.data?.message || "Failed to fetch waybill records.";
+      const errorMessage =
+        error?.response?.data?.message || "Failed to fetch waybill records.";
       setFailedSearch(true);
       setFailedText(errorMessage);
       showToast({
@@ -97,7 +113,8 @@ const AllWayBill = () => {
       });
     } catch (error) {
       showToast({
-        message: error?.response?.data?.message || "Failed to send waybill to print.",
+        message:
+          error?.response?.data?.message || "Failed to send waybill to print.",
         type: "error",
         duration: 5000,
       });
@@ -119,7 +136,8 @@ const AllWayBill = () => {
     }
   };
 
-  const isDropdownDisabled = (status) => status === "pending" || status === "rejected";
+  const isDropdownDisabled = (status) =>
+    status === "pending" || status === "rejected";
 
   const handleNextPage = () => {
     const nextIndex = currentPageIndex + 1;
@@ -155,16 +173,34 @@ const AllWayBill = () => {
 
       <Separator className="my-4 w-full" />
 
-      <Table.Root variant="surface" className="mt-4 table-fixed w-full" size="2">
+      <Table.Root
+        variant="surface"
+        className="mt-4 table-fixed w-full"
+        size="2"
+      >
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeaderCell className="text-left">DATE</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">BAGS (PKC)</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">TO</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">ADDRESS</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">TRANSPORT CARRIED OUT BY</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">VEHICLE NO.</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">STATUS</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              DATE
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              BAGS (PKC)
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              TO
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              ADDRESS
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              TRANSPORT CARRIED OUT BY
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              VEHICLE NO.
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              STATUS
+            </Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell className="text-left"></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
@@ -189,11 +225,20 @@ const AllWayBill = () => {
             </Table.Row>
           ) : (
             billDetails.map((item) => (
-              <Table.Row key={item.id || `${item.invoice?.vehicleNo || "unknown"}-${item.createdAt}`}>
+              <Table.Row
+                key={
+                  item.id ||
+                  `${item.invoice?.vehicleNo || "unknown"}-${item.createdAt}`
+                }
+              >
                 <Table.Cell>{refractor(item.createdAt) || "N/A"}</Table.Cell>
-                <Table.Cell>{item.bags ? `${item.bags} bags` : "N/A"}</Table.Cell>
                 <Table.Cell>
-                  {`${item?.transaction?.corder?.firstname || "N/A"} ${item?.transaction?.corder?.lastname || "N/A"}`.trim()}
+                  {item.bags ? `${item.bags} bags` : "N/A"}
+                </Table.Cell>
+                <Table.Cell>
+                  {`${item?.transaction?.corder?.firstname || "N/A"} ${
+                    item?.transaction?.corder?.lastname || "N/A"
+                  }`.trim()}
                 </Table.Cell>
                 <Table.Cell>{item.address || "N/A"}</Table.Cell>
                 <Table.Cell>{item.transportedBy || "N/A"}</Table.Cell>
@@ -212,7 +257,10 @@ const AllWayBill = () => {
                     <DropdownMenu.Trigger>
                       <Button
                         variant="soft"
-                        disabled={loadingId === item.id || isDropdownDisabled(item.status)}
+                        disabled={
+                          loadingId === item.id ||
+                          isDropdownDisabled(item.status)
+                        }
                         className="cursor-pointer"
                       >
                         {loadingId === item.id ? (
@@ -224,7 +272,9 @@ const AllWayBill = () => {
                     </DropdownMenu.Trigger>
                     <DropdownMenu.Content>
                       <DropdownMenu.Item
-                        onSelect={() => navigate(`/admin/receipts/waybill-invoice/${item.id}`)}
+                        onSelect={() =>
+                          navigate(`/admin/receipts/waybill-invoice/${item.id}`)
+                        }
                       >
                         View Approved Waybill
                       </DropdownMenu.Item>
@@ -232,7 +282,11 @@ const AllWayBill = () => {
                         onSelect={() => handleSendToPrintWaybill(item.id)}
                         disabled={loadingId === item.id}
                       >
-                        {loadingId === item.id ? <Spinner size="1" /> : "Send To Print"}
+                        {loadingId === item.id ? (
+                          <Spinner size="1" />
+                        ) : (
+                          "Send To Print"
+                        )}
                       </DropdownMenu.Item>
                     </DropdownMenu.Content>
                   </DropdownMenu.Root>
@@ -242,28 +296,29 @@ const AllWayBill = () => {
           )}
         </Table.Body>
       </Table.Root>
-
-      <Flex justify="center" align="center" gap="2" className="mt-4">
-        <Button
-          variant="soft"
-          disabled={currentPageIndex === 0}
-          onClick={handlePrevPage}
-          className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
-          aria-label="Previous page"
-        >
-          Previous
-        </Button>
-        <Text>Page {currentPageIndex + 1}</Text>
-        <Button
-          variant="soft"
-          disabled={!paginationUrls[currentPageIndex]}
-          onClick={handleNextPage}
-          className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
-          aria-label="Next page"
-        >
-          Next
-        </Button>
-      </Flex>
+      <div className="pagination-fixed">
+        <Flex justify="center" align="center" gap="2" className="mt-4">
+          <Button
+            variant="soft"
+            disabled={currentPageIndex === 0}
+            onClick={handlePrevPage}
+            className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
+            aria-label="Previous page"
+          >
+            Previous
+          </Button>
+          <Text>Page {currentPageIndex + 1}</Text>
+          <Button
+            variant="soft"
+            disabled={!paginationUrls[currentPageIndex]}
+            onClick={handleNextPage}
+            className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
+            aria-label="Next page"
+          >
+            Next
+          </Button>
+        </Flex>
+      </div>
 
       <Separator className="my-4 w-full" />
     </>

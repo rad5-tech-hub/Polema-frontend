@@ -1,92 +1,113 @@
 import React, { useState, useEffect } from "react";
-import useToast from "../../../../hooks/useToast";
 import { useNavigate } from "react-router-dom";
+import { DropdownMenu, Flex, Table, Heading, Button, Spinner, Text, Separator } from "@radix-ui/themes";
+import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquare, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
-import { DropdownMenu, Flex, Table, Heading, Button, Spinner, Text } from "@radix-ui/themes";
-import axios from "axios";
-import toast, { Toaster } from "react-hot-toast";
 import _ from "lodash";
 import { refractor, refractorToTime } from "../../../date";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 
 const AllInvoice = () => {
   const navigate = useNavigate();
+  const showToast = useToast();
   const [invoices, setInvoices] = useState([]);
-  const showToast = useToast()
+  const [loading, setLoading] = useState(false);
   const [failedSearch, setFailedSearch] = useState(false);
   const [failedText, setFailedText] = useState("");
   const [loadingId, setLoadingId] = useState(null);
+  const [paginationUrls, setPaginationUrls] = useState([]);
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
-  // Fetch all invoices
-  const fetchDetails = async () => {
+  const fetchDetails = async (pageUrl = null) => {
+    setLoading(true);
+    setInvoices([]);
+    setFailedSearch(false);
+    setFailedText("");
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("Please log in again.", { style: { padding: "20px" }, duration: 10000 });
+      showToast({
+        message: "Please log in again.",
+        type: "error",
+        duration: 10000,
+      });
+      setFailedSearch(true);
+      setFailedText("Authentication required.");
+      setLoading(false);
       return;
     }
-
     try {
-      const response = await axios.get(`${root}/customer/get-all-invoice`, {
+      const url = pageUrl ? `${root}${pageUrl}` : `${root}/customer/get-all-invoice`;
+      const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      const { records } = response.data;
-      setInvoices(records || []);
-
-      if (invoices.length === 0) {
+      const records = response.data.records || [];
+      setInvoices(records);
+      if (records.length === 0) {
         setFailedSearch(true);
-        setFailedText("No records found.");
-      } else {
-        setFailedSearch(false);
+        setFailedText("No invoice records found.");
+      }
+      const nextPage = response.data.pagination?.nextPage;
+      if (nextPage && typeof nextPage === "string") {
+        setPaginationUrls((prev) => {
+          const newUrls = [...prev];
+          if (newUrls.length <= currentPageIndex + 1) {
+            newUrls.push(nextPage); // add next page only once
+          }
+          return newUrls;
+        });
       }
     } catch (error) {
-      console.error("Error fetching invoices:", error);
+      const errorMessage = error?.response?.data?.message || "Failed to fetch invoice records.";
       setFailedSearch(true);
-      setFailedText("Failed to fetch invoices.");
-      toast.error("Failed to load invoices.");
+      setFailedText(errorMessage);
+      showToast({
+        message: errorMessage,
+        type: "error",
+        duration: 10000,
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Handle sending invoice to print
   const handleSendToPrintInvoice = async (id) => {
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("Please log in again.", { style: { padding: "20px" }, duration: 10000 });
+      showToast({
+        message: "Please log in again.",
+        type: "error",
+        duration: 10000,
+      });
       return;
     }
-
     setLoadingId(id);
     try {
-      const response = await axios.post(
-        `${root}/batch/add-invoice-to-print/${id}`, // Adjust endpoint as needed
-        {}, // Empty body if no data is required
+      await axios.post(
+        `${root}/batch/add-invoice-to-print/${id}`,
+        {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
       showToast({
-        message:"Invoice sent to print successfully!",
+        message: "Invoice sent to print successfully!",
         type: "success",
         duration: 5000,
-      })
-      
-      console.log("Invoice Response:", response.data);
+      });
     } catch (error) {
-      console.error("Error sending invoice to print:", error);
       showToast({
-        message:error.response?.data?.message || "Failed to send invoice to print.",
+        message: error?.response?.data?.message || "Failed to send invoice to print.",
         type: "error",
         duration: 5000,
       });
-      
     } finally {
       setLoadingId(null);
     }
   };
 
-  // Determine square color based on status
   const getSquareColor = (status) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case "pending":
         return "text-yellow-500";
       case "approved":
@@ -94,106 +115,125 @@ const AllInvoice = () => {
       case "rejected":
         return "text-red-500";
       default:
-        return "";
+        return "text-gray-500";
     }
   };
 
-  // Check if dropdown should be disabled
   const isDropdownDisabled = (status) => status === "pending" || status === "rejected";
 
-  // Fetch invoices on component mount
+  const handleNextPage = () => {
+    const nextIndex = currentPageIndex + 1;
+    setCurrentPageIndex(nextIndex);
+    fetchDetails(paginationUrls[currentPageIndex] || null);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPageIndex > 0) {
+      const prevIndex = currentPageIndex - 1;
+      setCurrentPageIndex(prevIndex);
+      fetchDetails(prevIndex === 0 ? null : paginationUrls[prevIndex - 1]);
+    }
+  };
+
   useEffect(() => {
     fetchDetails();
   }, []);
 
   return (
     <>
-      <Heading>View All Invoices</Heading>
+      <Flex justify="between" align="center" className="my-5 gap-4">
+        <Heading size="5">View All Invoices</Heading>
+        <Button
+          size="3"
+          title="Create New Invoice"
+          className="!bg-theme !text-white hover:!bg-brown-500 cursor-pointer px-5"
+          onClick={() => navigate("/admin/receipts/create-invoice")}
+        >
+          Create New Invoice
+        </Button>
+      </Flex>
 
-      {/* Table showing invoice details */}
-      <Table.Root variant="surface" className="mt-3">
+      <Separator className="my-4 w-full" />
+
+      <Table.Root variant="surface" className="mt-4 table-fixed w-full" size="2">
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>INVOICE</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>CUSTOMER NAME</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>VEHICLE NO.</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>TIME OUT</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>RECEIPT STATUS</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">DATE</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">INVOICE</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">CUSTOMER NAME</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">VEHICLE NO.</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">TIME OUT</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">RECEIPT STATUS</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left"></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
-        <Table.Body>
-          {invoices.length === 0 ? (
+        <Table.Body aria-live="polite">
+          {loading ? (
             <Table.Row>
-              <Table.Cell colSpan={7} className="p-4">
-                {failedSearch ? <Text>{failedText}</Text> : <Spinner />}
+              <Table.Cell colSpan={7} className="p-4 text-center">
+                <Spinner size="2" />
+              </Table.Cell>
+            </Table.Row>
+          ) : failedSearch ? (
+            <Table.Row>
+              <Table.Cell colSpan={7} className="p-4 text-center">
+                <Text>{failedText}</Text>
+              </Table.Cell>
+            </Table.Row>
+          ) : invoices.length === 0 ? (
+            <Table.Row>
+              <Table.Cell colSpan={7} className="p-4 text-center">
+                <Text>No invoice records found</Text>
               </Table.Cell>
             </Table.Row>
           ) : (
             invoices.map((invoice) => (
-              <Table.Row key={invoice.id}>
-                <Table.Cell>{refractor(invoice.createdAt)}</Table.Cell>
-                <Table.Cell>{invoice.invoiceNumber || ""}</Table.Cell>
+              <Table.Row key={invoice.id || `${invoice.invoiceNumber || "unknown"}-${invoice.createdAt}`}>
+                <Table.Cell>{refractor(invoice.createdAt) || "N/A"}</Table.Cell>
+                <Table.Cell>{invoice.invoiceNumber || "N/A"}</Table.Cell>
                 <Table.Cell>
-                  {`${invoice.customer?.firstname || ""} ${invoice.customer?.lastname || ""}`}
+                  {`${invoice.customer?.firstname || "N/A"} ${invoice.customer?.lastname || "N/A"}`.trim()}
                 </Table.Cell>
-                <Table.Cell>{invoice.vehicleNo || ""}</Table.Cell>
-                <Table.Cell>{refractorToTime(invoice.createdAt)}</Table.Cell>
+                <Table.Cell>{invoice.vehicleNo || "N/A"}</Table.Cell>
+                <Table.Cell>{refractorToTime(invoice.createdAt) || "N/A"}</Table.Cell>
                 <Table.Cell>
                   <Flex align="center" gap="1">
                     <FontAwesomeIcon
                       icon={faSquare}
                       className={getSquareColor(invoice.status)}
                     />
-                    {_.upperFirst(invoice.status)}
+                    <Text>{_.upperFirst(invoice.status || "N/A")}</Text>
                   </Flex>
                 </Table.Cell>
                 <Table.Cell>
-                  {isDropdownDisabled(invoice.status) ? (
-                    <Button
-                      variant="soft"
-                      disabled={loadingId === invoice.id || isDropdownDisabled(invoice.status)}
-                    >
-                      {loadingId === invoice.id ? (
-                        <Spinner size="1" />
-                      ) : (
-                        <FontAwesomeIcon icon={faEllipsisV} />
-                      )}
-                    </Button>
-                  ) : (
-                    <DropdownMenu.Root>
-                      <DropdownMenu.Trigger>
-                        <Button
-                          variant="soft"
-                          disabled={loadingId === invoice.id}
-                        >
-                          {loadingId === invoice.id ? (
-                            <Spinner size="1" />
-                          ) : (
-                            <FontAwesomeIcon icon={faEllipsisV} />
-                          )}
-                        </Button>
-                      </DropdownMenu.Trigger>
-                      <DropdownMenu.Content>
-                        <DropdownMenu.Item
-                          onSelect={() => navigate(`/admin/receipts/invoice/${invoice.id}`)}
-                        >
-                          View Approved Invoice
-                        </DropdownMenu.Item>
-                        <DropdownMenu.Item
-                          onSelect={() => handleSendToPrintInvoice(invoice.id)}
-                          disabled={loadingId === invoice.id}
-                        >
-                          {loadingId === invoice.id ? (
-                            <Spinner size="1" />
-                          ) : (
-                            "Send To Print"
-                          )}
-                        </DropdownMenu.Item>
-                      </DropdownMenu.Content>
-                    </DropdownMenu.Root>
-                  )}
+                  <DropdownMenu.Root>
+                    <DropdownMenu.Trigger>
+                      <Button
+                        variant="soft"
+                        disabled={loadingId === invoice.id || isDropdownDisabled(invoice.status)}
+                        className="cursor-pointer"
+                      >
+                        {loadingId === invoice.id ? (
+                          <Spinner size="1" />
+                        ) : (
+                          <FontAwesomeIcon icon={faEllipsisV} />
+                        )}
+                      </Button>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Content>
+                      <DropdownMenu.Item
+                        onSelect={() => navigate(`/admin/receipts/invoice/${invoice.id}`)}
+                      >
+                        View Approved Invoice
+                      </DropdownMenu.Item>
+                      <DropdownMenu.Item
+                        onSelect={() => handleSendToPrintInvoice(invoice.id)}
+                        disabled={loadingId === invoice.id}
+                      >
+                        {loadingId === invoice.id ? <Spinner size="1" /> : "Send To Print"}
+                      </DropdownMenu.Item>
+                    </DropdownMenu.Content>
+                  </DropdownMenu.Root>
                 </Table.Cell>
               </Table.Row>
             ))
@@ -201,7 +241,32 @@ const AllInvoice = () => {
         </Table.Body>
       </Table.Root>
 
-      <Toaster position="top-right" />
+<div className="pagination-fixed">
+
+      <Flex justify="center" align="center" gap="2" className="mt-4">
+        <Button
+          variant="soft"
+          disabled={currentPageIndex === 0}
+          onClick={handlePrevPage}
+          className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
+          aria-label="Previous page"
+        >
+          Previous
+        </Button>
+        <Text>Page {currentPageIndex + 1}</Text>
+        <Button
+          variant="soft"
+          disabled={!paginationUrls[currentPageIndex]}
+          onClick={handleNextPage}
+          className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
+          aria-label="Next page"
+        >
+          Next
+        </Button>
+      </Flex>
+</div>
+
+      <Separator className="my-4 w-full" />
     </>
   );
 };

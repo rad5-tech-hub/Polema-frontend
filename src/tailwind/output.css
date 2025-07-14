@@ -570,12 +570,20 @@ video {
   position: relative;
 }
 
+.\!sticky {
+  position: sticky !important;
+}
+
 .sticky {
   position: sticky;
 }
 
 .inset-0 {
   inset: 0px;
+}
+
+.\!top-0 {
+  top: 0px !important;
 }
 
 .bottom-0 {
@@ -868,10 +876,6 @@ video {
   margin-bottom: 1.5rem;
 }
 
-.mb-8 {
-  margin-bottom: 2rem;
-}
-
 .ml-2 {
   margin-left: 0.5rem;
 }
@@ -1128,6 +1132,10 @@ video {
 
 .max-h-\[85vh\] {
   max-height: 85vh;
+}
+
+.max-h-\[500px\] {
+  max-height: 500px;
 }
 
 .min-h-4 {

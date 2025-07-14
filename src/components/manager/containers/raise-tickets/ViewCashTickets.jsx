@@ -279,6 +279,8 @@ const CashTickets = () => {
           )}
         </Table.Body>
       </Table.Root>
+      <div className="pagination-fixed">
+
       {paginationUrls.length > 0 && (
         <Flex justify="center" className="mt-4">
           <Flex gap="2" align="center">
@@ -302,6 +304,7 @@ const CashTickets = () => {
           </Flex>
         </Flex>
       )}
+      </div>
     </>
   );
 };

@@ -48,7 +48,9 @@ const AllDispatchNote = () => {
       return;
     }
     try {
-      const url = pageUrl ? `${root}${pageUrl}` : `${root}/customer/get-all-vehicle-dispatch`;
+      const url = pageUrl
+        ? `${root}${pageUrl}`
+        : `${root}/customer/get-all-vehicle-dispatch`;
       const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -58,7 +60,11 @@ const AllDispatchNote = () => {
         setFailedSearch(true);
         setFailedText("No dispatch notes found.");
       }
-      if (response.data.pagination?.nextPage && response.data.pagination.nextPage !== "/customer/get-all-vehicle-dispatch") {
+      if (
+        response.data.pagination?.nextPage &&
+        response.data.pagination.nextPage !==
+          "/customer/get-all-vehicle-dispatch"
+      ) {
         setPaginationUrls((prev) => {
           const newUrls = [...prev];
           newUrls[currentPageIndex] = response.data.pagination.nextPage;
@@ -68,7 +74,8 @@ const AllDispatchNote = () => {
         setPaginationUrls((prev) => prev.slice(0, currentPageIndex));
       }
     } catch (error) {
-      const errorMessage = error?.response?.data?.message || "Failed to fetch dispatch notes.";
+      const errorMessage =
+        error?.response?.data?.message || "Failed to fetch dispatch notes.";
       setFailedSearch(true);
       setFailedText(errorMessage);
       showToast({
@@ -105,7 +112,9 @@ const AllDispatchNote = () => {
       });
     } catch (error) {
       showToast({
-        message: error?.response?.data?.message || "Failed to send dispatch note to print.",
+        message:
+          error?.response?.data?.message ||
+          "Failed to send dispatch note to print.",
         type: "error",
         duration: 5000,
       });
@@ -114,7 +123,8 @@ const AllDispatchNote = () => {
     }
   };
 
-  const isDropdownDisabled = (status) => status === "pending" || status === "rejected";
+  const isDropdownDisabled = (status) =>
+    status === "pending" || status === "rejected";
 
   const handleNextPage = () => {
     if (currentPageIndex <= paginationUrls.length) {
@@ -128,7 +138,9 @@ const AllDispatchNote = () => {
     if (currentPageIndex > 0) {
       const prevIndex = currentPageIndex - 1;
       setCurrentPageIndex(prevIndex);
-      fetchDispatchNotes(prevIndex === 0 ? null : paginationUrls[prevIndex - 1]);
+      fetchDispatchNotes(
+        prevIndex === 0 ? null : paginationUrls[prevIndex - 1]
+      );
     }
   };
 
@@ -138,7 +150,11 @@ const AllDispatchNote = () => {
 
   return (
     <>
-      <Flex justify="between" align="center" className="border-b border-gray-400 py-4">
+      <Flex
+        justify="between"
+        align="center"
+        className="border-b border-gray-400 py-4"
+      >
         <Heading size="5">View All Vehicle Dispatch Notes</Heading>
         <Button
           className="!bg-theme !text-white hover:!bg-brown-500 cursor-pointer"
@@ -149,15 +165,31 @@ const AllDispatchNote = () => {
       </Flex>
 
       <Separator className="my-4 w-full" />
-      <Table.Root variant="surface" className="mt-4 table-fixed w-full" size="2">
+      <Table.Root
+        variant="surface"
+        className="mt-4 table-fixed w-full"
+        size="2"
+      >
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeaderCell className="text-left">DATE</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">DRIVER'S NAME</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">ESCORT'S NAME</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">VEHICLE NO.</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">DESTINATION</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">STATUS</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              DATE
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              DRIVER'S NAME
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              ESCORT'S NAME
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              VEHICLE NO.
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              DESTINATION
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              STATUS
+            </Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell className="text-left"></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
@@ -202,7 +234,10 @@ const AllDispatchNote = () => {
                     <DropdownMenu.Trigger>
                       <Button
                         variant="soft"
-                        disabled={loadingId === note.id || isDropdownDisabled(note.status)}
+                        disabled={
+                          loadingId === note.id ||
+                          isDropdownDisabled(note.status)
+                        }
                         className="cursor-pointer"
                       >
                         {loadingId === note.id ? (
@@ -214,7 +249,11 @@ const AllDispatchNote = () => {
                     </DropdownMenu.Trigger>
                     <DropdownMenu.Content>
                       <DropdownMenu.Item
-                        onSelect={() => navigate(`/admin/receipt/receipt-dispatchnote/${note.id}`)}
+                        onSelect={() =>
+                          navigate(
+                            `/admin/receipt/receipt-dispatchnote/${note.id}`
+                          )
+                        }
                       >
                         View Dispatch Note
                       </DropdownMenu.Item>
@@ -222,7 +261,11 @@ const AllDispatchNote = () => {
                         onSelect={() => handleSendToPrintDispatch(note.id)}
                         disabled={loadingId === note.id}
                       >
-                        {loadingId === note.id ? <Spinner size="1" /> : "Send to Print"}
+                        {loadingId === note.id ? (
+                          <Spinner size="1" />
+                        ) : (
+                          "Send to Print"
+                        )}
                       </DropdownMenu.Item>
                     </DropdownMenu.Content>
                   </DropdownMenu.Root>
@@ -232,32 +275,35 @@ const AllDispatchNote = () => {
           )}
         </Table.Body>
       </Table.Root>
-
-      {(paginationUrls.length > 0 || currentPageIndex > 0) && (
-        <Flex justify="center" align="center" gap="2" className="mt-4">
-          <Button
-            variant="soft"
-            disabled={currentPageIndex === 0}
-            onClick={handlePrevPage}
-            className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
-            aria-label="Previous page"
-          >
-            Previous
-          </Button>
-          <Text>Page {currentPageIndex + 1}</Text>
-          <Button
-            variant="soft"
-            disabled={currentPageIndex >= paginationUrls.length && !paginationUrls[currentPageIndex - 1]}
-            onClick={handleNextPage}
-            className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
-            aria-label="Next page"
-          >
-            Next
-          </Button>
-        </Flex>
-      )}
+      <div className="pagination-fixed">
+        {(paginationUrls.length > 0 || currentPageIndex > 0) && (
+          <Flex justify="center" align="center" gap="2" className="mt-4">
+            <Button
+              variant="soft"
+              disabled={currentPageIndex === 0}
+              onClick={handlePrevPage}
+              className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
+              aria-label="Previous page"
+            >
+              Previous
+            </Button>
+            <Text>Page {currentPageIndex + 1}</Text>
+            <Button
+              variant="soft"
+              disabled={
+                currentPageIndex >= paginationUrls.length &&
+                !paginationUrls[currentPageIndex - 1]
+              }
+              onClick={handleNextPage}
+              className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
+              aria-label="Next page"
+            >
+              Next
+            </Button>
+          </Flex>
+        )}
+      </div>
       <Separator className="my-4 w-full" />
-      
     </>
   );
 };

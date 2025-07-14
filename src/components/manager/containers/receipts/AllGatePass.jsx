@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { DropdownMenu, Table, Flex, Button, Heading, Spinner, Text, Separator } from "@radix-ui/themes";
+import {
+  DropdownMenu,
+  Table,
+  Flex,
+  Button,
+  Heading,
+  Spinner,
+  Text,
+  Separator,
+} from "@radix-ui/themes";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquare, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
@@ -39,7 +48,9 @@ const OfficialPasses = () => {
       return;
     }
     try {
-      const url = pageUrl ? `${root}${pageUrl}` : `${root}/customer/get-all-gatepass`;
+      const url = pageUrl
+        ? `${root}${pageUrl}`
+        : `${root}/customer/get-all-gatepass`;
       const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -51,17 +62,17 @@ const OfficialPasses = () => {
       }
       const nextPage = response.data.pagination?.nextPage;
       if (nextPage && typeof nextPage === "string") {
-  setPaginationUrls((prev) => {
-    const newUrls = [...prev];
-    if (newUrls.length <= currentPageIndex + 1) {
-      newUrls.push(nextPage); // add next page only once
-    }
-    return newUrls;
-  });
-}
-
+        setPaginationUrls((prev) => {
+          const newUrls = [...prev];
+          if (newUrls.length <= currentPageIndex + 1) {
+            newUrls.push(nextPage); // add next page only once
+          }
+          return newUrls;
+        });
+      }
     } catch (error) {
-      const errorMessage = error?.response?.data?.message || "Failed to fetch gate pass records.";
+      const errorMessage =
+        error?.response?.data?.message || "Failed to fetch gate pass records.";
       setFailedSearch(true);
       setFailedText(errorMessage);
       showToast({
@@ -98,7 +109,9 @@ const OfficialPasses = () => {
       });
     } catch (error) {
       showToast({
-        message: error?.response?.data?.message || "Failed to send gate pass to print.",
+        message:
+          error?.response?.data?.message ||
+          "Failed to send gate pass to print.",
         type: "error",
         duration: 5000,
       });
@@ -120,7 +133,8 @@ const OfficialPasses = () => {
     }
   };
 
-  const isDropdownDisabled = (status) => status === "pending" || status === "rejected";
+  const isDropdownDisabled = (status) =>
+    status === "pending" || status === "rejected";
 
   const handleNextPage = () => {
     const nextIndex = currentPageIndex + 1;
@@ -156,17 +170,37 @@ const OfficialPasses = () => {
 
       <Separator className="my-4 w-full" />
 
-      <Table.Root variant="surface" className="mt-4 table-fixed w-full" size="2">
+      <Table.Root
+        variant="surface"
+        className="mt-4 table-fixed w-full"
+        size="2"
+      >
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeaderCell className="text-left">DATE</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">DRIVER NAME</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">OWNER NAME</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">GOODS</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">VEHICLE NO.</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">DESTINATION</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">DEPARTURE TIME</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-left">STATUS</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              DATE
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              DRIVER NAME
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              OWNER NAME
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              GOODS
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              VEHICLE NO.
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              DESTINATION
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              DEPARTURE TIME
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-left">
+              STATUS
+            </Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell className="text-left"></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
@@ -192,21 +226,36 @@ const OfficialPasses = () => {
           ) : (
             passDetails.map((entry) => (
               <Table.Row
-                key={entry.id || `${entry.vehicleNo || entry?.transaction?.authToWeighTickets?.vehicleNo || "unknown"}-${entry.createdAt}`}
+                key={
+                  entry.id ||
+                  `${
+                    entry.vehicleNo ||
+                    entry?.transaction?.authToWeighTickets?.vehicleNo ||
+                    "unknown"
+                  }-${entry.createdAt}`
+                }
               >
                 <Table.Cell>{refractor(entry.createdAt) || "N/A"}</Table.Cell>
                 <Table.Cell>
-                  {entry?.driver || entry?.transaction?.authToWeighTickets?.driver || "N/A"}
+                  {entry?.driver ||
+                    entry?.transaction?.authToWeighTickets?.driver ||
+                    "N/A"}
                 </Table.Cell>
                 <Table.Cell>{entry.owner || "N/A"}</Table.Cell>
                 <Table.Cell>
-                  {entry?.transaction?.porders?.name || entry?.rawMaterial?.name || "N/A"}
+                  {entry?.transaction?.porders?.name ||
+                    entry?.rawMaterial?.name ||
+                    "N/A"}
                 </Table.Cell>
                 <Table.Cell>
-                  {entry?.transaction?.authToWeighTickets?.vehicleNo || entry?.vehicleNo || "N/A"}
+                  {entry?.transaction?.authToWeighTickets?.vehicleNo ||
+                    entry?.vehicleNo ||
+                    "N/A"}
                 </Table.Cell>
                 <Table.Cell>{entry.destination || "N/A"}</Table.Cell>
-                <Table.Cell>{refractorToTime(entry.createdAt) || "N/A"}</Table.Cell>
+                <Table.Cell>
+                  {refractorToTime(entry.createdAt) || "N/A"}
+                </Table.Cell>
                 <Table.Cell>
                   <Flex align="center" gap="1">
                     <FontAwesomeIcon
@@ -221,7 +270,10 @@ const OfficialPasses = () => {
                     <DropdownMenu.Trigger>
                       <Button
                         variant="soft"
-                        disabled={loadingId === entry.id || isDropdownDisabled(entry.status)}
+                        disabled={
+                          loadingId === entry.id ||
+                          isDropdownDisabled(entry.status)
+                        }
                         className="cursor-pointer"
                       >
                         {loadingId === entry.id ? (
@@ -233,7 +285,9 @@ const OfficialPasses = () => {
                     </DropdownMenu.Trigger>
                     <DropdownMenu.Content>
                       <DropdownMenu.Item
-                        onSelect={() => navigate(`/admin/receipt/view-gatepass/${entry.id}`)}
+                        onSelect={() =>
+                          navigate(`/admin/receipt/view-gatepass/${entry.id}`)
+                        }
                       >
                         View Approved Gate Pass
                       </DropdownMenu.Item>
@@ -241,7 +295,11 @@ const OfficialPasses = () => {
                         onSelect={() => handleSendToPrintGatepass(entry.id)}
                         disabled={loadingId === entry.id}
                       >
-                        {loadingId === entry.id ? <Spinner size="1" /> : "Send To Print"}
+                        {loadingId === entry.id ? (
+                          <Spinner size="1" />
+                        ) : (
+                          "Send To Print"
+                        )}
                       </DropdownMenu.Item>
                     </DropdownMenu.Content>
                   </DropdownMenu.Root>
@@ -253,34 +311,31 @@ const OfficialPasses = () => {
       </Table.Root>
 
       <div className="pagination-fixed">
+        <Flex justify="center" align="center" gap="2" className="mt-4">
+          <Button
+            variant="soft"
+            disabled={currentPageIndex === 0}
+            onClick={handlePrevPage}
+            className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
+            aria-label="Previous page"
+          >
+            Previous
+          </Button>
+          <Text>Page {currentPageIndex + 1}</Text>
+          {console.log(paginationUrls)}
+          {console.log(currentPageIndex)}
 
-      <Flex justify="center" align="center" gap="2" className="mt-4">
-        <Button
-          variant="soft"
-          disabled={currentPageIndex === 0}
-          onClick={handlePrevPage}
-          className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
-          aria-label="Previous page"
-        >
-          Previous
-        </Button>
-        <Text>Page {currentPageIndex + 1}</Text>
-        {console.log(paginationUrls)
-        }
-        {console.log(currentPageIndex)}
-        
-        <Button
-          variant="soft"
-          disabled={!paginationUrls[currentPageIndex]}
-          onClick={handleNextPage}
-          className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
-          aria-label="Next page"
-        >
-          Next
-        </Button>
-      </Flex>
+          <Button
+            variant="soft"
+            disabled={!paginationUrls[currentPageIndex]}
+            onClick={handleNextPage}
+            className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
+            aria-label="Next page"
+          >
+            Next
+          </Button>
+        </Flex>
       </div>
-
 
       <Separator className="my-4 w-full" />
     </>
