@@ -87,7 +87,7 @@ const AllChequeRecords = () => {
         <Heading className="mb-4">All Cheque Records</Heading>
         <Button
           className="!bg-theme !text-white hover:!bg-brown-500 cursor-pointer"
-          onClick={() => navigate("/admin/receipts/cheques")}
+          onClick={() => navigate("/admin/receipts/cheque-records")}
         >
           New Cheque Record
         </Button>

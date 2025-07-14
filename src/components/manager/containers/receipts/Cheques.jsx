@@ -296,7 +296,7 @@ const Cheque = () => {
             type="submit"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Submitting..." : "Submit"}
+            {isSubmitting ? "Adding..." : "Add"}
           </Button>
         </Flex>
       </form>
