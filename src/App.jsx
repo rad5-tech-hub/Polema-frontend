@@ -440,7 +440,7 @@ const App = () => {
                     element={<AllReceipts />}
                   />
                     <Route
-                    path="/receipts/cheques"
+                    path="/receipts/cheque-records"
                     element={<Cheque />}
                   />
                      <Route
