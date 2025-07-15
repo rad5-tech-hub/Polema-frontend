@@ -416,10 +416,11 @@ const LocalPurchaseOrder = () => {
                       }}
                     >
                       <Select.Trigger
+                      
                         className="w-full mt-2"
                         placeholder="Select Raw Material"
                       />
-                      <Select.Content>
+                      <Select.Content position="popper">
                         {raw.map((item) => (
                           <Select.Item key={item.id} value={item.id}>
                             {item.name}
@@ -467,7 +468,11 @@ const LocalPurchaseOrder = () => {
                         }
                         placeholder="Enter Quantity Ordered"
                         className="mt-2"
-                      />
+                      >
+                        <TextField.Slot>
+                          {detail.unit}
+                        </TextField.Slot>
+                      </TextField.Root>
                     </div>
                   </Flex>
                   {materialDetails.length > 1 && (
