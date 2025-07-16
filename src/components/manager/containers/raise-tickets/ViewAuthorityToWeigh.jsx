@@ -248,7 +248,7 @@ const ViewAuthorityToWeigh = () => {
                           </DropdownMenu.Trigger>
                           <DropdownMenu.Content>
                             {item.status === "approved" &&
-                              (isAdmin || isWeighbridge) && (
+                               (
                                 <DropdownMenu.Item
                                   onSelect={() =>
                                     navigate(
