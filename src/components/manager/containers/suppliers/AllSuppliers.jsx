@@ -31,9 +31,10 @@ const AllSuppliers = () => {
   
   const [paginationUrls, setPaginationUrls] = useState([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [hasNextPage, setHasNextPage] = useState(false);
   const navigate = useNavigate();
 
-  const fetchSuppliers = async (pageUrl = null) => {
+  const fetchSuppliers = async (pageUrl = null, pageIndex = 0) => {
     setPageLoading(true);
     setSuppliers([]);
     const retrToken = localStorage.getItem("token");
@@ -51,14 +52,10 @@ const AllSuppliers = () => {
         headers: { Authorization: `Bearer ${retrToken}` },
       });
       setSuppliers(response.data.suppliers || []);
-      if (response.data.pagination?.nextPage && response.data.pagination.nextPage !== "/customer/all-suppliers") {
-        setPaginationUrls((prev) => {
-          const newUrls = [...prev];
-          newUrls[currentPageIndex] = response.data.pagination.nextPage;
-          return newUrls;
-        });
-      } else {
-        setPaginationUrls((prev) => prev.slice(0, currentPageIndex));
+      const nextPage = response.data.pagination?.nextPage;
+      setHasNextPage(!!nextPage);
+      if (nextPage && !paginationUrls.includes(nextPage)) {
+        setPaginationUrls((prev) => [...prev, nextPage]);
       }
     } catch (error) {
       toast.error(error?.response?.data?.message || "Failed to load suppliers.", {
@@ -90,10 +87,10 @@ const AllSuppliers = () => {
   const filteredCustomers = useMemo(() => filterCustomers(suppliers, searchTerm), [suppliers, searchTerm]);
 
   const handleNextPage = () => {
-    if (currentPageIndex <= paginationUrls.length) {
+    if (currentPageIndex < paginationUrls.length && hasNextPage) {
       const nextIndex = currentPageIndex + 1;
       setCurrentPageIndex(nextIndex);
-      fetchSuppliers(paginationUrls[currentPageIndex] || null);
+      fetchSuppliers(paginationUrls[currentPageIndex], nextIndex);
     }
   };
 
@@ -101,7 +98,7 @@ const AllSuppliers = () => {
     if (currentPageIndex > 0) {
       const prevIndex = currentPageIndex - 1;
       setCurrentPageIndex(prevIndex);
-      fetchSuppliers(prevIndex === 0 ? null : paginationUrls[prevIndex - 1]);
+      fetchSuppliers(prevIndex === 0 ? null : paginationUrls[prevIndex - 1], prevIndex);
     }
   };
 
@@ -298,10 +295,7 @@ const AllSuppliers = () => {
               <Text>Page {currentPageIndex + 1}</Text>
               <Button
                 variant="soft"
-                disabled={
-                  currentPageIndex >= paginationUrls.length &&
-                  !paginationUrls[currentPageIndex - 1]
-                }
+                disabled={!hasNextPage}
                 onClick={handleNextPage}
                 className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
                 aria-label="Next page"

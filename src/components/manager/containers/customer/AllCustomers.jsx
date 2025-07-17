@@ -203,10 +203,11 @@ const AllCustomers = () => {
   const [paginationUrls, setPaginationUrls] = useState([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [arrangeType,setArrangeType] = useState(null)
+  const [hasNextPage, setHasNextPage] = useState(false);
   const showToast = useToast();
   const navigate = useNavigate();
 
-  const fetchCustomers = async (pageUrl = null) => {
+  const fetchCustomers = async (pageUrl = null, pageIndex = 0) => {
     setLoading(true);
     setCustomerData([]);
     const retrToken = localStorage.getItem("token");
@@ -226,14 +227,10 @@ const AllCustomers = () => {
         },
       });
       setCustomerData(response.data.customers || []);
-      if (response.data.pagination?.nextPage && response.data.pagination.nextPage !== "/customer/all-customers") {
-        setPaginationUrls((prev) => {
-          const newUrls = [...prev];
-          newUrls[currentPageIndex] = response.data.pagination.nextPage;
-          return newUrls;
-        });
-      } else {
-        setPaginationUrls((prev) => prev.slice(0, currentPageIndex));
+      const nextPage = response.data.pagination?.nextPage;
+      setHasNextPage(!!nextPage);
+      if (nextPage && !paginationUrls.includes(nextPage)) {
+        setPaginationUrls((prev) => [...prev, nextPage]);
       }
     } catch (error) {
       showToast({
@@ -265,10 +262,10 @@ const AllCustomers = () => {
   const filteredCustomers = useMemo(() => filterCustomers(customerData, searchTerm), [customerData, searchTerm]);
 
   const handleNextPage = () => {
-    if (currentPageIndex <= paginationUrls.length) {
+    if (currentPageIndex < paginationUrls.length) {
       const nextIndex = currentPageIndex + 1;
       setCurrentPageIndex(nextIndex);
-      fetchCustomers(paginationUrls[currentPageIndex] || null);
+      fetchCustomers(paginationUrls[currentPageIndex], nextIndex);
     }
   };
 
@@ -276,7 +273,7 @@ const AllCustomers = () => {
     if (currentPageIndex > 0) {
       const prevIndex = currentPageIndex - 1;
       setCurrentPageIndex(prevIndex);
-      fetchCustomers(prevIndex === 0 ? null : paginationUrls[prevIndex - 1]);
+      fetchCustomers(prevIndex === 0 ? null : paginationUrls[prevIndex - 1], prevIndex);
     }
   };
 
@@ -453,7 +450,7 @@ const AllCustomers = () => {
             <Text>Page {currentPageIndex + 1}</Text>
             <Button
               variant="soft"
-              disabled={currentPageIndex >= paginationUrls.length && !paginationUrls[currentPageIndex - 1]}
+              disabled={!hasNextPage}
               onClick={handleNextPage}
               className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
               aria-label="Next page"
