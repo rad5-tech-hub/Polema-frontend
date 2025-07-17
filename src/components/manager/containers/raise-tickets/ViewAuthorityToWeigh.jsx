@@ -174,6 +174,7 @@ const ViewAuthorityToWeigh = () => {
         onValueChange={(tab) => {
           setActiveTab(tab);
           setPageIndex(0);
+          
           setPaginationUrls([]);
         }}
       >

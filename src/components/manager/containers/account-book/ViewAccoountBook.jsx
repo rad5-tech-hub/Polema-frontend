@@ -265,26 +265,7 @@ const ViewAccountBook = () => {
   return (
     <>
       <style>
-        {`
-          .pagination-fixed {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #fff;
-            padding: 10px 0;
-            z-index: 20;
-            border-top: 1px solid #e0e0e0;
-            display: flex;
-            align-items:center;
-            justify-content: center;
-            gap: 8px;
-          }
-          .dark .pagination-fixed {
-            background: transparent;
-            border-top: 1px solid #333;
-          }
-        `}
+        
       </style>
       <Flex justify="between" align="center" className="mb-4">
         <Heading>Account Book</Heading>
@@ -336,7 +317,7 @@ const ViewAccountBook = () => {
         </div>
       </Flex>
 
-      <Table.Root variant="surface">
+      <Table.Root variant="surface" className="mb-20">
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
