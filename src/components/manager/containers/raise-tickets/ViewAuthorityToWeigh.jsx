@@ -31,6 +31,7 @@ const ViewAuthorityToWeigh = () => {
   const [paginationUrls, setPaginationUrls] = useState([]);
   const [pageIndex, setPageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState("customer");
+  const [hasNextPage, setHasNextPage] = useState(false);
 
   const fetchWeighDetails = async (pageUrl = null, tab = activeTab) => {
     setLoading(true);
@@ -65,17 +66,10 @@ const ViewAuthorityToWeigh = () => {
       setErrorText(filtered.length === 0 ? `No ${tab} ATW records found.` : "");
 
       const nextPage = response.data.pagination?.nextPage;
-      setPaginationUrls((prev) => {
-        const updated = [...prev];
-        if (
-          nextPage &&
-          typeof nextPage === "string" &&
-          !prev.includes(nextPage)
-        ) {
-          updated[pageIndex] = nextPage;
-        }
-        return updated;
-      });
+      setHasNextPage(!!nextPage);
+      if (nextPage && !paginationUrls.includes(nextPage)) {
+        setPaginationUrls((prev) => [...prev, nextPage]);
+      }
     } catch (error) {
       const errorMessage =
         error?.response?.data?.message || "Failed to fetch ATW records.";
@@ -114,7 +108,7 @@ const ViewAuthorityToWeigh = () => {
   };
 
   const handlePagination = (direction) => {
-    if (direction === "next" && paginationUrls[pageIndex]) {
+    if (direction === "next" && hasNextPage) {
       const nextIndex = pageIndex + 1;
       setPageIndex(nextIndex);
       fetchWeighDetails(paginationUrls[pageIndex], activeTab);
@@ -185,7 +179,7 @@ const ViewAuthorityToWeigh = () => {
 
         <Tabs.Content value={activeTab}>
           <Separator className="my-4" />
-          <Table.Root variant="surface" className="table-fixed w-full" size="2">
+          <Table.Root variant="surface" className="table-fixed w-full mb-20" size="2">
             <Table.Header>
               <Table.Row>
                 <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
@@ -310,7 +304,7 @@ const ViewAuthorityToWeigh = () => {
             <Text>Page {pageIndex + 1}</Text>
             <Button
               variant="soft"
-              disabled={!paginationUrls[pageIndex]}
+              disabled={!hasNextPage}
               onClick={() => handlePagination("next")}
               className="!bg-blue-50 hover:!bg-blue-100"
             >
