@@ -156,7 +156,7 @@ const WeighDetailsDialog = ({ isOpen, onClose, selectedWeigh }) => {
               )}
               {selectedWeigh.supplierId && (
                 <Button
-                  className="bg-theme cursor-pointer"
+                  className="bg-theme cursor-pointer absolute top-4 right-16"
                   onClick={flagTransaction}
                 >
                   {buttonLoading ? <RadixSpinner /> : "Flag Weigh"}
