@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import axios from "axios";
 import {
   Table,
@@ -27,6 +27,7 @@ const AllSuppliers = () => {
   const [pageLoading, setPageLoading] = useState(false);
   const [viewStaff, setViewStaff] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const searchTimeout = useRef(null);
   const [arrangeType,setArrangeType] = useState(null)
   
   const [paginationUrls, setPaginationUrls] = useState([]);
@@ -67,24 +68,59 @@ const AllSuppliers = () => {
     }
   };
 
-  const filterCustomers = (customers, searchTerm) => {
-    if (!searchTerm.trim()) {
-      return customers;
+  const searchSuppliers = async (search) => {
+    setPageLoading(true);
+    setSuppliers([]);
+    const retrToken = localStorage.getItem("token");
+    if (!retrToken) {
+      toast.error("An error occurred. Try logging in again.", {
+        duration: 6500,
+        style: { padding: "30px" },
+      });
+      setPageLoading(false);
+      return;
     }
-    const lowerCaseSearchTerm = searchTerm.toLowerCase();
-    return customers.filter((customer) =>
-      [
-        customer.supplierTag,
-        customer.firstname,
-        customer.lastname,
-        customer.email,
-        customer.address,
-        customer.phoneNumber || [],
-      ].some((field) => String(field || "").toLowerCase().includes(lowerCaseSearchTerm))
-    );
+    try {
+      const response = await axios.get(`${root}/customer/search-supplier?search=${encodeURIComponent(search)}`, {
+        headers: { Authorization: `Bearer ${retrToken}` },
+      });
+      setSuppliers(response.data.customerList  || []);
+      setHasNextPage(false); // Search results are not paginated
+      setPaginationUrls([]);
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "An error occurred while searching suppliers.", {
+        duration: 6500,
+        style: { padding: "30px" },
+      });
+    } finally {
+      setPageLoading(false);
+    }
   };
 
-  const filteredCustomers = useMemo(() => filterCustomers(suppliers, searchTerm), [suppliers, searchTerm]);
+  useEffect(() => {
+    if (searchTimeout.current) {
+      clearTimeout(searchTimeout.current);
+    }
+    if (searchTerm.trim() === "") {
+      // If search is cleared, fetch all suppliers
+      searchTimeout.current = setTimeout(() => {
+        setCurrentPageIndex(0);
+        setPaginationUrls([]);
+        fetchSuppliers();
+      }, 500);
+    } else {
+      // Debounced search
+      searchTimeout.current = setTimeout(() => {
+        searchSuppliers(searchTerm);
+      }, 500);
+    }
+    return () => {
+      if (searchTimeout.current) {
+        clearTimeout(searchTimeout.current);
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm]);
 
   const handleNextPage = () => {
     if (currentPageIndex < paginationUrls.length && hasNextPage) {
@@ -207,14 +243,14 @@ const AllSuppliers = () => {
                   <Spinner size="2" />
                 </Table.Cell>
               </Table.Row>
-            ) : filteredCustomers.length === 0 ? (
+            ) : suppliers.length === 0 ? (
               <Table.Row>
                 <Table.Cell colSpan={8} className="text-center p-4">
                   No Suppliers Found
                 </Table.Cell>
               </Table.Row>
             ) : (
-              filteredCustomers.map((supplier) => (
+              suppliers.map((supplier) => (
                 <Table.Row
                   key={
                     supplier.id ||
@@ -280,6 +316,8 @@ const AllSuppliers = () => {
           </Table.Body>
         </Table.Root>
 
+<div className="pagination-fixed">
+
         {(paginationUrls.length > 0 || currentPageIndex > 0) && (
           <Flex justify="center" className="mt-4">
             <Flex gap="2" align="center">
@@ -305,6 +343,7 @@ const AllSuppliers = () => {
             </Flex>
           </Flex>
         )}
+</div>
 
         {viewStaff && (
           <EditSuppliers

@@ -803,11 +803,6 @@ video {
   margin-bottom: 0.5rem;
 }
 
-.my-20 {
-  margin-top: 5rem;
-  margin-bottom: 5rem;
-}
-
 .my-3 {
   margin-top: 0.75rem;
   margin-bottom: 0.75rem;
@@ -959,6 +954,10 @@ video {
 
 .mt-px {
   margin-top: 1px;
+}
+
+.mb-8 {
+  margin-bottom: 2rem;
 }
 
 .block {

@@ -102,6 +102,8 @@ const ViewAuthorityToWeigh = () => {
         return "text-green-500";
       case "rejected":
         return "text-red-500";
+      case "completed":
+        return "text-black";
       default:
         return "text-gray-500";
     }
@@ -168,7 +170,7 @@ const ViewAuthorityToWeigh = () => {
         onValueChange={(tab) => {
           setActiveTab(tab);
           setPageIndex(0);
-          
+
           setPaginationUrls([]);
         }}
       >
@@ -179,7 +181,11 @@ const ViewAuthorityToWeigh = () => {
 
         <Tabs.Content value={activeTab}>
           <Separator className="my-4" />
-          <Table.Root variant="surface" className="table-fixed w-full mb-20" size="2">
+          <Table.Root
+            variant="surface"
+            className="table-fixed w-full mb-20"
+            size="2"
+          >
             <Table.Header>
               <Table.Row>
                 <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
@@ -234,7 +240,7 @@ const ViewAuthorityToWeigh = () => {
                       </Flex>
                     </Table.Cell>
                     <Table.Cell>
-                      {item.status !== "pending" && (
+                      {/* {item.status !== "pending"  && (
                         <DropdownMenu.Root>
                           <DropdownMenu.Trigger>
                             <Button variant="soft">
@@ -283,7 +289,59 @@ const ViewAuthorityToWeigh = () => {
                             )}
                           </DropdownMenu.Content>
                         </DropdownMenu.Root>
-                      )}
+                      )} */}
+                      {(item.status !== "pending" && item.status !== "Recieved") &&
+                         (
+                          <DropdownMenu.Root>
+                            <DropdownMenu.Trigger>
+                              <Button variant="soft">
+                                <FontAwesomeIcon icon={faEllipsisV} />
+                              </Button>
+                            </DropdownMenu.Trigger>
+                            <DropdownMenu.Content>
+                              {item.status === "approved" && (
+                                <DropdownMenu.Item
+                                  onSelect={() =>
+                                    navigate(
+                                      `/admin/weighing-operations/new-weigh/${item.id}`
+                                    )
+                                  }
+                                >
+                                  New Weigh
+                                </DropdownMenu.Item>
+                              )}
+
+                              {item.status === "completed" &&
+                                activeTab === "supplier" &&
+                                !isWeighbridge && (
+                                  <DropdownMenu.Item
+                                    onSelect={() =>
+                                      navigate(
+                                        `/admin/suppliers/place-supplier-order/${
+                                          item.weigh?.id || item.id
+                                        }${item.weigh?.id ? "" : "-not-weigh"}`
+                                      )
+                                    }
+                                  >
+                                    Receive Supplier Order
+                                  </DropdownMenu.Item>
+                                )}
+
+                              {(item.status === "approved" ||
+                                item.status === "completed") && (
+                                <DropdownMenu.Item
+                                  onSelect={() =>
+                                    navigate(
+                                      `/admin/tickets/view-auth-to-weigh/${item.id}`
+                                    )
+                                  }
+                                >
+                                  View Approved
+                                </DropdownMenu.Item>
+                              )}
+                            </DropdownMenu.Content>
+                          </DropdownMenu.Root>
+                        )}
                     </Table.Cell>
                   </Table.Row>
                 ))
@@ -291,26 +349,25 @@ const ViewAuthorityToWeigh = () => {
             </Table.Body>
           </Table.Root>
           <div className="pagination-fixed">
-
-          <Flex justify="center" align="center" gap="2" className="mt-4">
-            <Button
-              variant="soft"
-              disabled={pageIndex === 0}
-              onClick={() => handlePagination("prev")}
-              className="!bg-blue-50 hover:!bg-blue-100"
-            >
-              Previous
-            </Button>
-            <Text>Page {pageIndex + 1}</Text>
-            <Button
-              variant="soft"
-              disabled={!hasNextPage}
-              onClick={() => handlePagination("next")}
-              className="!bg-blue-50 hover:!bg-blue-100"
-            >
-              Next
-            </Button>
-          </Flex>
+            <Flex justify="center" align="center" gap="2" className="mt-4">
+              <Button
+                variant="soft"
+                disabled={pageIndex === 0}
+                onClick={() => handlePagination("prev")}
+                className="!bg-blue-50 hover:!bg-blue-100"
+              >
+                Previous
+              </Button>
+              <Text>Page {pageIndex + 1}</Text>
+              <Button
+                variant="soft"
+                disabled={!hasNextPage}
+                onClick={() => handlePagination("next")}
+                className="!bg-blue-50 hover:!bg-blue-100"
+              >
+                Next
+              </Button>
+            </Flex>
           </div>
         </Tabs.Content>
       </Tabs.Root>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { formatMoney, refractor, isNegative } from "../../../date";
 import {
   Table,
@@ -200,6 +200,7 @@ const AllCustomers = () => {
   const [loading, setLoading] = useState(false);
   const [selectEditCustomer, setSelectEditCustomer] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const searchTimeout = useRef(null);
   const [paginationUrls, setPaginationUrls] = useState([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [arrangeType,setArrangeType] = useState(null)
@@ -236,6 +237,37 @@ const AllCustomers = () => {
       showToast({
         type: "error",
         message: error?.response?.data?.message || "An error occurred while fetching customers.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const searchCustomers = async (search) => {
+    setLoading(true);
+    setCustomerData([]);
+    const retrToken = localStorage.getItem("token");
+    if (!retrToken) {
+      showToast({
+        type: "error",
+        message: "An error occurred. Try logging in again.",
+      });
+      setLoading(false);
+      return;
+    }
+    try {
+      const response = await axios.get(`${root}/customer/search-customer?search=${encodeURIComponent(search)}`, {
+        headers: {
+          Authorization: `Bearer ${retrToken}`,
+        },
+      });
+      setCustomerData(response.data.customerList || []);
+       // Search results are not paginated
+      setPaginationUrls([]);
+    } catch (error) {
+      showToast({
+        type: "error",
+        message: error?.response?.data?.message || "An error occurred while searching customers.",
       });
     } finally {
       setLoading(false);
@@ -314,6 +346,29 @@ const AllCustomers = () => {
     }
   }, [arrangeType]);
   useEffect(() => {
+    if (searchTimeout.current) {
+      clearTimeout(searchTimeout.current);
+    }
+    if (searchTerm.trim() === "") {
+      // If search is cleared, fetch all customers
+      searchTimeout.current = setTimeout(() => {
+        setCurrentPageIndex(0);
+        setPaginationUrls([]);
+        fetchCustomers();
+      }, 500);
+    } else {
+      // Debounced search
+      searchTimeout.current = setTimeout(() => {
+        searchCustomers(searchTerm);
+      }, 500);
+    }
+    return () => {
+      if (searchTimeout.current) {
+        clearTimeout(searchTimeout.current);
+      }
+    };
+  }, [searchTerm]);
+  useEffect(() => {
     fetchCustomers();
   }, []);
 
@@ -374,14 +429,14 @@ const AllCustomers = () => {
                 <Spinner size="2" />
               </Table.Cell>
             </Table.Row>
-          ) : filteredCustomers.length === 0 ? (
+          ) : customerData.length === 0 ? (
             <Table.Row>
               <Table.Cell colSpan={8} className="text-center p-4">
                 No Customers Found
               </Table.Cell>
             </Table.Row>
           ) : (
-            filteredCustomers.map((customer) => (
+            customerData.map((customer) => (
               <Table.Row key={customer.id || `${customer.customerTag}-${customer.createdAt}`} className="relative cursor-pointer">
                 <Table.Cell>{refractor(customer.createdAt) || "N/A"}</Table.Cell>
                 <Table.Cell>{customer.customerTag || "N/A"}</Table.Cell>
@@ -391,11 +446,15 @@ const AllCustomers = () => {
                 <Table.Cell>{customer.email || "N/A"}</Table.Cell>
                 <Table.Cell>{customer.address || "N/A"}</Table.Cell>
                 <Table.Cell>
-                  {(customer?.phoneNumber || []).map((item, index) => (
-                    <span key={index}>
-                      {item || "N/A"} <br />
-                    </span>
-                  ))}
+                  {Array.isArray(customer?.phoneNumber) && customer.phoneNumber.length > 0 ? (
+                    customer.phoneNumber.map((item, index) => (
+                      <span key={index}>
+                        {item || "N/A"} <br />
+                      </span>
+                    ))
+                  ) : (
+                    JSON.parse(customer?.phoneNumber) || ""
+                  )}
                 </Table.Cell>
                 {/* <Table.Cell
                   className={
@@ -434,6 +493,7 @@ const AllCustomers = () => {
           )}
         </Table.Body>
       </Table.Root>
+      <div className="pagination-fixed">
 
       {(paginationUrls.length > 0 || currentPageIndex > 0) && (
         <Flex justify="center" className="mt-4">
@@ -460,6 +520,8 @@ const AllCustomers = () => {
           </Flex>
         </Flex>
       )}
+      </div>
+
 
       {selectEditCustomer && (
         <EditDialog

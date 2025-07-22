@@ -30,13 +30,60 @@ const root = import.meta.env.VITE_ROOT;
 
 const WeighDetailsDialog = ({ isOpen, onClose, selectedWeigh }) => {
   if (!isOpen) return null;
+  const showToast = useToast();
+  const [buttonLoading, setButtonLoading] = React.useState(false);
+
+  const flagTransaction = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      showToast({
+        type: "error",
+        message: "An error occurred , try loggin in again.",
+      });
+      return;
+    }
+    setButtonLoading(true);
+
+    try {
+      const response = await axios.patch(
+        `${root}/customer/flag-weigh/${selectedWeigh.authToWeighId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      showToast({
+        type: "success",
+        message: "Weigh transaction flagged successfully.",
+      });
+      setButtonLoading(false);
+      setTimeout(() => {
+        onClose();
+      }, 3000);
+    } catch (error) {
+      console.log(error);
+      setButtonLoading(false);
+      showToast({
+        type: "error",
+        message:
+          error?.response?.message ||
+          "An error occurred , when trying to flag transaction",
+      });
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-lg shadow-lg max-w-md w-full p-6 m-4">
+      <div className="relative bg-white rounded-lg shadow-lg max-w-lg w-full p-6 m-4">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold">Weigh Details</h2>
+
           <button
             onClick={onClose}
             className="text-white rounded-md px-2 py-0 text-xl bg-red-500 hover:bg-red-700 hover:text-white"
@@ -48,7 +95,7 @@ const WeighDetailsDialog = ({ isOpen, onClose, selectedWeigh }) => {
         <div className="space-y-2 max-h-[70vh] overflow-y-auto">
           {selectedWeigh ? (
             <>
-              <div className="mb-4">
+              <div className="mb-8">
                 {selectedWeigh.image ? (
                   <img
                     src={selectedWeigh.image}
@@ -106,6 +153,14 @@ const WeighDetailsDialog = ({ isOpen, onClose, selectedWeigh }) => {
                   <strong>Vehicle Number:</strong>{" "}
                   {selectedWeigh.vehicleNo || "-"}
                 </Text>
+              )}
+              {selectedWeigh.supplierId && (
+                <Button
+                  className="bg-theme cursor-pointer"
+                  onClick={flagTransaction}
+                >
+                  {buttonLoading ? <RadixSpinner /> : "Flag Weigh"}
+                </Button>
               )}
               <div className="flex items-end justify-end">
                 <div>
@@ -402,7 +457,7 @@ const AllWeigh = ({ onWeighAction }) => {
       </Flex>
       <Separator className="my-4 w-full" />
 
-      <Table.Root className="mt-4" variant="surface">
+      <Table.Root className="mt-4 mb-20" variant="surface">
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
@@ -516,29 +571,31 @@ const AllWeigh = ({ onWeighAction }) => {
       />
 
       {/* Pagination Controls */}
-      {paginationUrls.length > 0 && (
-        <Flex justify="center" className="mt-4">
-          <Flex gap="2" align="center">
-            <Button
-              variant="soft"
-              disabled={currentPageIndex === 0}
-              onClick={handlePrevPage}
-              className="!bg-blue-50 hover:!bg-blue-100"
-            >
-              Previous
-            </Button>
-            <Text>Page {currentPageIndex + 1}</Text>
-            <Button
-              variant="soft"
-              disabled={currentPageIndex >= paginationUrls.length}
-              onClick={handleNextPage}
-              className="!bg-blue-50 hover:!bg-blue-100"
-            >
-              Next
-            </Button>
+      <div className="pagination-fixed">
+        {paginationUrls.length > 0 && (
+          <Flex justify="center" className="mt-4">
+            <Flex gap="2" align="center">
+              <Button
+                variant="soft"
+                disabled={currentPageIndex === 0}
+                onClick={handlePrevPage}
+                className="!bg-blue-50 hover:!bg-blue-100"
+              >
+                Previous
+              </Button>
+              <Text>Page {currentPageIndex + 1}</Text>
+              <Button
+                variant="soft"
+                disabled={currentPageIndex >= paginationUrls.length}
+                onClick={handleNextPage}
+                className="!bg-blue-50 hover:!bg-blue-100"
+              >
+                Next
+              </Button>
+            </Flex>
           </Flex>
-        </Flex>
-      )}
+        )}
+      </div>
 
       <Toaster position="top-right" />
     </>

@@ -9,7 +9,7 @@ import {
 } from "@radix-ui/themes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
-import { formatMoney } from "../../../date";
+import { formatMoney,refractor,refractorToTime } from "../../../date";
 import { useParams } from "react-router-dom";
 import useToast from "../../../../hooks/useToast";
 import React, { useState, useEffect } from "react";
@@ -160,7 +160,7 @@ const BatchingRecords = ({ setSelectedRecord }) => {
               <Table.Header>
                 <Table.Row>
                   <Table.ColumnHeaderCell
-                    colSpan={2}
+                    colSpan={3}
                     className="font-bold text-sm p-4 text-center"
                   >
                     FINE VEGETABLE OIL SALES
@@ -174,10 +174,16 @@ const BatchingRecords = ({ setSelectedRecord }) => {
                 </Table.Row>
                 <Table.Row>
                   <Table.ColumnHeaderCell className="text-left p-4">
+                    DATE
+                  </Table.ColumnHeaderCell>
+                  <Table.ColumnHeaderCell className="text-left p-4">
                     QUANTITY (TONS)
                   </Table.ColumnHeaderCell>
                   <Table.ColumnHeaderCell className="text-left p-4">
                     UNIT PRICE (₦)
+                  </Table.ColumnHeaderCell>
+                  <Table.ColumnHeaderCell className="text-left p-4">
+                    DATE
                   </Table.ColumnHeaderCell>
                   <Table.ColumnHeaderCell className="text-left p-4">
                     QUANTITY (TONS)
@@ -194,10 +200,17 @@ const BatchingRecords = ({ setSelectedRecord }) => {
                   }).map((_, index) => (
                     <Table.Row key={index}>
                       <Table.Cell>
+                        {/* {FVODetails[index]?.createdAt || "-"} */}
+                        {FVODetails[index]?.createdAt ? `${refractor(FVODetails[index]?.createdAt)} ${refractorToTime(FVODetails[index]?.createdAt)}`: "" || "-"}
+                      </Table.Cell>
+                      <Table.Cell>
                         {FVODetails[index]?.quantity || "-"}
                       </Table.Cell>
                       <Table.Cell>
                         {formatMoney(FVODetails[index]?.price) || "-"}
+                      </Table.Cell>
+                      <Table.Cell>
+                        {CPKODetails[index]?.createdAt ? `${refractor(CPKODetails[index]?.createdAt)} ${refractorToTime(CPKODetails[index]?.createdAt)}`: "" || "-"}
                       </Table.Cell>
                       <Table.Cell>
                         {CPKODetails[index]?.quantity || "-"}

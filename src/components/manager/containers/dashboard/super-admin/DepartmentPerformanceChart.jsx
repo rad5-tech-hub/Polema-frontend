@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { formatMoney } from "../../../../date";
+import { formatMoney,refractor } from "../../../../date";
 import {
   BarChart,
   Bar,
@@ -204,8 +204,8 @@ const DepartmentPerformanceChart = () => {
         ) : (
           <div className="w-full h-[50vh] flex justify-center items-center">
             <p className="text-center mt-4 text-gray-500">
-              No top performing department from <b>{returnedDateRange.start}</b>{" "}
-              to <b>{returnedDateRange.end}</b>.
+              No top performing department from <b>{refractor(returnedDateRange.start)}</b>{" "}
+              to <b>{refractor(returnedDateRange.end)}</b>.
             </p>
           </div>
         )}
