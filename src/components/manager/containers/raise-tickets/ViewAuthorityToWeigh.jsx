@@ -104,6 +104,11 @@ const ViewAuthorityToWeigh = () => {
         return "text-red-500";
       case "completed":
         return "text-black";
+       case "weigherror":
+        return "text-red-500";
+        case "recieved":
+        return "text-blue-500";
+        
       default:
         return "text-gray-500";
     }
