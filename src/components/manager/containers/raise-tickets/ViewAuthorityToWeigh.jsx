@@ -290,7 +290,7 @@ const ViewAuthorityToWeigh = () => {
                           </DropdownMenu.Content>
                         </DropdownMenu.Root>
                       )} */}
-                      {(item.status !== "pending" && item.status !== "Recieved") &&
+                      {(item.status !== "pending" && item.status !== "Recieved" &&  item.status !== "WeighError") &&
                          (
                           <DropdownMenu.Root>
                             <DropdownMenu.Trigger>
