@@ -154,14 +154,15 @@ const WeighDetailsDialog = ({ isOpen, onClose, selectedWeigh }) => {
                   {selectedWeigh.vehicleNo || "-"}
                 </Text>
               )}
-              {selectedWeigh.supplierId && (
-                <Button
-                  className="bg-theme cursor-pointer absolute top-4 right-16"
-                  onClick={flagTransaction}
-                >
-                  {buttonLoading ? <RadixSpinner /> : "Flag Weigh"}
-                </Button>
-              )}
+              {selectedWeigh.supplierId &&
+                selectedWeigh.authToWeigh?.status !== "WeighError" && (
+                  <Button
+                    className="bg-theme cursor-pointer absolute top-4 right-16"
+                    onClick={flagTransaction}
+                  >
+                    {buttonLoading ? <RadixSpinner /> : "Flag Weigh"}
+                  </Button>
+                )}
               <div className="flex items-end justify-end">
                 <div>
                   {selectedWeigh.signInSupervisor && (
@@ -180,18 +181,9 @@ const WeighDetailsDialog = ({ isOpen, onClose, selectedWeigh }) => {
                       {selectedWeigh.signOut ? "Signed Out" : "-"}
                     </Text>
                   )}
-                  <Text
-                    as="p"
-                    className={`${
-                      selectedWeigh.status === "uncompleted"
-                        ? "text-red-400"
-                        : "text-green-400"
-                    }`}
-                  >
+                  <Text as="p" className="text-blue-400 my-4">
                     <strong>Status:</strong>{" "}
-                    {selectedWeigh.status === "uncompleted"
-                      ? "Pending"
-                      : "Completed"}
+                    {selectedWeigh?.authToWeigh?.status || ""}
                   </Text>
                 </div>
               </div>
@@ -508,19 +500,8 @@ const AllWeigh = ({ onWeighAction }) => {
                 <Table.Cell>
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
-                      <FontAwesomeIcon
-                        icon={faSquare}
-                        className={`${checkStatus(item.status)} p-1 rounded`}
-                        title={
-                          item.status === "uncompleted"
-                            ? "Uncompleted"
-                            : "Completed"
-                        }
-                      />
-                      <span className={`${checkStatus(item.status)} text-sm`}>
-                        {item.status === "uncompleted"
-                          ? "Pending"
-                          : "Completed"}
+                      <span className={`text-sm`}>
+                        {_.upperFirst(item?.authToWeigh?.status) || ""}
                       </span>
                     </div>
                     {item.status === "uncompleted" && (
