@@ -28,176 +28,7 @@ import { DatePicker } from "antd";
 const { RangePicker } = DatePicker;
 const root = import.meta.env.VITE_ROOT;
 
-const WeighDetailsDialog = ({ isOpen, onClose, selectedWeigh }) => {
-  if (!isOpen) return null;
-  const showToast = useToast();
-  const [buttonLoading, setButtonLoading] = React.useState(false);
 
-  const flagTransaction = async (e) => {
-    e.preventDefault();
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      showToast({
-        type: "error",
-        message: "An error occurred , try loggin in again.",
-      });
-      return;
-    }
-    setButtonLoading(true);
-
-    try {
-      const response = await axios.patch(
-        `${root}/customer/flag-weigh/${selectedWeigh.authToWeighId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      showToast({
-        type: "success",
-        message: "Weigh transaction flagged successfully.",
-      });
-      setButtonLoading(false);
-      setTimeout(() => {
-        onClose();
-      }, 3000);
-    } catch (error) {
-      console.log(error);
-      setButtonLoading(false);
-      showToast({
-        type: "error",
-        message:
-          error?.response?.message ||
-          "An error occurred , when trying to flag transaction",
-      });
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-lg shadow-lg max-w-lg w-full p-6 m-4">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold">Weigh Details</h2>
-
-          <button
-            onClick={onClose}
-            className="text-white rounded-md px-2 py-0 text-xl bg-red-500 hover:bg-red-700 hover:text-white"
-            aria-label="Close dialog"
-          >
-            ×
-          </button>
-        </div>
-        <div className="space-y-2 max-h-[70vh] overflow-y-auto">
-          {selectedWeigh ? (
-            <>
-              <div className="mb-8">
-                {selectedWeigh.image ? (
-                  <img
-                    src={selectedWeigh.image}
-                    alt="Weigh image"
-                    style={{
-                      height: "200px",
-                      width: "100%",
-                      objectFit: "contain",
-                    }}
-                    className="w-full"
-                  />
-                ) : (
-                  <Text as="p" className="text-gray-500">
-                    No image available
-                  </Text>
-                )}
-              </div>
-              <Text as="p">
-                <strong>Date:</strong> {refractor(selectedWeigh.createdAt)}
-              </Text>
-              <Text as="p">
-                <strong>Client Name:</strong>{" "}
-                {selectedWeigh.customer
-                  ? `${selectedWeigh.customer.firstname} ${selectedWeigh.customer.lastname}`
-                  : selectedWeigh.supplier
-                  ? `${selectedWeigh.supplier.firstname} ${selectedWeigh.supplier.lastname}`
-                  : "-"}
-              </Text>
-              <Text as="p">
-                <strong>Quantity:</strong>{" "}
-                {selectedWeigh.transactions?.quantity || 0}
-              </Text>
-              {selectedWeigh.gross && (
-                <Text as="p">
-                  <strong>Gross:</strong> {selectedWeigh.gross || "-"}
-                </Text>
-              )}
-              {selectedWeigh.tar && (
-                <Text as="p">
-                  <strong>Tar:</strong> {selectedWeigh.tar || "-"}
-                </Text>
-              )}
-              {selectedWeigh.net && (
-                <Text as="p">
-                  <strong>Net:</strong> {selectedWeigh.net || "-"}
-                </Text>
-              )}
-              {selectedWeigh.extra && (
-                <Text as="p">
-                  <strong>Extra:</strong> {selectedWeigh.extra || "-"}
-                </Text>
-              )}
-              {selectedWeigh.vehicleNo && (
-                <Text as="p">
-                  <strong>Vehicle Number:</strong>{" "}
-                  {selectedWeigh.vehicleNo || "-"}
-                </Text>
-              )}
-              {selectedWeigh.supplierId &&
-                selectedWeigh.authToWeigh?.status !== "WeighError" && (
-                  <Button
-                    className="bg-theme cursor-pointer absolute top-4 right-16"
-                    onClick={flagTransaction}
-                  >
-                    {buttonLoading ? <RadixSpinner /> : "Flag Weigh"}
-                  </Button>
-                )}
-              <div className="flex items-end justify-end">
-                <div>
-                  {selectedWeigh.signInSupervisor && (
-                    <Text as="p">
-                      <strong className="pe-2">
-                        {selectedWeigh.signInSupervisor}:
-                      </strong>{" "}
-                      {selectedWeigh.signIn ? "Signed In" : "-"}
-                    </Text>
-                  )}
-                  {selectedWeigh.signOutSupervisor && (
-                    <Text as="p">
-                      <strong className="pe-2">
-                        {selectedWeigh.signOutSupervisor}:
-                      </strong>{" "}
-                      {selectedWeigh.signOut ? "Signed Out" : "-"}
-                    </Text>
-                  )}
-                  <Text as="p" className="text-blue-400 my-4">
-                    <strong>Status:</strong>{" "}
-                    {selectedWeigh?.authToWeigh?.status || ""}
-                  </Text>
-                </div>
-              </div>
-            </>
-          ) : (
-            <Text as="p" className="text-gray-500">
-              No weigh details available.
-            </Text>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const AllWeigh = ({ onWeighAction }) => {
   const navigate = useNavigate();
@@ -215,10 +46,26 @@ const AllWeigh = ({ onWeighAction }) => {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
   // Helper to determine status class
-  const checkStatus = (status) =>
-    status === "uncompleted"
-      ? "text-red-500 bg-red-100"
-      : "text-green-500 bg-green-100";
+  
+    const checkStatus = (status) => {
+    switch (status?.toLowerCase()) {
+      case "pending":
+        return "text-yellow-500";
+      case "approved":
+        return "text-green-500";
+      case "rejected":
+        return "text-red-500";
+      case "completed":
+        return "text-black";
+       case "weigherror":
+        return "text-red-500";
+        case "recieved":
+        return "text-blue-500";
+        
+      default:
+        return "text-gray-500";
+    }
+  };
 
   // Fetch weigh details based on filter and date range
   const fetchWeighDetails = async (
@@ -390,6 +237,178 @@ const AllWeigh = ({ onWeighAction }) => {
     fetchWeighDetails();
   }, [filter]);
 
+  const WeighDetailsDialog = ({ isOpen, onClose, selectedWeigh }) => {
+  if (!isOpen) return null;
+  const showToast = useToast();
+  const [buttonLoading, setButtonLoading] = React.useState(false);
+
+  const flagTransaction = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      showToast({
+        type: "error",
+        message: "An error occurred , try loggin in again.",
+      });
+      return;
+    }
+    setButtonLoading(true);
+
+    try {
+      const response = await axios.patch(
+        `${root}/customer/flag-weigh/${selectedWeigh.authToWeighId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      showToast({
+        type: "success",
+        message: "Weigh transaction flagged successfully.",
+      });
+      setButtonLoading(false);
+      setTimeout(() => {
+        onClose();
+      }, 3000);
+      fetchWeighDetails()
+    } catch (error) {
+      console.log(error);
+      setButtonLoading(false);
+      showToast({
+        type: "error",
+        message:
+          error?.response?.message ||
+          "An error occurred , when trying to flag transaction",
+      });
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="relative bg-white rounded-lg shadow-lg max-w-lg w-full p-6 m-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-bold">Weigh Details</h2>
+
+          <button
+            onClick={onClose}
+            className="text-white rounded-md px-2 py-0 text-xl bg-red-500 hover:bg-red-700 hover:text-white"
+            aria-label="Close dialog"
+          >
+            ×
+          </button>
+        </div>
+        <div className="space-y-2 max-h-[70vh] overflow-y-auto">
+          {selectedWeigh ? (
+            <>
+              <div className="mb-8">
+                {selectedWeigh.image ? (
+                  <img
+                    src={selectedWeigh.image}
+                    alt="Weigh image"
+                    style={{
+                      height: "200px",
+                      width: "100%",
+                      objectFit: "contain",
+                    }}
+                    className="w-full"
+                  />
+                ) : (
+                  <Text as="p" className="text-gray-500">
+                    No image available
+                  </Text>
+                )}
+              </div>
+              <Text as="p">
+                <strong>Date:</strong> {refractor(selectedWeigh.createdAt)}
+              </Text>
+              <Text as="p">
+                <strong>Client Name:</strong>{" "}
+                {selectedWeigh.customer
+                  ? `${selectedWeigh.customer.firstname} ${selectedWeigh.customer.lastname}`
+                  : selectedWeigh.supplier
+                  ? `${selectedWeigh.supplier.firstname} ${selectedWeigh.supplier.lastname}`
+                  : "-"}
+              </Text>
+              <Text as="p">
+                <strong>Quantity:</strong>{" "}
+                {selectedWeigh.transactions?.quantity || 0}
+              </Text>
+              {selectedWeigh.gross && (
+                <Text as="p">
+                  <strong>Gross:</strong> {selectedWeigh.gross || "-"}
+                </Text>
+              )}
+              {selectedWeigh.tar && (
+                <Text as="p">
+                  <strong>Tar:</strong> {selectedWeigh.tar || "-"}
+                </Text>
+              )}
+              {selectedWeigh.net && (
+                <Text as="p">
+                  <strong>Net:</strong> {selectedWeigh.net || "-"}
+                </Text>
+              )}
+              {selectedWeigh.extra && (
+                <Text as="p">
+                  <strong>Extra:</strong> {selectedWeigh.extra || "-"}
+                </Text>
+              )}
+              {selectedWeigh.vehicleNo && (
+                <Text as="p">
+                  <strong>Vehicle Number:</strong>{" "}
+                  {selectedWeigh.vehicleNo || "-"}
+                </Text>
+              )}
+              {selectedWeigh.supplierId &&
+                selectedWeigh.authToWeigh?.status !== "WeighError" && (
+                  <Button
+                    className="bg-theme cursor-pointer absolute top-4 right-16"
+                    onClick={flagTransaction}
+                  >
+                    {buttonLoading ? <RadixSpinner /> : "Flag Weigh"}
+                  </Button>
+                )}
+              <div className="flex items-end justify-end">
+                <div>
+                  {selectedWeigh.signInSupervisor && (
+                    <Text as="p">
+                      <strong className="pe-2">
+                        {selectedWeigh.signInSupervisor}:
+                      </strong>{" "}
+                      {selectedWeigh.signIn ? "Signed In" : "-"}
+                    </Text>
+                  )}
+                  {selectedWeigh.signOutSupervisor && (
+                    <Text as="p">
+                      <strong className="pe-2">
+                        {selectedWeigh.signOutSupervisor}:
+                      </strong>{" "}
+                      {selectedWeigh.signOut ? "Signed Out" : "-"}
+                    </Text>
+                  )}
+                  <Text as="p" className="text-blue-400 my-4">
+                    <strong>Status:</strong>{" "}
+                    {selectedWeigh?.authToWeigh?.status || ""}
+                  </Text>
+                </div>
+              </div>
+            </>
+          ) : (
+            <Text as="p" className="text-gray-500">
+              No weigh details available.
+            </Text>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
   // Custom loader
   const Loader = () => (
     <Box className="flex justify-center p-4">
@@ -500,6 +519,7 @@ const AllWeigh = ({ onWeighAction }) => {
                 <Table.Cell>
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
+                      { item?.authToWeigh?.status && <FontAwesomeIcon icon={faSquare} className={`${checkStatus(item?.authToWeigh?.status)}`}/>}
                       <span className={`text-sm`}>
                         {_.upperFirst(item?.authToWeigh?.status) || ""}
                       </span>
