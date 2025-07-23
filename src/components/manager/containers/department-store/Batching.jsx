@@ -711,7 +711,7 @@ const Batching = () => {
 
           {/* Edit Batch Modal */}
           <Dialog.Root open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-            <Dialog.Content className="max-w-lg">
+            <Dialog.Content className={`max-w-lg bg-red ${isEditConfirmModalOpen ? "opacity-0" :"opacity-100"}`}>
               <Flex justify="between" align="center" className="mb-4">
                 <Dialog.Title>Edit Batch Quantities</Dialog.Title>
                 <Button
