@@ -1153,6 +1153,8 @@ const AllWeigh = ({ onWeighAction }) => {
         selectedWeigh={selectedWeigh}
       />
 
+{/* ///NEw changes Made  */}
+
       <Toaster position="top-right" />
     </>
   );
