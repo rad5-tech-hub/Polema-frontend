@@ -1050,7 +1050,7 @@ const AllWeigh = ({ onWeighAction }) => {
               <Table.Row
                 key={item.id}
                 onClick={() => handleRowClick(item)}
-                className="cursor-pointer hover:bg-gray-100"
+                className={`cursor-pointer  ${item.authToWeigh?.status === "WeighError" ? "bg-red-200/80" : "hover:bg-gray-100"}`}
               >
                 <Table.Cell>{refractor(item.createdAt)}</Table.Cell>
                 <Table.Cell>
