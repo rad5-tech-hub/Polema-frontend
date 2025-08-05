@@ -82,6 +82,12 @@ const ViewAccountBook = () => {
       url = `${root}/customer/acctbook-filter${nameParam ? `?${nameParam.slice(1)}` : ""}`;
     }
 
+    // If this is the initial load (no pageUrl), reset pagination state
+    if (!pageUrl) {
+      setPaginationUrls([]);
+      setCurrentPageIndex(0);
+    }
+
     try {
       const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
@@ -103,17 +109,13 @@ const ViewAccountBook = () => {
         setPaginationUrls((prev) => {
           const newUrl = response.data.pagination.nextPage;
           if (!prev.includes(newUrl)) {
-            if (!pageUrl || currentPageIndex >= prev.length - 1) {
-              return pageUrl && currentPageIndex >= prev.length - 1
-                ? [...prev, newUrl]
-                : [newUrl];
-            }
-            return prev;
+            return [...prev, newUrl];
           }
           return prev;
         });
       } else {
-        setPaginationUrls((prev) => prev.slice(0, currentPageIndex + 1));
+        // No more pages, so we're at the end
+        setPaginationUrls((prev) => prev);
       }
 
       setLoading(false);
@@ -221,11 +223,7 @@ const ViewAccountBook = () => {
 
   // Handle next page
   const handleNextPage = () => {
-    if (currentPageIndex < paginationUrls.length - 1) {
-      const nextIndex = currentPageIndex + 1;
-      setCurrentPageIndex(nextIndex);
-      fetchAccountBookDetails(null, null, paginationUrls[nextIndex]);
-    } else if (paginationUrls[currentPageIndex]) {
+    if (currentPageIndex < paginationUrls.length) {
       setCurrentPageIndex((prev) => prev + 1);
       fetchAccountBookDetails(null, null, paginationUrls[currentPageIndex]);
     }
@@ -236,7 +234,7 @@ const ViewAccountBook = () => {
     if (currentPageIndex > 0) {
       const prevIndex = currentPageIndex - 1;
       setCurrentPageIndex(prevIndex);
-      fetchAccountBookDetails(null, null, paginationUrls[prevIndex]);
+      fetchAccountBookDetails(null, null, paginationUrls[prevIndex - 1] || null);
     }
   };
 
@@ -299,7 +297,7 @@ const ViewAccountBook = () => {
             size="2"
           >
             <Select.Trigger placeholder="Filter by Bank" />
-            <Select.Content>
+            <Select.Content position="popper">
               <Select.Item value="all">All Banks</Select.Item>
               {bankDetails.length === 0 ? (
                 <Select.Item value="no-banks" disabled>
@@ -425,7 +423,7 @@ const ViewAccountBook = () => {
             </Button>
             <Button
               onClick={handleNextPage}
-              disabled={currentPageIndex >= paginationUrls.length}
+              disabled={paginationUrls.length === 0 || currentPageIndex >= paginationUrls.length}
             >
               Next
             </Button>

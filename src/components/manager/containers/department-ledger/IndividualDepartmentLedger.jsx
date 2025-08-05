@@ -448,9 +448,9 @@ const IndividualDepartmentLedger = () => {
     </div>
 
       {/* Table for ledger details */}
-      <Table.Root variant="surface" className="mt-4">
-        <Table.Header>
-          <Table.Row>
+      <Table.Root variant="surface" className="mt-4 mb-36 relative">
+        {/* <Table.Header className="!sticky top-0">
+          <Table.Row className="!sticky top-0">
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>NAME</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>COMMENTS</Table.ColumnHeaderCell>
@@ -466,7 +466,7 @@ const IndividualDepartmentLedger = () => {
             </Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>BALANCE</Table.ColumnHeaderCell>
           </Table.Row>
-        </Table.Header>
+        </Table.Header> */}
         <Table.Body>
           {loading ? (
             <Table.Row>

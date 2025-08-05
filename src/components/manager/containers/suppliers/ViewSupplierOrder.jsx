@@ -166,11 +166,7 @@ const ViewSupplierOrder = () => {
 
   // Handle next page
   const handleNextPage = () => {
-    if (currentPageIndex < paginationUrls.length - 1) {
-      const nextIndex = currentPageIndex + 1;
-      setCurrentPageIndex(nextIndex);
-      fetchSupplierOrders(null, null, paginationUrls[nextIndex]);
-    } else if (paginationUrls[currentPageIndex]) {
+    if (currentPageIndex < paginationUrls.length) {
       setCurrentPageIndex((prev) => prev + 1);
       fetchSupplierOrders(null, null, paginationUrls[currentPageIndex]);
     }
@@ -181,7 +177,11 @@ const ViewSupplierOrder = () => {
     if (currentPageIndex > 0) {
       const prevIndex = currentPageIndex - 1;
       setCurrentPageIndex(prevIndex);
-      fetchSupplierOrders(null, null, paginationUrls[prevIndex]);
+      if (prevIndex === 0) {
+        fetchSupplierOrders();
+      } else {
+        fetchSupplierOrders(null, null, paginationUrls[prevIndex - 1]);
+      }
     }
   };
 
@@ -220,15 +220,15 @@ const ViewSupplierOrder = () => {
         </div>
       </Flex>
 
-      <Table.Root variant="surface" className="mt-5">
+      <Table.Root variant="surface" className="mt-5 my-20">
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>SUPPLIER</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>RAW MATERIAL</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>PRICE(₦)</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>QUANTITY</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>COMMENT</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>PRICE(₦)</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
@@ -255,6 +255,8 @@ const ViewSupplierOrder = () => {
                   }`}
                 </Table.Cell>
                 <Table.Cell>{getProductNamebyId(item.productId)}</Table.Cell>
+                <Table.Cell>{item.quantity}</Table.Cell>
+                <Table.Cell>{item.comments}</Table.Cell>
                 <Table.Cell>
                   {item.price === item.initialTotalPrice ? (
                     <span>{formatMoney(item.price)}</span>
@@ -269,8 +271,8 @@ const ViewSupplierOrder = () => {
                     </>
                   )}
                 </Table.Cell>
-                <Table.Cell>{item.quantity}</Table.Cell>
-                <Table.Cell>{item.comments}</Table.Cell>
+                
+                
                 <Table.Cell>
                   <DropdownMenu.Root>
                     <DropdownMenu.Trigger className="right-0">

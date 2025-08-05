@@ -352,6 +352,8 @@ const Batching = () => {
       return acc;
     }, {});
 
+    ///Remove the condition below that show the toast : "Please enter at least one quantity."
+
     if (Object.keys(payload).length === 0) {
       showToast({
         type: "error",

@@ -209,7 +209,9 @@ const AllSuspended = () => {
           </Table.Row>
         </Table.Header>
         {loading ? (
-          <Spinner />
+          <div className="p-4">
+            <Spinner/>
+          </div>
         ) : (
           <Table.Body>
             {suspended.length === 0 ? (

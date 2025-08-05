@@ -20,6 +20,7 @@ const AllInvoice = () => {
   const [loadingId, setLoadingId] = useState(null);
   const [paginationUrls, setPaginationUrls] = useState([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [hasNextPage, setHasNextPage] = useState(false);
 
   const fetchDetails = async (pageUrl = null) => {
     setLoading(true);
@@ -50,6 +51,7 @@ const AllInvoice = () => {
         setFailedText("No invoice records found.");
       }
       const nextPage = response.data.pagination?.nextPage;
+      setHasNextPage(!!nextPage);
       if (nextPage && typeof nextPage === "string") {
         setPaginationUrls((prev) => {
           const newUrls = [...prev];
@@ -122,9 +124,11 @@ const AllInvoice = () => {
   const isDropdownDisabled = (status) => status === "pending" || status === "rejected";
 
   const handleNextPage = () => {
-    const nextIndex = currentPageIndex + 1;
-    setCurrentPageIndex(nextIndex);
-    fetchDetails(paginationUrls[currentPageIndex] || null);
+    if (hasNextPage) {
+      const nextIndex = currentPageIndex + 1;
+      setCurrentPageIndex(nextIndex);
+      fetchDetails(paginationUrls[currentPageIndex] || null);
+    }
   };
 
   const handlePrevPage = () => {
@@ -155,7 +159,7 @@ const AllInvoice = () => {
 
       <Separator className="my-4 w-full" />
 
-      <Table.Root variant="surface" className="mt-4 table-fixed w-full" size="2">
+      <Table.Root variant="surface" className="mb-8 table-fixed w-full" size="2">
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell className="text-left">DATE</Table.ColumnHeaderCell>
@@ -256,7 +260,7 @@ const AllInvoice = () => {
         <Text>Page {currentPageIndex + 1}</Text>
         <Button
           variant="soft"
-          disabled={!paginationUrls[currentPageIndex]}
+          disabled={!hasNextPage}
           onClick={handleNextPage}
           className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
           aria-label="Next page"

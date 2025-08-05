@@ -11,7 +11,11 @@ import {
 } from "@radix-ui/themes";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEllipsisV, faFilter, faRedoAlt } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEllipsisV,
+  faFilter,
+  faRedoAlt,
+} from "@fortawesome/free-solid-svg-icons";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { DatePicker } from "antd";
@@ -30,7 +34,11 @@ const ViewCustomerOrders = () => {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const fetchOrders = async (startDate = null, endDate = null, pageUrl = null) => {
+  const fetchOrders = async (
+    startDate = null,
+    endDate = null,
+    pageUrl = null
+  ) => {
     setLoading(true);
     setStore([]);
     setFailedSearch(false);
@@ -105,11 +113,7 @@ const ViewCustomerOrders = () => {
   };
 
   const handleNextPage = () => {
-    if (currentPageIndex < paginationUrls.length - 1) {
-      const nextIndex = currentPageIndex + 1;
-      setCurrentPageIndex(nextIndex);
-      fetchOrders(null, null, paginationUrls[nextIndex]);
-    } else if (paginationUrls[currentPageIndex]) {
+    if (currentPageIndex < paginationUrls.length) {
       setCurrentPageIndex((prev) => prev + 1);
       fetchOrders(null, null, paginationUrls[currentPageIndex]);
     }
@@ -119,7 +123,11 @@ const ViewCustomerOrders = () => {
     if (currentPageIndex > 0) {
       const prevIndex = currentPageIndex - 1;
       setCurrentPageIndex(prevIndex);
-      fetchOrders(null, null, paginationUrls[prevIndex]);
+      if (prevIndex === 0) {
+        fetchOrders();
+      } else {
+        fetchOrders(null, null, paginationUrls[prevIndex - 1]);
+      }
     }
   };
 
@@ -129,28 +137,7 @@ const ViewCustomerOrders = () => {
 
   return (
     <>
-      <style>
-        {`
-          .pagination-fixed {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #fff;
-            padding: 10px 0;
-            z-index: 10;
-            border-top: 1px solid #e0e0e0;
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-          }
-          .dark .pagination-fixed {
-            background: #1a1a1a;
-            border-top: #fff;
-            background: #333;
-          }
-        `}
-      </style>
+   
       <Flex justify="between" align="center" className="gap-4">
         <Heading>View Orders</Heading>
         <div className="flex gap-4">
@@ -189,7 +176,7 @@ const ViewCustomerOrders = () => {
       </Flex>
       <Separator className="my-4 w-full" />
 
-      <Table.Root variant="surface" className="mt-4">
+      <Table.Root variant="surface" className="mt-5 my-20">
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>

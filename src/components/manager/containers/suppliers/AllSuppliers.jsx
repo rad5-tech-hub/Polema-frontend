@@ -352,7 +352,7 @@ const AllSuppliers = () => {
               setViewStaff(null);
               setCurrentPageIndex(0);
               setPaginationUrls([]);
-              fetchSuppliers();
+              // fetchSuppliers();
             }}
             fetchSuppliers={() => {
               setCurrentPageIndex(0);

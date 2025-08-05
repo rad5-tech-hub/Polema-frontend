@@ -347,7 +347,7 @@ const CashManagementLedger = () => {
         </p>
       </Modal>
 
-      <div className="flex justify-center items-center mt-4 gap-4">
+      <div className="flex justify-center items-center mt-4 gap-4 pagination-fixed">
         <Button
           onClick={handlePrevPage}
           disabled={currentPageIndex === 0}
@@ -357,7 +357,7 @@ const CashManagementLedger = () => {
         </Button>
         <span>
           Page {currentPageIndex + 1} of{" "}
-          {paginationUrls.length > 0 ? "many" : 1}
+          {paginationUrls.length > 0 ? paginationUrls.length : 1}
         </span>
         <Button
           onClick={handleNextPage}
