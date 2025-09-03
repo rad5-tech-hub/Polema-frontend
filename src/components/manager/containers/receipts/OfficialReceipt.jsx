@@ -1,18 +1,20 @@
 import React, { useRef, useState } from "react";
 import { refractor } from "../../../date";
+import useToast from "../../../../hooks/useToast";
 import { Spinner } from "@radix-ui/themes";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 const root = import.meta.env.VITE_ROOT;
-import { faPrint } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {Button, Dropdown, Menu } from "antd";
 import polemaLogo from "../../../../static/image/polema-logo.png";
 import toast, { Toaster } from "react-hot-toast";
 
 const OfficialReceipt = () => {
   const { id } = useParams();
+  const showToast = useToast();
 
   const [fetchComplete, setFetchComplete] = useState(false);
+  const [loadingId, setLoadingId] = useState(null); 
 
   const [receiptDetails, setReceiptDetails] = useState({});
   // Function to fetch receipt details
@@ -60,14 +62,81 @@ const OfficialReceipt = () => {
 
   const receiptRef = useRef();
 
+    // Handle sending dispatch note to print
+    const handleSendToPrint = async (id) => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Please log in again.", { style: { padding: "15px" }, duration: 10000 });
+        return;
+      }
+  
+      setLoadingId(id);
+      try {
+        await axios.post(
+          `${root}/batch/add-official-receipt-to-print/${id}`, // Adjust endpoint as needed
+          {},
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        showToast({
+          message: "Offical Receipt sent to print successfully!",
+          duration: 4000,
+          type:"success"
+        });
+        
+      } catch (error) {
+        console.error("Error sending official reciept to print:", error);
+        showToast({
+          message: error.response?.data?.message || "Failed to send dispatch note to print.",
+          type: "error",
+          duration: 4000,
+        })
+      } finally {
+        setLoadingId(null);
+      }
+    };
+  
+
   const handlePrint = () => {
     if (receiptRef.current) {
       window.print();
     }
   };
+  // Dropdown menu for print actions
+  const menu = (
+    <Menu
+      onClick={({ key }) => {
+        if (key === "print") {
+          handlePrint();
+        } else if (key === "sendToPrint") {
+          handleSendToPrint(id);
+        }
+      }}
+      className="no-print"
+    >
+      <Menu.Item key="print">Print</Menu.Item>
+      <Menu.Item key="sendToPrint">Send to Print</Menu.Item>
+    </Menu>
+  );
 
   return (
     <>
+      <style>
+        {`
+        @media print {
+          .no-print {
+            display: none !important;
+          }
+          * {
+            box-shadow: none !important;
+          }
+          .footerMoney {
+            display: flex !important;
+            justify-content: space-between !important;
+            gap: 5px;
+          }
+        }
+        `}
+      </style>
       {!fetchComplete ? (
         // Loader Screen
         <div className="loading h-screen bg-black/40 flex justify-center items-center">
@@ -76,42 +145,42 @@ const OfficialReceipt = () => {
       ) : (
         <div ref={receiptRef} className="p-6 sm:p-12 bg-gray-100">
           {/* Header Section */}
-          <div className="intro flex justify-between items-center pb-6 border-b border-[#919191]">
+          <div className="no-print flex justify-between items-center pb-6 border-b border-[#919191]">
             <span className="text-sm sm:text-[20px] font-semibold text-[#434343]">
               Official Receipt
             </span>
-            <button
-              onClick={handlePrint}
-              className="rounded-lg h-[40px] border-[1px] border-[#919191] px-4 sm:px-8 shadow-lg text-sm sm:text-base flex gap-2 items-center print-hidden"
-            >
-              <FontAwesomeIcon icon={faPrint} />
-              Print
-            </button>
+            <div className="w-fit">
+              {!loadingId ? <Dropdown overlay={menu} trigger={["click"]}>
+                <button className="rounded-lg border-[1px] border-[#919191] p-2 shadow-lg text-sm sm:text-base cursor-pointer w-full lg:w-auto">
+                  Select Action
+                </button>
+              </Dropdown> : <Button> <Spinner size={3}/> </Button>}
+            </div>
           </div>
 
           {/* Details Section */}
-          <div className="details bg-white mt-8 rounded p-8 sm:p-16">
+          <div className="details bg-white mt-8 rounded p-6">
             {/* Logo, RC, and Company Info */}
             <div className="relative">
-              <h1 className="text-[24px] sm:text-[44px] font-bold text-center">
+              <h5 className="text-[24px] font-bold text-[#434343] text-center">
                 POLEMA INDUSTRIES LIMITED
-              </h1>
+              </h5>
               {/* <div className="absolute right-[10%] text-[12px] sm:text-[16px] font-semibold italic">
                 RC 131127
               </div> */}
-              <p className="font-bold text-center text-sm sm:text-base">
+              <p className="font-semibold text-center text-sm">
                 Manufacturers & Exporters of Palm Kernel Oil, Palm Kernel Cakes,
                 and Drugs
               </p>
 
               {/* Logo and Addresses */}
-              <div className="flex items-center justify-center">
+              <div className="flex gap-4 items-center justify-center">
                 <img
                   src={polemaLogo}
                   alt="Polema-logo"
-                  className="w-[100px] sm:w-[150px]"
+                  className="h-[120px] object-contain"
                 />
-                <div className="text-sm sm:text-base flex items-center gap-4 px-4">
+                <div className="text-sm  flex items-center gap-3">
                   <div className="sm:w-1/2">
                     <b>FACTORY/OFFICE:</b>
                     <br /> Osisioma Industry Layout,
@@ -131,19 +200,18 @@ const OfficialReceipt = () => {
               </div>
 
               {/* Receipt Title */}
-              <h4 className="font-bold text-[20px] sm:text-[32px] text-[#919191] mt-4 border-b-2 border-[#D2D2D2] mx-auto w-fit">
+              <h4 className="font-semibold text-[18px] text-[#919191] mt-4 border-b-2 border-[#D2D2D2] mx-auto w-fit">
                 OFFICIAL RECEIPT
               </h4>
 
               {/* Receipt Number */}
-              <div className="receiptNo absolute top-[320px] sm:top-[355px] right-[10%] italic rotate-6 font-bold text-[24px] sm:text-[32px] text-[#D2D2D2]">
-                0818
-              </div>
+            
+                
             </div>
 
             {/* Receipt Details */}
-            <div className="descriptions mt-8">
-              <div className="w-full details mt-8 sm:mt-12 flex flex-col gap-2 sm:gap-4">
+            <div className="descriptions">
+              <div className="w-full details mt-6 flex flex-col gap-2 sm:gap-4">
                 {[
                   ["Date", refractor(receiptDetails.createdAt)],
                   ["Received from", receiptDetails.cashier.name],
@@ -164,13 +232,14 @@ const OfficialReceipt = () => {
             </div>
 
             {/* Amount and Receiver's Signature */}
-            <div className="mt-12 sm:mt-24 flex flex-col sm:flex-row justify-between items-center gap-8">
-              <div className="amount w-full sm:w-auto">
-                <button className="border-[1px] border-[#919191] text-[#919191] rounded-lg h-[44px] bg-[#F9F9F9] w-full sm:w-[191px] text-start px-4 print-hidden">
-                  # {formatMoney(receiptDetails.cashier.credit)}
+            <div className="footerMoney mt-12 sm:mt-20 flex justify-between items-center gap-8">
+              <div className="amount ">
+                <button className="border-[1px] border-[#919191] text-[#919191] h-fit rounded-lg bg-[#F9F9F9] w-fit text-start px-4 py-3">
+                  ₦ {formatMoney(receiptDetails.cashier.credit)}
                 </button>
               </div>
               <div className="flex flex-col items-center">
+                {receiptDetails?.preparedByAdmin?.admins[0]?.firstname && <img width={150} src={receiptDetails?.preparedByAdmin?.admins[0].signature}/>}
                 <p className="border-b border-black border-dotted w-[150px] sm:w-[230px]"></p>
                 <label className="text-sm sm:text-base mt-2">
                   RECEIVER’S SIGNATURE
@@ -180,6 +249,8 @@ const OfficialReceipt = () => {
           </div>
         </div>
       )}
+      <Toaster position="top-right" />
+
     </>
   );
 };

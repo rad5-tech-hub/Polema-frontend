@@ -1,19 +1,27 @@
+import useToast from "../../../../hooks/useToast";
 import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import {
   Heading,
   Separator,
   Flex,
-  Select,
   Text,
   TextField,
   Button,
+  Grid,
 } from "@radix-ui/themes";
 import toast, { Toaster, LoaderIcon } from "react-hot-toast";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { Input, Select } from "antd";
 
-const root = import.meta.env.VITE_ROOT;
+const { Option } = Select;
+const API_ROOT = import.meta.env.VITE_ROOT;
 
 const SupplierPlaceOrder = () => {
+  const showToast = useToast();
+  const navigate = useNavigate();
+  const { id } = useParams(); // Get ticket ID from URL params
   const [basePrice, setBasePrice] = useState("");
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
@@ -21,13 +29,18 @@ const SupplierPlaceOrder = () => {
   const [selectedProductId, setSelectedProductId] = useState("");
   const [comment, setComment] = useState("");
   const [quantity, setQuantity] = useState("");
-  const [selectedUnit, setSelectedUnit] = useState("");
+  const [selectedUnit, setSelectedUnit] = useState(null);
   const [buttonLoading, setButtonLoading] = useState(false);
+  const [subCharge, setSubCharge] = useState("");
+  const [ticketLoading, setTicketLoading] = useState(true);
 
   // Format number with commas
-  const formatNumber = (num) =>
-    num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-
+  const formatNumber = (num) => {
+    if (!num) return "";
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+ 
+  // Handle base price change
   const handleBasePriceChange = (e) => {
     const value = e.target.value.replace(/,/g, "");
     if (/^\d*$/.test(value)) {
@@ -35,52 +48,114 @@ const SupplierPlaceOrder = () => {
     }
   };
 
+  // Handle sub charge change
+  const handleSubChargeChange = (e) => {
+    const value = e.target.value.replace(/,/g, "");
+    if (/^\d*$/.test(value)) {
+      setSubCharge(value);
+    }
+  };
+
   // Fetch customers
   const fetchCustomers = async () => {
     const token = localStorage.getItem("token");
-    if (!token) return toast.error("Please log in again.");
+    if (!token) {
+      toast.error("Please log in again.");
+      return;
+    }
 
     try {
-      const { data } = await axios.get(`${root}/customer/get-suppliers`, {
+      const { data } = await axios.get(`${API_ROOT}/customer/get-suppliers`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setCustomers(data.customers);
+      setCustomers(data.customers || []);
     } catch (error) {
       console.error("Failed to fetch customers:", error);
-      toast.error("Error fetching customers. Try again later.");
+      toast.error("Error fetching suppliers. Try again later.");
     }
   };
 
   // Fetch products
   const fetchProducts = async () => {
     const token = localStorage.getItem("token");
-    if (!token) return toast.error("Please log in again.");
+
+    if (!token) {
+      toast.error("Please log in again.");
+      return;
+    }
 
     try {
-      const { data } = await axios.get(`${root}/admin/get-raw-materials`, {
+      const { data } = await axios.get(`${API_ROOT}/admin/get-raw-materials`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setProducts(data.products);
+      setProducts(data.products || []);
     } catch (error) {
       console.error("Failed to fetch products:", error);
-      toast.error("Error fetching products. Try again later.");
+      toast.error("Error fetching raw materials. Try again later.");
     }
   };
 
-  // Update selected unit when product changes
+  // Fetch ticket details
+  const fetchTicketDetails = async () => {
+    const token = localStorage.getItem("token");
+    let url = `${API_ROOT}`;
+
+    if (id.includes("-not-weigh")) {
+      url += `/admin/view-auth-weigh/${id.replace("-not-weigh", "")}`;
+    } else {
+      url += `/customer/view-weigh/${id}`;
+    }
+    if (!token || !id) {
+      toast.error("Invalid session or ticket ID.");
+      setTicketLoading(false);
+      return;
+    }
+
+    try {
+      const { data } = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const ticket = data.data;
+      setSelectedCustomerId(
+        ticket?.authToWeigh?.supplierId || data.ticket.supplierId
+      ); // Supplier ID
+      setSelectedProductId(
+        ticket?.authToWeigh?.productId || data.ticket.productId
+      ); // Product ID
+      setQuantity(ticket?.net || data.ticket?.quantityLoaded || ""); // Net weight as quantity
+    } catch (error) {
+      console.error("Failed to fetch ticket details:", error);
+      toast.error("Error fetching ticket details. Try again later.");
+    } finally {
+      setTicketLoading(false);
+    }
+  };
+
+  // Update selected unit and base price when product changes
   useEffect(() => {
-    if (selectedProductId) {
+    if (selectedProductId && products.length > 0) {
       const selectedProduct = products.find(
         (product) => product.id === selectedProductId
       );
-      setSelectedUnit(selectedProduct ? selectedProduct : "");
-      setBasePrice(selectedProduct.price[0].amount)
+      if (selectedProduct) {
+        setSelectedUnit(selectedProduct);
+        setBasePrice(selectedProduct.price[0]?.amount?.toString() || "");
+      }
     }
   }, [selectedProductId, products]);
 
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchCustomers();
+    fetchProducts();
+    if (id) fetchTicketDetails();
+    else setTicketLoading(false);
+  }, [id]);
+
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setButtonLoading(true);
+    
 
     const token = localStorage.getItem("token");
     if (!token) {
@@ -90,160 +165,199 @@ const SupplierPlaceOrder = () => {
     }
 
     const orderData = {
-      supplierId: selectedCustomerId,
-      productId: selectedProductId,
-      quantity,
-      // price: selectedUnit.price[0].amount,
-      price:basePrice,
+      ...(id.includes("-not-weigh") && {
+        atwWeighId: id.replace("-not-weigh", ""),
+      }),
+      ...(!id.includes("-not-weigh") && { supplierWeighId: id }),
+      // supplierWeighId:id.includes("-not-weigh") ? id.replace("-not-weigh",""):id ,
+      ...(id.includes("-not-weigh") ? { atw: true } : { atw: false }),
+      // quantity,
+      price: basePrice.replace(/,/g, ""),
       ...(comment && { comments: comment }),
-      unit: selectedUnit.price[0].unit,
+      ...(subCharge && { discount: subCharge.replace(/,/g, "") }),
+      ...(selectedUnit?.price[0]?.unit && {unit: selectedUnit?.price[0]?.unit || ""}),
     };
 
+    setButtonLoading(true);
     try {
-      await axios.post(`${root}/customer/raise-supplier-order`, orderData, {
+      await axios.post(`${API_ROOT}/customer/raise-supplier-order`, orderData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success("Order placed successfully!", {
-        style: {
-          padding: "20px",
-        },
-        duration: 10000,
+      showToast({
+        message: "Order Placed Successfully",
+        type: "success",
+        duration: 5000,
       });
+
       setBasePrice("");
       setSelectedCustomerId("");
       setSelectedProductId("");
       setQuantity("");
       setComment("");
-      setSelectedUnit("");
+      setSubCharge("");
+      setSelectedUnit(null);
+
+      setTimeout(() => {
+        navigate(`/admin/supplier/supplier-ledger/${selectedCustomerId}`);
+      }, 3000);
     } catch (error) {
       console.error("Error placing order:", error);
       toast.error(
-        "Failed to place order. Please check your inputs and try again."
+        error.response?.data?.message ||
+          "Failed to place order. Please check your inputs."
       );
     } finally {
       setButtonLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchCustomers();
-    fetchProducts();
-  }, []);
-
   return (
     <>
-      <Heading>Received Order</Heading>
+      <Heading>Receive Order</Heading>
       <Separator className="my-3 w-full" />
-      <form onSubmit={handleSubmit}>
-        <Flex className="w-full mb-4" gap="5">
-          {/* Supplier Select */}
-          <div className="w-full">
-            <Text>Supplier Name</Text>
-            <Select.Root
-              value={selectedCustomerId}
-              onValueChange={setSelectedCustomerId}
-              required
-            >
-              <Select.Trigger
-                disabled={customers.length === 0}
-                className="w-full mt-2"
+      {ticketLoading ? (
+        <Flex justify="center" className="my-4">
+          <LoaderIcon className="animate-spin" />
+        </Flex>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <Grid columns="2" gap="4" className="w-full">
+            {/* Supplier Select */}
+            <div className="w-full">
+              <Text className="font-bold">Supplier Name</Text>
+              <Select
+                showSearch
                 placeholder="Select Supplier"
-              />
-              <Select.Content position="popper">
+                optionFilterProp="children"
+                onChange={(value) => setSelectedCustomerId(value)}
+                value={selectedCustomerId || undefined}
+                className={`w-full mt-2 text-bold text-lg disabled:text-gray-800 ${
+                  customers.length === 0 || !!id
+                    ? "bg-gray-100 text-black font-bold"
+                    : ""
+                }`}
+                filterOption={(input, option) =>
+                  option?.children
+                    ?.toString()
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
+                }
+                disabled={customers.length === 0 || !!id} // Disable if no customers or id exists
+                required
+              >
                 {customers.map((customer) => (
-                  <Select.Item key={customer.id} value={customer.id}>
-                    {customer.firstname} {customer.lastname}
-                  </Select.Item>
+                  <Option key={customer.id} value={customer.id}>
+                    {`${customer.firstname} ${customer.lastname}`}
+                  </Option>
                 ))}
-              </Select.Content>
-            </Select.Root>
-          </div>
+              </Select>
+            </div>
 
-          {/* Product Select */}
-          <div className="w-full">
-            <Text>Raw Material</Text>
-            <Select.Root
-              value={selectedProductId}
-              required
-              onValueChange={setSelectedProductId}
-            >
-              <Select.Trigger
-                disabled={products.length === 0}
-                className="w-full mt-2"
+            {/* Product Select */}
+            <div className="w-full">
+              <Text className="font-bold">Raw Material</Text>
+              <Select
+                showSearch
                 placeholder="Select Raw Material"
-              />
-              <Select.Content position="popper">
+                optionFilterProp="children"
+                onChange={(value) => setSelectedProductId(value)}
+                value={selectedProductId || undefined}
+                className={`w-full mt-2 placeholder:text-black ${
+                  products.length === 0 || !!id
+                    ? "bg-gray-100 text-black font-black"
+                    : ""
+                }`}
+                filterOption={(input, option) =>
+                  option.children.toLowerCase().includes(input.toLowerCase())
+                }
+                disabled={products.length === 0 || !!id} // Disable if no products or id exists
+                required
+              >
                 {products.map((product) => (
-                  <Select.Item key={product.id} value={product.id}>
+                  <Option key={product.id} value={product.id}>
                     {product.name}
-                  </Select.Item>
+                  </Option>
                 ))}
-              </Select.Content>
-            </Select.Root>
-          </div>
-        </Flex>
+              </Select>
+            </div>
 
-        {/* Quantity and Unit */}
-        <Flex className="w-full mb-4" gap="5">
-          <div className="w-full">
-            <Text>Quantity</Text>
-            <TextField.Root
-              className="mt-2"
-              placeholder="Input Quantity"
-              type="number"
-              required
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-            />
-          </div>
-          <div className="w-full">
-            <Text>Product Unit</Text>
-            <TextField.Root
-              className="mt-2"
-              placeholder="Unit"
-              value={selectedUnit && selectedUnit.price[0].unit}
-              disabled
-            />
-          </div>
-        </Flex>
+            {/* Quantity */}
+            <div className="w-full">
+              <Text>Quantity</Text>
+              <TextField.Root
+                className="mt-2"
+                placeholder="Input Quantity"
+                type="number"
+                required
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                disabled={!!id} // Disable if id exists
+              />
+            </div>
 
-        {/* Base Price and Comments */}
-        <Flex className="w-full mb-4" gap="5">
-          <div className="w-full">
-            <Text>Base Price (₦)</Text>
-            <TextField.Root
-              // disabled
-              onChange={(e)=>{
-                setBasePrice(e.target.value)
-              }}
-              // value={selectedUnit && selectedUnit.price[0].amount}
-              value={basePrice}
-              className="mt-2"
-              placeholder="Enter Price"
-            />
-          </div>
-          <div className="w-full">
-            <Text>Comment</Text>
-            <TextField.Root
-              className="mt-2"
-              placeholder="Optional Description"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-            />
-          </div>
-        </Flex>
+            {/* Product Unit */}
+            <div className="w-full">
+              <Text>Product Unit</Text>
+              <TextField.Root
+                className="mt-2"
+                placeholder="Unit"
+                value={selectedUnit?.price[0]?.unit || ""}
+                disabled
+              />
+            </div>
 
-        {/* Submit Button */}
-        <Flex justify="end" gap="5">
-          <Button
-            size="3"
-            className="!bg-theme cursor-pointer"
-            disabled={buttonLoading}
-          >
-            {buttonLoading ? <LoaderIcon /> : "Submit Order"}
-          </Button>
-        </Flex>
-      </form>
+            {/* Base Price */}
+            <div className="w-full">
+              <Text>Base Price (₦)</Text>
+              <Input
+                addonBefore="₦"
+                value={formatNumber(basePrice)}
+                onChange={handleBasePriceChange}
+                className="mt-2"
+                placeholder="Enter Price"
+              />
+            </div>
+
+            {/* Sub Charge */}
+            <div className="w-full">
+              <Text>SUR CHARGE</Text>
+              <Input
+                addonBefore="₦"
+                className="mt-2"
+                value={formatNumber(subCharge)}
+                onChange={handleSubChargeChange}
+                placeholder="Enter Supplier Subcharge"
+              />
+            </div>
+
+            {/* Comment */}
+            <div className="w-full">
+              <Text>Comment</Text>
+              <TextField.Root
+                className="mt-2"
+                placeholder="Optional Description"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              />
+            </div>
+          </Grid>
+
+          {/* Submit Button */}
+          <Flex justify="end" gap="5">
+            <Button
+              size="3"
+              className="!bg-theme cursor-pointer mt-4 text-white"
+              disabled={buttonLoading}
+            >
+              {buttonLoading ? (
+                <LoaderIcon className="animate-spin" />
+              ) : (
+                "Submit Order"
+              )}
+            </Button>
+          </Flex>
+        </form>
+      )}
       <Toaster position="top-right" />
     </>
   );

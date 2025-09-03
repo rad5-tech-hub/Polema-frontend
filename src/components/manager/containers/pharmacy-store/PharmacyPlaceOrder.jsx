@@ -14,11 +14,13 @@ import {
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 
 const PharmacyPlaceOrder = () => {
   const [isLoading, setIsLoading] = React.useState(false);
+  const showToast = useToast()
   const [rawMaterials, setRawMaterials] = React.useState([]);
   const [plans, setPlans] = React.useState([
     {
@@ -118,10 +120,10 @@ const PharmacyPlaceOrder = () => {
         }
       );
       setIsLoading(false);
-      toast.success(response.data.message, {
-        style: { padding: "30px" },
-        duration: 3500,
-      });
+      showToast({
+        message: response.data.message,
+        duration:4500
+      })
 
       // Clear form after successful submission
       setPlans([
@@ -130,7 +132,10 @@ const PharmacyPlaceOrder = () => {
     } catch (err) {
       console.log(err);
       setIsLoading(false);
-      toast.error();
+      showToast({
+        message: err.response.data.message ||" An error occurred",
+        type: "error"
+      })
     }
   };
 

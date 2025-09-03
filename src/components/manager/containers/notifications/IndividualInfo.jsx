@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from "react";
+import TransactionTag from "../template/TransactionTag";
 import { jwtDecode } from "jwt-decode";
 import _ from "lodash";
 import axios from "axios";
 import { Spinner, Grid, Button, Text } from "@radix-ui/themes";
+import { refractor, isNegative, formatMoney } from "../../../date";
 import { Modal } from "antd";
 import Image from "../../../../static/image/polema-logo.png";
 import { Toaster, toast, LoaderIcon } from "react-hot-toast";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
   const [ticketDetails, setTicketDetails] = useState();
+  const showToast = useToast();
   const [rejectLoading, setRejectLoading] = useState(false);
   const [approveLoading, setApproveLoading] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
@@ -19,7 +23,8 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
   const [storeDetails, setStoreDetails] = useState([]);
 
   //------------- State management for approving to to other admins-------------
-  const [approveToOtherAdminChecked,setApproveToOtherAdminChecked] = useState(false)
+  const [approveToOtherAdminChecked, setApproveToOtherAdminChecked] =
+    useState(false);
 
   // Function to fetch general store
   const fetchGeneralStore = async () => {
@@ -59,8 +64,8 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
         return "customer/invoice-pdf";
       case "weigh":
         return "admin/view-auth-weigh";
-        case "waybill":
-          return "customer/waybill-pdf";
+      case "waybill":
+        return "customer/waybill-pdf";
       default:
         break;
     }
@@ -113,7 +118,7 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
         style: { padding: "20px" },
         duration: 6000,
       });
-      return
+      return;
     }
 
     // setTicketDetails({})
@@ -147,9 +152,9 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
         case "store":
           setTicketDetails(response.data.records);
           break;
-          case "waybill":
-            setTicketDetails(response.data?.parse || []);
-            break;
+        case "waybill":
+          setTicketDetails(response.data?.parse || []);
+          break;
         default:
           break;
       }
@@ -171,9 +176,10 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
       setApproveLoading(false);
       setOpen(false);
       setTimeout(() => {
-        toast.success("Ticket Approved", {
-          style: { padding: "20px" },
-          duration: 3000,
+        showToast({
+          message: "Ticket Approved",
+          duration: 4000,
+          type: "success",
         });
       }, 1000);
     } catch (error) {
@@ -197,15 +203,19 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
         }
       );
       setRejectLoading(false);
-      toast.success("Ticket Disapproved");
+      showToast({
+        message: "Ticket Disapproved",
+        duration: 4000,
+        type: "success",
+      });
     } catch (error) {
       console.log(error);
       setRejectLoading(false);
       toast.error(
         error.response?.data?.message ||
-          error.response?.data.error ||
-          error.response?.message ||
-          "An error occurred while trying ot reject ticket"
+        error.response?.data.error ||
+        error.response?.message ||
+        "An error occurred while trying ot reject ticket"
       );
     }
   };
@@ -226,9 +236,12 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
           },
         }
       );
-      toast.success("Ticket Confimed", {
-        duration: 6500,
+      showToast({
+        message: "Ticket Confirmed",
+        duration: 5000,
+        type: "success",
       });
+
       setConfirmLoading(false);
     } catch (error) {
       console.log(error);
@@ -248,7 +261,6 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
     setOpen(false);
   };
 
-  
   React.useEffect(() => {
     fetchTicketDetails();
     fetchGeneralStore();
@@ -269,7 +281,6 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
               <>{_.upperFirst(selectedTicket.type)} Ticket Details</>
             )}
           </div>
-         
 
           <div className="details-container h-[75%]">
             {typeof ticketDetails !== "object" ? (
@@ -293,10 +304,10 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                       </div>
                       <div>
                         <Text className="text-[.56rem] font-black tracking-wide">
-                          CUSTOMER
+                          OWNER OF GOODS
                         </Text>
                         <p className="text-[.7rem]">
-                          {`${ticketDetails.transaction?.corder.firstname} ${ticketDetails.transaction?.corder.lastname}`}
+                          {ticketDetails.owner || "-"}
                         </p>
                       </div>
                       <div>
@@ -312,7 +323,8 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                           PRODUCT NAME
                         </Text>
                         <p className="text-[.7rem]">
-                          {ticketDetails.transaction?.porders?.name}
+                          {ticketDetails.transaction?.porders?.name ||
+                            ticketDetails?.rawMaterial?.name}
                         </p>
                       </div>
                     </>
@@ -410,7 +422,8 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                                 <>
                                   <p className="text-[.5rem]">
                                     {entry.quantity} {entry.unit} of{" "}
-                                    {entry.productName}
+                                    {entry.productName}{" "}
+                                    <TransactionTag entry={entry} />
                                   </p>{" "}
                                 </>
                               );
@@ -426,42 +439,66 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                   {/* Weigh Ticket Example */}
                   {selectedTicket.type === "weigh" && (
                     <>
-                      <div>
-                        <Text className="text-[.56rem] font-black tracking-wide">
+                      {/* Driver */}
+                      <div className="flex w-full justify-between items-center p-2">
+                        <Text className="text-[.9rem] font-black tracking-wide">
                           DRIVER
                         </Text>
-                        <p className="text-[.7rem]">{ticketDetails.driver}</p>
-                      </div>
-                      <div>
-                        <Text className="text-[.56rem] font-black tracking-wide">
-                          CUSTOMER NAME
-                        </Text>
-                        <p className="text-[.7rem]">
-                          {`${ticketDetails.transactions?.corder.firstname} ${ticketDetails.transactions?.corder.lastname}`}
+                        <p className="text-[.9rem]">
+                          {ticketDetails.driver || "N/A"}
                         </p>
                       </div>
-                      <div>
-                        <Text className="text-[.56rem] font-black tracking-wide">
-                          QUANTITY
+
+                      {/* Customer or Supplier Name */}
+                      <div className="flex w-full justify-between items-center p-2">
+                        <Text className="text-[.9rem] font-black tracking-wide">
+                          {ticketDetails.customerId
+                            ? "CUSTOMER NAME"
+                            : "SUPPLIER NAME"}
                         </Text>
-                        <p className="text-[.7rem]">
-                          {ticketDetails.transactions?.quantity}
+                        <p className="text-[.9rem]">
+                          {ticketDetails.customerId &&
+                            ticketDetails.transactions?.corder
+                            ? `${ticketDetails.transactions.corder.firstname} ${ticketDetails.transactions.corder.lastname}`
+                            : ticketDetails?.supplierId &&
+                              ticketDetails?.supplier
+                              ? `${ticketDetails?.supplier.firstname} ${ticketDetails?.supplier.lastname}`
+                              : "Name not available"}
                         </p>
                       </div>
-                      <div>
-                        <Text className="text-[.56rem] font-black tracking-wide">
+
+                      {/* Quantity */}
+                      {ticketDetails.transactions && (
+                        <div className="flex w-full justify-between items-center p-2">
+                          <Text className="text-[.9rem] font-black tracking-wide">
+                            QUANTITY
+                          </Text>
+                          <p className="text-[.9rem]">
+                            {ticketDetails.transactions?.quantity || ""}{" "}
+                            {ticketDetails.transactions?.unit || ""}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Product */}
+                      <div className="flex w-full justify-between items-center p-2">
+                        <Text className="text-[.9rem] font-black tracking-wide">
                           PRODUCT
                         </Text>
-                        <p className="text-[.7rem]">
-                          {ticketDetails.transactions?.porders.name}
+                        <p className="text-[.9rem]">
+                          {ticketDetails.transactions?.porders?.name ||
+                            ticketDetails.rawMaterial?.name ||
+                            "N/A"}
                         </p>
                       </div>
-                      <div>
-                        <Text className="text-[.56rem] font-black tracking-wide">
+
+                      {/* Vehicle Number */}
+                      <div className="flex w-full justify-between items-center p-2">
+                        <Text className="text-[.9rem] font-black tracking-wide">
                           VEHICLE NO
                         </Text>
-                        <p className="text-[.7rem]">
-                          {ticketDetails.vehicleNo}
+                        <p className="text-[.9rem]">
+                          {ticketDetails.vehicleNo || "N/A"}
                         </p>
                       </div>
                     </>
@@ -479,22 +516,22 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                           {`${ticketDetails?.supplier?.firstname} ${ticketDetails?.supplier?.lastname}`}
                         </p>
                       </div>
-                      <div className="flex justify-between">
+                      {/* <div className="flex justify-between">
                         <Text className="text-[1rem] font-bold tracking-wide">
                           PRODUCT
                         </Text>
                         <p className="text-[.7rem]">
                           {ticketDetails?.product?.name || ""}
                         </p>
-                      </div>
-                      <div className="flex justify-between">
+                      </div> */}
+                      {/* <div className="flex justify-between">
                         <Text className="text-[1rem] font-bold tracking-wide">
                           QUANTITY ORDERED
                         </Text>
                         <p className="text-[.7rem]">
                           {ticketDetails.quantOrdered}
                         </p>
-                      </div>
+                      </div> */}
                       <div className="flex justify-between">
                         <Text className="text-[1rem] font-bold tracking-wide">
                           UNIT PRICE
@@ -515,7 +552,33 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                         <Text className="text-[1rem] font-bold tracking-wide">
                           COMMENT
                         </Text>
-                        <p className="text-[.7rem]">{ticketDetails.comments}</p>
+                        <p className="text-[.7rem]">
+                          {ticketDetails?.comments || ""}
+                        </p>
+                      </div>
+                      <div className="flex justify-between">
+                        <Text className="text-[1rem] font-bold tracking-wide">
+                          DETAILS
+                        </Text>
+                        <p className="text-[.7rem]">
+                          {Array.isArray(ticketDetails.items)
+                            ? ticketDetails.items.map((item) => {
+                              return (
+                                <>
+                                  <span>
+                                    {item?.quantity || ""}{" "}
+                                    {item?.rawMaterial || ""} at{" "}
+                                    {item?.unitPrice
+                                      ? formatMoney(item.unitPrice)
+                                      : ""}{" "}
+                                    each
+                                  </span>
+                                  <br />
+                                </>
+                              );
+                            })
+                            : "No Details Found."}
+                        </p>
                       </div>
                     </>
                   )}
@@ -525,17 +588,23 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                     <>
                       <div className="flex items-center gap-6 justify-between">
                         <Text className="text-[.56rem] font-black tracking-wide">
-                          PRODUCT
+                          {ticketDetails?.product !== null
+                            ? "PRODUCT"
+                            : "ITEM NAME"}
                         </Text>
                         <p className="text-[.9rem]">
-                          {ticketDetails.product?.name}
+                          {ticketDetails.product?.name ||
+                            ticketDetails?.item ||
+                            ""}
                         </p>
                       </div>
                       <div className="flex items-center gap-6 justify-between">
                         <Text className="text-[.56rem] font-black tracking-wide">
                           AMOUNT
                         </Text>
-                        <p className="text-[.9rem]">{ticketDetails.amount}</p>
+                        <p className="text-[.9rem]">
+                          ₦{formatMoney(ticketDetails.amount)}
+                        </p>
                       </div>
                       <div className="flex items-center gap-6 justify-between">
                         <Text className="text-[.56rem] font-black tracking-wide">
@@ -548,22 +617,39 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                           TYPE
                         </Text>
                         {ticketDetails.creditOrDebit === "credit" ? (
-                          <p className="text-[.9rem] text-green-500">
-                            Give Cash
+                          <p className="text-[.9rem] text-red-500">
+                            {/* Give Cash */}
+                            {/* This was changed to collected cash because if the cash is given , the admin collect it  */}
+                            Collect Cash
                           </p>
                         ) : (
-                          <p className="text-[.9rem] text-red-500">
-                            Collected Cash
+                          <p className="text-[.9rem] text-green-500">
+                            {/* This was changed because of the reverse of the abpve comments  */}
+                            {/* Collected Cash */}
+                            Give Cash
                           </p>
                         )}
                       </div>
-                      {ticketDetails?.customer && (
+                      {ticketDetails?.customer !== null ? (
                         <div className="flex items-center gap-6 justify-between">
                           <Text className="text-[.56rem] font-black tracking-wide">
                             NAME
                           </Text>
                           <p className="text-[.9rem]">
                             {`${ticketDetails.customer.firstname} ${ticketDetails.customer.lastname}`}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-6 justify-between">
+                          <Text className="text-[.56rem] font-black tracking-wide">
+                            NAME
+                          </Text>
+                          <p className="text-[.9rem]">
+                            {ticketDetails.staffName !== null
+                              ? ticketDetails.staffName
+                              : ticketDetails.customer !== null
+                                ? `${ticketDetails.customer.firstname} ${ticketDetails.customer.lastname}`
+                                : `${ticketDetails.supplier.firstname} ${ticketDetails.supplier.lastname}`}
                           </p>
                         </div>
                       )}
@@ -587,57 +673,51 @@ const IndividualInfo = ({ open, setOpen, selectedTicket }) => {
                         </Text>
                         <p className="text-[.9rem]">{ticketDetails.comments}</p>
                       </div>
-                      <div className="flex items-center gap-6 justify-between">
+                      {/* <div className="flex items-center gap-6 justify-between">
                         <Text className="text-[1rem] font-bold tracking-wide">
                           ITEMS
                         </Text>
-                        {ticketDetails.items &&
-                          Object.entries(ticketDetails.items).map(
-                            ([goodsName, quantity]) => (
-                              <>
-                                <p key={goodsName} className="text-[.9rem]">
-                                  {fetchStoreNameByID(goodsName).name}:{" "}
-                                  {quantity}{" "}
-                                  {fetchStoreNameByID(goodsName).unit}
-                                </p>
-                              </>
-                            )
-                          )}
-                      </div>
+                        
+                      </div> */}
                     </>
                   )}
 
                   {/* Waybill Details  */}
-                  {selectedTicket.type === "waybill"  && (
+                  {selectedTicket.type === "waybill" && (
                     <>
                       <div className="flex items-center gap-6 justify-between">
                         <Text className="text-[1rem] font-bold font-space tracking-wide">
-                         CUSTOMER
+                          CUSTOMER
                         </Text>
                         <p className="text-[.9rem]">
-                          {`${ticketDetails.transaction.corder.firstname} ${ticketDetails.transaction.corder.lastname} ` || ""}
+                          {`${ticketDetails.transaction.corder.firstname} ${ticketDetails.transaction.corder.lastname} ` ||
+                            ""}
                         </p>
                       </div>
                       <div className="flex items-center gap-6 justify-between">
                         <Text className="text-[1rem] font-bold tracking-wide">
                           PRODUCT ORDERED
                         </Text>
-                        <p className="text-[.9rem]">{ticketDetails.transaction.porders.name}</p>
+                        <p className="text-[.9rem]">
+                          {ticketDetails?.transactionEntries?.map((item, index) =>
+                            `${item.product}${index !== ticketDetails.transactionEntries.length - 1 ? ", " : ""}`
+                          ) || ""}
+
+                        </p>
                       </div>
                       <div className="flex items-center gap-6 justify-between">
                         <Text className="text-[1rem] font-bold tracking-wide">
                           CUSTOMER ADDRESS
                         </Text>
-                              {ticketDetails.address || ""}                      
+                        {ticketDetails.address || ""}
                       </div>
                       <div className="flex items-center gap-6 justify-between">
                         <Text className="text-[1rem] font-bold tracking-wide">
-                       BAGS (FOR PKC)
+                          BAGS (FOR PKC)
                         </Text>
-                              {ticketDetails.bags || ""}                      
+                        {ticketDetails.bags || ""}
                       </div>
                     </>
-                   
                   )}
                   {/* </Grid> */}
 

@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import useToast from "../../../../hooks/useToast";
 import {
   Tabs,
   Heading,
@@ -16,14 +18,19 @@ import toast, { Toaster } from "react-hot-toast";
 const root = import.meta.env.VITE_ROOT;
 
 const AuthorityToGiveCash = () => {
+  const navigate = useNavigate();
   const [customers, setCustomers] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [suppliers, setSuppliers] = useState([]);
   const [products, setProducts] = useState([]);
+  const [rawMaterials, setRawMaterials] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchProductQuery, setSearchProductQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedRawMaterial, setSelectedRawMaterial] = useState(null);
   const [authorityType, setAuthorityType] = useState("credit");
   const [othersDescription, setOthersDescription] = useState("");
   const [originalAmount, setOriginalAmount] = useState("");
@@ -31,22 +38,21 @@ const AuthorityToGiveCash = () => {
   const [superAdmins, setSuperAdmins] = useState([]);
   const [adminId, setAdminId] = useState("");
   const [ticketId, setTicketId] = useState("");
-
-  // STATE MANAGAEMENT FOR THE STAFF TABS
   const [staffName, setStaffName] = useState("");
   const [itemName, setItemName] = useState("");
   const [departments, setDepartments] = useState([]);
   const [comments, setComments] = useState("");
   const [departmentId, setDepartmentId] = useState("");
   const [staffAmount, setStaffAmount] = useState("");
+  const [newPayment, setNewPayment] = useState(null);
 
+  const showToast = useToast();
 
-  // Function that is used to remove commas from the amount string
-  function removeCommas(numberStr) {
-    return numberStr.includes(",")
-      ? parseInt(numberStr.replace(/,/g, ""), 10)
-      : numberStr;
-  }
+  // Function to format numbers with commas
+  const formatWithCommas = (value) => {
+    const numericValue = value.replace(/[^0-9]/g, ""); // Remove non-numeric characters
+    return Number(numericValue).toLocaleString(); // Format with commas
+  };
 
   const fetchCustomers = async () => {
     const retrToken = localStorage.getItem("token");
@@ -62,9 +68,59 @@ const AuthorityToGiveCash = () => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      setCustomers(response.data.customers);
+      setCustomers(response.data.customers || []);
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || "An error occurred");
+    }
+  };
+
+  const fetchSuppliers = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      showToast({
+        message: "An error occurred. Try logging in again",
+        type: "error",
+      });
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${root}/customer/get-suppliers`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setSuppliers(response.data.customers || []);
+    } catch (err) {
+      showToast({
+        message: err?.message || "An error occurred",
+        type: "error",
+      });
+    }
+  };
+
+  const fetchRawMaterials = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      showToast({
+        message: "An error occurred, try logging in again",
+        type: "error",
+      });
+      return;
+    }
+    try {
+      const response = await axios.get(`${root}/admin/get-raw-materials`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setRawMaterials(response.data.products || []);
+    } catch (err) {
+      showToast({
+        message: err?.message || "An error occurred",
+        type: "error",
+      });
     }
   };
 
@@ -82,9 +138,9 @@ const AuthorityToGiveCash = () => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      setProducts(response.data.products);
+      setProducts(response.data.products || []);
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || "An error occurred");
     }
   };
 
@@ -93,7 +149,7 @@ const AuthorityToGiveCash = () => {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      toast.error("An error occured,try logging in again.");
+      toast.error("An error occurred, try logging in again.");
     }
 
     try {
@@ -102,9 +158,13 @@ const AuthorityToGiveCash = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setSuperAdmins(response.data.staffList);
+      setSuperAdmins(response.data.staffList || []);
     } catch (error) {
       console.log(error);
+      showToast({
+        message: error.message || "An error occurred",
+        type: "error",
+      });
     }
   };
 
@@ -113,7 +173,7 @@ const AuthorityToGiveCash = () => {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      toast.error("An error occured,try logging in again.");
+      toast.error("An error occurred, try logging in again.");
     }
 
     try {
@@ -122,35 +182,143 @@ const AuthorityToGiveCash = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setDepartments(request.data.departments);
+      setDepartments(request.data.departments || []);
     } catch (error) {
       console.log(error);
+      showToast({
+        message: error.message || "An error occurred",
+        type: "error",
+      });
     }
   };
 
   const handleCustomersSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (newPayment === null) { 
+      showToast({
+        message: "Please select if this is a new payment or a balance payment",
+        type: "error",
+      });
+      return;
+    }
+
+
+    const retrToken = localStorage.getItem("token");
+
+    if (!retrToken) {
+      showToast({
+        message: "An error occurred. Try logging in again",
+        type: "error",
+        duration: 5000,
+      });
+      setLoading(false);
+      return;
+    }
+    if (!adminId) {
+      showToast({
+        message: "Select an admin to send it to",
+        type: "error",
+      });
+      setLoading(false);
+      return;
+    }
+
+
+    const resetForm = () => {
+      setAmount("");
+      setSelectedCustomer(null);
+      setSelectedProduct(null);
+      setComments("");
+      setAdminId("");
+      setNewPayment(null); // Reset newPayment state
+    };
+
+    setLoading(true);
+    const body = {
+      amount: amount.replaceAll(",", ""),
+      customerId: selectedCustomer,
+      comments,
+      productId: selectedProduct,
+      creditOrDebit: authorityType,
+      isFreshPayment: newPayment, // Add newPayment to the body
+    };
+
+    try {
+      const response = await axios.post(`${root}/admin/cash-ticket`, body, {
+        headers: {
+          Authorization: `Bearer ${retrToken}`,
+        },
+      });
+
+      const ticketId = response.data.ticket.id;
+      setTicketId(ticketId);
+
+      await axios.post(
+        `${root}/admin/send-ticket/${ticketId}`,
+        { adminIds: [adminId] },
+        {
+          headers: {
+            Authorization: `Bearer ${retrToken}`,
+          },
+        }
+      );
+      resetForm();
+      showToast({
+        message: "Ticket created and sent successfully!",
+        type: "success",
+        duration: 5000,
+      });
+
+      setLoading(false);
+    } catch (error) {
+      console.error("Error during submission:", error);
+      showToast({
+        message: "Failed to submit the form. Please try again.",
+        type: "error",
+        duration: 5000,
+      });
+      setLoading(false);
+    }
+  };
+
+  const handleSuppliersSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     const retrToken = localStorage.getItem("token");
 
     if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
-      setButtonLoading(false);
+      showToast({
+        message: "An error occurred. Try logging in again",
+        type: "error",
+        duration: 5000,
+      });
+      setLoading(false);
       return;
     }
+    if (!adminId) {
+      showToast({
+        message: "Select an admin to send it to",
+        type: "error",
+      });
+      setLoading(false);
+      return;
+    }
+
     const resetForm = () => {
       setAmount("");
-      setSelectedCustomer("");
-      setSelectedProduct("");
+      setSelectedSupplier(null);
+      setSelectedRawMaterial(null);
       setComments("");
+      setAdminId("");
     };
 
     const body = {
-      amount: removeCommas(originalAmount),
-      customerId: selectedCustomer,
+      amount: amount.replaceAll(",", ""),
+      supplierId: selectedSupplier,
       comments,
-      productId: selectedProduct,
+      productId: selectedRawMaterial,
       creditOrDebit: authorityType,
     };
 
@@ -166,7 +334,7 @@ const AuthorityToGiveCash = () => {
 
       await axios.post(
         `${root}/admin/send-ticket/${ticketId}`,
-        { adminIds:[adminId] },
+        { adminIds: [adminId] },
         {
           headers: {
             Authorization: `Bearer ${retrToken}`,
@@ -174,41 +342,59 @@ const AuthorityToGiveCash = () => {
         }
       );
       resetForm();
-      toast.success("Ticket created and sent successfully!", {
-        style: {
-          padding: "20px",
-        },
-        duration: 5500,
+      showToast({
+        message: "Ticket created and sent successfully!",
+        type: "success",
+        duration: 5000,
       });
+
       setLoading(false);
     } catch (error) {
       console.error("Error during submission:", error);
-      toast.error("Failed to submit the form. Please try again.");
+      showToast({
+        message: "Failed to submit the form. Please try again.",
+        type: "error",
+        duration: 5000,
+      });
       setLoading(false);
     }
   };
 
   const staffSubmit = async (e) => {
     e.preventDefault();
-    setOthersLoading(true);
 
     const token = localStorage.getItem("token");
 
     if (!token) {
-      toast.error("An error occurred, try logging in again");
+      showToast({
+        message: "An error occurred, try logging in again",
+        type: "error",
+      });
       setOthersLoading(false);
       return;
     }
+    if (!adminId) {
+      showToast({
+        message: "Select an admin to send it to",
+        type: "error",
+      });
+      setOthersLoading(false);
+      return;
+    }
+    setOthersLoading(true);
 
     const resetForm = () => {
       setStaffAmount("");
       setStaffName("");
       setItemName("");
       setComments("");
+      setDepartmentId("");
+      setAdminId("");
     };
 
     const body = {
-      amount: Number(staffAmount),
+      staffName,
+      amount: staffAmount.replaceAll(",", ""),
       item: itemName,
       creditOrDebit: authorityType,
       comments,
@@ -216,7 +402,6 @@ const AuthorityToGiveCash = () => {
     };
 
     try {
-      // First API call
       const firstResponse = await axios.post(
         `${root}/admin/cash-ticket`,
         body,
@@ -230,10 +415,10 @@ const AuthorityToGiveCash = () => {
       const newTicketId = firstResponse.data.ticket.id;
       setTicketId(newTicketId);
 
-      const secondResponse = await axios.post(
+      await axios.post(
         `${root}/admin/send-ticket/${newTicketId}`,
         {
-          adminIds:[adminId],
+          adminIds: [adminId],
         },
         {
           headers: {
@@ -242,27 +427,26 @@ const AuthorityToGiveCash = () => {
         }
       );
       resetForm();
-      toast.success("Ticket processed successfully!", {
-        style: {
-          padding: "20px",
-        },
-        duration: 5500,
+      showToast({
+        message: "Ticket Processed Successfully",
+        type: "success",
       });
     } catch (error) {
       console.error(error);
-      toast.error("An error occurred while processing the ticket.");
+      showToast({
+        message: "An error occurred while processing the ticket.",
+        type: "error",
+      });
     } finally {
       setOthersLoading(false);
     }
   };
-  const formatWithCommas = (value) => {
-    const numericValue = value.replace(/[^0-9]/g, ""); // Remove non-numeric characters
-    return Number(numericValue).toLocaleString(); // Format with commas
-  };
 
   useEffect(() => {
     fetchCustomers();
+    fetchSuppliers();
     fetchProducts();
+    fetchRawMaterials();
     fetchSuperAdmins();
     fetchDept();
   }, []);
@@ -270,33 +454,63 @@ const AuthorityToGiveCash = () => {
   return (
     <>
       <div className="flex justify-between items-center mb-4">
-        <Heading>Authority To Give Cash</Heading>
-        <Select.Root
-          defaultValue="give"
-          onValueChange={(value) => {
-            value === "credit"
-              ? setAuthorityType("credit")
-              : setAuthorityType("debit");
-          }}
-        >
-          <Select.Trigger />
-          <Select.Content>
-            <Select.Item value="give">Give Cash</Select.Item>
-            <Select.Item value="collect">Collect Cash</Select.Item>
-          </Select.Content>
-        </Select.Root>
+        <Heading>
+          Authority To{" "}
+          {authorityType !== "credit"
+            ? "Give Cash (To Cashier)"
+            : "Collect Cash (From Cashier)"}
+        </Heading>
+        <div className="flex gap-2 items-center justify-center">
+          <Select.Root
+            defaultValue="collect"
+            onValueChange={(value) => {
+              value === "collect"
+                ? setAuthorityType("credit")
+                : setAuthorityType("debit");
+            }}
+          >
+            <Select.Trigger />
+            <Select.Content position="popper">
+              <Select.Item value="give">Give Cash</Select.Item>
+              <Select.Item value="collect">Collect Cash</Select.Item>
+            </Select.Content>
+          </Select.Root>
+          <Button
+            className="cursor-pointer"
+            onClick={() => {
+              navigate("/admin/raise-ticket/view-cash-tickets");
+            }}
+          >
+            View Cash Tickets
+          </Button>
+        </div>
       </div>
-      <Separator className="my-4 w-full" />
-      <Tabs.Root defaultValue="Customers">
-        <Tabs.List className="justify-center flex w-full items-center">
-          <Tabs.Trigger value="Customers">Customers</Tabs.Trigger>
-          <Tabs.Trigger value="Staff">Staff</Tabs.Trigger>
-        </Tabs.List>
+      {/* <Separator className="my-4 w-full" /> */}
+
+      <Tabs.Root
+        defaultValue="Customers"
+        onValueChange={() => {
+          setComments("");
+          setAdminId("");
+          setAmount("");
+          setSelectedCustomer(null);
+          setSelectedSupplier(null);
+          setSelectedProduct(null);
+          setSelectedRawMaterial(null);
+        }}
+      >
+        <div className="flex justify-center mt-6">
+          <Tabs.List className="justify-center flex w-full items-center">
+            <Tabs.Trigger value="Customers">Customers</Tabs.Trigger>
+            <Tabs.Trigger value="Suppliers">Suppliers</Tabs.Trigger>
+            <Tabs.Trigger value="Staff">Staff</Tabs.Trigger>
+          </Tabs.List>
+        </div>
         <Tabs.Content value="Customers">
           <form onSubmit={handleCustomersSubmit} className="mt-6">
             <div className="flex w-full justify-between gap-8">
               <div className="w-full">
-                <Text size={"4"}>
+                <Text>
                   Customer Name <span className="text-red-500">*</span>
                 </Text>
                 <Select.Root
@@ -338,7 +552,7 @@ const AuthorityToGiveCash = () => {
               </div>
 
               <div className="w-full">
-                <Text size={"4"}>
+                <Text>
                   Select Product <span className="text-red-500">*</span>
                 </Text>
                 <Select.Root
@@ -387,9 +601,13 @@ const AuthorityToGiveCash = () => {
                   className="mt-3"
                   value={amount}
                   onChange={(e) => {
-                    const formattedAmount = formatWithCommas(e.target.value);
-                    setOriginalAmount(e.target.value);
-                    setAmount(formattedAmount);
+                    const rawValue = e.target.value.replace(/[^0-9]/g, "");
+                    if (rawValue === "") {
+                      setAmount("");
+                    } else {
+                      const formattedValue = formatWithCommas(rawValue);
+                      setAmount(formattedValue);
+                    }
                   }}
                   placeholder="Enter Amount in Naira (₦)"
                 />
@@ -412,6 +630,7 @@ const AuthorityToGiveCash = () => {
               <Select.Root
                 disabled={superAdmins.length === 0}
                 onValueChange={(value) => setAdminId(value)}
+                value={adminId}
               >
                 <Select.Trigger
                   className="mt-3 w-full"
@@ -422,14 +641,206 @@ const AuthorityToGiveCash = () => {
                     <Select.Item
                       key={admin.role?.id || " "}
                       value={admin.role?.id || " "}
-                    >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
+                    >{`${admin?.role?.name || ""} (${admin.firstname} ${
+                      admin.lastname
+                    }) `}</Select.Item>
+                  ))}
+                </Select.Content>
+              </Select.Root>
+            </div>
+
+            <div className="mt-6 w-[50%]">
+              <p className="font-bold">
+                Is this a new payment or a balance payment on an existing
+                payment?
+              </p>
+              <div className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="payment"
+                  id="np"
+                  value="new"
+                  checked={newPayment === true}
+                  onChange={() => setNewPayment(true)}
+                />
+                <label htmlFor="np">New Payment</label>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="payment"
+                  id="bp"
+                  value="balance"
+                  checked={newPayment === false}
+                  onChange={() => setNewPayment(false)}
+                />
+                <label htmlFor="bp">Balance Payment</label>
+              </div>
+            </div>
+
+            <Flex justify={"end"} className="mt-4">
+              <Button
+                size={"3"}
+                disabled={loading}
+                type="submit"
+                className="!bg-theme"
+              >
+                {loading ? <Spinner /> : "Send"}
+              </Button>
+            </Flex>
+          </form>
+        </Tabs.Content>
+
+        <Tabs.Content value="Suppliers">
+          <form onSubmit={handleSuppliersSubmit} className="mt-6">
+            <div className="flex w-full justify-between gap-8">
+              <div className="w-full">
+                <Text>
+                  Supplier Name <span className="text-red-500">*</span>
+                </Text>
+                <Select.Root
+                  value={selectedSupplier}
+                  required
+                  onValueChange={setSelectedSupplier}
+                >
+                  <Select.Trigger
+                    className="w-full mt-2"
+                    placeholder="Select Supplier Name"
+                  />
+                  <Select.Content position="popper">
+                    <div className="p-2">
+                      <input
+                        type="text"
+                        placeholder="Search suppliers..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded"
+                      />
+                    </div>
+                    {suppliers
+                      .filter(
+                        (supplier) =>
+                          supplier.firstname
+                            .toLowerCase()
+                            .includes(searchQuery.toLowerCase()) ||
+                          supplier.lastname
+                            .toLowerCase()
+                            .includes(searchQuery.toLowerCase())
+                      )
+                      .map((supplier) => (
+                        <Select.Item key={supplier.id} value={supplier.id}>
+                          {supplier.firstname} {supplier.lastname}
+                        </Select.Item>
+                      ))}
+                  </Select.Content>
+                </Select.Root>
+              </div>
+
+              <div className="w-full">
+                <Text>
+                  Select Raw Material <span className="text-red-500">*</span>
+                </Text>
+                <Select.Root
+                  required
+                  value={selectedRawMaterial}
+                  onValueChange={setSelectedRawMaterial}
+                >
+                  <Select.Trigger
+                    className="w-full mt-2"
+                    placeholder="Select Raw Material"
+                  />
+                  <Select.Content position="popper">
+                    <div className="p-2">
+                      <input
+                        type="text"
+                        placeholder="Search raw materials..."
+                        value={searchProductQuery}
+                        onChange={(e) => setSearchProductQuery(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded"
+                      />
+                    </div>
+                    {rawMaterials
+                      .filter((material) =>
+                        material.name
+                          .toLowerCase()
+                          .includes(searchProductQuery.toLowerCase())
+                      )
+                      .map((material) => (
+                        <Select.Item key={material.id} value={material.id}>
+                          {material.name}
+                        </Select.Item>
+                      ))}
+                  </Select.Content>
+                </Select.Root>
+              </div>
+            </div>
+
+            <div className="flex w-full mt-4 justify-between gap-8">
+              <div className="w-[49%]">
+                <label htmlFor="amount">
+                  Enter Amount <span className="text-red-500">*</span>
+                </label>
+                <TextField.Root
+                  id="amount"
+                  required
+                  className="mt-3"
+                  value={amount}
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/[^0-9]/g, "");
+                    if (rawValue === "") {
+                      setAmount("");
+                    } else {
+                      const formattedValue = formatWithCommas(rawValue);
+                      setAmount(formattedValue);
+                    }
+                  }}
+                  placeholder="Enter Amount in Naira (₦)"
+                />
+              </div>
+
+              <div className="comments w-[50%]">
+                <label htmlFor="comments">Comments</label>
+                <TextField.Root
+                  id="comments"
+                  required
+                  className="mt-3 mb-4"
+                  value={comments}
+                  onChange={(e) => setComments(e.target.value)}
+                  placeholder="Enter a description..."
+                />
+              </div>
+            </div>
+            <div className="w-[49%]">
+              <Text>Send To</Text>
+              <Select.Root
+                disabled={superAdmins.length === 0}
+                onValueChange={(value) => setAdminId(value)}
+                value={adminId}
+              >
+                <Select.Trigger
+                  className="mt-3 w-full"
+                  placeholder="Select Admin"
+                />
+                <Select.Content position="popper">
+                  {superAdmins.map((admin) => (
+                    <Select.Item
+                      key={admin.role?.id || " "}
+                      value={admin.role?.id || " "}
+                    >{`${admin?.role?.name || ""} (${admin.firstname} ${
+                      admin.lastname
+                    }) `}</Select.Item>
                   ))}
                 </Select.Content>
               </Select.Root>
             </div>
 
             <Flex justify={"end"} className="mt-4">
-              <Button size={"2"} disabled={loading} type="submit">
+              <Button
+                size={"3"}
+                disabled={loading}
+                type="submit"
+                className="!bg-theme"
+              >
                 {loading ? <Spinner /> : "Send"}
               </Button>
             </Flex>
@@ -471,7 +882,13 @@ const AuthorityToGiveCash = () => {
                   value={staffAmount}
                   placeholder="Enter Price"
                   onChange={(e) => {
-                    setStaffAmount(e.target.value);
+                    const rawValue = e.target.value.replace(/[^0-9]/g, "");
+                    if (rawValue === "") {
+                      setStaffAmount("");
+                    } else {
+                      const formattedValue = formatWithCommas(rawValue);
+                      setStaffAmount(formattedValue);
+                    }
                   }}
                 >
                   <TextField.Slot>₦</TextField.Slot>
@@ -491,7 +908,7 @@ const AuthorityToGiveCash = () => {
                   <Select.Content position="popper">
                     {departments.map((dept) => {
                       return (
-                        <Select.Item key={dept.id} value={dept.id} >
+                        <Select.Item key={dept.id} value={dept.id}>
                           {dept.name}
                         </Select.Item>
                       );
@@ -501,7 +918,14 @@ const AuthorityToGiveCash = () => {
               </div>
               <div className="w-full">
                 <Text>Comments </Text>
-                <TextField.Root className="mt-2" placeholder="Enter Comments" />
+                <TextField.Root
+                  className="mt-2"
+                  value={comments}
+                  onChange={(e) => {
+                    setComments(e.target.value);
+                  }}
+                  placeholder="Enter Comments"
+                />
               </div>
               <div className="w-full">
                 <Text>Send To</Text>
@@ -510,17 +934,21 @@ const AuthorityToGiveCash = () => {
                   onValueChange={(value) => {
                     setAdminId(value);
                   }}
+                  value={adminId}
                 >
                   <Select.Trigger
                     className="w-full mt-2"
                     placeholder="Select Admin"
                   />
-                  <Select.Content>
+                  <Select.Content position="popper">
                     {superAdmins.map((admin) => {
                       return (
                         <Select.Item
+                          key={admin.role?.id || " "}
                           value={admin.role?.id || " "}
-                        >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
+                        >{`${admin?.role?.name || ""} (${admin.firstname} ${
+                          admin.lastname
+                        }) `}</Select.Item>
                       );
                     })}
                   </Select.Content>
@@ -528,15 +956,20 @@ const AuthorityToGiveCash = () => {
               </div>
             </Grid>
 
-            <Flex justify={"end"} className="mt-4">
-              <Button size={"2"} disabled={othersLoading} type="submit">
+            <Flex justify={"end"} className="mt-5">
+              <Button
+                size={"3"}
+                disabled={othersLoading}
+                type="submit"
+                className="!bg-theme"
+              >
                 {othersLoading ? <Spinner /> : "Send"}
               </Button>
             </Flex>
           </form>
         </Tabs.Content>
       </Tabs.Root>
-      <Toaster position="top-right" />
+      {/* <Toaster position="top-right" /> */}
     </>
   );
 };

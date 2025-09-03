@@ -1,17 +1,21 @@
 import React, { useState, useRef, useEffect } from "react";
+import TransactionTag from "../template/TransactionTag";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
-import { formatMoney } from "../../../date";
+import { formatMoney, isNegative } from "../../../date";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import { CameraFilled } from "@ant-design/icons";
 import { Flex, Button, Separator, Spinner, Grid, Text } from "@radix-ui/themes";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 
 const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
+  const showToast = useToast();
   const [entries, setEntries] = useState([]);
+  const [weighImage, setWeighImage] = useState("");
   const [docOrders, setDocOrders] = useState({});
   const [summary, setSummary] = useState({});
   const [failedSearch, setFailedSearch] = useState(false);
@@ -47,9 +51,12 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
 
     setLoading(true);
     try {
-      const { data } = await axios.get(`${root}/customer/get-summary/${customerId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { data } = await axios.get(
+        `${root}/customer/get-summary/${customerId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setEntries(data.ledgerSummary?.ledgerEntries || []);
       setSummary(data.ledgerSummary || {});
       setDocOrders(data.order || {});
@@ -59,6 +66,7 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
         gatepass: data.ledger?.gatepassImage || null,
         waybill: data.ledger?.wayBillImage || null,
       });
+      setWeighImage(data.ledger?.weighImage || null);
       setFailedSearch(false);
     } catch (error) {
       setFailedSearch(true);
@@ -74,23 +82,91 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
   }, [isOpen, customerId]);
 
   const handleFullscreen = (type, imageUrl) => {
-    const imageElement = document.getElementById(`image-${type}`);
-    if (imageUrl && imageElement?.requestFullscreen) {
-      imageElement.requestFullscreen();
-    } else if (!imageUrl) {
+    if (!imageUrl) {
       toast.error("No image available to view.");
-    } else {
-      toast.error("Fullscreen mode is not supported in this browser.");
+      return;
     }
+
+    // Create a temporary image element for fullscreen
+    const img = document.createElement("img");
+    img.src = imageUrl;
+    img.id = `fullscreen-image-${type}`;
+    img.style.position = "fixed";
+    img.style.top = "0";
+    img.style.left = "0";
+    img.style.width = "100vw";
+    img.style.height = "100vh";
+    img.style.objectFit = "contain";
+    img.style.background = "black";
+    img.style.zIndex = "9999";
+    document.body.appendChild(img);
+
+    // Cross-browser fullscreen request
+    const requestFullscreen = () => {
+      if (img.requestFullscreen) {
+        return img.requestFullscreen();
+      } else if (img.webkitRequestFullscreen) {
+        // Safari
+        return img.webkitRequestFullscreen();
+      } else if (img.msRequestFullscreen) {
+        // IE/Edge
+        return img.msRequestFullscreen();
+      } else {
+        toast.error("Fullscreen mode is not supported in this browser.");
+        document.body.removeChild(img);
+        return Promise.reject("Fullscreen not supported");
+      }
+    };
+
+    requestFullscreen()
+      .then(() => {
+        // Listen for fullscreen change to clean up
+        const handleFullscreenChange = () => {
+          if (
+            !document.fullscreenElement &&
+            !document.webkitFullscreenElement &&
+            !document.msFullscreenElement
+          ) {
+            document.body.removeChild(img);
+            document.removeEventListener(
+              "fullscreenchange",
+              handleFullscreenChange
+            );
+            document.removeEventListener(
+              "webkitfullscreenchange",
+              handleFullscreenChange
+            );
+            document.removeEventListener(
+              "msfullscreenchange",
+              handleFullscreenChange
+            );
+          }
+        };
+        document.addEventListener("fullscreenchange", handleFullscreenChange);
+        document.addEventListener(
+          "webkitfullscreenchange",
+          handleFullscreenChange
+        );
+        document.addEventListener("msfullscreenchange", handleFullscreenChange);
+      })
+      .catch((err) => {
+        console.error("Error entering fullscreen:", err);
+        toast.error("Failed to enter fullscreen mode.");
+        document.body.removeChild(img);
+      });
   };
 
   const getReceiptBody = (receiptType, imageUrl) => {
     if (!imageUrl) return null;
     switch (receiptType.toLowerCase()) {
-      case "cashticket": return { cashImage: imageUrl };
-      case "invoice": return { invoiceImg: imageUrl };
-      case "gatepass": return { gatepassImage: imageUrl };
-      case "waybill": return { wayBillImage: imageUrl };
+      case "cashticket":
+        return { cashImage: imageUrl };
+      case "invoice":
+        return { invoiceImg: imageUrl };
+      case "gatepass":
+        return { gatepassImage: imageUrl };
+      case "waybill":
+        return { wayBillImage: imageUrl };
       default:
         console.warn(`Unknown receipt type: ${receiptType}`);
         return null;
@@ -119,9 +195,13 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
 
       const body = getReceiptBody(type, imageUrl);
       if (body) {
-        await axios.patch(`${root}/customer/ledgers-images/${customerId}`, body, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await axios.patch(
+          `${root}/customer/ledgers-images/${customerId}`,
+          body,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
       }
 
       setUploadedFiles((prev) => ({
@@ -136,7 +216,10 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
         ...prev,
         [type.toLowerCase()]: imageUrl,
       }));
-      toast.success(`${type} uploaded successfully!`);
+      showToast({
+        message: `${type} uploaded successfully!`,
+        type: "success",
+      });
     } catch (error) {
       toast.error(`Failed to upload ${type}. Please try again.`);
       console.error("Upload error:", error.response?.data || error.message);
@@ -178,7 +261,9 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
                   id={`image-${type}`}
                   className="bg-gray-300 rounded min-w-[70px] h-[70px] flex justify-center items-center overflow-hidden cursor-pointer"
                   style={{
-                    backgroundImage: displayImageUrl ? `url(${displayImageUrl})` : "none",
+                    backgroundImage: displayImageUrl
+                      ? `url(${displayImageUrl})`
+                      : "none",
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                   }}
@@ -204,7 +289,7 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[101]">
       <div className="bg-white p-6 rounded shadow-md w-[90%] max-w-[850px] relative max-h-[550px] overflow-y-scroll">
-        <Toaster />
+        {/* <Toaster /> */}
         <Flex justify="between" className="mb-4">
           <div>
             <p className="text-sm font-bold opacity-50">Customer Name:</p>
@@ -224,25 +309,42 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
               </p>
               {summary.bankName && <p>Paid to {summary.bankName}</p>}
             </Flex>
-            <p className="text-lg font-bold mt-4">Ledger Transactions History</p>
+            <p className="text-lg font-bold mt-4">
+              Ledger Transactions History
+            </p>
             {loading ? (
               <Spinner />
             ) : entries.length === 0 ? (
               <p className="text-red-500 p-4">
-                {failedSearch ? "An error occurred. Try again." : "No transactions found."}
+                {failedSearch
+                  ? "An error occurred. Try again."
+                  : "No transactions found."}
               </p>
             ) : (
               entries.map((entry, idx) => (
                 <Grid key={idx} columns="3" gap="2" className="p-1">
                   <p className="text-xs">
-                    {entry.creditType === null && `${entry.quantity} ${entry.unit} of`}{" "}
-                    {entry.product?.name}
+                    {entry.creditType === null &&
+                      `${entry.quantity} ${entry.unit} of`}{" "}
+                    {(entry.quantity && entry?.quantity) || ""}{" "}
+                    {(entry.unit && entry?.unit) || ""} of {entry.product?.name}
+                    
+                    <TransactionTag entry={entry}/>
                   </p>
                   <p className="text-xs">
                     {entry.creditType && `Paid with ${entry.creditType}`}
                   </p>
-                  <p className={`text-xs ${entry.credit > entry.debit ? "text-green-500" : "text-red-500"}`}>
-                    ₦ {entry.debit > entry.credit  ? formatMoney(entry.debit) : formatMoney(entry.credit)}
+                  <p
+                    className={`text-xs ${
+                      entry.credit > entry.debit
+                        ? "text-green-500"
+                        : "text-red-500"
+                    }`}
+                  >
+                    ₦{" "}
+                    {entry.debit > entry.credit
+                      ? formatMoney(entry.debit)
+                      : formatMoney(entry.credit)}
                   </p>
                 </Grid>
               ))
@@ -256,31 +358,44 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
             <Text className="font-bold">Weigh Bridge Summary</Text>
             <div
               ref={divRef}
+              id="image-weigh"
               className="w-20 h-20 mt-2 rounded-md bg-gray-400/40 border-2 cursor-pointer"
-              onClick={() => handleFullscreen("weigh", entries[0]?.weighImage)}
+              onClick={() => handleFullscreen("weigh", weighImage)}
               style={{
-                backgroundImage: entries[0]?.weighImage ? `url(${entries[0].weighImage})` : "none",
+                backgroundImage: weighImage ? `url(${weighImage})` : "none",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
             />
             {docOrders.authToWeighTickets && (
               <div>
-                <p className="py-2">Vehicle No: {docOrders.authToWeighTickets.vehicleNo}</p>
-                <p className="py-2">Driver's Name: {docOrders.authToWeighTickets.driver}</p>
-                <p className="py-2">Tar Quantity: {docOrders.weighBridge?.tar}</p>
-                <p className="py-2">Gross Quantity: {docOrders.weighBridge?.gross}</p>
-                <p className="py-2">Net Quantity: {docOrders.weighBridge?.net}</p>
+                <p className="py-2">
+                  Vehicle No: {docOrders.authToWeighTickets.vehicleNo}
+                </p>
+                <p className="py-2">
+                  Driver's Name: {docOrders.authToWeighTickets.driver}
+                </p>
+                <p className="py-2">
+                  Tar Quantity: {docOrders.weighBridge?.tar}
+                </p>
+                <p className="py-2">
+                  Gross Quantity: {docOrders.weighBridge?.gross}
+                </p>
+                <p className="py-2">
+                  Net Quantity: {docOrders.weighBridge?.net}
+                </p>
               </div>
             )}
           </div>
         </div>
         <Flex justify="end" className="mt-5">
           <Flex gap="2">
-            {["invoice", "gatepass", "waybill-invoice"].map((route) => (
+            {["invoice", "gatepass", "waybill"].map((route) => (
               <Button
                 key={route}
-                onClick={() => navigate(`/admin/receipt/create-${route}/${customerId}`)}
+                onClick={() =>
+                  navigate(`/admin/receipt/create-${route}/${customerId}`)
+                }
                 variant="outline"
                 disabled={loading}
               >
@@ -292,8 +407,18 @@ const DocumentsModal = ({ isOpen, onClose, customerName, customerId }) => {
         <Button
           onClick={() => {
             onClose();
-            setReceiptImages({ cashticket: null, invoice: null, gatepass: null, waybill: null });
-            setUploadedFiles({ cashticket: null, invoice: null, gatepass: null, waybill: null });
+            setReceiptImages({
+              cashticket: null,
+              invoice: null,
+              gatepass: null,
+              waybill: null,
+            });
+            setUploadedFiles({
+              cashticket: null,
+              invoice: null,
+              gatepass: null,
+              waybill: null,
+            });
           }}
           className="absolute top-2 right-2 bg-red-400 cursor-pointer"
           disabled={loading}

@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import useToast from "../../../../hooks/useToast";
 import {
   Card,
   Select,
@@ -21,6 +23,7 @@ const root = import.meta.env.VITE_ROOT;
 const AddSuppliers = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [firstname, setFirstName] = useState("");
+  const showToast = useToast();
   const [lastname, setLastName] = useState("");
   const [address, setAddress] = useState("");
   const [number, setNumber] = useState("");
@@ -53,12 +56,12 @@ const AddSuppliers = () => {
         },
       });
       setIsLoading(false);
-      toast.success(response.data.message, {
-        duration: 6000,
-        style: {
-          padding: "30px",
-        },
-      });
+      showToast({
+        message: response.data.message,
+        type: "success",
+        duration:5000
+      })
+     
       // Clear the form fields
       setFirstName("");
       setLastName("");
@@ -67,7 +70,12 @@ const AddSuppliers = () => {
       setEmail("");
     } catch (error) {
       setIsLoading(false);
-      toast.error(error.response.data.error);
+      showToast({
+        type: "error",
+        message: error.response.data.error || "An error occurred, try again",
+        duration:5000
+      })
+      
       console.log(error);
     }
   };

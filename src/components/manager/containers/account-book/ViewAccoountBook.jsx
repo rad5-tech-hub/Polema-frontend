@@ -1,53 +1,126 @@
 import React, { useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faClose, faRedoAlt } from "@fortawesome/free-solid-svg-icons";
+import { DatePicker } from "antd";
 import { refractor, formatMoney } from "../../../date";
 import toast, { Toaster } from "react-hot-toast";
-import { Spinner, Table, Heading, Select, Flex } from "@radix-ui/themes";
+import {
+  Spinner,
+  Table,
+  Heading,
+  Select,
+  Flex,
+  Button,
+} from "@radix-ui/themes";
 import axios from "axios";
 import { Modal } from "antd";
+const { RangePicker } = DatePicker;
 
 const root = import.meta.env.VITE_ROOT;
 
 const ViewAccountBook = () => {
+  const [rawAccountBook, setRawAccountBook] = useState([]);
   const [accountBook, setAccountBook] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [customerActive, setCustomerActive] = useState(true);
   const [department, setDepartments] = useState([]);
-  const [accountRecepient, setAccountRecepient] = useState("customers");
   const [failedSearch, setFailedSearch] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility state
-  const [selectedRow, setSelectedRow] = useState(null); // Selected row data
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [bankDetails, setBankDetails] = useState([]);
+  const [selectedBank, setSelectedBank] = useState("all");
+  const [dateRange, setDateRange] = useState(null);
+  const [paginationUrls, setPaginationUrls] = useState([]);
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
-  // Fetch Details of account book
-  const fetchAccountBookDetails = async () => {
+  // Fetch Bank Details
+  const fetchBankDetails = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("An error occurred, try logging in again");
+      return;
+    }
+    try {
+      const response = await axios.get(`${root}/admin/get-banks`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setBankDetails(response.data.banks || []);
+    } catch (error) {
+      console.error("Error fetching banks:", error);
+      toast.error("Error: Error in getting bank details");
+    }
+  };
+
+  // Fetch Account Book Details
+  const fetchAccountBookDetails = async (
+    startDate = null,
+    endDate = null,
+    pageUrl = null,
+    clearParams = false,
+    bank = selectedBank
+  ) => {
+    setLoading(true);
+    setRawAccountBook([]);
     setAccountBook([]);
-    const retrToken = localStorage.getItem("token");
-
-    if (!retrToken) {
+    setFailedSearch(false);
+    const token = localStorage.getItem("token");
+    if (!token) {
       toast.error("An error occurred. Try logging in again");
+      setLoading(false);
       return;
     }
 
-    const changeURLByRecepient = (recepient) => {
-      switch (recepient) {
-        case "customers": return "get-accountbook";
-        case "suppliers": return "get-supplier-accountbook";
-        case "others": return "get-other-accountbook";
-        default: return "";
-      }
-    };
+    let url;
+    const nameParam = !clearParams && bank !== "all" ? `&bankId=${encodeURIComponent(bank)}` : "";
+
+    if (pageUrl) {
+      url = `${root}${pageUrl}${nameParam}`;
+    } else if (startDate && endDate && !clearParams) {
+      url = `${root}/customer/acctbook-filter?startDate=${startDate}&endDate=${endDate}${nameParam}`;
+    } else {
+      url = `${root}/customer/acctbook-filter${nameParam ? `?${nameParam.slice(1)}` : ""}`;
+    }
+
+    // If this is the initial load (no pageUrl), reset pagination state
+    if (!pageUrl) {
+      setPaginationUrls([]);
+      setCurrentPageIndex(0);
+    }
 
     try {
-      const response = await axios.get(
-        `${root}/customer/${changeURLByRecepient(accountRecepient)}`,
-        { headers: { Authorization: `Bearer ${retrToken}` } }
-      );
-      response.data.acct.length === 0
-        ? setFailedSearch(true)
-        : setAccountBook(response.data.acct);
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const output = response.data.data;
+
+      if (output.length === 0) {
+        setFailedSearch(true);
+        setRawAccountBook([]);
+        setAccountBook([]);
+      } else {
+        setRawAccountBook(output);
+        setAccountBook(output);
+        setFailedSearch(false);
+      }
+
+      if (response.data.pagination?.nextPage) {
+        setPaginationUrls((prev) => {
+          const newUrl = response.data.pagination.nextPage;
+          if (!prev.includes(newUrl)) {
+            return [...prev, newUrl];
+          }
+          return prev;
+        });
+      } else {
+        // No more pages, so we're at the end
+        setPaginationUrls((prev) => prev);
+      }
+
+      setLoading(false);
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching account book:", error);
       setLoading(false);
       toast.error("An error occurred, try again later", {
         style: { padding: "20px" },
@@ -57,16 +130,16 @@ const ViewAccountBook = () => {
     }
   };
 
-  // Fetch Customer details from backend
+  // Fetch Customer details
   const fetchCustomers = async () => {
-    const retrToken = localStorage.getItem("token");
-    if (!retrToken) {
+    const token = localStorage.getItem("token");
+    if (!token) {
       toast.error("An error occurred. Try logging in again");
       return;
     }
     try {
       const response = await axios.get(`${root}/customer/get-customers`, {
-        headers: { Authorization: `Bearer ${retrToken}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setCustomers(response.data.customers || []);
     } catch (error) {
@@ -74,36 +147,38 @@ const ViewAccountBook = () => {
     }
   };
 
+  // Fetch Products
   const fetchProducts = async () => {
-    const retrToken = localStorage.getItem("token");
-    if (!retrToken) {
+    const token = localStorage.getItem("token");
+    if (!token) {
       toast.error("An error occurred. Try logging in again");
       return;
     }
     try {
       const response = await axios.get(`${root}/admin/get-products`, {
-        headers: { Authorization: `Bearer ${retrToken}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setProducts(response.data.length === 0 ? [] : response.data.products);
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching products:", error);
       toast.error(error.message);
     }
   };
 
+  // Fetch Departments
   const fetchDepartments = async () => {
-    const retrToken = localStorage.getItem("token");
-    if (!retrToken) {
+    const token = localStorage.getItem("token");
+    if (!token) {
       toast.error("An error occurred. Try logging in again");
       return;
     }
     try {
       const response = await axios.get(`${root}/dept/view-department`, {
-        headers: { Authorization: `Bearer ${retrToken}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setDepartments(response.data.departments);
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching departments:", error);
     }
   };
 
@@ -124,23 +199,123 @@ const ViewAccountBook = () => {
     setSelectedRow(null);
   };
 
+  // Handle bank selection
+  const handleBankChange = (value) => {
+    setPaginationUrls([]);
+    setCurrentPageIndex(0);
+    fetchAccountBookDetails(
+      dateRange?.[0]?.format("YYYY-MM-DD"),
+      dateRange?.[1]?.format("YYYY-MM-DD"),
+      null,
+      false,
+      value
+    );
+    setSelectedBank(value);
+  };
+
+  // Handle clear date range
+  const handleClearDateRange = () => {
+    setDateRange(null);
+    setPaginationUrls([]);
+    setCurrentPageIndex(0);
+    fetchAccountBookDetails(null, null, null, true);
+  };
+
+  // Handle next page
+  const handleNextPage = () => {
+    if (currentPageIndex < paginationUrls.length) {
+      setCurrentPageIndex((prev) => prev + 1);
+      fetchAccountBookDetails(null, null, paginationUrls[currentPageIndex]);
+    }
+  };
+
+  // Handle previous page
+  const handlePreviousPage = () => {
+    if (currentPageIndex > 0) {
+      const prevIndex = currentPageIndex - 1;
+      setCurrentPageIndex(prevIndex);
+      fetchAccountBookDetails(null, null, paginationUrls[prevIndex - 1] || null);
+    }
+  };
+
+  // Filter accountBook based on selectedBank
+  useEffect(() => {
+    if (selectedBank === "all") {
+      setAccountBook(rawAccountBook);
+      setFailedSearch(rawAccountBook.length === 0);
+    } else {
+      const filtered = rawAccountBook.filter(
+        (details) => details.bank?.id?.toString() === selectedBank
+      );
+      setAccountBook(filtered);
+      setFailedSearch(filtered.length === 0);
+    }
+  }, [selectedBank, rawAccountBook]);
+
   useEffect(() => {
     fetchCustomers();
     fetchProducts();
     fetchDepartments();
+    fetchBankDetails();
     fetchAccountBookDetails();
   }, []);
 
-  useEffect(() => {
-    fetchAccountBookDetails();
-  }, [accountRecepient]);
-
   return (
     <>
-      <Flex justify={"between"}>
-        <Heading className="mb-4">Account Book</Heading>
+      <style>
+        
+      </style>
+      <Flex justify="between" align="center" className="mb-4">
+        <Heading>Account Book</Heading>
+        <div className="flex gap-4">
+          <div className="date-picker right-0 top-0">
+            <RangePicker
+              value={dateRange}
+              onCalendarChange={(dates) => {
+                setDateRange(dates);
+                if (dates && dates[0] && dates[1]) {
+                  setPaginationUrls([]);
+                  setCurrentPageIndex(0);
+                  fetchAccountBookDetails(
+                    dates[0].format("YYYY-MM-DD"),
+                    dates[1].format("YYYY-MM-DD")
+                  );
+                }
+              }}
+            />
+            {dateRange !== null && (
+              <FontAwesomeIcon
+                icon={faRedoAlt}
+                className="ml-2 cursor-pointer"
+                onClick={handleClearDateRange}
+              />
+            )}
+          </div>
+          <Select.Root
+            value={selectedBank}
+            onValueChange={handleBankChange}
+            size="2"
+          >
+            <Select.Trigger placeholder="Filter by Bank" />
+            <Select.Content position="popper">
+              <Select.Item value="all">All Banks</Select.Item>
+              {bankDetails.length === 0 ? (
+                <Select.Item value="no-banks" disabled>
+                  No Banks Available
+                </Select.Item>
+              ) : (
+                bankDetails.map((bank) => (
+                  <Select.Item key={bank.id} value={bank.id.toString()}>
+                    {bank.name}
+                  </Select.Item>
+                ))
+              )}
+            </Select.Content>
+          </Select.Root>
+        </div>
       </Flex>
-      <Table.Root variant="surface">
+
+      <Table.Root variant="surface" className="mb-20">
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
@@ -149,16 +324,29 @@ const ViewAccountBook = () => {
             <Table.ColumnHeaderCell>DEPARTMENT</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>PRODUCT</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>RAW MATERIALS</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-green-500">CREDIT(₦)</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="text-red-500">DEBIT(₦)</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-green-500">
+              CREDIT(₦)
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="text-red-500">
+              DEBIT(₦)
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>
+              {selectedBank === "all" ? "BALANCE" : "BANK BALANCE"}
+            </Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
 
         <Table.Body>
-          {accountBook.length === 0 ? (
+          {loading ? (
             <Table.Row>
-              <Table.Cell colSpan="8">
-                {failedSearch ? "No Records Found" : <Spinner />}
+              <Table.Cell colSpan="9">
+                <Spinner />
+              </Table.Cell>
+            </Table.Row>
+          ) : accountBook.length === 0 ? (
+            <Table.Row>
+              <Table.Cell colSpan="9">
+                {failedSearch ? "No Records Found" : "No Data Available"}
               </Table.Cell>
             </Table.Row>
           ) : (
@@ -166,19 +354,27 @@ const ViewAccountBook = () => {
               <Table.Row
                 key={details.id}
                 className="hover:bg-gray-600/10"
-                onClick={() => handleRowClick(details)} // Add click handler
-                style={{ cursor: "pointer" }} // Indicate clickable row
+                onClick={() => handleRowClick(details)}
+                style={{ cursor: "pointer" }}
               >
                 <Table.Cell>{refractor(details.createdAt)}</Table.Cell>
                 <Table.Cell>
                   {details.other === null
-                    ? details.credit > details.debit
-                      ? `${details.theCustomer.firstname} ${details.theCustomer.lastname}`
-                      : `${details.theSupplier.firstname} ${details.theSupplier.lastname}`
+                    ? details.theSupplier === null
+                      ? `${details.theCustomer?.firstname || ""} ${
+                          details.theCustomer?.lastname || ""
+                        }`
+                      : `${details.theSupplier?.firstname || ""} ${
+                          details.theSupplier?.lastname || ""
+                        }`
                     : details.other}
                 </Table.Cell>
-                <Table.Cell>{details.bank?.name || "No bank provided"}</Table.Cell>
-                <Table.Cell>{matchDepartmentNameById(details.departmentId)}</Table.Cell>
+                <Table.Cell>
+                  {details.bank?.name || "No bank provided"}
+                </Table.Cell>
+                <Table.Cell>
+                  {matchDepartmentNameById(details.departmentId)}
+                </Table.Cell>
                 <Table.Cell>
                   {details.other == null
                     ? details.credit < details.debit
@@ -194,10 +390,21 @@ const ViewAccountBook = () => {
                     : ""}
                 </Table.Cell>
                 <Table.Cell>
-                  {formatMoney(details.credit > details.debit ? details.credit : "")}
+                  {formatMoney(
+                    details.credit > details.debit ? details.credit : ""
+                  )}
                 </Table.Cell>
                 <Table.Cell>
-                  {formatMoney(details.debit > details.credit ? details.debit : "")}
+                  {formatMoney(
+                    details.debit > details.credit ? details.debit : ""
+                  )}
+                </Table.Cell>
+                <Table.Cell>
+                  {formatMoney(
+                    selectedBank === "all"
+                      ? details.balance
+                      : details.bankBalance || ""
+                  )}
                 </Table.Cell>
               </Table.Row>
             ))
@@ -205,7 +412,25 @@ const ViewAccountBook = () => {
         </Table.Body>
       </Table.Root>
 
-      {/* Modal for showing credit/debit details */}
+      {paginationUrls.length > 0 && (
+        <div className="pagination-fixed ml-8 items-center">
+          {/* <Flex justify="center" gap="2"> */}
+            <Button
+              onClick={handlePreviousPage}
+              disabled={currentPageIndex === 0}
+            >
+              Previous
+            </Button>
+            <Button
+              onClick={handleNextPage}
+              disabled={paginationUrls.length === 0 || currentPageIndex >= paginationUrls.length}
+            >
+              Next
+            </Button>
+          {/* </Flex> */}
+        </div>
+      )}
+
       <Modal
         title="Transaction Details"
         open={isModalOpen}
@@ -213,25 +438,60 @@ const ViewAccountBook = () => {
         footer={null}
       >
         {selectedRow && (
-         <div>
-         <p style={{ padding: "8px 0" }}><strong>Date:</strong> {refractor(selectedRow.createdAt)}</p>
-         <p style={{ padding: "8px 0" }}><strong>Name:</strong> 
-           {selectedRow.other === null
-             ? selectedRow.credit > selectedRow.debit
-               ? `${selectedRow.theCustomer.firstname} ${selectedRow.theCustomer.lastname}`
-               : `${selectedRow.theSupplier.firstname} ${selectedRow.theSupplier.lastname}`
-             : selectedRow.other}
-         </p>
-         <p style={{ padding: "8px 0" }}><strong>Bank Name:</strong> {selectedRow.bank?.name || "No bank provided"}</p>
-         <p style={{ padding: "8px 0" }}><strong>Department:</strong> {matchDepartmentNameById(selectedRow.departmentId)}</p>
-         <p style={{ padding: "8px 0" }}><strong>Credit (₦):</strong> {formatMoney(selectedRow.credit > selectedRow.debit ? selectedRow.credit : 0)}</p>
-         <p style={{ padding: "8px 0" }}><strong>Debit (₦):</strong> {formatMoney(selectedRow.debit > selectedRow.credit ? selectedRow.debit : 0)}</p>
-         <p style={{ padding: "8px 0" }}><strong>Comment:</strong> {selectedRow.comments}</p>
-       </div>
+          <div>
+            <p style={{ padding: "8px 0" }}>
+              <strong>Date:</strong> {refractor(selectedRow.createdAt)}
+            </p>
+            <p style={{ padding: "8px 0" }}>
+              <strong>Name:</strong>
+              {selectedRow.other === null
+                ? selectedRow.theSupplier === null
+                  ? `${selectedRow.theCustomer?.firstname || ""} ${
+                      selectedRow.theCustomer?.lastname || ""
+                    }`
+                  : `${selectedRow.theSupplier?.firstname || ""} ${
+                      selectedRow.theSupplier?.lastname || ""
+                    }`
+                : selectedRow.other}
+            </p>
+            <p style={{ padding: "8px 0" }}>
+              <strong>Bank Name:</strong>{" "}
+              {selectedRow.bank?.name || "No bank provided"}
+            </p>
+            <p style={{ padding: "8px 0" }}>
+              <strong>Department:</strong>{" "}
+              {matchDepartmentNameById(selectedRow.departmentId)}
+            </p>
+            <p style={{ padding: "8px 0" }}>
+              <strong>Credit (₦):</strong>{" "}
+              {formatMoney(
+                selectedRow.credit > selectedRow.debit ? selectedRow.credit : 0
+              )}
+            </p>
+            <p style={{ padding: "8px 0" }}>
+              <strong>Debit (₦):</strong>{" "}
+              {formatMoney(
+                selectedRow.debit > selectedRow.credit ? selectedRow.debit : 0
+              )}
+            </p>
+            <p style={{ padding: "8px 0" }}>
+              <strong>
+                {selectedBank === "all" ? "Balance" : "Bank Balance"} (₦):
+              </strong>{" "}
+              {formatMoney(
+                selectedBank === "all"
+                  ? selectedRow.balance
+                  : selectedRow.bankBalance || 0
+              )}
+            </p>
+            <p style={{ padding: "8px 0" }}>
+              <strong>Comment:</strong> {selectedRow.comments}
+            </p>
+          </div>
         )}
       </Modal>
 
-      <Toaster position="top-right" />
+      {/* <Toaster position="top-right" /> */}
     </>
   );
 };

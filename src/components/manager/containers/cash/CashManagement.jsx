@@ -12,6 +12,7 @@ import {
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import { Modal, Button as AntButton, Select as AntSelect } from "antd";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -28,6 +29,7 @@ const CashManagement = () => {
   const [name, setName] = useState("");
   const [comment, setComment] = useState("");
   const [amount, setAmount] = useState("");
+  const showToast = useToast();
 
   const fetchAdmins = async () => {
     const retrToken = localStorage.getItem("token");
@@ -96,7 +98,7 @@ const CashManagement = () => {
         return;
       }
 
-      if (!name || !cashAmount || !adminId || !comment ) {
+      if (!name || !cashAmount || !adminId || !comment) {
         toast.error("Please fill all required fields.");
         setButtonLoading(false);
         return;
@@ -118,11 +120,12 @@ const CashManagement = () => {
             headers: { Authorization: `Bearer ${retrToken}` },
           }
         );
-        toast.success(response.data.message, {
-          style: { padding: "30px" },
-          duration: 5500,
-        });
-
+        
+        showToast({
+          message: response.data.message,
+          type: "success",
+          duration: 4000,
+          })
         setAdminId(undefined); // Reset to undefined
         setDepartmentId(undefined); // Reset to undefined
         setCashAmount("");
@@ -163,9 +166,14 @@ const CashManagement = () => {
         closable={false}
         onCancel={() => setModalOpen(false)}
       >
-        <h1 className="font-space font-bold text-lg">What do you want to do?</h1>
+        <h1 className="font-space font-bold text-lg">
+          What do you want to do?
+        </h1>
         <div className="flex mt-4 justify-between">
-          <AntButton className="bg-green-500 text-white" onClick={handleCollectCash}>
+          <AntButton
+            className="bg-green-500 text-white"
+            onClick={handleCollectCash}
+          >
             Collect Cash
           </AntButton>
           <AntButton className="bg-red-500 text-white" onClick={handleGiveCash}>
@@ -179,8 +187,12 @@ const CashManagement = () => {
           <Heading>Cash Management</Heading>
           {!modalOpen && (
             <AntSelect
-              defaultValue={isCashCollection ? "Cash Collection" : "Cash Disbursement"}
-              onChange={(value) => setIsCashCollection(value === "Cash Collection")}
+              defaultValue={
+                isCashCollection ? "Cash Collection" : "Cash Disbursement"
+              }
+              onChange={(value) =>
+                setIsCashCollection(value === "Cash Collection")
+              }
               style={{ width: 200 }}
               options={[
                 { value: "Cash Collection", label: "Cash Collection" },
@@ -227,7 +239,7 @@ const CashManagement = () => {
                 disabled={dropdownBlur}
                 style={{ width: "100%", marginTop: "8px" }}
                 options={admins.map((admin) => ({
-                  value: admin.id,
+                  value: admin.role.id,
                   label: `${admin.firstname} ${admin.lastname}`,
                 }))}
               />

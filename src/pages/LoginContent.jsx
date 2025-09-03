@@ -3,6 +3,7 @@ import Image from "../static/image/login-bg.png";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import {jwtDecode} from "jwt-decode"  
 import { TextField, Heading, Card, Button } from "@radix-ui/themes";
 import {
   LockClosedIcon,
@@ -10,11 +11,13 @@ import {
   EyeOpenIcon,
   EyeClosedIcon,
 } from "@radix-ui/react-icons"; // Add icons for eye open and closed
+import useToast from "../hooks/useToast"
 
 const root = import.meta.env.VITE_ROOT;
 
 const LoginContent = () => {
   const [loading, setLoading] = useState(false); // Spinner state
+  const showToast = useToast()
   const [passwordVisible, setPasswordVisible] = useState(false); // Password visibility state
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
@@ -23,39 +26,38 @@ const LoginContent = () => {
     e.preventDefault();
     setLoading(true); // Show spinner
 
+
     try {
       const response = await axios.post(`${root}/admin/login`, {
         email: email,
         password: e.target[1].value,
       });
+        
 
+      const adminData = {
+        firstname: response.data.admin.lastname,
+        lastname: response.data.admin.firstname,
+        role: jwtDecode(response.data.token).roleName,
+      }; 
       localStorage.setItem("token", response.data.token);
-      localStorage.setItem("adminFirstName", response.data.admin.firstname);
-
-      // toast.success("Login Successful", {
-      //   style: {
-      //     padding: "30px",
-      //   },
-      //   duration: 6000,
-      // });
+      localStorage.setItem("adminData", JSON.stringify(adminData));
       navigate("/admin");
     } catch (error) {
       
       // Handle error
       if (error.response) {
-        toast.error(error.response.data.error, {
-          style: {
-            padding: "30px",
-          },
-          duration: 7500,
+        showToast({
+          message: error.response.data.error,
+          type:"error"
         });
+        
       } else if (error.request) {
-        toast.error("Network Error", {
-          style: {
-            padding: "30px",
-          },
-          duration: 7500,
-        });
+        showToast({
+          message: "Network Error",
+          type: "error",
+          duration:4000
+        })
+     
       }
     } finally {
       setLoading(false); // Remove spinner after request completes
@@ -129,14 +131,16 @@ const LoginContent = () => {
                   </TextField.Slot>
                 </TextField.Root>
 
-                <p
-                  className="text-right mt-[10px] text-[.7rem] cursor-pointer underline"
-                  onClick={() => {
-                    navigate(`/confirm-email`);
-                  }}
-                >
-                  Forgot Password?
-                </p>
+                <div className="flex justify-end mt-4">
+                  <p
+                      className="mt-2 text-[0.8rem] w-fit cursor-pointer underline"
+                      onClick={() => {
+                        navigate(`/confirm-email`);
+                      }}
+                    >
+                      Forgot Password?
+                    </p>
+                </div>
               </div>
 
               <div className="btn w-full">

@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from "react";
+import useToast from "../../../../hooks/useToast";
 import { LoaderIcon } from "react-hot-toast";
 import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { Select } from "@radix-ui/themes";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const root = import.meta.env.VITE_ROOT;
 
 const WaybillCreateInvoice = () => {
+  const showToast = useToast()
   const { id } = useParams();
+  const navigate = useNavigate()
   const [buttonLoading, setButtonLoading] = useState(false);
   const [ledgerEntries, setLedgerEntries] = useState(null); // Initialize as `null` for type safety.
   const [selectedTransport, setSelectedTransport] = useState("");
@@ -19,12 +23,14 @@ const WaybillCreateInvoice = () => {
   const [bagNumber, setBagNumber] = useState("");
   const [carriedByWho, setCarriedByWho] = useState("");
   const [adminId, setAdminId] = useState("");
-  const [wayBillId, setWayBillId] = useState("");
   const [invoiceNo, setInvoiceNo] = useState("");
   const [address, setAddress] = useState("");
 
-  // Function to fetch entry details
-  const fetchEntryDetails = async () => {
+  const [driverName, setDriverName] = useState("");
+  const [vehicleNo, setVehicleNo] = useState("");
+  const [customerId, setCustomerId] = useState("");
+
+  const TransDetails = async () => {
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -38,17 +44,37 @@ const WaybillCreateInvoice = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      if (response.data?.order) {
-        setLedgerEntries(response.data.order);
-      } else {
-        throw new Error("Invalid data format received.");
-      }
+      const customerInfo = response.data.ledger?.customerId;
+      setCustomerId(customerInfo);    
+      setDriverName(response.data.order?.authToWeighTickets?.driver || "");
+      setVehicleNo(response.data.order?.authToWeighTickets?.vehicleNo || "");
     } catch (error) {
-      console.error("Error fetching entry details:", error);
-      toast.error("An error occurred while fetching details.");
+
+      toast.error("Failed to fetch gate pass details");
     }
   };
 
+  const fetchDetails = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("An error occurred, try logging in again.", {
+        duration: 5000,
+      });
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${root}/customer/get-customer/${customerId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const customerInfo = response.data.customer;
+      setAddress(customerInfo?.address || "");
+      
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to fetch customer details.");
+    }
+  };
   // Function to fetch super admins
   const fetchSuperAdmins = async () => {
     const token = localStorage.getItem("token");
@@ -94,7 +120,8 @@ const WaybillCreateInvoice = () => {
     // Prepare the request body
     const body = {
       ...(bagNumber && { bags: bagNumber }),
-      driversLicense: driverLicense,
+      ...(driverLicense && {driversLicense: driverLicense}),
+      
       transportedBy: carriedByWho,
     };
 
@@ -137,32 +164,46 @@ const WaybillCreateInvoice = () => {
       setInvoiceNo("");
 
       setButtonLoading(false);
-      toast.success("Waybill created and sent successfully!", {
-        style: {
-          padding: "20px",
-        },
-        duration: 10000,
+      showToast({
+        message: "Waybill created and sent successfully!",
+        duration: 4000,
+        type: "success",
       });
+     
+      setTimeout(()=>{
+        navigate("/admin/receipts/waybill");
+      },3000)
     } catch (error) {
       console.error("Error during request:", error);
       setButtonLoading(false);
-      toast.error("An error occurred, please try again later", {
-        style: {
-          padding: "20px",
-        },
-      });
+      showToast({
+        message:"An error occurred , please try again later",
+        duration:5000,
+        type:"error"
+      })
+      
     }
   };
 
   useEffect(() => {
-    fetchEntryDetails();
     fetchSuperAdmins();
+
+    //get driver name and vehicle number when page loads
+    setDriverName(ledgerEntries?.authToWeighTickets?.driver || "");
+    setVehicleNo(ledgerEntries?.authToWeighTickets?.vehicleNo || "");
   }, []);
+
+  useEffect(() => {      
+    TransDetails();
+    if (customerId) {
+      fetchDetails();
+    }
+  }, [id, customerId]);
 
   return (
     <div className="p-6 relative mb-16">
       <div className="invoice flex justify-between items-center py-2">
-        <b className="text-[#434343]">Waybill</b>
+        <b className="text-[#434343] text-lg">Waybill</b>
       </div>
       <form className="my-8" onSubmit={handleSubmit}>
         <div className="my-8 grid grid-cols-2 max-sm:grid-cols-1 gap-8 border-t-[1px] border-[#9191914] py-8">
@@ -170,9 +211,9 @@ const WaybillCreateInvoice = () => {
             <label>To (Driver's Name)</label>
             <input
               type="text"
-              placeholder="Input"
-              disabled
-              value={ledgerEntries?.authToWeighTickets?.driver || ""}
+              placeholder="Enter Driver Name"
+              onChange={(e) => setDriverName(e.target.value)}
+              value={driverName}
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
@@ -180,6 +221,7 @@ const WaybillCreateInvoice = () => {
             <label>Address</label>
             <input
               value={address}
+              disabled
               onChange={(e) => setAddress(e.target.value)}
               type="text"
               placeholder="Enter Address"
@@ -204,9 +246,10 @@ const WaybillCreateInvoice = () => {
           <div className="vehicle-no">
             <label>Vehicle No</label>
             <input
-              placeholder="Input"
-              disabled
-              value={ledgerEntries?.authToWeighTickets?.vehicleNo || ""}
+              placeholder="Enter Vehicle Number"
+              // disabled
+              value={vehicleNo}
+              onChange={(e) => setVehicleNo(e.target.value)}
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
@@ -216,16 +259,15 @@ const WaybillCreateInvoice = () => {
               placeholder="Input Driver License"
               value={driverLicense}
               onChange={(e) => setDriverLicense(e.target.value)}
-              required
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
-          <div className="invoice-no">
+          {/* <div className="invoice-no">
             <label>Invoice No</label>
             <input
               value={invoiceNo}
               onChange={(e) => setInvoiceNo(e.target.value)}
-              placeholder="Input"
+              placeholder="Enter Invoice No"
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
           </div>
@@ -235,17 +277,18 @@ const WaybillCreateInvoice = () => {
               type="number"
               value={bagNumber}
               onChange={(e) => setBagNumber(e.target.value)}
-              placeholder="Input the No."
+              placeholder="Input number of bags"
               className="border border-[#8C949B40] rounded-lg px-4 h-[44px] mt-2 w-full"
             />
-          </div>
+          </div> */}
 
           <div>
-            <label>Send TO:</label>
+            <label>Send To:</label>
             <Select.Root
               size="3"
               value={adminId}
               disabled={superAdmins.length === 0}
+              required
               onValueChange={(value) => setAdminId(value)}
             >
               <Select.Trigger
@@ -254,10 +297,9 @@ const WaybillCreateInvoice = () => {
               />
               <Select.Content position="popper">
                 {superAdmins.map((admin) => (
-                  <Select.Item
-                    key={admin.id}
-                    value={admin.role?.id || " "}
-                  >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
+                  <Select.Item key={admin.id} value={admin.role?.id || " "}>{`${
+                    admin?.role?.name || ""
+                  } (${admin.firstname} ${admin.lastname}) `}</Select.Item>
                 ))}
               </Select.Content>
             </Select.Root>

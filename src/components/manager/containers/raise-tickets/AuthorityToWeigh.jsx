@@ -1,4 +1,5 @@
 import React from "react";
+import useToast from "../../../../hooks/useToast";
 import { refractor } from "../../../date";
 import axios from "axios";
 import {
@@ -18,10 +19,12 @@ import { useParams } from "react-router-dom";
 const root = import.meta.env.VITE_ROOT;
 import toast, { Toaster } from "react-hot-toast";
 import { SendOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 
 const AuthorityToWeigh = () => {
   const { customerId, orderId } = useParams();
-
+  const navigate = useNavigate();
+  const showToast = useToast();
   // State management for Switching between pages
   const [viewPageOpen, setViewPageOpen] = React.useState(false);
 
@@ -36,7 +39,7 @@ const AuthorityToWeigh = () => {
   const [adminDropdownDisabled, setAdminDropdownDisabled] =
     React.useState(true);
   const [ticketId, setTicketId] = React.useState("");
-  const [btnLoading,setBtnLoading] = React.useState(false)
+  const [btnLoading, setBtnLoading] = React.useState(false);
 
   // Function to check status
 
@@ -132,7 +135,7 @@ const AuthorityToWeigh = () => {
     const resetForm = () => {
       setAdminId("");
       setDriverName("");
-      setChiefAdminId("")
+      setChiefAdminId("");
       setVehicleNumber("");
     };
 
@@ -141,7 +144,7 @@ const AuthorityToWeigh = () => {
       vehicleNo: vehicleNumber,
       driver: driverName,
     };
-    setBtnLoading(true)
+    setBtnLoading(true);
 
     try {
       // Show loading toast
@@ -174,23 +177,32 @@ const AuthorityToWeigh = () => {
           },
         }
       );
-      setBtnLoading(false)
+      setBtnLoading(false);
 
       // Success Toast
-      toast.success("Ticket successfully sent!",{
-        style:{
-          padding:"20px"
-        },duration:5000
+      showToast({
+        message: "Ticket Successfully sent!",
+        duration: 5000,
+        type: "success",
       });
 
       // Reset form fields
       resetForm();
+
+      setTimeout(() => {
+        navigate("/admin/raise-ticket/authority-to-weigh");
+      },3000)
     } catch (error) {
       // Error Toast
-      setBtnLoading(false)
+      setBtnLoading(false);
       console.error(error);
-      toast.error(error.response.message || error.response.error || "An error occurred. Please try again later.", {
-        style: { padding: "20px" },
+      showToast({
+        message:
+          error.response.message ||
+          error.response.error ||
+          "An error occurred. Please try again later.",
+        type: "error",
+        duration: 5000,
       });
     }
   };
@@ -298,90 +310,97 @@ const AuthorityToWeigh = () => {
       {/* {viewPageOpen ? (
         <ViewAuthorityToWeigh />
       ) : ( */}
-        <>
-          <Heading>Authority to Weigh</Heading>
+      <>
+        <Heading>Authority to Weigh</Heading>
 
-          <Separator className="my-5 w-full" />
+        <Separator className="my-5 w-full" />
 
-          <form action="" onSubmit={handleSubmit}>
-            <Grid columns={"2"} rows={"2"} gap={"4"}>
-              <div className="w-full">
-                <Text>
-                  Vehicle Number<span className="text-red-500">*</span>
-                </Text>
-                <TextField.Root
-                  placeholder="Enter Vehicle Number"
-                  onChange={(e) => setVehicleNumber(e.target.value)}
-                  value={vehicleNumber}
-                  className="mt-2"
+        <form action="" onSubmit={handleSubmit}>
+          <Grid columns={"2"} rows={"2"} gap={"4"}>
+            <div className="w-full">
+              <Text>
+                Vehicle Number<span className="text-red-500">*</span>
+              </Text>
+              <TextField.Root
+                placeholder="Enter Vehicle Number"
+                onChange={(e) => setVehicleNumber(e.target.value)}
+                value={vehicleNumber}
+                className="mt-2"
+              />
+            </div>
+            <div className="w-full">
+              <Text>
+                Customer Name<span className="text-red-500">*</span>
+              </Text>
+              <TextField.Root
+                className="w-full mt-2 "
+                disabled
+                placeholder="Customer Name"
+                value={
+                  customers.length !== 0
+                    ? `${matchCustomerNameById().firstname} ${
+                        matchCustomerNameById().lastname
+                      }`
+                    : ""
+                }
+              />
+            </div>
+            <div className="w-full">
+              <Text>
+                Driver's Name<span className="text-red-500">*</span>
+              </Text>
+              <TextField.Root
+                placeholder="Enter Driver's Name"
+                value={driverName}
+                className="mt-2"
+                required
+                onChange={(e) => setDriverName(e.target.value)}
+              />
+            </div>
+            <div className="w-full">
+              <Text>
+                Send To<span className="text-red-500">*</span>
+              </Text>
+              <Select.Root
+                required
+                disabled={adminDropdownDisabled}
+                value={chiefAdminId}
+                onValueChange={(value) => {
+                  setChiefAdminId(value);
+                }}
+              >
+                <Select.Trigger
+                  placeholder="Select Admin"
+                  className="w-full mt-2"
                 />
-              </div>
-              <div className="w-full">
-                <Text>
-                  Customer Name<span className="text-red-500">*</span>
-                </Text>
-                <TextField.Root
-                  className="w-full mt-2 "
-                  disabled
-                  placeholder="Customer Name"
-                  value={
-                    customers.length !== 0
-                      ? `${matchCustomerNameById().firstname} ${
-                          matchCustomerNameById().lastname
-                        }`
-                      : ""
-                  }
-                />
-              </div>
-              <div className="w-full">
-                <Text>
-                  Driver's Name<span className="text-red-500">*</span>
-                </Text>
-                <TextField.Root
-                  placeholder="Enter Driver's Name"
-                  value={driverName}
-                  className="mt-2"
-                  required
-                  onChange={(e) => setDriverName(e.target.value)}
-                />
-              </div>
-              <div className="w-full">
-                <Text>
-                  Send To<span className="text-red-500">*</span>
-                </Text>
-                <Select.Root
-                  required
-                  disabled={adminDropdownDisabled}
-                  value={chiefAdminId}
-                  onValueChange={(value) => {
-                    setChiefAdminId(value);
-                  }}>
-                  <Select.Trigger
-                    placeholder="Select Admin"
-                    className="w-full mt-2"
-                  />
-                  <Select.Content position="popper">
-                    {admins.map((item) => {
-                      return (
-                        <Select.Item key={item.role?.id} value={item.role?.id || " "}>
-                          {item.firstname} {item.lastname}
-                        </Select.Item>
-                      );
-                    })}
-                  </Select.Content>
-                </Select.Root>
-              </div>
-            </Grid>
+                <Select.Content position="popper">
+                  {admins.map((item) => {
+                    return (
+                      <Select.Item
+                        key={item.role?.id}
+                        value={item.role?.id || " "}
+                      >
+                        ({item.firstname} {item.lastname}) {item.role?.name}
+                      </Select.Item>
+                    );
+                  })}
+                </Select.Content>
+              </Select.Root>
+            </div>
+          </Grid>
 
-            <Flex justify={"end"}>
-              <Button size={"3"} className="cursor-pointer mt-5 !bg-theme" disabled={btnLoading}>
-                
-                {btnLoading ? <Spinner/> :  "Send"}
-              </Button>
-            </Flex>
-          </form>
-          <Toaster position="top-right" />
-        </>
+          <Flex justify={"end"}>
+            <Button
+              size={"3"}
+              className="cursor-pointer mt-5 !bg-theme"
+              disabled={btnLoading}
+            >
+              {btnLoading ? <Spinner /> : "Send"}
+            </Button>
+          </Flex>
+        </form>
+        <Toaster position="top-right" />
+      </>
       {/* )} */}
     </>
   );

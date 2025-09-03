@@ -1,11 +1,15 @@
 import Onboarding from "./dashboard/Onboarding";
 import OfficialLPO from "./raise-tickets/OfficialLPO";
+import Cheque from "./receipts/Cheques";
 // import WelcomeComponent from "./WelcomeComponent";
 // import WelcomeComponent from "./dashbaord/WelcomeComponent";
 import BlankLPO from "./raise-tickets/BlankLPO";
+import Batching from "./department-store/Batching";
+import Dipping from "./department-store/Dipping";
 import EditDialog from "./products/EditDialog";
 import EditProducts from "./products/EditProducts";
 import AuthorityToGiveCash from "./raise-tickets/AuthorityToGiveCash";
+import ViewCashTickets from "./raise-tickets/ViewCashTickets"
 import AllWeigh from "./weighing-operations/AllWeigh";
 import ViewAuthorityToWeigh from "./raise-tickets/ViewAuthorityToWeigh";
 import IndividualDepartmentLedger from "./department-ledger/IndividualDepartmentLedger";
@@ -34,6 +38,7 @@ import IndividualCustomerLedger from "./customer/IndividualCustomerLedger";
 import ViewSupplierOrder from "./suppliers/ViewSupplierOrder";
 import ViewCustomerOrders from "./customer/ViewCustomerOrders";
 import AuthorityToWeigh from "./raise-tickets/AuthorityToWeigh";
+import NewAuthorityToWeigh from "./raise-tickets/authorityToWeighForSuppliers";
 import AuthorityToLoad from "./raise-tickets/AuthorityToLoad";
 import LocalPurchaseOrder from "./raise-tickets/LocalPurchaseOrder";
 import CreateDepartmentStore from "./department-store/CreateDepartmentStore";
@@ -60,6 +65,7 @@ import AllDepartments from "./department/AllDepartments";
 import AllCustomers from "./customer/AllCustomers";
 import AddSuppliers from "./suppliers/AddSuppliers";
 import SupplierPlaceOrder from "./suppliers/SupplierPlaceOrder";
+import CreateGatepassForSupplier from "./suppliers/supplierGatePass";
 import CreateRole from "./roles/CreateRole";
 import AllProducts from "./products/AllProducts";
 import InvoiceAuthorityToWeigh from "./raise-tickets/InvoiceAuthorityToWeigh";
@@ -83,9 +89,15 @@ import GeneralRecordBook from "./general-store/GeneralRecordBook";
 import DepartmentRecordBook from "./department-store/DepartmentRecordBook";
 import ManageGenStore from "./general-store/ManageGenStore";
 import ManageDeptStore from "./department-store/ManageDeptStore";
+import PrintingRecords from "./printing/printing";
+import BatchingRecords from  "./department-store/BatchingRecords"; 
+import AllChequeRecords from "./receipts/AllChequeRecords"; 
 export {
   // OfficialLPO,
+  AllChequeRecords,
   ManageDeptStore,
+  BatchingRecords,
+  Batching,
   ManagePharmacyStore,
   DepartmentRecordBook,
   ManageGenStore,
@@ -104,6 +116,7 @@ export {
   ViewDepartmentStore,
   AuthorityToGiveCash,
   SupplierPlaceOrder,
+  ViewCashTickets,
   AddSuppliers,
   AccountBook,
   CustomerPlaceOrder,
@@ -143,6 +156,7 @@ export {
   IndividualDepartmentLedger,
   GeneralSupplierLedger,
   AuthorityToWeigh,
+  NewAuthorityToWeigh,
   ViewLocalPurchaseOrder,
   ViewAuthorityToWeigh,
   AllWeigh,
@@ -150,6 +164,7 @@ export {
   AllGatePass,
   CreateDispatchNote,
   CreateGatepass,
+  CreateGatepassForSupplier,
   CreateInvoice,
   EditRole,
   GatepassReceipt,
@@ -166,4 +181,7 @@ export {
   Onboarding,
   OfficialLPO,
   EditProducts,
+  PrintingRecords,
+  Cheque,
+  Dipping,
 };

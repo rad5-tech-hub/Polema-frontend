@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
+import { LoaderIcon } from "react-hot-toast";
 import toast, { Toaster } from "react-hot-toast";
-
+import _ from "lodash";
 import { useNavigate } from "react-router-dom";
-import { Select as AntSelect } from "antd";
+import { Select as AntSelect, Modal } from "antd";
 const { Option } = AntSelect;
 import {
   Select,
@@ -16,10 +17,73 @@ import {
   Heading,
 } from "@radix-ui/themes";
 import axios from "axios";
+import useToast from "../../../../hooks/useToast";
 const root = import.meta.env.VITE_ROOT;
+
+// Define ConfirmModal outside AccountBook
+const ConfirmModal = ({
+  open,
+  onCancel,
+  transactionType,
+  basePrice,
+  customers,
+  selectedCustomerId,
+  otherName,
+  handleSubmit,
+}) => {
+  // Memoize computed values to avoid unnecessary recalculations
+  const customerName = useMemo(() => {
+    const customer = customers.find((c) => c.id === selectedCustomerId);
+    return customer ? `${customer.firstname} ${customer.lastname}` : otherName || "Unknown";
+  }, [customers, selectedCustomerId, otherName]);
+
+  const formattedAmount = useMemo(() => {
+    return basePrice ? `₦${basePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}` : "₦0";
+  }, [basePrice]);
+
+  return (
+    <Modal
+      open={open}
+      title="Confirm Transaction"
+      footer={null}
+      onCancel={onCancel}
+    >
+      <Heading>
+        Are you sure you want to{" "}
+        <span
+          className={`${
+            transactionType === "credit" ? "text-green-400" : "text-red-400"
+          }`}
+        >
+          {_.upperCase(transactionType)}
+        </span>{" "}
+        {formattedAmount} {transactionType === "credit" ? "to" :"from"} {customerName}?
+      </Heading>
+      <Flex justify={"end"} className="mt-4">
+        <Flex gap="3">
+          <Button
+            color="blue"
+            className="p-2 rounded border-2 border-black cursor-pointer mr-2"
+            onClick={handleSubmit}
+          >
+            Yes
+          </Button>
+          <Button
+            color="gray"
+            className="p-2 rounded border-2 border-black cursor-pointer mr-2"
+            onClick={onCancel}
+          >
+            No
+          </Button>
+        </Flex>
+      </Flex>
+    </Modal>
+  );
+};
 
 const AccountBook = () => {
   const navigate = useNavigate();
+
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
@@ -30,10 +94,12 @@ const AccountBook = () => {
   const [comment, setComment] = useState("");
   const [deptID, setDeptID] = useState("");
   const [modalSelected, setModalSelected] = useState(false);
-  const [bankDetails,setBankDetails] = useState([]);
-  const [bankId,setBankId] = useState("")
-
-  const [isCustomer, setIscustomer] = useState("");
+  const [bankDetails, setBankDetails] = useState([]);
+  const [bankId, setBankId] = useState("");
+  const [transactionType, setTransactionType] = useState("");
+  const [confirmModal, setConfirmModal] = useState(false);
+  const [formConfirmed, setFormConfirmed] = useState(false);
+  const [isCustomer, setIsCustomer] = useState("");
 
   const [accountRecipient, setAccountRecipient] = useState("customers");
   const [department, setDepartment] = useState([]);
@@ -41,6 +107,8 @@ const AccountBook = () => {
 
   // Check if dialog is open
   const [dialogOpen, setDialogOpen] = useState(true);
+
+  const showToast = useToast();
 
   // Function to reset form
   const resetForm = () => {
@@ -51,6 +119,9 @@ const AccountBook = () => {
     setComment("");
     setDeptID("");
     setOtherName("");
+    setBankId("");
+    setTransactionType("");
+    setConfirmModal(false); // Ensure modal is closed on reset
   };
 
   const formatNumber = (num) => {
@@ -74,7 +145,6 @@ const AccountBook = () => {
       return;
     }
 
-    // Function to check for customer or supplier
     const isCustomer = () => {
       if (accountRecipient === "customers") {
         return true;
@@ -91,9 +161,14 @@ const AccountBook = () => {
           },
         }
       );
-      setCustomers(response.data.customers);
+      setCustomers(response.data.customers || []);
     } catch (error) {
       console.log(error);
+      showToast({
+        message: "Failed to fetch customers or suppliers",
+        type: "error",
+        duration: 4000,
+      });
     }
   };
 
@@ -106,7 +181,6 @@ const AccountBook = () => {
       return;
     }
 
-    // Function to check for customer or supplier
     const isCustomer = () => {
       if (accountRecipient === "customers") {
         return true;
@@ -115,7 +189,7 @@ const AccountBook = () => {
       }
     };
     try {
-      const repsonse = await axios.get(
+      const response = await axios.get(
         `${root}/admin/${isCustomer() ? "get-products" : "get-raw-materials"}`,
         {
           headers: {
@@ -124,9 +198,14 @@ const AccountBook = () => {
         }
       );
 
-      setProducts(repsonse.data.products);
+      setProducts(response.data.products || []);
     } catch (error) {
       console.log(error);
+      showToast({
+        message: "Failed to fetch products or raw materials",
+        type: "error",
+        duration: 4000,
+      });
     }
   };
 
@@ -145,36 +224,140 @@ const AccountBook = () => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      setDepartment(response.data.departments);
+      setDepartment(response.data.departments || []);
     } catch (error) {
       console.log(error);
+      showToast({
+        message: "Failed to fetch departments",
+        type: "error",
+        duration: 4000,
+      });
+    }
+  };
+
+  // Function to fetch bank names and details
+  const fetchBankDetails = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("An error occurred, try logging in again");
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${root}/admin/get-banks`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setBankDetails(response.data.banks || []);
+    } catch (error) {
+      console.log(error);
+      showToast({
+        message: "Error in getting bank details",
+        type: "error",
+        duration: 4000,
+      });
     }
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+    if (e && e.preventDefault) {
+      e.preventDefault();
+    }
 
-    const retrToken = localStorage.getItem("token");
 
-    if (!retrToken) {
-      toast.error("An error occurred. Try logging in again");
+    if (confirmModal){
+      setConfirmModal(false)
+    }
+      if (!transactionType) {
+        // Validation before opening modal
+        showToast({
+          message: "Please select a transaction type (Credit or Debit)",
+          type: "error",
+          duration: 4000,
+        });r
+        return;
+      }
+    if (!basePrice) {
+      showToast({
+        message: "Please enter an amount",
+        type: "error",
+        duration: 4000,
+      });
+      return;
+    }
+    if (accountRecipient === "others" && !otherName) {
+      showToast({
+        message: "Please enter a name",
+        type: "error",
+        duration: 4000,
+      });
+      return;
+    }
+    if (accountRecipient === "others" && !deptID) {
+      showToast({
+        message: "Please select a department",
+        type: "error",
+        duration: 4000,
+      });
+      return;
+    }
+    if (accountRecipient !== "others" && !selectedCustomerId) {
+      showToast({
+        message: `Please select a ${accountRecipient === "customers" ? "customer" : "supplier"}`,
+        type: "error",
+        duration: 4000,
+      });
+      return;
+    }
+    if (accountRecipient !== "others" && !selectedProductId) {
+      showToast({
+        message: `Please select a ${accountRecipient === "customers" ? "product" : "raw material"}`,
+        type: "error",
+        duration: 4000,
+      });
+      return;
+    }
+    if (!bankId) {
+      showToast({
+        message: "Please select a bank",
+        type: "error",
+        duration: 4000,
+      });
+      return;
+    }
+    if (!comment) {
+      showToast({
+        message: "Please enter a comment",
+        type: "error",
+        duration: 4000,
+      });
       return;
     }
 
-    // Function to check if account Receipient is either customer/supplier or others
+    if (!confirmModal) {
+      setConfirmModal(true);
+      return;
+    }
+
+    setLoading(true);
+    const retrToken = localStorage.getItem("token");
+
+    if (!retrToken) {
+      showToast({
+        message: "An error occurred. Try logging in again",
+        type: "error",
+        duration: 4000,
+      });
+      setLoading(false);
+      return;
+    }
+
     const customerOrSupplier = () => {
-      if (
-        accountRecipient === "customers" ||
-        accountRecipient === "suppliers"
-      ) {
-        return true;
-      } else {
-        return false;
-      }
+      return accountRecipient === "customers" || accountRecipient === "suppliers";
     };
 
-    // Function to check if account receipient is either customer or supplier
     const isCustomer = () => {
       if (accountRecipient === "customers") {
         return true;
@@ -186,13 +369,11 @@ const AccountBook = () => {
     };
 
     const submissionData = {
-      // bankName: bankName,
       bankId,
       ...(isCustomer() === true && { customerId: selectedCustomerId }),
       ...(isCustomer() === false && { supplierId: selectedCustomerId }),
       ...(customerOrSupplier() && { productId: selectedProductId }),
-
-      [isCustomer() ? "credit" : "debit"]: basePrice,
+      [transactionType]: basePrice,
       comments: comment,
       ...(isCustomer() === null && { other: otherName }),
       ...(!customerOrSupplier() && { departmentId: deptID }),
@@ -204,42 +385,26 @@ const AccountBook = () => {
         submissionData,
         { headers: { Authorization: `Bearer ${retrToken}` } }
       );
-      toast.success(response.data.message, {
-        style: {
-          padding: "20px",
-        },
-        duration: 5500,
+      showToast({
+        message: response.data.message,
+        type: "success",
+        duration: 5000,
       });
+
+      setLoading(false);
       resetForm();
     } catch (error) {
       console.log(error);
-    }
-
-    setLoading(false);
-  };
-
-  // Function to fetch bank names and details 
-  const fetchBankDetails = async()=>{
-    const token = localStorage.getItem("token");
-
-    if(!token){
-      toast.error("An error occrred , try loggging in again");
-      return;
-    }
-
-    try {
-      const response =  await axios.get(`${root}/admin/get-banks`,{
-        headers:{
-          Authorization:`Bearer ${token}`
-        }
+      showToast({
+        message: "An error occurred, check your details and try again later",
+        type: "error",
+        duration: 4000,
       });
-      setBankDetails(response.data.banks)
-    } catch (error) {
-      console.log(error);
-      toast.error("Error: Error in getting bank details")
-      
+      setLoading(false);
     }
-  }
+
+    setConfirmModal(false);
+  };
 
   // Make the below requests when page loads
   useEffect(() => {
@@ -249,7 +414,7 @@ const AccountBook = () => {
 
   useEffect(() => {
     fetchDepartments();
-    fetchBankDetails()
+    fetchBankDetails();
   }, []);
 
   // Initial Dialog
@@ -284,7 +449,7 @@ const AccountBook = () => {
               </Button>
               <Button
                 size={"3"}
-                className="bg-theme  cursor-pointer"
+                className="bg-theme cursor-pointer"
                 onClick={() => {
                   setDialogOpen(false);
                   setAccountRecipient("others");
@@ -299,17 +464,14 @@ const AccountBook = () => {
     );
   };
 
-  // fl,
-
   return (
     <>
-      {dialogOpen !== false && <InitDialog />}
-      {dialogOpen === false && (
+      {dialogOpen && <InitDialog />}
+      {!dialogOpen && (
         <>
           <Flex justify={"between"}>
             <Heading className="mb-4">Add</Heading>
             <Select.Root
-              // defaultValue="customers"
               defaultValue={accountRecipient}
               onValueChange={(value) => {
                 setAccountRecipient(value);
@@ -348,6 +510,7 @@ const AccountBook = () => {
                       Department <span className="text-red-500">*</span>{" "}
                     </Text>
                     <Select.Root
+                      value={deptID}
                       onValueChange={(value) => {
                         setDeptID(value);
                       }}
@@ -359,13 +522,11 @@ const AccountBook = () => {
                         className="w-full mt-2"
                       />
                       <Select.Content>
-                        {department.map((item, index) => {
-                          return (
-                            <Select.Item value={item.id} key={index}>
-                              {item.name}
-                            </Select.Item>
-                          );
-                        })}
+                        {department.map((item, index) => (
+                          <Select.Item value={item.id} key={index}>
+                            {item.name}
+                          </Select.Item>
+                        ))}
                       </Select.Content>
                     </Select.Root>
                   </div>
@@ -376,32 +537,10 @@ const AccountBook = () => {
                 <>
                   <div className="w-full">
                     <Text className="mb-4">
-                      {accountRecipient === "customers" && "Customer Name"}
-                      {accountRecipient === "suppliers" && "Supplier Name"}
+                      {accountRecipient === "customers" ? "Customer Name" : "Supplier Name"}
                       <span className="text-red-500">*</span>
                     </Text>
-                    {/* <Select.Root
-                  value={selectedCustomerId}
-                  required
-                  onValueChange={setSelectedCustomerId}
-                  disabled={customers.length === 0}
-                >
-                  <Select.Trigger
-                    className="w-full mt-2"
-                    placeholder={
-                      accountRecipient === "customers"
-                        ? "Select Customers"
-                        : "Select Suppliers"
-                    }
-                  />
-                  <Select.Content position="popper">
-                    {customers.map((customer) => (
-                      <Select.Item key={customer.id} value={customer.id}>
-                        {customer.firstname} {customer.lastname}
-                      </Select.Item>
-                    ))}
-                  </Select.Content>
-                </Select.Root> */}
+
                     <AntSelect
                       showSearch
                       className="mt-2"
@@ -411,6 +550,7 @@ const AccountBook = () => {
                           : "Select Suppliers"
                       }
                       style={{ width: "100%" }}
+                      value={selectedCustomerId || ""}
                       onChange={(value) => {
                         setSelectedCustomerId(value);
                       }}
@@ -430,14 +570,13 @@ const AccountBook = () => {
                   </div>
                   <div className="w-full">
                     <Text className="mb-4">
-                      {accountRecipient === "customers" && "Select Product"}
-                      {accountRecipient === "suppliers" &&
-                        "Select Raw Materials"}
+                      {accountRecipient === "customers" ? "Select Product" : "Select Raw Materials"}
                       <span className="text-red-500">*</span>
                     </Text>
                     <AntSelect
                       showSearch
                       className="mt-2"
+                      value={selectedProductId || ""}
                       placeholder={
                         accountRecipient === "customers"
                           ? "Select Products"
@@ -456,11 +595,10 @@ const AccountBook = () => {
                     >
                       {products.map((product) => (
                         <Option key={product.id} value={product.id}>
-                          {`${product.name} `}
+                          {product.name}
                         </Option>
                       ))}
                     </AntSelect>
-          
                   </div>
                 </>
               )}
@@ -481,32 +619,27 @@ const AccountBook = () => {
                 <Text>
                   Bank Name <span className="text-red-500">*</span>
                 </Text>
-                
-                  <AntSelect
-                 
-                 showSearch
-                      className="mt-2"
-                      placeholder={
-                          "Select Bank"
-                      }
-                      style={{ width: "100%" }}
-                      onChange={(value) => {
-                        // setSelectedProductId(value);
-                        setBankId(value)
-                      }}
-                      optionFilterProp="children"
-                      filterOption={(input, option) =>
-                        option.children
-                          .toLowerCase()
-                          .includes(input.toLowerCase())
-                      }
-                    >
-                      {bankDetails.map((bank) => (
-                        <Option key={bank.id} value={bank.id} > 
-                          {`${bank.name} `}
-                        </Option>
-                      ))}
-                    </AntSelect>
+
+                <AntSelect
+                  showSearch
+                  className="mt-2"
+                  placeholder={"Select Bank"}
+                  value={bankId || ""}
+                  style={{ width: "100%" }}
+                  onChange={(value) => {
+                    setBankId(value);
+                  }}
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    option.children.toLowerCase().includes(input.toLowerCase())
+                  }
+                >
+                  {bankDetails.map((bank) => (
+                    <Option key={bank.id} value={bank.id}>
+                      {bank.name}
+                    </Option>
+                  ))}
+                </AntSelect>
               </div>
 
               <div className="w-full">
@@ -514,7 +647,7 @@ const AccountBook = () => {
                   Comment <span className="text-red-500">*</span>{" "}
                 </Text>
                 <TextField.Root
-                  className="mt-2 "
+                  className="mt-2"
                   required
                   placeholder="Write any comment"
                   value={comment}
@@ -523,6 +656,27 @@ const AccountBook = () => {
                   }}
                 />
               </div>
+
+              <div className="w-full">
+                <Text>Transaction Type</Text>
+                <Select.Root
+                  value={transactionType}
+                  onValueChange={(value) => {
+                    setTransactionType(value);
+                  }}
+                  required
+                >
+                  <Select.Trigger
+                    disabled={department.length === 0}
+                    placeholder="Select transaction type"
+                    className="w-full mt-2"
+                  />
+                  <Select.Content position="popper">
+                    <Select.Item value={"credit"}>Credit</Select.Item>
+                    <Select.Item value={"debit"}>Debit</Select.Item>
+                  </Select.Content>
+                </Select.Root>
+              </div>
             </Grid>
             <Flex justify={"end"} className="mt-4 cursor-pointer">
               <Button
@@ -530,14 +684,23 @@ const AccountBook = () => {
                 type="submit"
                 disabled={loading}
               >
-                {loading ? <Spinner /> : "Submit"}
+                {loading ?<LoaderIcon/> : "Submit"}
               </Button>
             </Flex>
           </form>
-
-          <Toaster position="top-right" />
+          <ConfirmModal
+            open={confirmModal}
+            onCancel={() => setConfirmModal(false)}
+            transactionType={transactionType}
+            basePrice={basePrice}
+            customers={customers}
+            selectedCustomerId={selectedCustomerId}
+            otherName={otherName}
+            handleSubmit={handleSubmit}
+          />
         </>
       )}
+      {/* <Toaster position="top-right" /> */}
     </>
   );
 };

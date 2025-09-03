@@ -101,7 +101,7 @@ const Profile = () => {
   return (
     <>
       <Card className="cursor-pointer relative border-[1px] z-[999] border-[#000]/60 rounded-lg p-3">
-        <Dropdown menu={{ items: menuItems }} trigger={["hover"]}>
+        <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
           <a onClick={(e) => e.preventDefault()}>
             <PersonIcon />
           </a>

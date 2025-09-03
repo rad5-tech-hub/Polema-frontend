@@ -21,10 +21,12 @@ import { faEllipsisV, faSquare } from "@fortawesome/free-solid-svg-icons";
 
 import axios from "axios";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 
 const ViewDepartmentStore = () => {
+  const showToast = useToast();
   const [isProductActive, setIsProductActive] = useState(true);
   const [failedSearch, setFailedSearch] = useState(false);
   const [store, setStore] = useState([]);
@@ -32,7 +34,8 @@ const ViewDepartmentStore = () => {
   const [loading, setLoading] = useState(true);
   const [openModal, setOpenModal] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
-
+  const [products,setProducts] = useState([]);
+  const [rawMaterials,setRawMaterials] = useState([]);
   // Search state
   const [searchCriteria, setSearchCriteria] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -49,14 +52,18 @@ const ViewDepartmentStore = () => {
     try {
       const response = await axios.get(
         `${root}/dept/${
-          isProductActive ? "view-deptstore-prod" : "view-deptstore-raw"
+          "view-deptstore-prod" 
         }`,
         {
           headers: { Authorization: `Bearer ${retrToken}` },
         }
       );
-      setStore(response.data.stores);
-      setFilteredStore(response.data.stores); // Initially show all items
+      
+      // setStore(response.data.stores);
+      setRawMaterials(response.data.rawMaterials);
+      setProducts(response.data.departmentProducts);
+      // setFilteredStore(response.data.stores); // Initially show all items
+      // setFilteredStore(store);
     } catch (error) {
       console.error("Error fetching store data:", error);
       toast.error("Failed to fetch store data");
@@ -120,6 +127,12 @@ const ViewDepartmentStore = () => {
     fetchStore();
   }, [isProductActive]);
 
+  //changing products based on click 
+  useEffect(() => {
+    setStore(isProductActive ? products : rawMaterials);
+    setFilteredStore(isProductActive ? products : rawMaterials);
+  })
+
   // Handle opening modals
   const handleOpenModal = (type, product = null) => {
     setSelectedProduct(product);
@@ -160,7 +173,11 @@ const ViewDepartmentStore = () => {
       setStore((prevStore) =>
         prevStore.filter((item) => item.id !== selectedProduct.id)
       );
-      toast.success("Product deleted successfully");
+      showToast({
+        message: "Product Deleted Successfully",
+        type: "success",
+        duration: 4000,
+      })
     } catch (error) {
       console.error("Error deleting product:", error);
       toast.error("Failed to delete product");
@@ -245,7 +262,7 @@ const ViewDepartmentStore = () => {
                 <Table.RowHeaderCell
                   dangerouslySetInnerHTML={{
                     __html: highlightText(
-                      storeItem.product?.name ?? storeItem.other ?? "N/A",
+                      storeItem.product?.name ?? storeItem.name ?? "N/A",
                       searchTerm
                     ),
                   }}

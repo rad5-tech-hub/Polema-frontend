@@ -2,6 +2,8 @@ import axios from "axios";
 import React from "react";
 import toast, { LoaderIcon, Toaster } from "react-hot-toast";
 const root = import.meta.env.VITE_ROOT;
+import useToast from "../../../../hooks/useToast";
+const showToast = useToast();
 const EditProductModal = ({ closeModal, product, runFetch }) => {
   const [quantity, setQuantity] = React.useState("");
   const [thresholdVal, setThresholdVal] = React.useState("");
@@ -31,9 +33,11 @@ const EditProductModal = ({ closeModal, product, runFetch }) => {
           },
         }
       );
-      toast.success("Successfully edited", {
+      showToast({
+        message: "Successfully edited",
+        type: "success",
         duration: 4000,
-      });
+      })
       setButtonLoading(false);
       closeModal();
       runFetch();
@@ -43,6 +47,13 @@ const EditProductModal = ({ closeModal, product, runFetch }) => {
     }
   };
 
+  // if (product.product === null) {
+  //   return (
+  //     <>
+  //     Not a Valid Product
+  //     </>
+  //   )
+  // }
   return (
     <>
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[101]">
@@ -55,7 +66,7 @@ const EditProductModal = ({ closeModal, product, runFetch }) => {
               <input
                 type="text"
                 disabled
-                placeholder={product?.product.name || "Show product name"}
+                placeholder={product?.product?.name || product?.name}
                 className="border h-[44px] px-4 lg:w-[273px] rounded-lg"
               />
             </div>

@@ -14,7 +14,9 @@ import {
 } from "@radix-ui/themes";
 import axios from "axios";
 const root = import.meta.env.VITE_ROOT;
-const cloudinaryRoot = import.meta.env.VITE_CLOUD_ROOT;
+import useToast from "../../../../hooks/useToast";
+
+const showToast = useToast();
 
 const CreateDepartmentStore = () => {
   const fileInputRef = useRef(null);
@@ -36,9 +38,9 @@ const CreateDepartmentStore = () => {
   const [selectedUnit, setSelcetedUnit] = useState("");
   const [modalOpen, setModalOpen] = useState(true);
   const [modalSelected, setModalSelected] = useState(false);
-  const [plasticsDeptSelected,setPlasticsDeptSelected] = useState(false);
-  const [otherDetails,setOtherDetails] = useState("")
-  const [deptName, setDeptName] = useState("")
+  const [plasticsDeptSelected, setPlasticsDeptSelected] = useState(false);
+  const [otherDetails, setOtherDetails] = useState("");
+  const [deptName, setDeptName] = useState("");
 
   // Function to handle the click on the "Browse Image" text
   const handleBrowseClick = () => {
@@ -148,22 +150,31 @@ const CreateDepartmentStore = () => {
       setThresholdVal(""), setSelcetedUnit("");
       setImage(null);
       setProductId("");
-      setDeptId("")
-      setOtherDetails("")
+      setDeptId("");
+      setOtherDetails("");
     };
 
     const body = {
       thresholdValue: threshHoldVal, // Fixed typo from threshHoldVal
-      ...(deptName && !checkForDepartmentName(deptName, "plastics") && { productId: productId }),
+      ...(deptName &&
+        !checkForDepartmentName(deptName, "plastics") && {
+          productId: productId,
+        }),
       departmentId: deptId,
-      ...(deptName && checkForDepartmentName(deptName, "plastics") && {
-        ...(isProductActive ? { other: otherDetails } : { otherRaw: otherDetails }),
-      }),
+      ...(deptName &&
+        checkForDepartmentName(deptName, "plastics") && {
+          ...(isProductActive
+            ? { other: otherDetails }
+            : { otherRaw: otherDetails }),
+        }),
       ...(image && { image }),
-      ...(deptName && !checkForDepartmentName(deptName, "plastics") && { unit: selectedUnit }),
+      ...(deptName &&
+        !checkForDepartmentName(deptName, "plastics") && {
+          unit: selectedUnit,
+        }),
     };
     // console.log(body);
-    
+
     try {
       const response = await axios.post(
         `${root}/dept/create-dept-store`,
@@ -175,17 +186,21 @@ const CreateDepartmentStore = () => {
         }
       );
       setButtonLoading(false);
-      toast.success("Created successfully", {
-        style: {
-          padding: "25px",
-        },
-        duration: 5000,
+      showToast({
+        message: "Created successfully",
+        type: "success",
       });
+
       resetForm();
     } catch (error) {
       console.log(error);
       setButtonLoading(false);
-      toast.error( error.response.data.message || error.response.data.errors.join("\n") ||   error.response.data.message  || "An error occurred while adding to department store");
+      toast.error(
+        error.response.data.message ||
+          error.response.data.errors.join("\n") ||
+          error.response.data.message ||
+          "An error occurred while adding to department store"
+      );
     }
   };
 
@@ -199,13 +214,11 @@ const CreateDepartmentStore = () => {
     }
   };
 
-  // Function to check by a particular dept name 
-  const checkForDepartmentName = (arg,deptName)=>{
+  // Function to check by a particular dept name
+  const checkForDepartmentName = (arg, deptName) => {
     return arg.toLowerCase().includes(deptName);
-  }
+  };
 
-  
-  
   // Initial Dialog
   const InitialDialog = () => {
     return (
@@ -329,65 +342,82 @@ const CreateDepartmentStore = () => {
             <Text>
               Select Department <span className="text-red-500">*</span>
             </Text>
-              <Select.Root
-              value={deptId}
-                onValueChange={(value) => {
-                  const selectedDept = dept.find((item) => item.id === value);
-                  setProducts([]);
-                  setDeptId(value);
-                  setDeptName(selectedDept ? selectedDept.name : ""); // Store the name
-                  fetchRawMaterials(value);
-                }}
-              >
-                <Select.Trigger
-                  disabled={deptDisabled}
-                  className="w-full mt-2"
-                  placeholder="Select Departmemt"
-                />
-                <Select.Content position="popper">
-                  {dept.map((item) => {
-                    return <Select.Item value={item.id}>{item.name}</Select.Item>;
-                  })}
-                </Select.Content>
-              </Select.Root>
-          </div>
-         {checkForDepartmentName(deptName,"plastics") &&  <div className="w-full">
-            <Text>{`${isProductActive ? "Products" :"Raw Material"}`}</Text>
-            <TextField.Root className="mt-2 " placeholder={`Enter Plastics ${isProductActive ? "Products" :"Raw Materials"}`} value={otherDetails} onChange={(e)=>{
-              setOtherDetails(e.target.value)
-            }}/> 
-          </div>}
-       {!checkForDepartmentName(deptName,"plastics") &&   <>
-         <div className="w-full">
-            <Text>
-              {isProductActive ? "Product" : "Raw Material"} Name
-              <span className="text-red-500">*</span>
-            </Text>
             <Select.Root
-              disabled={products.length === 0}
-              value={productId}
+              value={deptId}
               onValueChange={(value) => {
-                setProductId(value);
-                getMatchingProductNameById(value);
+                const selectedDept = dept.find((item) => item.id === value);
+                setProducts([]);
+                setDeptId(value);
+                setDeptName(selectedDept ? selectedDept.name : ""); // Store the name
+                fetchRawMaterials(value);
               }}
             >
               <Select.Trigger
+                disabled={deptDisabled}
                 className="w-full mt-2"
-                disabled={productDisabled}
-                placeholder={
-                  deptId.length > 0
-                    ? `Select ${isProductActive ? "Product" : "Raw Material"}`
-                    : "Select Department First"
-                }
+                placeholder="Select Departmemt"
               />
               <Select.Content position="popper">
-                {products.map((item) => {
+                {dept.map((item) => {
                   return <Select.Item value={item.id}>{item.name}</Select.Item>;
                 })}
               </Select.Content>
             </Select.Root>
           </div>
-         
+          {checkForDepartmentName(deptName, "plastics") && (
+            <div className="w-full">
+              <Text>{`${isProductActive ? "Products" : "Raw Material"}`}</Text>
+              <TextField.Root
+                className="mt-2 "
+                placeholder={`Enter Plastics ${
+                  isProductActive ? "Products" : "Raw Materials"
+                }`}
+                value={otherDetails}
+                onChange={(e) => {
+                  setOtherDetails(e.target.value);
+                }}
+              />
+            </div>
+          )}
+          {!checkForDepartmentName(deptName, "plastics") && (
+            <>
+              <div className="w-full">
+                <Text>
+                  {isProductActive ? "Product" : "Raw Material"} Name
+                  <span className="text-red-500">*</span>
+                </Text>
+                <Select.Root
+                  disabled={products.length === 0}
+                  value={productId}
+                  onValueChange={(value) => {
+                    setProductId(value);
+                    getMatchingProductNameById(value);
+                  }}
+                >
+                  <Select.Trigger
+                    className="w-full mt-2"
+                    disabled={productDisabled}
+                    placeholder={
+                      deptId.length > 0
+                        ? `Select ${
+                            isProductActive ? "Product" : "Raw Material"
+                          }`
+                        : "Select Department First"
+                    }
+                  />
+                  <Select.Content position="popper">
+                    {products.map((item) => {
+                      return (
+                        <Select.Item value={item.id}>{item.name}</Select.Item>
+                      );
+                    })}
+                  </Select.Content>
+                </Select.Root>
+              </div>
+            </>
+          )}
+
+          {/* Show unit input box regardles of department shown  */}
           <div className="w-full">
             <Text>
               {" "}
@@ -397,17 +427,17 @@ const CreateDepartmentStore = () => {
               className="mt-2 w-full"
               value={selectedUnit}
               placeholder="Enter product unit"
-              disabled
+              disabled={!checkForDepartmentName(deptName, "plastics")}
             />
           </div>
-         </>}
+          
           <div className="w-full">
             <Text>
               {" "}
               Threshold Value <span className="text-red-500">*</span>{" "}
             </Text>
             <TextField.Root
-            required
+              required
               value={threshHoldVal}
               className="mt-2 w-full"
               placeholder="Enter threshold value"

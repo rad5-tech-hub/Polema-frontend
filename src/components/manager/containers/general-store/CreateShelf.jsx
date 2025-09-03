@@ -10,11 +10,13 @@ import {
 } from "@radix-ui/themes";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
-
+import useToast from "../../../../hooks/useToast";
 const root = import.meta.env.VITE_ROOT;
 
 const CreateShelf = () => {
   const [shelfName, setShelfName] = React.useState("");
+  const showToast = useToast();
+
   const [unit, setUnit] = React.useState("");
   const [quantity, setQuantity] = React.useState("");
   const [thresholdVal, setThresholdVal] = React.useState([]);
@@ -38,9 +40,12 @@ const CreateShelf = () => {
       unit: unit,
       thresholdValue: thresholdVal,
     };
-    toast.loading("Adding item to shelf", {
+    showToast({
+      message: "Creating shelf...",
+      type: "loading",
       duration: 1500,
-    });
+    })
+    
     try {
       const response = await axios.post(`${root}/dept/create-gen-store`, body, {
         headers: {
@@ -52,22 +57,26 @@ const CreateShelf = () => {
       setShelfName("");
       setThresholdVal("");
       setUnit("");
-
-      toast.success(response.data.message, {
-        style: {
-          padding: "30px",
-        },
-        duration: 10000,
-      });
+      showToast({
+        message: response.data.message,
+        type: "success",
+        duration: 5000,
+      })
+    
     } catch (error) {
       console.log(error);
       setIsLoading(false);
-      toast.error(error.response.data.message || error.response.data.message.join("\n") || error.message ||"An error occured.",{
-        style:{
-          padding:"30px"
-        },
-        duration:4500
+      showToast({
+        message:
+          error.response.data.message ||
+          error.response.data.errors.join("\n") ||
+          error.response.data.messages.join("\n") ||
+          error.message ||
+          "An error occured.",
+        type: "error",
+        duration: 5000,
       });
+     
     }
 
     // console.log(body);

@@ -1,4 +1,5 @@
 import React from "react";
+import useToast from "../../../../hooks/useToast";
 import { useParams } from "react-router-dom";
 import {
   Heading,
@@ -18,6 +19,7 @@ const root = import.meta.env.VITE_ROOT;
 
 const BlankLPO = () => {
   const { quantity, rawId } = useParams();
+  const showToast = useToast()
 
   const [suppliers, setSuppliers] = React.useState([]);
   const [raw, setRaw] = React.useState([]);
@@ -179,15 +181,21 @@ const BlankLPO = () => {
       );
 
       // Success feedback and reset form
-      toast.success("LPO raised and sent successfully!", {
-        style: {
-          padding: "20px",
-        },
-      });
+      showToast({
+        message:"LPO raised and sent successfully!",
+        type: "success",
+        duration:5000
+      })
+      
       resetForm();
     } catch (error) {
       console.error("Error occurred during submission:", error);
-      toast.error("Failed to submit the form. Please try again.");
+      showToast({
+        message: "Failed to submit the form. Please try again.",
+        type: "error",
+        duration:5000
+      })
+      
     } finally {
       setButtonLoading(false); // Reset loading state
     }
@@ -392,7 +400,7 @@ const BlankLPO = () => {
                   return (
                     <Select.Item
                       value={admin.role?.id}
-                    >{`${admin.firstname} ${admin.lastname}`}</Select.Item>
+                    >{`${admin.firstname} ${admin.lastname} (${admin?.role?.name || ""})`}</Select.Item>
                   );
                 })}
               </Select.Content>

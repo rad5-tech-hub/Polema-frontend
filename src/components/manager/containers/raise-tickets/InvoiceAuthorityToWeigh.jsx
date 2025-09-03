@@ -10,6 +10,7 @@ const root = import.meta.env.VITE_ROOT;
 
 const InvoiceAuthorityToWeigh = () => {
   const [authDetails, setAuthDetails] = useState("");
+  const [approvedBy, setApprovedBy] = useState("");
   const { id } = useParams();
 
   // Function to get approved weigh
@@ -23,6 +24,8 @@ const InvoiceAuthorityToWeigh = () => {
         },
       });
       setAuthDetails(response.data.ticket);
+      setApprovedBy(response.data.approvedBy);
+
     } catch (error) {
       console.log(error);
     }
@@ -42,40 +45,21 @@ const InvoiceAuthorityToWeigh = () => {
       <style>
         {`
           @media print {
-            * {
-              box-shadow: none !important;
-              text-shadow: none !important;
+            *{           
+            box-shadow: none !important;
             }
             body {
               margin: 0;
               padding: 0;
               color-adjust: exact !important;
             }
-            .print-hidden {
+            .headers{
               display: none !important;
             }
             .print-border {
               border-style: dotted !important;
             }
-            img {
-              max-width: 100%;
-              height: auto;
-            }
-            .flex {
-              display: flex !important;
-            }
-            .text-center {
-              text-align: center !important;
-            }
-            .mt-8, .mt-12 {
-              margin-top: 1rem !important;
-            }
-            .sm\\:p-16 {
-              padding: 1rem !important;
-            }
-            .w-32 {
-              width: 8rem !important;
-            }
+    
           }
         `}
       </style>
@@ -88,8 +72,8 @@ const InvoiceAuthorityToWeigh = () => {
         </div>
       ) : (
         <div className="bg-gray-50 p-4 sm:p-8">
-          {/* Header Section */}
-          <div className="flex justify-between items-center pb-6 border-b border-[#919191]">
+          {/* Header Section - will be hidden on print */}
+          <div className="flex justify-between items-center pb-6 border-b border-[#919191] headers">
             <span className="text-sm sm:text-lg font-semibold text-[#434343]">
               Approved Authority to Weigh
             </span>
@@ -145,9 +129,11 @@ const InvoiceAuthorityToWeigh = () => {
                   ["Date", refractor(authDetails.createdAt)],
                   ["Vehicle No", authDetails.vehicleNo],
                   [
-                    "Customer's Name",
-                    `${authDetails.transactions.corder.firstname} ${authDetails.transactions.corder.lastname}`,
-                  ],
+                    "Client's Name",
+                    authDetails?.transactions?.corder
+                      ? `${authDetails.transactions.corder.firstname} ${authDetails.transactions.corder.lastname}`
+                      : `${authDetails?.supplier?.firstname || ''} ${authDetails?.supplier?.lastname || ''}`,
+                  ],                  
                   ["Driver's Name", authDetails.driver],
                 ].map(([label, value], idx) => (
                   <div
@@ -157,7 +143,7 @@ const InvoiceAuthorityToWeigh = () => {
                     <span className="font-semibold w-1/3 text-start">
                       {label}:
                     </span>
-                    <span className="border-b border-black border-dotted flex-grow text-right">
+                    <span className="border-b border-black border-dotted w-full text-right">
                       {value}
                     </span>
                   </div>
@@ -165,22 +151,36 @@ const InvoiceAuthorityToWeigh = () => {
               </div>
 
                 <div>
-                  {/* <p>{authDetails}</p> */}
-                  <p>
-                    
-                  {`${authDetails.transactions.quantity} ${authDetails.transactions.unit} of ${authDetails.transactions.porders.name}`}
-                </p>
+                 {authDetails.transactions ? <p>                    
+                  {`${authDetails.transactions?.quantity } ${authDetails.transactions?.unit} of ${authDetails.transactions?.porders.name}`}
+                </p> : ''}
               </div>
-
               <div className="flex justify-between mt-12">
                 {[
-                  "AUTHORISED SIGNATURE",
-                  "CUSTOMER’S SIGNATURE",
-                  "SIGNATURE",
-                ].map((label, idx) => (
+                  {
+                    label: "AUTHORISED SIGNATURE",
+                    signature: approvedBy?.signature, // Use approvedBy.signature
+                  },
+                  {
+                    label: "CUSTOMER’S SIGNATURE",
+                    signature: null, // No signature for customer, keep as placeholder
+                  },
+                  {
+                    label: "SIGNATURE",
+                    signature: authDetails?.role?.admins?.[0]?.signature, // Use role.admin.signature
+                  },
+                ].map((item, idx) => (
                   <div key={idx} className="text-left">
-                    <div className="border-b border-black border-dotted w-32 mx-auto mb-4"></div>
-                    <span className="text-sm sm:text-base">{label}</span>
+                    {item.signature ? (
+                      <img
+                        src={item.signature}
+                        alt={`${item.label} signature`}
+                        className="w-32 h-auto mx-auto mb-4"
+                      />
+                    ) : (
+                      <div className="border-b border-black border-dotted w-32 mx-auto mb-4"></div>
+                    )}
+                    <span className="text-sm sm:text-base">{item.label}</span>
                   </div>
                 ))}
               </div>

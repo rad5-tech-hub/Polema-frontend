@@ -4,12 +4,13 @@ import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { TextField, Heading, Card, Button } from "@radix-ui/themes";
-
+import useToast from "../hooks/useToast";
 import { EnvelopeClosedIcon } from "@radix-ui/react-icons";
 
 const root = import.meta.env.VITE_ROOT;
 
 const ConfirmEmailContent = () => {
+  const showToast = useToast()
   const [loading, setLoading] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [email, setEmail] = useState("");
@@ -24,12 +25,12 @@ const ConfirmEmailContent = () => {
       const response = await axios.post(`${root}/admin/forgot`, {
         email,
       });
-      toast.success("Password reset link sent to your email.", {
-        style: {
-          padding: "20px",
-        },
-        duration: 4500,
+      showToast({
+        message: "Password reset link sent to your email.",
+        type: "success",
+        duration:4000
       });
+      
       setLoading(false);
       setEmail("");
     } catch (error) {

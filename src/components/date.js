@@ -20,6 +20,11 @@ const refractorToTime = (ISO_DATE) => {
 
 // Funciton to format money
 function formatMoney(value) {
+  // Check for null or undefined
+  if (value === null || value === undefined) {
+    return "";
+  }
+
   // Convert to a number if it's a string
   value = typeof value === "string" ? parseFloat(value) : value;
 
@@ -28,20 +33,24 @@ function formatMoney(value) {
     return "";
   }
 
-  // Remove the decimal part if it's a whole number
-  if (value % 1 === 0) {
-    value = value.toString();
-  } else {
-    value = value.toFixed(2);
-  }
+  // Format the number: whole numbers without decimals, others with two decimal places
+  const formattedValue = value % 1 === 0 ? value.toString() : value.toFixed(2);
 
   // Split integer and decimal parts
-  const [integerPart] = value.split(".");
+  const [integerPart, decimalPart] = formattedValue.split(".");
 
   // Format the integer part with commas
   const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
-  return formattedInteger;
+  // Return formatted string with decimal part if it exists
+  return decimalPart ? `${formattedInteger}.${decimalPart}` : formattedInteger;
+}
+// function to check if a number is negative
+function isNegative(value) {
+    // Convert to number if string
+    const num = Number(value);
+    // Check if it's a valid number and negative
+    return !isNaN(num) && num < 0;
 }
 
-export { refractor, refractorToTime, formatMoney };
+export { refractor, refractorToTime, formatMoney,isNegative };

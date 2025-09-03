@@ -11,13 +11,14 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { refractor } from "../../../date";
 import toast, { Toaster } from "react-hot-toast";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 
 // Restore Dialog
 const RestoreDialog = ({ isOpen, onClose, runfetch, id }) => {
   const [suspendLoading, setSuspendLoading] = useState(false);
-
+const showToast = useToast();
   const restoreAdmin = async (id) => {
     setSuspendLoading(true);
     const retrToken = localStorage.getItem("token");
@@ -38,10 +39,12 @@ const RestoreDialog = ({ isOpen, onClose, runfetch, id }) => {
         }
       );
       setSuspendLoading(false);
-      toast.success("Admin Restored successfully", {
+      showToast({
+        message: "Admin Restored successfully",
+        type: "success",
         duration: 6500,
-        style: { padding: "30px" },
-      });
+      })
+      
       onClose();
       runfetch();
     } catch (error) {
@@ -107,7 +110,11 @@ const DeleteDialog = ({ isOpen, onClose, runfetch, id }) => {
         },
       });
       setSuspendLoading(false);
-      toast.success("Admin Deleted successfully");
+      showToast({
+        message: "Admin Deleted successfully",
+        type: "success",
+        duration: 6500,
+      })
       onClose();
       runfetch();
     } catch (error) {
@@ -202,7 +209,9 @@ const AllSuspended = () => {
           </Table.Row>
         </Table.Header>
         {loading ? (
-          <Spinner />
+          <div className="p-4">
+            <Spinner/>
+          </div>
         ) : (
           <Table.Body>
             {suspended.length === 0 ? (

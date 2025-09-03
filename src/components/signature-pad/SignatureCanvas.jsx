@@ -1,9 +1,11 @@
 import React, { useRef, useEffect } from "react";
 import toast,{Toaster} from "react-hot-toast"
 import SignaturePad from "signature_pad";
+import useToast from "../../hooks/useToast";
 
 const SignatureCanvas = ({ onSave }) => {
   const canvasRef = useRef(null);
+  const showToast = useToast();
   const signaturePadRef = useRef(null);
 
   useEffect(() => {
@@ -25,17 +27,18 @@ const SignatureCanvas = ({ onSave }) => {
     if (!signaturePadRef.current.isEmpty()) {
       const dataUrl = signaturePadRef.current.toDataURL("image/webp",0.7);
       onSave(dataUrl);
-      toast.success("Signature Saved", {
-        style: {
-          padding:"30px"
-        },duration:6500
-      })
-    } else {
-      toast.error("Please provide a signature first.", {
-        style: {
-          padding:"30px"
-        },duration:2000
+      showToast({
+        message: "Signature saved successfully!",
+        type: "success",
+        duration: 4000,
       });
+    } else {
+      showToast({
+        message: "Please provide a signature first",
+        type:"error",
+        duration:5000
+      })
+   
     }
   };
 

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-
 import { PlusIcon } from "@radix-ui/react-icons";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
@@ -12,6 +11,7 @@ import {
   TextField,
   Grid,
   Flex,
+  Text,
   Skeleton,
   Spinner,
 } from "@radix-ui/themes";
@@ -19,6 +19,8 @@ import { LoaderIcon } from "react-hot-toast";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import toast, { Toaster } from "react-hot-toast";
+import useToast from "../../../../hooks/useToast";
+import SignatureCanvas from "../../../signature-pad/SignatureCanvas";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -31,16 +33,17 @@ const EditAdmin = () => {
   const [skeletonLoading, setSkeletonLoading] = useState(true);
   const [departments, setDepartments] = useState([]);
   const [additionalDepartments, setAdditionalDepartments] = useState([]);
-
-  // State management for form fields
+  const [adminDepartments, setAdminDepartments] = useState([]);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [roleId, setRoleId] = useState("");
   const [address, setAddress] = useState("");
-  const [deptId, setDeptID] = useState("");
-  const [adminDepartments, setAdminDepartments] = useState([]);
+  const [canvasVisible, setCanvasVisible] = useState(false);
+  const [signatureImage, setSignatureImage] = useState(null);
+
+  const showToast = useToast();
 
   // Fetch departments
   const fetchDept = async () => {
@@ -60,6 +63,7 @@ const EditAdmin = () => {
     }
   };
 
+  // Fetch roles
   const fetchRoles = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -77,20 +81,17 @@ const EditAdmin = () => {
     }
   };
 
-  // Function to fetch admins
+  // Fetch admins
   const fetchAdmins = async () => {
     const token = localStorage.getItem("token");
-
     if (!token) {
-      toast.error("An error occurred , try logging in again.");
+      toast.error("An error occurred, try logging in again.");
       return;
     }
 
     try {
       const response = await axios.get(`${root}/admin/all-staff`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setAdmins(response.data.staffList);
       setSkeletonLoading(false);
@@ -99,7 +100,7 @@ const EditAdmin = () => {
     }
   };
 
-  // Function to get admin name by id
+  // Get admin name by ID
   const getAdminNameById = (id) => {
     const adminDetails = admins.find((item) => item.id === id);
     return adminDetails
@@ -107,26 +108,25 @@ const EditAdmin = () => {
       : "Admin Name not found";
   };
 
-  // Function to get admin details
+  // Get admin details by ID
   const getAdminsDetailsFromID = (id) => {
     const details = admins.find((item) => item.id === id);
     return details ? details : "";
   };
 
-  // Function to update state on loading
+  // Update form details
   const updateFormDetails = () => {
     const adminDetails = getAdminsDetailsFromID(id);
-
-    setFirstName(adminDetails.firstname);
-    setLastName(adminDetails.lastname);
-    setPhone(adminDetails.phoneNumber);
-    setEmail(adminDetails.email);
-    setRoleId(adminDetails.roleId);
-    setAddress(adminDetails.address);
+    setFirstName(adminDetails.firstname || "");
+    setLastName(adminDetails.lastname || "");
+    setPhone(adminDetails.phoneNumber || "");
+    setEmail(adminDetails.email || "");
+    setRoleId(adminDetails.roleId || "");
+    setAddress(adminDetails.address || "");
 
     if (typeof adminDetails.department === "string") {
       try {
-        setAdminDepartments(JSON.parse(adminDetails.department));
+        setAdminDepartments(JSON.parse(adminDetails.department) || []);
       } catch (error) {
         console.error("Failed to parse department JSON:", error);
         setAdminDepartments([]);
@@ -145,11 +145,41 @@ const EditAdmin = () => {
   }, []);
 
   useEffect(() => {
-    {
-      !skeletonLoading && updateFormDetails();
+    if (!skeletonLoading) {
+      updateFormDetails();
     }
   }, [skeletonLoading]);
 
+  // Handle updating existing department
+  const handleExistingDepartmentChange = (index, value) => {
+    setAdminDepartments((prev) =>
+      prev.map((dept, i) => (i === index ? value : dept))
+    );
+  };
+
+  // Handle removing existing department
+  const handleRemoveExistingDepartment = (index) => {
+    setAdminDepartments((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Handle adding a new department input
+  const handleAddDepartment = () => {
+    setAdditionalDepartments((prev) => [...prev, ""]);
+  };
+
+  // Handle updating a new department value
+  const handleUpdateDepartment = (index, value) => {
+    setAdditionalDepartments((prev) =>
+      prev.map((dept, i) => (i === index ? value : dept))
+    );
+  };
+
+  // Handle removing a new department
+  const handleRemoveDepartment = (index) => {
+    setAdditionalDepartments((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -157,6 +187,7 @@ const EditAdmin = () => {
     const token = localStorage.getItem("token");
     if (!token) {
       toast.error("An error occurred, try logging in again.");
+      setIsLoading(false);
       return;
     }
 
@@ -166,9 +197,11 @@ const EditAdmin = () => {
       email: email,
       phoneNumber: phone,
       ...(address && { address }),
-
+      ...(signatureImage && { signature: signatureImage }),
       roleId,
-      department: [...adminDepartments, ...additionalDepartments],
+      department: [...adminDepartments, ...additionalDepartments].filter(
+        (dept) => dept !== ""
+      ),
     };
 
     try {
@@ -179,53 +212,25 @@ const EditAdmin = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      toast.success(response.data.message, {
-        duration: 6000,
-        style: {
-          padding: "20px",
-        },
+
+      showToast({
+        message: response.data.message,
+        type: "success",
+        duration: 5000,
       });
       setIsLoading(false);
 
-      // Reset form
-      // setFirstName("");
-      // setLastName("");
-      // setEmail("");
-      // setPhone("");
-      // setAddress("");
-      // // setRoleId("");
-      // setDeptID("");
-      // setAdditionalDepartments([]);
       setTimeout(() => {
         navigate("/admin/admins/view-admins");
-      }, 8000);
+      }, 5000);
     } catch (error) {
       console.log(error);
       setIsLoading(false);
       toast.error("An error occurred.", {
         duration: 10000,
-        style: {
-          padding: "20px",
-        },
+        style: { padding: "20px" },
       });
     }
-  };
-
-  // Handle adding a new department input
-  const handleAddDepartment = () => {
-    setAdditionalDepartments((prev) => [...prev, ""]);
-  };
-
-  // Handle updating a department value
-  const handleUpdateDepartment = (index, value) => {
-    setAdditionalDepartments((prev) =>
-      prev.map((dept, i) => (i === index ? value : dept))
-    );
-  };
-
-  // Handle removing a department
-  const handleRemoveDepartment = (index) => {
-    setAdditionalDepartments((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -320,7 +325,7 @@ const EditAdmin = () => {
               >
                 Assign Role
               </label>
-              <Select.Root onValueChange={setRoleId} defaultValue={roleId}>
+              <Select.Root onValueChange={setRoleId} value={roleId}>
                 <Select.Trigger
                   className="w-full mt-2"
                   placeholder="Select Role"
@@ -336,6 +341,35 @@ const EditAdmin = () => {
             </div>
 
             <div className="input-field mt-3">
+              <Text className="text-[15px] font-medium leading-[35px]">
+                Signature
+              </Text>
+              <Flex
+                className="w-full mt-2"
+                onClick={() => {
+                  setCanvasVisible(!canvasVisible);
+                }}
+              >
+                <TextField.Root
+                  placeholder="Sign Here"
+                  value={""}
+                  disabled
+                  className="w-[70%]"
+                ></TextField.Root>
+                <Button
+                  className="w-[30%] bg-theme cursor-pointer"
+                  type="button"
+                >
+                  Sign
+                </Button>
+              </Flex>
+            </div>
+            {canvasVisible && (
+              <div className="block">
+                <SignatureCanvas onSave={setSignatureImage} />
+              </div>
+            )}
+            <div className="input-field mt-3">
               <label
                 className="text-[15px] font-medium leading-[35px]"
                 htmlFor="address"
@@ -343,7 +377,7 @@ const EditAdmin = () => {
                 Address
               </label>
               <TextField.Root
-                placeholder="Enter Address "
+                placeholder="Enter Address"
                 className="mt-2"
                 id="address"
                 onChange={(e) => setAddress(e.target.value)}
@@ -352,31 +386,40 @@ const EditAdmin = () => {
             </div>
 
             {Array.isArray(adminDepartments) &&
-              adminDepartments.map((_, index) => (
-                <div key={`dept-${index}`} className="input-field mt-3">
-                  <label
-                    className="text-[15px] font-medium leading-[35px]"
-                    htmlFor={`dept-${index}`}
-                  >
-                    Department {index + 1}
-                  </label>
+              adminDepartments.map((dept, index) => (
+                <div
+                  key={`existing-dept-${index}`}
+                  className="input-field mt-3"
+                >
+                  <div className="flex justify-between items-center">
+                    <label
+                      className="text-[15px] font-medium leading-[35px]"
+                      htmlFor={`existing-dept-${index}`}
+                    >
+                      Department {index + 1}
+                    </label>
+                    <p
+                      className="text-red-500 text-sm cursor-pointer underline"
+                      onClick={() => handleRemoveExistingDepartment(index)}
+                    >
+                      -Remove
+                    </p>
+                  </div>
                   <Select.Root
+                    value={dept}
                     onValueChange={(value) =>
-                      // handleDepartmentChange(index, value)
-                      handleDepartments(Number(index), value)
+                      handleExistingDepartmentChange(index, value)
                     }
-                    defaultValue={_}
                   >
                     <Select.Trigger
                       className="mt-2 w-full"
-                      placeholder="Additional Department"
+                      placeholder="Select Department"
                     />
-
                     <Select.Content>
                       {Array.isArray(departments) &&
-                        departments.map((dept) => (
-                          <Select.Item key={dept.id} value={dept.id}>
-                            {dept.name}
+                        departments.map((d) => (
+                          <Select.Item key={d.id} value={d.id}>
+                            {d.name}
                           </Select.Item>
                         ))}
                     </Select.Content>
@@ -388,11 +431,11 @@ const EditAdmin = () => {
             <Card className="mt-4">
               <Grid columns={"2"} gap={"3"}>
                 {additionalDepartments.map((value, index) => (
-                  <div key={index} className="input-field mt-2">
+                  <div key={`new-dept-${index}`} className="input-field mt-2">
                     <div className="flex justify-between items-center">
                       <label
                         className="text-[15px] font-medium leading-[35px]"
-                        htmlFor={`dept-${index}`}
+                        htmlFor={`new-dept-${index}`}
                       >
                         New Department {index + 1}
                       </label>
@@ -439,7 +482,6 @@ const EditAdmin = () => {
               className="mt-4 bg-theme hover:bg-theme/85"
               size={3}
               type="submit"
-              // disabled={isLoading}
             >
               {isLoading ? <LoaderIcon /> : "Save"}
             </Button>

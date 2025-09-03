@@ -16,6 +16,7 @@ import {
 } from "@radix-ui/themes";
 import { LoaderIcon } from "react-hot-toast";
 import toast, { Toaster } from "react-hot-toast";
+import useToast from "../../../../hooks/useToast";
 
 const root = import.meta.env.VITE_ROOT;
 
@@ -37,6 +38,8 @@ const AddAdmin = () => {
   const [deptId, setDeptID] = useState("");
   const [canvasVisible, setCanvasVisible] = useState(false);
   const [signatureImage, setSignatureImage] = useState(null);
+
+  const  showToast  = useToast();
 
   // Fetch departments
   const fetchDept = async () => {
@@ -110,11 +113,11 @@ const AddAdmin = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      toast.success(response.data.message, {
-        duration: 10000,
-        style: {
-          padding: "20px",
-        },
+    
+      showToast({
+        message: response.data.message,
+        type: "success",
+        duration: 4000,
       });
       setIsLoading(false);
 

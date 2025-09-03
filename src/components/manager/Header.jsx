@@ -3,16 +3,25 @@ import Profile from "./Profile";
 import FAQ from "./containers/FAQ/FAQ";
 import { faBars, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Logout from "../Logout";
-import { Card } from "@radix-ui/themes";
+import toast,{Toaster} from "react-hot-toast";
 const YT_LINK = import.meta.env.VITE_YT_LINK
 import Notifications from "./containers/notifications/Notifications";
+import useToast from "../../hooks/useToast";
+import { use } from "react";
 
-const Header = ({ sidebarOpen, setSidebarOpen }) => {
+const Header = ({ sidebarOpen, setSidebarOpen }) => {   
+  const showToast  = useToast();  
+
   const getAdminName = () => {
-    const name = localStorage.getItem("adminFirstName");
-    return name || "Admin";
+    const name = localStorage.getItem("adminData");
+    if (name) {
+      const adminData = JSON.parse(name);
+      return `${adminData.firstname} (${adminData.role})`;
+    }
   };
+
+ 
+
 
   return (
     <header className="top-0 z-10 font-amsterdam flex w-full shadow-md dark:bg-boxdark dark:drop-shadow-none">
@@ -42,13 +51,17 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
             <FAQ />
           </a>
           <Notifications />
+          
 
           {/* Logout Button */}
           {/* <Logout /> */}
           <Profile />
         </div>
       </div>
-    </header>
+            <Toaster
+        position="top-right"  
+      />
+      </header>
   );
 };
 
