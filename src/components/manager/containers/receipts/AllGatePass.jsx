@@ -172,7 +172,7 @@ const OfficialPasses = () => {
 
       <Table.Root
         variant="surface"
-        className="mt-4 table-fixed w-full"
+        className="mt-4 mb-20 table-fixed w-full"
         size="2"
       >
         <Table.Header>

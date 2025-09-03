@@ -105,7 +105,7 @@ const AllChequeRecords = () => {
       </div>
       <Separator className="my-4 w-full" />
       <Table.Root
-        className="mt-4 table-fixed w-full"
+        className="mt-4 mb-20 table-fixed w-full"
         variant="surface"
         size="2"
       >

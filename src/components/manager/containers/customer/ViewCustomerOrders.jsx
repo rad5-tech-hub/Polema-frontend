@@ -176,7 +176,7 @@ const ViewCustomerOrders = () => {
       </Flex>
       <Separator className="my-4 w-full" />
 
-      <Table.Root variant="surface" className="mt-5 my-20">
+      <Table.Root variant="surface" className="mt-5 mb-20">
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>

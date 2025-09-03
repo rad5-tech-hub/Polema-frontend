@@ -159,7 +159,7 @@ const AllInvoice = () => {
 
       <Separator className="my-4 w-full" />
 
-      <Table.Root variant="surface" className="mb-8 table-fixed w-full" size="2">
+      <Table.Root variant="surface" className="mb-20   table-fixed w-full" size="2">
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell className="text-left">DATE</Table.ColumnHeaderCell>

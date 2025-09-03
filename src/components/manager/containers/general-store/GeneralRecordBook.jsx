@@ -257,7 +257,7 @@ const GeneralRecordBook = () => {
       </div>
       <Separator className="my-4 w-full" />
 
-      <Table.Root className="mt-5" variant="surface">
+      <Table.Root className="mt-5 mb-20" variant="surface">
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
@@ -379,10 +379,12 @@ const GeneralRecordBook = () => {
           </div>
         </div>
       </Modal>
+
+      
       <div className="pagination-fixed">
 
       {(showPreviousButton || details?.pagination?.nextPage) && (
-        <Flex className="my-6" justify={"between"} gap="3">
+        <Flex className="my-2" justify={"between"} gap="3">
           
           {showPreviousButton && (
             <Button

@@ -409,7 +409,7 @@ const AllCustomers = () => {
         </div>
       </div>
 
-      <Table.Root className="mt-4 table-fixed w-full" variant="surface" size="2">
+      <Table.Root className="mt-4 mb-20 table-fixed w-full" variant="surface" size="2">
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell className="text-left">DATE</Table.ColumnHeaderCell>

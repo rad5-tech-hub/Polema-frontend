@@ -247,7 +247,7 @@ const CashTickets = () => {
           </Tabs.List>
         </div>
       </Tabs.Root>
-      <Table.Root className="mt-4 table-fixed w-full" variant="surface" size="2">
+      <Table.Root className="mt-4 table-fixed w-full mb-20"  variant="surface" size="2">
         <Table.Header>
           <Table.Row>
             {getTableHeaders().map((header) => (
