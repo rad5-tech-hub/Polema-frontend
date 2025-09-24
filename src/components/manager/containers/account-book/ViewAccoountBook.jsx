@@ -378,16 +378,16 @@ const ViewAccountBook = () => {
                 <Table.Cell>
                   {details.other == null
                     ? details.credit < details.debit
-                      ? ""
+                      ? "N/A"
                       : details.theProduct.name
-                    : ""}
+                    : "N/A"}
                 </Table.Cell>
                 <Table.Cell>
                   {details.other == null
                     ? details.credit < details.debit
-                      ? details.theProduct.name
-                      : ""
-                    : ""}
+                      ? details?.theProduct?.name || ""
+                      : "N/A"
+                    : "N/A"}
                 </Table.Cell>
                 <Table.Cell>
                   {formatMoney(
