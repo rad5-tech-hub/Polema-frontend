@@ -29,6 +29,7 @@ const AllWayBill = () => {
   const [loadingId, setLoadingId] = useState(null);
   const [paginationUrls, setPaginationUrls] = useState([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [hasNextPage, setHasNextPage] = useState(false);
 
   const fetchWaybills = async (pageUrl = null) => {
     setLoading(true);
@@ -61,18 +62,17 @@ const AllWayBill = () => {
         setFailedText("No waybill records found.");
       }
       const nextPage = response.data.pagination?.nextPage;
-      if (
-        nextPage &&
-        typeof nextPage === "string" &&
-        nextPage !== "/customer/get-all-waybill"
-      ) {
+      setHasNextPage(!!nextPage);
+      if (nextPage && typeof nextPage === "string") {
         setPaginationUrls((prev) => {
           const newUrls = [...prev];
-          newUrls[currentPageIndex] = nextPage;
+          if (newUrls.length <= currentPageIndex + 1) {
+            newUrls.push(nextPage);
+          }
           return newUrls;
         });
       } else {
-        setPaginationUrls((prev) => prev.slice(0, currentPageIndex));
+        setPaginationUrls((prev) => prev);
       }
     } catch (error) {
       const errorMessage =
@@ -140,9 +140,11 @@ const AllWayBill = () => {
     status === "pending" || status === "rejected";
 
   const handleNextPage = () => {
-    const nextIndex = currentPageIndex + 1;
-    setCurrentPageIndex(nextIndex);
-    fetchWaybills(paginationUrls[currentPageIndex] || null);
+    if (hasNextPage) {
+      const nextIndex = currentPageIndex + 1;
+      setCurrentPageIndex(nextIndex);
+      fetchWaybills(paginationUrls[currentPageIndex] || null);
+    }
   };
 
   const handlePrevPage = () => {
@@ -236,8 +238,8 @@ const AllWayBill = () => {
                   {item.bags ? `${item.bags} bags` : "N/A"}
                 </Table.Cell>
                 <Table.Cell>
-                  {`${item?.transaction?.corder?.firstname || "N/A"} ${
-                    item?.transaction?.corder?.lastname || "N/A"
+                  {`${item?.transaction?.corder?.firstname || ""} ${
+                    item?.transaction?.corder?.lastname || ""
                   }`.trim()}
                 </Table.Cell>
                 <Table.Cell>{item.address || "N/A"}</Table.Cell>
@@ -310,7 +312,7 @@ const AllWayBill = () => {
           <Text>Page {currentPageIndex + 1}</Text>
           <Button
             variant="soft"
-            disabled={!paginationUrls[currentPageIndex]}
+            disabled={!hasNextPage}
             onClick={handleNextPage}
             className="!bg-blue-50 hover:!bg-blue-100 cursor-pointer"
             aria-label="Next page"
