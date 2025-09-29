@@ -272,7 +272,15 @@ const AllSuppliers = () => {
                         {item || "N/A"} <br />
                       </span>
                     ))} */}
-                    <Table.Cell>{supplier?.phoneNumber || "N/A"}</Table.Cell>
+                    
+                      {Array.isArray(supplier?.phoneNumber) ? supplier?.phoneNumber.map((num)=>{
+                        return <>
+                          {num}  <br />
+                        </>
+                      
+                      }) : ""}
+
+                    
                   </Table.Cell>
                   {/* <Table.Cell
                     className={

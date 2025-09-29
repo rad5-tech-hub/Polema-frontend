@@ -13,8 +13,32 @@ const EditSuppliers = ({ isOpen, onClose, fetchSuppliers, id }) => {
   const [changedFirstName, setChangedFirstName] = useState(id.firstname);
   const [changedLastName, setChangedLastName] = useState(id.lastname);
   const [changedEmail, setChangedEmail] = useState(id.email);
-  const [changedPhone, setChangedPhone] = useState(id.phoneNumber);
+  const [changedPhone, setChangedPhone] = useState(
+    Array.isArray(id.phoneNumber)
+      ? id.phoneNumber.length > 0
+        ? id.phoneNumber
+        : [""]
+      : id.phoneNumber
+      ? [String(id.phoneNumber)]
+      : [""]
+  );
   const [changedAddress, setChangedAddress] = useState(id.address);
+
+  const handleAddNumber = () => {
+    setChangedPhone([...(changedPhone || []), ""]);
+  };
+
+  const handleRemoveNumber = (index) => {
+    if (!Array.isArray(changedPhone) || changedPhone.length === 1) return;
+    const next = changedPhone.filter((_, i) => i !== index);
+    setChangedPhone(next.length ? next : [""]);
+  };
+
+  const handleNumberChange = (value, index) => {
+    const next = [...changedPhone];
+    next[index] = value;
+    setChangedPhone(next);
+  };
 
   const EditSupplier = async () => {
     setSuspendLoading(true);
@@ -28,7 +52,9 @@ const EditSuppliers = ({ isOpen, onClose, fetchSuppliers, id }) => {
     const body = {
       firstname: changedFirstName,
       lastname: changedLastName,
-      phoneNumber: changedPhone,
+      phoneNumber: (Array.isArray(changedPhone) ? changedPhone : [changedPhone]).filter(
+        (n) => String(n).trim() !== ""
+      ),
       ...(changedEmail && { email: changedEmail }),
       address: changedAddress,
     };
@@ -123,19 +149,40 @@ const EditSuppliers = ({ isOpen, onClose, fetchSuppliers, id }) => {
 
           <div>
             <label
-              htmlFor="phone"
               className="block text-sm font-medium text-black"
             >
-              Phone Number
+              Phone Numbers
             </label>
-            <input
-              id="phone"
-              type="number"
-              placeholder="Enter Phone Number"
-              defaultValue={id.phoneNumber}
-              onChange={(e) => setChangedPhone(e.target.value)}
-              className="w-full p-2 border rounded"
-            />
+            {(changedPhone || [""]).map((num, idx) => (
+              <div key={idx} className="flex items-center gap-2 mt-2">
+                <input
+                  type="number"
+                  placeholder="Enter Phone Number"
+                  value={num}
+                  onChange={(e) => handleNumberChange(e.target.value, idx)}
+                  className="w-full p-2 border rounded"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleRemoveNumber(idx)}
+                  disabled={(changedPhone || [""]).length === 1}
+                  className="bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white !px-3 !py-2 rounded"
+                  aria-label="Remove phone number"
+                >
+                  ×
+                </button>
+                {idx === (changedPhone || [""]).length - 1 && (
+                  <button
+                    type="button"
+                    onClick={handleAddNumber}
+                    className="bg-blue-500 hover:bg-blue-600 text-white !px-3 !py-2 rounded"
+                    aria-label="Add phone number"
+                  >
+                    +
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
 
           <div>

@@ -28,6 +28,12 @@ const AddSuppliers = () => {
     setNumbers([...numbers, ""]);
   };
 
+  const handleRemoveNumber = (index) => {
+    if (numbers.length === 1) return; // keep at least one
+    const newNumbers = numbers.filter((_, i) => i !== index);
+    setNumbers(newNumbers.length ? newNumbers : [""]);
+  };
+
   const handleNumberChange = (value, index) => {
     const newNumbers = [...numbers];
     newNumbers[index] = value;
@@ -137,12 +143,24 @@ const AddSuppliers = () => {
                       size="3"
                       className="flex-1"
                     />
+                    {numbers.length > 1 && <Button
+                      type="button"
+                      size="2"
+                      onClick={() => handleRemoveNumber(idx)}
+                      className="bg-red-500 hover:bg-red-600 disabled:opacity-50"
+                      disabled={numbers.length === 1}
+                      aria-label="Remove phone number"
+                    >
+                      ×
+                    </Button>}
+                    
                     {idx === numbers.length - 1 && (
                       <Button
                         type="button"
                         size="2"
                         onClick={handleAddNumber}
                         className="bg-theme hover:bg-theme/85"
+                        aria-label="Add phone number"
                       >
                         +
                       </Button>
