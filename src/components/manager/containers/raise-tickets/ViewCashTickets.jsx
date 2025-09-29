@@ -125,7 +125,7 @@ const CashTickets = () => {
       const response = await axios.get(`${root}/customer/get-suppliers`, {
         headers: { Authorization: `Bearer ${retrToken}` },
       });
-      setSuppliers(response.data.customers || []);
+      setSuppliers(response.data.suppliers || []);
     } catch (error) {
       setSuppliers([]);
       showToast({

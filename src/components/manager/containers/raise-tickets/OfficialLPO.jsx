@@ -52,7 +52,7 @@ const OfficialLPO = () => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      setSuppliers(response.data.customers);
+      setSuppliers(response.data.suppliers);
     } catch (error) {
       console.log(error);
     }
