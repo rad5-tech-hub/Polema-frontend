@@ -36,7 +36,7 @@ const GeneralSupplierLedger = () => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      setCustomers(response.data.customers);
+      setCustomers(response.data.suppliers || []);
     } catch (error) {
       console.log(error);
     }

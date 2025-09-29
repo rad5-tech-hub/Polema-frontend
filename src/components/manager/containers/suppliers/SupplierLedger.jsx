@@ -55,7 +55,7 @@ const SupplierLedger = () => {
           Authorization: `Bearer ${retrToken}`,
         },
       });
-      const suppliersData = response.data.customers || [];
+      const suppliersData = response.data.suppliers || [];
       setSuppliers(suppliersData);
       setFilteredSuppliers(suppliersData);
     } catch (error) {
