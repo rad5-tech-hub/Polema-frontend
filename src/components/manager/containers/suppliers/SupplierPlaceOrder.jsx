@@ -117,7 +117,7 @@ const SupplierPlaceOrder = () => {
       });
       const ticket = data.data;
       setSelectedCustomerId(
-        ticket?.authToWeigh?.supplierId || data.ticket.supplierId
+         `${data.data?.authToWeigh?.supplier?.firstname || ""} ${data.data?.authToWeigh?.supplier?.lastname || ""}` || ticket?.authToWeigh?.supplierId || data?.ticket?.supplierId || ""
       ); // Supplier ID
       setSelectedProductId(
         ticket?.authToWeigh?.productId || data.ticket.productId
