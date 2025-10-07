@@ -161,7 +161,7 @@ const AccountBook = () => {
           },
         }
       );
-      setCustomers(response.data.customers || []);
+      setCustomers(isCustomer() ? response.data.customers || [] : response.data.suppliers || [] );
     } catch (error) {
       console.log(error);
       showToast({
