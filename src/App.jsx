@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Charts from "./components/Charts";
 import Manager from "./components/manager";
 import DashBoardManager from "./components/manager/DashboardManager";
+
 import NewPassword from "./pages/NewPassword";
 import ReceiptDispatchNote from "./components/manager/containers/receipts/ReceiptDispatchNote";
 import {
