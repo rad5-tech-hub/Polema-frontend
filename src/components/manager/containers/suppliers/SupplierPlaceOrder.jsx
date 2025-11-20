@@ -26,6 +26,7 @@ const SupplierPlaceOrder = () => {
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
+  const [selectedCustomerIdentifier, setSelectedCustomerIdentifier] = useState("");
   const [selectedProductId, setSelectedProductId] = useState("");
   const [comment, setComment] = useState("");
   const [quantity, setQuantity] = useState("");
@@ -116,9 +117,14 @@ const SupplierPlaceOrder = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       const ticket = data.data;
+      // console.log(data.data?.supplierId);
+      
       setSelectedCustomerId(
          `${data.data?.authToWeigh?.supplier?.firstname || ""} ${data.data?.authToWeigh?.supplier?.lastname || ""}` || ticket?.authToWeigh?.supplierId || data?.ticket?.supplierId || ""
-      ); // Supplier ID
+      ); // Supplier Name
+      setSelectedCustomerIdentifier(
+        data.data?.supplierId || ""
+      ); // Supplier Identifier
       setSelectedProductId(
         ticket?.authToWeigh?.productId || data.ticket.productId
       ); // Product ID
@@ -198,7 +204,7 @@ const SupplierPlaceOrder = () => {
       setSelectedUnit(null);
 
       setTimeout(() => {
-        navigate(`/admin/supplier/supplier-ledger/${selectedCustomerId}`);
+        navigate(`/admin/supplier/supplier-ledger/${selectedCustomerIdentifier}`);
       }, 3000);
     } catch (error) {
       console.error("Error placing order:", error);
