@@ -67,7 +67,7 @@ const NewAuthorityToWeigh = () => {
       const response = await axios.get(`${API_ROOT}/customer/get-suppliers`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setSuppliers(response.data.customers || []);
+      setSuppliers(response.data.suppliers || []);
     } catch (error) {
       console.error("Error fetching suppliers:", error);
       setSuppliers([]);

@@ -235,7 +235,7 @@ const CashManagementLedger = () => {
 
       <Separator className="my-4 w-full" />
 
-      <Table.Root variant="surface" className="mt-3 mb-6">
+      <Table.Root variant="surface" className="mt-3 mb-20">
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell>DATE</Table.ColumnHeaderCell>
@@ -352,19 +352,24 @@ const CashManagementLedger = () => {
           onClick={handlePrevPage}
           disabled={currentPageIndex === 0}
           className="cursor-pointer"
+          variant="soft"
         >
-          <FontAwesomeIcon icon={faArrowLeft} />
+          Previous 
+          {/* <FontAwesomeIcon icon={faArrowLeft} /> */}
         </Button>
         <span>
-          Page {currentPageIndex + 1} of{" "}
-          {paginationUrls.length > 0 ? paginationUrls.length : 1}
+          Page {currentPageIndex + 1} 
+          
+          {/* {paginationUrls.length > 0 ? paginationUrls.length : 1} */}
         </span>
         <Button
           onClick={handleNextPage}
+          variant= "soft"
           disabled={currentPageIndex >= paginationUrls.length}
           className="cursor-pointer"
         >
-          <FontAwesomeIcon icon={faArrowRight} />
+          Next
+          {/* <FontAwesomeIcon icon={faArrowRight} /> */}
         </Button>
       </div>
 

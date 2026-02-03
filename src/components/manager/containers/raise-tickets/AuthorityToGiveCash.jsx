@@ -91,7 +91,7 @@ const AuthorityToGiveCash = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setSuppliers(response.data.customers || []);
+      setSuppliers(response.data.suppliers || []);
     } catch (err) {
       showToast({
         message: err?.message || "An error occurred",

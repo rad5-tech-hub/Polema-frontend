@@ -160,7 +160,7 @@ const ViewLocalPurchaseOrder = () => {
 
       <Table.Root
         variant="surface"
-        className="mt-4 table-fixed w-full"
+        className="mt-4 table-fixed w-full mb-20"
         size="2"
       >
         <Table.Header>

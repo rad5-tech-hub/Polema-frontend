@@ -50,9 +50,16 @@ const ViewAuthorityToWeigh = () => {
     }
 
     try {
+      const urlEnding = tab === "customer" ? "hasCustomer=true" : "hasSupplier=true";
       const url = pageUrl
-        ? `${root}${pageUrl}`
-        : `${root}/admin/view-all-auth-weigh`;
+        ? (() => {
+            const hasParamKey = urlEnding.split("=")[0];
+            const needsAppend = !pageUrl.includes(hasParamKey);
+            const separator = pageUrl.includes("?") ? "&" : "?";
+            const appended = needsAppend ? `${separator}${urlEnding}` : "";
+            return `${root}${pageUrl}${appended}`;
+          })()
+        : `${root}/admin/view-all-auth-weigh?${urlEnding}`;
       const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${retrToken}` },
       });

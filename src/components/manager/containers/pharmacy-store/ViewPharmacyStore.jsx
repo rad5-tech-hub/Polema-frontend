@@ -210,7 +210,7 @@ const ViewPharmacyStore = () => {
         </Grid> */}
       </div>
 
-      <Table.Root className="mt-4" variant="surface">
+      <Table.Root className="mt-4 mb-20" variant="surface">
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell className="text-[#919191]">
@@ -321,19 +321,26 @@ const ViewPharmacyStore = () => {
           )}
         </Table.Body>
       </Table.Root>
+      <div className="pagination-fixed">
 
-      <Flex justify={"center"} align={"center"} className="mt-4">
+      <Flex justify={"center"} align={"center"} gap={"2"} className="mt-4">
         <Button
           onClick={handlePrevPage}
           disabled={currentPage === 1}
-          className="mr-2"
+          className="mr-2 cursor-pointer"
+          variant="soft"
         >
-          <FontAwesomeIcon icon={faArrowLeft} />
+          Previous
+          {/* <FontAwesomeIcon icon={faArrowLeft} /> */}
         </Button>
-        <Button onClick={handleNextPage} disabled={currentPage === totalPages}>
-          <FontAwesomeIcon icon={faArrowRight} />
+        <p>Page {currentPage}</p>
+        <Button onClick={handleNextPage} disabled={currentPage === totalPages} className="cursor-pointer" variant="soft">
+          Next
+          {/* <FontAwesomeIcon icon={faArrowRight} /> */}
         </Button>
       </Flex>
+      </div>
+
 
       {isModalOpen && modalAction === "Top Up" && (
         <AddModal

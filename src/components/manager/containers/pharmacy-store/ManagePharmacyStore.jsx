@@ -64,7 +64,7 @@ const ManagePharmacyStore = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setSuppliers(response.data.customers);
+      setSuppliers(response.data.suppliers);
     } catch (e) {
       console.log(e);
       toast.error(

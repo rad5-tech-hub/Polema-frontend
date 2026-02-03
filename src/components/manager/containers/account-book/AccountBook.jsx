@@ -161,7 +161,7 @@ const AccountBook = () => {
           },
         }
       );
-      setCustomers(response.data.customers || []);
+      setCustomers(isCustomer() ? response.data.customers || [] : response.data.suppliers || [] );
     } catch (error) {
       console.log(error);
       showToast({
@@ -418,7 +418,7 @@ const AccountBook = () => {
   }, []);
 
   // Initial Dialog
-  const InitDialog = () => {
+  const InitDialog = () => { 
     return (
       <>
         <div className="h-screen flex flex-col justify-center items-center">

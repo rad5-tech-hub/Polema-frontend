@@ -33,6 +33,18 @@ const CashTickets = () => {
     setIsFetching(true);
     setTicketDetails([]);
     setFetchError(false);
+    let urlEnding;
+
+    if(type == "customer"){
+      urlEnding = "hasCustomer=true"
+    }else if(type == "supplier"){
+      urlEnding="hasSupplier=true"
+    }else if(type == "staff"){
+      urlEnding="hasStaff=true"
+    }else{
+      throw new Error("Tab type not supported.")
+    }
+
     const token = localStorage.getItem("token");
     if (!token) {
       showToast({
@@ -45,9 +57,14 @@ const CashTickets = () => {
     try {
       let url;
       if (pageUrl) {
-        url = `${root}${pageUrl}`;
+        // Ensure the pagination URL carries the current tab filter
+        const hasParamKey = urlEnding.split("=")[0];
+        const needsAppend = !pageUrl.includes(hasParamKey);
+        const separator = pageUrl.includes("?") ? "&" : "?";
+        const appended = needsAppend ? `${separator}${urlEnding}` : "";
+        url = `${root}${pageUrl}${appended}`;
       } else {
-        url = `${root}/admin/view-cash-ticket?type=${encodeURIComponent(type)}`;
+        url = `${root}/admin/view-cash-ticket?${urlEnding}`;
       }
       const { data } = await axios.get(url, {
         headers: {
@@ -55,7 +72,7 @@ const CashTickets = () => {
         },
       });
       setTicketDetails(data.data || []);
-      setFetchError(data.data.length === 0);
+      // setFetchError(data.data.length === 0);
       if (data.pagination?.nextPage) {
         setPaginationUrls((prev) => {
           const newUrl = data.pagination.nextPage;
@@ -108,7 +125,7 @@ const CashTickets = () => {
       const response = await axios.get(`${root}/customer/get-suppliers`, {
         headers: { Authorization: `Bearer ${retrToken}` },
       });
-      setSuppliers(response.data.customers || []);
+      setSuppliers(response.data.suppliers || []);
     } catch (error) {
       setSuppliers([]);
       showToast({
@@ -199,7 +216,7 @@ const CashTickets = () => {
       case "supplier":
         return [
           <Table.Cell key="date">{refractor(item.createdAt)}</Table.Cell>,
-          <Table.Cell key="supplier">{getSupplierNameById(item.supplierId)}</Table.Cell>,
+          <Table.Cell key="supplier">{item?.supplier?.firstname || "" } {item?.supplier?.lastname || "" }</Table.Cell>,
           <Table.Cell key="product">{item?.product?.name || "N/A"}</Table.Cell>,
           ...baseCells,
         ];

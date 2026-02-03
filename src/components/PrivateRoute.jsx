@@ -8,11 +8,11 @@ const isAuthenticated = () => {
   if (!token) return false;
 
   try {
-    const { exp } = jwtDecode(token); // Decode the token to get expiration
+    const { exp } = jwtDecode(token); 
 
     // Check if token has expired
     if (exp < Date.now() / 1000) {
-      localStorage.removeItem("token"); // If expired, remove the token
+      localStorage.removeItem("token"); 
       return false;
     }
     return true; // Token is valid and not expired

@@ -214,9 +214,9 @@ const ViewCustomerOrders = () => {
                 <Table.Cell>
                   {`${item.corder.firstname} ${item.corder.lastname}`}
                 </Table.Cell>
-                <Table.Cell>{item.porders.name || "-"}</Table.Cell>
-                <Table.Cell>{item.unit}</Table.Cell>
-                <Table.Cell>{item.quantity}</Table.Cell>
+                <Table.Cell>{item?.porders?.name || "-"}</Table.Cell>
+                <Table.Cell>{item?.unit || ""}</Table.Cell>
+                <Table.Cell>{item?.quantity || ""}</Table.Cell>
                 <Table.Cell>
                   {item.price === item.basePrice ? (
                     <span>{formatMoney(item.price)}</span>
